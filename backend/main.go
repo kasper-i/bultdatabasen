@@ -17,7 +17,7 @@ import (
 
 func getResourceAncestors(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    id := vars["resourceID"]
+	id := vars["resourceID"]
 
 	ancestors := model.GetAncestors(model.DB, id)
 
@@ -27,9 +27,9 @@ func getResourceAncestors(w http.ResponseWriter, r *http.Request) {
 
 func getSectors(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    id := vars["resourceID"]
+	id := vars["resourceID"]
 
-	descendants := model.GetDescendants(model.DB, id, model.LvlSector)
+	descendants := model.GetDescendants(model.DB, id, model.DepthSector)
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(descendants)
@@ -37,28 +37,28 @@ func getSectors(w http.ResponseWriter, r *http.Request) {
 
 func getRoutes(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    id := vars["resourceID"]
+	parentResourceId := vars["resourceID"]
 
-	descendants := model.GetDescendants(model.DB, id, model.LvlRoute)
+	routes := model.GetRoutes(model.DB, parentResourceId)
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(descendants)
+	json.NewEncoder(w).Encode(routes)
 }
 
 func createRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    parentResourceID := vars["resourceID"]
+	parentResourceID := vars["resourceID"]
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	var route model.Route 
-    json.Unmarshal(reqBody, &route)
+	var route model.Route
+	json.Unmarshal(reqBody, &route)
 
 	route.ID = uuid.Must(uuid.NewRandom()).String()
 
 	resource := model.Resource{
-		ID: route.ID,
-		Name: route.Name,
-		Type: "route",
+		ID:       route.ID,
+		Name:     route.Name,
+		Type:     "route",
 		ParentID: &parentResourceID,
 	}
 	resource.SetDepth()
@@ -71,7 +71,7 @@ func createRoute(w http.ResponseWriter, r *http.Request) {
 		if err := tx.Create(&route).Error; err != nil {
 			return err
 		}
-	  
+
 		return nil
 	})
 
@@ -85,7 +85,7 @@ func createRoute(w http.ResponseWriter, r *http.Request) {
 
 func getResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    id := vars["resourceID"]
+	id := vars["resourceID"]
 
 	resource, _ := model.FindResourceByID(model.DB, id)
 
@@ -95,11 +95,11 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 
 func createChildResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    parentResourceID := vars["resourceID"]
+	parentResourceID := vars["resourceID"]
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	var resource model.Resource 
-    json.Unmarshal(reqBody, &resource)
+	var resource model.Resource
+	json.Unmarshal(reqBody, &resource)
 
 	resource.SetDepth()
 	resource.ID = uuid.Must(uuid.NewRandom()).String()
@@ -111,10 +111,10 @@ func createChildResource(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-    w.WriteHeader(http.StatusOK)
-    io.WriteString(w, `{"alive": true}`)
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, `{"alive": true}`)
 }
 
 func main() {
@@ -133,7 +133,6 @@ func main() {
 	router.HandleFunc("/resources/{resourceID}/routes", createRoute).Methods(http.MethodPost, http.MethodOptions)
 
 	router.HandleFunc("/health", checkHandler)
-
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

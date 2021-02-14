@@ -16,9 +16,9 @@ func New() *authorizer {
 }
 
 func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        vars := mux.Vars(r)
-	    resourceID := vars["resourceID"]
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		resourceID := vars["resourceID"]
 		userId := "be44169f-6e27-11eb-8c37-7085c2c40195"
 
 		roles := auth.GetRoles(model.DB, userId)
@@ -39,8 +39,8 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 					return
 				}
 			}
-		}	
+		}
 
 		http.Error(w, "Forbidden", http.StatusForbidden)
-    })
+	})
 }

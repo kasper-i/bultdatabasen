@@ -7,10 +7,10 @@ import (
 )
 
 type Resource struct {
-	ID       string `gorm:"primaryKey" json:"id"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Depth    int32 `json:"-"`
+	ID       string  `gorm:"primaryKey" json:"id"`
+	Name     string  `json:"name"`
+	Type     string  `json:"type"`
+	Depth    int32   `json:"-"`
 	ParentID *string `json:"-"`
 }
 
@@ -22,29 +22,29 @@ func (resource *Resource) SetDepth() {
 	var depth int32
 
 	switch resource.Type {
-		case "area":
-			depth = 100
-		case "crag":
-			depth = 200
-		case "sector":
-			depth = 300
-		case "route":
-			depth = 400
-		case "installation":
-			depth = 500
+	case "area":
+		depth = 100
+	case "crag":
+		depth = 200
+	case "sector":
+		depth = 300
+	case "route":
+		depth = 400
+	case "installation":
+		depth = 500
 	}
 
 	resource.Depth = depth
 }
 
-type Level string
+type Depth int32
 
 const (
-	LvlArea         Level = "area"
-	LvlCrag         Level = "crag"
-	LvlSector       Level = "sector"
-	LvlRoute        Level = "route"
-	LvlInstallation Level = "installation"
+	DepthArea         Depth = 100
+	DepthCrag         Depth = 200
+	DepthSector       Depth = 300
+	DepthRoute        Depth = 400
+	DepthInstallation Depth = 500
 )
 
 func FindResourceByID(db *gorm.DB, resourceID string) (*Resource, error) {
@@ -58,21 +58,21 @@ func FindResourceByID(db *gorm.DB, resourceID string) (*Resource, error) {
 	return &resource, nil
 }
 
-func GetDescendants(db *gorm.DB, resourceID string, downTo Level) []Resource {
+func GetDescendants(db *gorm.DB, resourceID string, downTo Depth) []Resource {
 	var descendants []Resource
 
-	db.Raw(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
-		SELECT id, name, type, parent_id
+	db.Raw(`WITH RECURSIVE cte (id, name, depth, parent_id) AS (
+		SELECT id, name, depth, parent_id
 		FROM resource
 		WHERE id = ?
 	UNION DISTINCT
-		SELECT child.id, child.name, child.type, child.parent_id
+		SELECT child.id, child.name, child.depth, child.parent_id
 		FROM resource child
 		INNER JOIN cte ON child.parent_id = cte.id
-		WHERE depth <= 500
+		WHERE child.depth <= ?
 	)
 	SELECT * FROM cte
-	WHERE id <> ? AND type = ?`, resourceID, resourceID, string(downTo)).Scan(&descendants)
+	WHERE depth = ?`, resourceID, downTo, downTo).Scan(&descendants)
 
 	return descendants
 }
@@ -90,7 +90,6 @@ func GetAncestors(db *gorm.DB, resourceID string) []Resource {
 		INNER JOIN cte ON parent.id=cte.parent_id
 	)
 	SELECT * FROM cte
-	WHERE id <> ?
 	ORDER BY depth ASC`, resourceID, resourceID).Scan(&ancestors)
 
 	return ancestors

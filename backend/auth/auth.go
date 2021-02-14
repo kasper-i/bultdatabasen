@@ -4,13 +4,12 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type AssignedRole struct {
-	Role string
+	Role       string
 	ResourceID string
 }
 
-func GetRoles(db *gorm.DB, userID string) ([]AssignedRole) {
+func GetRoles(db *gorm.DB, userID string) []AssignedRole {
 	var roles []AssignedRole
 
 	db.Raw(`SELECT resource_id, role
