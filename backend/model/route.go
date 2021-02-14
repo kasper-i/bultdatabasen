@@ -17,18 +17,7 @@ func (Route) TableName() string {
 func GetRoutes(db *gorm.DB, resourceID string) []Route {
 	var routes []Route
 
-	db.Raw(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
-		SELECT id, name, type, parent_id
-		FROM resource
-		WHERE id = ?
-	UNION DISTINCT
-		SELECT child.id, child.name, child.type, child.parent_id
-		FROM resource child
-		INNER JOIN cte ON child.parent_id = cte.id
-		WHERE depth <= ?
-	)
-	SELECT * FROM cte
-	INNER JOIN route ON cte.id = route.id`, resourceID, DepthRoute).Scan(&routes)
+	db.Raw(getDescendantsQuery(DepthRoute, "route"), resourceID, DepthRoute).Scan(&routes)
 
 	return routes
 }
