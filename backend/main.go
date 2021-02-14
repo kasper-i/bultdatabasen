@@ -3,6 +3,7 @@ package main
 import (
 	authorizer "bultdatabasen/middleware"
 	"bultdatabasen/model"
+	"io"
 	"log"
 	"net/http"
 
@@ -60,6 +61,13 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resource)
 }
 
+func checkHandler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+	
+    w.WriteHeader(http.StatusOK)
+    io.WriteString(w, `{"alive": true}`)
+}
+
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -72,6 +80,9 @@ func main() {
 	router.HandleFunc("/resources/{resourceID}/ancestors", getResourceAncestors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/sectors", getSectors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/routes", getRoutes).Methods(http.MethodGet, http.MethodOptions)
-	
+
+	router.HandleFunc("/health", checkHandler)
+
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
