@@ -66,10 +66,12 @@ func main() {
 	authorizer := authorizer.New()
 
 	router.Use(authorizer.Middleware)
+	router.Use(mux.CORSMethodMiddleware(router))
 
-	router.HandleFunc("/resources/{resourceID}", getResource)
-	router.HandleFunc("/resources/{resourceID}/ancestors", getResourceAncestors)
-	router.HandleFunc("/resources/{resourceID}/sectors", getSectors)
-	router.HandleFunc("/resources/{resourceID}/routes", getRoutes)
+	router.HandleFunc("/resources/{resourceID}", getResource).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/ancestors", getResourceAncestors).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/sectors", getSectors).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/routes", getRoutes).Methods(http.MethodGet, http.MethodOptions)
+	
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
