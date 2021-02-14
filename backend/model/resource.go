@@ -8,7 +8,7 @@ import (
 
 type Resource struct {
 	ID       string `gorm:"primaryKey" json:"id"`
-	Name     *string `json:"name"`
+	Name     string `json:"name"`
 	Type     string `json:"type"`
 	Depth    int32 `json:"-"`
 	ParentID *string `json:"-"`
@@ -16,6 +16,25 @@ type Resource struct {
 
 func (Resource) TableName() string {
 	return "resource"
+}
+
+func (resource *Resource) SetDepth() {
+	var depth int32
+
+	switch resource.Type {
+		case "area":
+			depth = 100
+		case "crag":
+			depth = 200
+		case "sector":
+			depth = 300
+		case "route":
+			depth = 400
+		case "installation":
+			depth = 500
+	}
+
+	resource.Depth = depth
 }
 
 type Level string

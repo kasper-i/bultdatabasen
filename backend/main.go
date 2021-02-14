@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 )
 
 func getResourceAncestors(w http.ResponseWriter, r *http.Request) {
@@ -19,9 +20,6 @@ func getResourceAncestors(w http.ResponseWriter, r *http.Request) {
     id := vars["resourceID"]
 
 	ancestors := model.GetAncestors(model.DB, id)
-	for _, ancestor := range ancestors {
-		log.Printf("%v", *ancestor.Name)
-	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(ancestors)
@@ -32,9 +30,6 @@ func getSectors(w http.ResponseWriter, r *http.Request) {
     id := vars["resourceID"]
 
 	descendants := model.GetDescendants(model.DB, id, model.LvlSector)
-	for _, descendant := range descendants {
-		log.Printf("%v", *descendant.Name)
-	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(descendants)
@@ -45,12 +40,47 @@ func getRoutes(w http.ResponseWriter, r *http.Request) {
     id := vars["resourceID"]
 
 	descendants := model.GetDescendants(model.DB, id, model.LvlRoute)
-	for _, descendant := range descendants {
-		log.Printf("%v", *descendant.Name)
-	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(descendants)
+}
+
+func createRoute(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+    parentResourceID := vars["resourceID"]
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var route model.Route 
+    json.Unmarshal(reqBody, &route)
+
+	route.ID = uuid.Must(uuid.NewRandom()).String()
+
+	resource := model.Resource{
+		ID: route.ID,
+		Name: route.Name,
+		Type: "route",
+		ParentID: &parentResourceID,
+	}
+	resource.SetDepth()
+
+	err := model.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&resource).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Create(&route).Error; err != nil {
+			return err
+		}
+	  
+		return nil
+	})
+
+	if err != nil {
+		http.Error(w, "Forbidden", http.StatusInternalServerError)
+	} else {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		json.NewEncoder(w).Encode(route)
+	}
 }
 
 func getResource(w http.ResponseWriter, r *http.Request) {
@@ -71,23 +101,9 @@ func createChildResource(w http.ResponseWriter, r *http.Request) {
 	var resource model.Resource 
     json.Unmarshal(reqBody, &resource)
 
-	var depth int32
-	switch resource.Type {
-	case "area":
-		depth = 100
-	case "crag":
-		depth = 200
-	case "sector":
-		depth = 300
-	case "route":
-		depth = 400
-	case "installation":
-		depth = 500
-	}
-	
+	resource.SetDepth()
 	resource.ID = uuid.Must(uuid.NewRandom()).String()
 	resource.ParentID = &parentResourceID
-	resource.Depth = depth
 	model.DB.Create(&resource)
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -114,8 +130,7 @@ func main() {
 	router.HandleFunc("/resources/{resourceID}/ancestors", getResourceAncestors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/sectors", getSectors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/routes", getRoutes).Methods(http.MethodGet, http.MethodOptions)
-
-
+	router.HandleFunc("/resources/{resourceID}/routes", createRoute).Methods(http.MethodPost, http.MethodOptions)
 
 	router.HandleFunc("/health", checkHandler)
 
