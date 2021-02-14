@@ -1,6 +1,7 @@
 package main
 
 import (
+	authorizer "bultdatabasen/middleware"
 	"bultdatabasen/model"
 	"log"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 
 func getResourceAncestors(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    id := vars["id"]
+    id := vars["resourceID"]
 
 	ancestors := model.GetAncestors(model.DB, id)
 	for _, ancestor := range ancestors {
@@ -25,7 +26,7 @@ func getResourceAncestors(w http.ResponseWriter, r *http.Request) {
 
 func getSectors(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    id := vars["id"]
+    id := vars["resourceID"]
 
 	descendants := model.GetDescendants(model.DB, id, model.LvlSector)
 	for _, descendant := range descendants {
@@ -38,7 +39,7 @@ func getSectors(w http.ResponseWriter, r *http.Request) {
 
 func getRoutes(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    id := vars["id"]
+    id := vars["resourceID"]
 
 	descendants := model.GetDescendants(model.DB, id, model.LvlRoute)
 	for _, descendant := range descendants {
@@ -51,7 +52,7 @@ func getRoutes(w http.ResponseWriter, r *http.Request) {
 
 func getResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-    id := vars["id"]
+    id := vars["resourceID"]
 
 	resource, _ := model.FindResourceByID(model.DB, id)
 
@@ -60,11 +61,15 @@ func getResource(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	myRouter := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter().StrictSlash(true)
 
-	myRouter.HandleFunc("/resources/{id}", getResource)
-	myRouter.HandleFunc("/resources/{id}/ancestors", getResourceAncestors)
-	myRouter.HandleFunc("/resources/{id}/sectors", getSectors)
-	myRouter.HandleFunc("/resources/{id}/routes", getRoutes)
-	log.Fatal(http.ListenAndServe(":8080", myRouter))
+	authorizer := authorizer.New()
+
+	router.Use(authorizer.Middleware)
+
+	router.HandleFunc("/resources/{resourceID}", getResource)
+	router.HandleFunc("/resources/{resourceID}/ancestors", getResourceAncestors)
+	router.HandleFunc("/resources/{resourceID}/sectors", getSectors)
+	router.HandleFunc("/resources/{resourceID}/routes", getRoutes)
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
