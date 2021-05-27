@@ -19,8 +19,7 @@ func GetRoles(db *gorm.DB, userID string) []AssignedRole {
 	UNION
 		SELECT resource_id, role
 			FROM user_team
-			LEFT JOIN team on user_team.team_id = team.id
-			LEFT JOIN team_role on team.id = team_role.team_id
+			LEFT JOIN team_role ON user_team.team_id = team_role.team_id
 			WHERE user_team.user_id = ?`, userID, userID).Scan(&roles)
 
 	return roles
