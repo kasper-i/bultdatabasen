@@ -45,8 +45,8 @@ function Signin(): ReactElement {
 
         Api.setTokens(id_token, access_token, refresh_token);
 
-        axios.post("https://api.bultdatabasen.se/users/myself", {
-          headers: { Authorization: access_token },
+        axios.get("https://api.bultdatabasen.se/users/myself", {
+          headers: { Authorization: `Bearer ${access_token}` },
         });
       })
       .catch(function (error) {});
