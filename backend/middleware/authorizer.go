@@ -92,6 +92,11 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 		var userId string
 		var err error
 
+		if r.Method == "OPTIONS" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		if r.URL.Path == "/health" {
 			next.ServeHTTP(w, r)
 			return
