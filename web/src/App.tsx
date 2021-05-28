@@ -1,5 +1,7 @@
 import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Button } from "semantic-ui-react";
+import Signin from "./pages/Signin";
 
 function App() {
   const gotoCognito = () => {
@@ -11,20 +13,28 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-gray-100">
-      <div style={{ height: 600 }} className="bg-gray-900">
-        <div className="flex justify-end p-5">
+    <div className="w-full min-h-screen bg-gray-100">
+      <div style={{ minHeight: "50vh" }} className="flex flex-col bg-gray-900">
+        <div className="absolute top-0 right-0 flex justify-end p-5">
           <Button primary size="medium" fluid={false} onClick={gotoCognito}>
             Logga In
           </Button>
         </div>
-        <div className="flex flex-col items-center justify-center text-white">
+        <div className="flex flex-grow flex-col items-center justify-center text-white">
           <h1 className="text-5xl">Bultdatabasen</h1>
           <p className="italic text-lg">
             En databas över borrbultar, limbultar, ankare, etc.
           </p>
         </div>
       </div>
+
+      <Router>
+        <Switch>
+          <Route path="/signin">
+            <Signin />
+          </Route>
+        </Switch>
+      </Router>
     </div>
   );
 }
