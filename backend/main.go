@@ -2,7 +2,8 @@ package main
 
 import (
 	"bultdatabasen/api"
-	authorizer "bultdatabasen/middleware"
+	"bultdatabasen/middleware/authorizer"
+	"bultdatabasen/middleware/cors"
 	"io"
 	"log"
 	"net/http"
@@ -23,7 +24,7 @@ func main() {
 	authorizer := authorizer.New()
 
 	router.Use(authorizer.Middleware)
-	router.Use(mux.CORSMethodMiddleware(router))
+	router.Use(cors.CORSMiddleware)
 
 	router.HandleFunc("/health", checkHandler)
 
