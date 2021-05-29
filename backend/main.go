@@ -2,6 +2,7 @@ package main
 
 import (
 	"bultdatabasen/api"
+	"bultdatabasen/middleware/authenticator"
 	"bultdatabasen/middleware/authorizer"
 	"bultdatabasen/middleware/cors"
 	"io"
@@ -21,8 +22,10 @@ func checkHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
+	authenticator := authenticator.New()
 	authorizer := authorizer.New()
 
+	router.Use(authenticator.Middleware)
 	router.Use(authorizer.Middleware)
 	router.Use(cors.CORSMiddleware)
 
