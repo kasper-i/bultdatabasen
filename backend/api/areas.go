@@ -30,11 +30,13 @@ func GetArea(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateArea(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value("user_id").(string)
+
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var area model.Area
 	json.Unmarshal(reqBody, &area)
 
-	err := model.CreateArea(model.DB, &area)
+	err := model.CreateArea(model.DB, &area, userId)
 
 	if err != nil {
 		utils.WriteError(w, err)

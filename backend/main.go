@@ -33,7 +33,7 @@ func main() {
 
 	router.HandleFunc("/users/myself", api.GetMyUser).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/{userID}", nil).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/users/{userID}", nil).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/users/{userID}", api.UpdateUser).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/users/{userID}", nil).Methods(http.MethodDelete, http.MethodOptions)
 	router.HandleFunc("/users/{userID}/teams", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/{userID}/teams/{teamID}", nil).Methods(http.MethodDelete, http.MethodOptions)

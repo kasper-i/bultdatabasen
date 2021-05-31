@@ -72,7 +72,7 @@ func authenticate(tokenString string) (string, error) {
 	})
 
 	if err != nil {
-		return userId, nil
+		return userId, err
 	}
 
 	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {

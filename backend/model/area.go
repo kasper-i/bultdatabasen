@@ -34,7 +34,7 @@ func GetArea(db *gorm.DB, resourceID string) (*Area, error) {
 	return &area, nil
 }
 
-func CreateArea(db *gorm.DB, area *Area) error {
+func CreateArea(db *gorm.DB, area *Area, userID string) error {
 	area.ID = uuid.Must(uuid.NewRandom()).String()
 	parentResourceID := RootID
 
@@ -54,7 +54,7 @@ func CreateArea(db *gorm.DB, area *Area) error {
 			return err
 		}
 
-		if err := tx.Exec("INSERT INTO user_role VALUES (?, ?, ?)", "be44169f-6e27-11eb-8c37-7085c2c40195", area.ID, "owner").Error; err != nil {
+		if err := tx.Exec("INSERT INTO user_role VALUES (?, ?, ?)", userID, area.ID, "owner").Error; err != nil {
 			return err
 		}
 
