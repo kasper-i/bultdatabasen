@@ -22,8 +22,14 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		resourceID := vars["resourceID"]
-		var userID string = r.Context().Value("user_id").(string)
 		var err error
+
+		if r.Method == "OPTIONS" || r.URL.Path == "/health" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		var userID string = r.Context().Value("user_id").(string)
 
 		if r.Method == "GET" && r.URL.Path == "/users/myself" {
 			next.ServeHTTP(w, r)
