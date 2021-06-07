@@ -8,6 +8,7 @@ import (
 type Area struct {
 	ID   string `gorm:"primaryKey" json:"id"`
 	Name string `json:"name"`
+	ParentID string `json:"parent_id"`
 }
 
 func (Area) TableName() string {
