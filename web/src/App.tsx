@@ -9,26 +9,33 @@ function App() {
   const renderHelper = () => {
     if (Api.authValid()) {
       return (
-        <Router>
-          <Switch>
-            <Route exact path="/signin">
-              <SigninPage />
-            </Route>
-            <Route path="/">
-              <RootPage />
-            </Route>
-          </Switch>
-        </Router>
+        <Switch>
+          <Route path="/">
+            <RootPage />
+          </Route>
+          <Route path="/area/:resourceId">
+            <RootPage />
+          </Route>
+        </Switch>
       );
     } else {
-      return <WelcomePage />;
+      return (
+        <Switch>
+          <Route path="/signin">
+            <SigninPage />
+          </Route>
+          <Route path="/">
+            <WelcomePage />
+          </Route>
+        </Switch>
+      );
     }
   };
 
   return (
     <div className="w-full min-h-screen bg-gray-100">
       <div style={{ minHeight: "50vh" }} className="flex flex-col bg-gray-900">
-        {renderHelper()}
+        <Router>{renderHelper()}</Router>
       </div>
     </div>
   );
