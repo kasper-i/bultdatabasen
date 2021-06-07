@@ -3,7 +3,8 @@ import { Area } from "./models/area";
 import { User } from "./models/user";
 
 export class Api {
-  static baseUrl: string = "https://api.bultdatabasen.se";
+  //static baseUrl: string = "https://api.bultdatabasen.se";
+  static baseUrl: string = "http://localhost:8080";
   static idToken: string | null;
   static accessToken: string | null;
   static refreshToken: string | null;

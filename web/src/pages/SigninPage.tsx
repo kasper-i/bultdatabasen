@@ -47,6 +47,7 @@ function SigninPage(): ReactElement {
         Api.setTokens(id_token, access_token, refresh_token);
         Api.saveTokens();
 
+        console.log(Api.authValid());
         history.push("/");
       })
       .catch(function (error) {});
