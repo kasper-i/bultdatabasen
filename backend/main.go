@@ -49,7 +49,9 @@ func main() {
 
 	router.HandleFunc("/resources/{resourceID}/ancestors", api.GetAncestors).Methods(http.MethodGet, http.MethodOptions)
 
+	router.HandleFunc("/resources/{resourceID}/areas", api.GetAreas).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/areas", api.GetAreas).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/areas", api.CreateArea).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/areas", api.CreateArea).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/areas/{resourceID}", api.GetArea).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/areas/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)

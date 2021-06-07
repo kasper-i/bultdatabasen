@@ -8,18 +8,19 @@ import (
 )
 
 func getDescendantsQuery(resourceType string) string {
-	return fmt.Sprintf(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
-		SELECT id, name, type, parent_id
+	return fmt.Sprintf(`WITH RECURSIVE cte (id, name, type, parent_id, first) AS (
+		SELECT id, name, type, parent_id, TRUE
 		FROM resource
 		WHERE id = ?
 	UNION DISTINCT
-		SELECT child.id, child.name, child.type, child.parent_id
+		SELECT child.id, child.name, child.type, child.parent_id, FALSE
 		FROM resource child
 		INNER JOIN cte ON child.parent_id = cte.id
 		WHERE depth <= %d
 	)
 	SELECT %s.*, cte.name, cte.parent_id FROM cte
-	INNER JOIN %s ON cte.id = %s.id`, GetResourceDepth(resourceType), resourceType, resourceType, resourceType)
+	INNER JOIN %s ON cte.id = %s.id
+	WHERE cte.first <> TRUE`, GetResourceDepth(resourceType), resourceType, resourceType, resourceType)
 }
 
 func createResource(tx *gorm.DB, resource Resource) error {

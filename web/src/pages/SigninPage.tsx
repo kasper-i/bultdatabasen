@@ -17,7 +17,7 @@ const instance = axios.create({
   headers: { "Content-Type": "application/x-www-form-urlencoded" },
 });
 
-function Signin(): ReactElement {
+function SigninPage(): ReactElement {
   const location = useLocation();
   const history = useHistory();
 
@@ -50,9 +50,9 @@ function Signin(): ReactElement {
         history.push("/");
       })
       .catch(function (error) {});
-  }, [location]);
+  }, [location, history]);
 
   return <Fragment />;
 }
 
-export default Signin;
+export default SigninPage;

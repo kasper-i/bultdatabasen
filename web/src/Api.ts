@@ -1,5 +1,6 @@
 import axios from "axios";
-import { User } from "./models/User";
+import { Area } from "./models/area";
+import { User } from "./models/user";
 
 export class Api {
   static baseUrl: string = "https://api.bultdatabasen.se";
@@ -35,11 +36,30 @@ export class Api {
     Api.refreshToken = localStorage.getItem("refreshToken");
   };
 
-  static getMySelf = async () => {
+  static authValid = () => {
+    return Api.accessToken != null;
+  };
+
+  static getMySelf = async (): Promise<User> => {
     const result = await axios.get(`${Api.baseUrl}/users/myself`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
     return result.data as User;
+  };
+
+  static getAreas = async (resourceId?: string): Promise<Area[]> => {
+    let endpoint: string;
+    if (resourceId != null) {
+      endpoint = `/resources/${resourceId}/areas`;
+    } else {
+      endpoint = "/areas";
+    }
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Area[];
   };
 }
