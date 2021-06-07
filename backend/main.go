@@ -25,9 +25,9 @@ func main() {
 	authenticator := authenticator.New()
 	authorizer := authorizer.New()
 
+	router.Use(cors.CORSMiddleware)
 	router.Use(authenticator.Middleware)
 	router.Use(authorizer.Middleware)
-	router.Use(cors.CORSMiddleware)
 
 	router.HandleFunc("/health", checkHandler)
 

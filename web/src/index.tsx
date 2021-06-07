@@ -5,6 +5,9 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
 import "semantic-ui-css/semantic.min.css";
+import { Api } from "./Api";
+
+Api.restoreTokens();
 
 ReactDOM.render(
   <React.StrictMode>

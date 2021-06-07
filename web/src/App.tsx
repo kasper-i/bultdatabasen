@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Button } from "semantic-ui-react";
+import { Api } from "./Api";
 import Signin from "./pages/Signin";
 
 function App() {

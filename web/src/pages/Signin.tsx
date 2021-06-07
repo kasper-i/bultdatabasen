@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { Fragment, ReactElement, useEffect } from "react";
-import { useLocation } from "react-router";
+import { useHistory, useLocation } from "react-router";
 import { Api } from "../Api";
 
 interface OAuthTokenResponse {
@@ -19,6 +19,7 @@ const instance = axios.create({
 
 function Signin(): ReactElement {
   const location = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -39,15 +40,14 @@ function Signin(): ReactElement {
 
     instance
       .post("/oauth2/token", params)
-      .then(function (response) {
+      .then((response) => {
         const { id_token, access_token, refresh_token }: OAuthTokenResponse =
           response.data;
 
         Api.setTokens(id_token, access_token, refresh_token);
+        Api.saveTokens();
 
-        axios.get("https://api.bultdatabasen.se/users/myself", {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
+        history.push("/");
       })
       .catch(function (error) {});
   }, [location]);
