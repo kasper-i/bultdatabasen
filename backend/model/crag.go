@@ -8,7 +8,7 @@ import (
 type Crag struct {
 	ID   string `gorm:"primaryKey" json:"id"`
 	Name string `json:"name"`
-	ParentID string `json:"parent_id"`
+	ParentID string `gorm:"->" json:"parent_id"`
 }
 
 func (Crag) TableName() string {

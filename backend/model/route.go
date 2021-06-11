@@ -11,7 +11,7 @@ type Route struct {
 	AltName   *string `json:"alt_name"`
 	Year      *int32  `json:"year"`
 	RouteType *string `json:"route_type"`
-	ParentID string `json:"parent_id"`
+	ParentID string `gorm:"->" json:"parent_id"`
 }
 
 func (Route) TableName() string {
