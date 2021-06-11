@@ -11,7 +11,7 @@ type Resource struct {
 	Name     string  `json:"name"`
 	Type     string  `json:"type"`
 	Depth    Depth   `json:"-"`
-	ParentID *string `json:"parent_id"`
+	ParentID *string `json:"parentId"`
 }
 
 func (Resource) TableName() string {

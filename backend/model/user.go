@@ -10,7 +10,7 @@ type User struct {
 	ID       string    `gorm:"primaryKey" json:"id"`
 	Email    string    `json:"email"`
 	Name     string    `json:"name"`
-	JoinDate time.Time `json:"join_date"`
+	JoinDate time.Time `json:"joinDate"`
 }
 
 func (User) TableName() string {

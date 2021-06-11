@@ -8,10 +8,10 @@ import (
 type Route struct {
 	ID        string  `gorm:"primaryKey" json:"id"`
 	Name      string  `json:"name"`
-	AltName   *string `json:"alt_name"`
+	AltName   *string `json:"altName"`
 	Year      *int32  `json:"year"`
-	RouteType *string `json:"route_type"`
-	ParentID string `gorm:"->" json:"parent_id"`
+	RouteType *string `json:"routeType"`
+	ParentID string `gorm:"->" json:"parentId"`
 }
 
 func (Route) TableName() string {
