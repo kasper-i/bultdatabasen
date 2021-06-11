@@ -1,10 +1,10 @@
 import axios from "axios";
 import { Area } from "./models/area";
 import { User } from "./models/user";
+import configData from "config.json";
 
 export class Api {
-  //static baseUrl: string = "https://api.bultdatabasen.se";
-  static baseUrl: string = "http://localhost:8080";
+  static baseUrl: string = configData.API_URL;
   static idToken: string | null;
   static accessToken: string | null;
   static refreshToken: string | null;
