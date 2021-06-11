@@ -16,7 +16,7 @@ function RootPage(): ReactElement {
   }
 
   return (
-    <div className="flex flex-col text-white">
+    <div className="flex flex-col">
       {areas.data.map((area) => (
         <div
           className="cursor-pointer"

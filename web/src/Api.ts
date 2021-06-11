@@ -2,6 +2,8 @@ import axios from "axios";
 import { Area } from "./models/area";
 import { User } from "./models/user";
 import configData from "config.json";
+import { Resource } from "models/resource";
+import { Route } from "models/route";
 
 export class Api {
   static baseUrl: string = configData.API_URL;
@@ -62,5 +64,35 @@ export class Api {
     });
 
     return result.data as Area[];
+  };
+
+  static getArea = async (areaId?: string): Promise<Area> => {
+    const endpoint = `/areas/${areaId}`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Area;
+  };
+
+  static getAncestors = async (resourceId?: string): Promise<Resource[]> => {
+    const endpoint = `/resources/${resourceId}/ancestors`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Resource[];
+  };
+
+  static getRoute = async (routeId?: string): Promise<Route> => {
+    const endpoint = `/routes/${routeId}`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Route;
   };
 }
