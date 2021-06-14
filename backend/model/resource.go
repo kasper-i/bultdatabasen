@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -8,10 +10,21 @@ const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 
 type Resource struct {
 	ID       string  `gorm:"primaryKey" json:"id"`
-	Name     string  `json:"name"`
+	Name     *string `json:"name"`
 	Type     string  `json:"type"`
 	Depth    Depth   `json:"-"`
 	ParentID *string `json:"parentId"`
+}
+
+type Parent struct {
+	ID   string  `json:"id"`
+	Name *string `json:"name"`
+	Type string  `json:"type"`
+}
+
+type ResourceWithParents struct {
+	Resource
+	Parents []Parent `json:"parents"`
 }
 
 func (Resource) TableName() string {
@@ -65,4 +78,75 @@ func GetAncestors(db *gorm.DB, resourceID string) ([]Resource, error) {
 	}
 
 	return ancestors, nil
+}
+
+func GetChildren(db *gorm.DB, resourceID string) ([]Resource, error) {
+	var children []Resource
+
+	err := db.Raw(`SELECT * FROM resource
+	WHERE parent_id = ?`, resourceID).Scan(&children).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return children, nil
+}
+
+func parseString(value interface{}) *string {
+	if str, ok := value.(string); ok {
+		return &str
+	} else {
+		return nil
+	}
+}
+
+func Search(db *gorm.DB, name string) ([]ResourceWithParents, error) {
+	var results []map[string]interface{}
+	var resources []ResourceWithParents = make([]ResourceWithParents, 0)
+
+	err := db.Raw(`SELECT
+		r1.*,
+		r2.id as r2_id, r2.name as r2_name, r2.type as r2_type,
+		r3.id as r3_id, r3.name as r3_name, r3.type as r3_type
+	FROM resource r1
+	LEFT JOIN resource r2 ON r1.parent_id = r2.id
+	LEFT JOIN resource r3 ON r2.parent_id = r3.id
+	WHERE r1.name LIKE ?
+	LIMIT 20`, fmt.Sprintf("%%%s%%", name)).Scan(&results).Error
+
+	for _, result := range results {
+		parents := make([]Parent, 0)
+
+		if result["r2_id"] != nil {
+			parents = append(parents, Parent{
+				ID:   result["r2_id"].(string),
+				Name: parseString(result["r2_name"]),
+				Type: result["r2_type"].(string),
+			})
+		}
+
+		if result["r3_id"] != nil {
+			parents = append(parents, Parent{
+				ID:   result["r3_id"].(string),
+				Name: parseString(result["r3_name"]),
+				Type: result["r3_type"].(string),
+			})
+		}
+
+		resources = append(resources, ResourceWithParents{
+			Resource: Resource{
+				ID:       result["id"].(string),
+				Name:     parseString(result["name"]),
+				Type:     result["type"].(string),
+				ParentID: parseString(result["parent_id"])},
+			Parents: parents,
+		})
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resources, nil
 }

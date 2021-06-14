@@ -11,7 +11,7 @@ type Route struct {
 	AltName   *string `json:"altName"`
 	Year      *int32  `json:"year"`
 	RouteType *string `json:"routeType"`
-	ParentID string `gorm:"->" json:"parentId"`
+	ParentID  string  `gorm:"->" json:"parentId"`
 }
 
 func (Route) TableName() string {
@@ -43,7 +43,7 @@ func CreateRoute(db *gorm.DB, route *Route, parentResourceID string) error {
 
 	resource := Resource{
 		ID:       route.ID,
-		Name:     route.Name,
+		Name:     &route.Name,
 		Type:     "route",
 		ParentID: &parentResourceID,
 	}

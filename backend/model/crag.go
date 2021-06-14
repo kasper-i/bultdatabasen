@@ -6,8 +6,8 @@ import (
 )
 
 type Crag struct {
-	ID   string `gorm:"primaryKey" json:"id"`
-	Name string `json:"name"`
+	ID       string `gorm:"primaryKey" json:"id"`
+	Name     string `json:"name"`
 	ParentID string `gorm:"->" json:"parentId"`
 }
 
@@ -40,7 +40,7 @@ func CreateCrag(db *gorm.DB, crag *Crag, parentResourceID string) error {
 
 	resource := Resource{
 		ID:       crag.ID,
-		Name:     crag.Name,
+		Name:     &crag.Name,
 		Type:     "crag",
 		ParentID: &parentResourceID,
 	}

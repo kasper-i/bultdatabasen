@@ -6,8 +6,8 @@ import (
 )
 
 type Sector struct {
-	ID   string `gorm:"primaryKey" json:"id"`
-	Name string `json:"name"`
+	ID       string `gorm:"primaryKey" json:"id"`
+	Name     string `json:"name"`
 	ParentID string `gorm:"->" json:"parentId"`
 }
 
@@ -40,7 +40,7 @@ func CreateSector(db *gorm.DB, sector *Sector, parentResourceID string) error {
 
 	resource := Resource{
 		ID:       sector.ID,
-		Name:     sector.Name,
+		Name:     &sector.Name,
 		Type:     "sector",
 		ParentID: &parentResourceID,
 	}

@@ -31,7 +31,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 
 		var userID string = r.Context().Value("user_id").(string)
 
-		if r.Method == "GET" && r.URL.Path == "/users/myself" {
+		if r.Method == "GET" && (r.URL.Path == "/users/myself" || r.URL.Path == "/resources") {
 			next.ServeHTTP(w, r)
 			return
 		}

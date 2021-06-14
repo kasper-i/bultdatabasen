@@ -6,8 +6,8 @@ import (
 )
 
 type Area struct {
-	ID   string `gorm:"primaryKey" json:"id"`
-	Name string `json:"name"`
+	ID       string `gorm:"primaryKey" json:"id"`
+	Name     string `json:"name"`
 	ParentID string `gorm:"->" json:"parentId"`
 }
 
@@ -40,7 +40,7 @@ func CreateArea(db *gorm.DB, area *Area, parentResourceID string, userID string)
 
 	resource := Resource{
 		ID:       area.ID,
-		Name:     area.Name,
+		Name:     &area.Name,
 		Type:     "area",
 		ParentID: &parentResourceID,
 	}
