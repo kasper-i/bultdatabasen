@@ -2,7 +2,7 @@ import axios from "axios";
 import { Area } from "./models/area";
 import { User } from "./models/user";
 import configData from "config.json";
-import { Resource } from "models/resource";
+import { Resource, ResourceWithParents } from "models/resource";
 import { Route } from "models/route";
 
 export class Api {
@@ -94,5 +94,16 @@ export class Api {
     });
 
     return result.data as Route;
+  };
+
+  static searchResources = async (searchTerm?: string): Promise<ResourceWithParents[]> => {
+    const endpoint = `/resources`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+      params: {name: searchTerm}
+    });
+
+    return result.data as ResourceWithParents[];
   };
 }

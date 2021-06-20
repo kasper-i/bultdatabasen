@@ -1,9 +1,9 @@
 import LoginToolbar from "components/LoginToolbar";
+import Search from "components/Search";
 import AreaPage from "pages/AreaPage";
 import RoutePage from "pages/RoutePage";
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { Button, Input } from "semantic-ui-react";
 import { Api } from "./Api";
 import RootPage from "./pages/RootPage";
 import SigninPage from "./pages/SigninPage";
@@ -11,15 +11,15 @@ import WelcomePage from "./pages/WelcomePage";
 
 function App() {
   return (
-    <div className="w-full min-h-screen bg-gray-100">
-      <div className="bg-gray-900 h-16 shadow-md flex justify-between items-center px-2">
-        <div className="flex items-center">
-          <Input focus placeholder="Sök..." />
+    <Router>
+      <div className="w-full min-h-screen bg-gray-100">
+        <div className="bg-gray-900 h-16 shadow-md flex justify-between items-center px-2">
+          <div className="flex items-center">
+            <Search />
+          </div>
+          <LoginToolbar />
         </div>
-        <LoginToolbar />
-      </div>
-      <div className="mx-auto flex flex-col mt-5" style={{ width: 1000 }}>
-        <Router>
+        <div className="mx-auto flex flex-col mt-5" style={{ width: 1000 }}>
           <Switch>
             <Route
               exact
@@ -40,9 +40,9 @@ function App() {
               <SigninPage />
             </Route>
           </Switch>
-        </Router>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 }
 

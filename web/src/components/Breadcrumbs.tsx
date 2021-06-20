@@ -1,5 +1,5 @@
 import { useAncestors } from "queries/commonQueries";
-import React, { Fragment, ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import { Breadcrumb, StrictBreadcrumbSectionProps } from "semantic-ui-react";
 import { SemanticShorthandCollection } from "semantic-ui-react/dist/commonjs/generic";
@@ -51,7 +51,7 @@ const Breadcrumbs = ({ resourceId, resourceName }: Props): ReactElement => {
 
       setCrumbs(sections);
     }
-  }, [ancestors.data]);
+  }, [ancestors.data, history, resourceId, resourceName]);
 
   return <Breadcrumb icon="right angle" sections={crumbs} />;
 };

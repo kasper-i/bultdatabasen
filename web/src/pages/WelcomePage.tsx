@@ -1,5 +1,4 @@
 import React, { ReactElement } from "react";
-import { Button } from "semantic-ui-react";
 
 function WelcomePage(): ReactElement {
   return (

@@ -1,4 +1,3 @@
-import Breadcrumbs from "components/Breadcrumbs";
 import PageHeader from "components/PageHeader";
 import { useRoute } from "queries/routeQueries";
 import React, { Fragment, ReactElement } from "react";
@@ -32,6 +31,9 @@ const RoutePage = (): ReactElement => {
       <PageHeader resourceId={routeId} resourceName={route.data.name} />
       <div>{route.data.year}</div>
       <div>{renderRouteType(route.data.routeType)}</div>
+      <div>
+        <a href={route.data.externalLink}>{route.data.externalLink}</a>
+      </div>
     </div>
   );
 };

@@ -4,4 +4,5 @@ export interface Route {
   altName: string;
   year: number;
   routeType: string;
+  externalLink: string
 }
