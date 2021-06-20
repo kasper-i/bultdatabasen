@@ -17,7 +17,7 @@ const CragPage = (): ReactElement => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col space-y-5">
       <PageHeader resourceId={cragId} resourceName={crag.data.name} />
       <ChildrenTable resourceId={cragId} />
     </div>

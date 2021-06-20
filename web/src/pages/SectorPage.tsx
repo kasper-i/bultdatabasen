@@ -17,7 +17,7 @@ const SectorPage = (): ReactElement => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col space-y-5">
       <PageHeader resourceId={sectorId} resourceName={sector.data.name} />
       <ChildrenTable resourceId={sectorId} />
     </div>

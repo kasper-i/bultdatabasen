@@ -2,6 +2,7 @@ import { Api } from "Api";
 import React, { Reducer, useReducer } from "react";
 import { useHistory } from "react-router";
 import { Search as SemanticSearch, SearchProps } from "semantic-ui-react";
+import { getResourceUrl } from "utils/resourceUtils";
 
 interface State {
   loading: boolean;
@@ -57,7 +58,10 @@ function Search() {
       await Api.searchResources(data.value)
     ).map((result) => ({
       title: result.name,
-      description: result.parents.map((parent) => parent.name).join(", "),
+      description: result.parents
+        .filter((parent) => parent.type != "root")
+        .map((parent) => parent.name)
+        .join(", "),
       key: result.id,
       type: result.type,
     }));
@@ -68,9 +72,10 @@ function Search() {
   return (
     <SemanticSearch
       loading={loading}
-      onResultSelect={(e, data) => {
-        dispatch({ type: "UPDATE_SELECTION", payload: data.result.title });
-        history.push(`/route/${data.result.key}`);
+      onResultSelect={(_e, { result }) => {
+        dispatch({ type: "UPDATE_SELECTION", payload: result.title });
+        const url = getResourceUrl(result.type, result.key);
+        url && history.push(url);
       }}
       onSearchChange={handleSearchChange}
       results={results}

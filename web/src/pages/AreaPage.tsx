@@ -17,7 +17,7 @@ const AreaPage = (): ReactElement => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col space-y-5">
       <PageHeader resourceId={areaId} resourceName={area.data.name} />
       <ChildrenTable resourceId={areaId} />
     </div>
