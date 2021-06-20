@@ -4,6 +4,8 @@ import { User } from "./models/user";
 import configData from "config.json";
 import { Resource, ResourceWithParents } from "models/resource";
 import { Route } from "models/route";
+import { Crag } from "models/crag";
+import { Sector } from "models/sector";
 
 export class Api {
   static baseUrl: string = configData.API_URL;
@@ -76,8 +78,38 @@ export class Api {
     return result.data as Area;
   };
 
+  static getCrag = async (cragId?: string): Promise<Crag> => {
+    const endpoint = `/crags/${cragId}`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Crag;
+  };
+
+  static getSector = async (sectorId?: string): Promise<Sector> => {
+    const endpoint = `/sectors/${sectorId}`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Sector;
+  };
+
   static getAncestors = async (resourceId?: string): Promise<Resource[]> => {
     const endpoint = `/resources/${resourceId}/ancestors`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Resource[];
+  };
+
+  static getChildren = async (resourceId?: string): Promise<Resource[]> => {
+    const endpoint = `/resources/${resourceId}/children`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -96,12 +128,14 @@ export class Api {
     return result.data as Route;
   };
 
-  static searchResources = async (searchTerm?: string): Promise<ResourceWithParents[]> => {
+  static searchResources = async (
+    searchTerm?: string
+  ): Promise<ResourceWithParents[]> => {
     const endpoint = `/resources`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
-      params: {name: searchTerm}
+      params: { name: searchTerm },
     });
 
     return result.data as ResourceWithParents[];

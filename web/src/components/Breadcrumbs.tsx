@@ -54,7 +54,7 @@ const Breadcrumbs = ({ resourceId, resourceName }: Props): ReactElement => {
   }, [ancestors.data, history, resourceId, resourceName]);
 
   return (
-    <div className="h-3.5">
+    <div className="h-5 flex items-center">
       <Breadcrumb icon="right angle" sections={crumbs} />
     </div>
   );

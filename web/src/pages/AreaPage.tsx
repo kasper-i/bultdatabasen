@@ -1,3 +1,4 @@
+import ChildrenTable from "components/ChildrenTable";
 import PageHeader from "components/PageHeader";
 import { useArea } from "queries/areaQueries";
 import React, { Fragment, ReactElement } from "react";
@@ -15,7 +16,12 @@ const AreaPage = (): ReactElement => {
     return <Fragment />;
   }
 
-  return <PageHeader resourceId={areaId} resourceName={area.data.name} />;
+  return (
+    <div>
+      <PageHeader resourceId={areaId} resourceName={area.data.name} />
+      <ChildrenTable resourceId={areaId} />
+    </div>
+  );
 };
 
 export default AreaPage;

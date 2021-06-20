@@ -1,7 +1,9 @@
 import LoginToolbar from "components/LoginToolbar";
 import Search from "components/Search";
 import AreaPage from "pages/AreaPage";
+import CragPage from "pages/CragPage";
 import RoutePage from "pages/RoutePage";
+import SectorPage from "pages/SectorPage";
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Api } from "./Api";
@@ -34,8 +36,12 @@ function App() {
             <Route path="/area/:areaId">
               <AreaPage />
             </Route>
-            <Route path="/crag/:resourceId"></Route>
-            <Route path="/sector/:resourceId"></Route>
+            <Route path="/crag/:cragId">
+              <CragPage />
+            </Route>
+            <Route path="/sector/:sectorId">
+              <SectorPage />
+            </Route>
             <Route path="/route/:routeId">
               <RoutePage />
             </Route>
