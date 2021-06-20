@@ -19,7 +19,10 @@ function App() {
           </div>
           <LoginToolbar />
         </div>
-        <div className="mx-auto flex flex-col mt-5" style={{ width: 1000 }}>
+        <div
+          className="mx-auto flex flex-col mt-5 px-5"
+          style={{ width: 1000 }}
+        >
           <Switch>
             <Route
               exact
