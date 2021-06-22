@@ -60,6 +60,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 
 		for _, role := range roles {
 			if role.ResourceID == resourceID {
+				grantAccess(w, r, role.Role)
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -75,6 +76,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 		for _, ancestor := range ancestors {
 			for _, role := range roles {
 				if role.ResourceID == ancestor.ID {
+					grantAccess(w, r, role.Role)
 					next.ServeHTTP(w, r)
 					return
 				}
@@ -83,6 +85,12 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 
 		writeForbidden(w, resourceID)
 	})
+}
+
+func grantAccess(w http.ResponseWriter, r *http.Request, role string) {
+	if r.Method == "GET" || r.Method == "HEAD" {
+		w.Header().Set("Role", role)
+	}
 }
 
 func writeForbidden(w http.ResponseWriter, resourceID string) {
