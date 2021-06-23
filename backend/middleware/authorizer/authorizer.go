@@ -11,6 +11,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	RoleOwner string = "owner"
+)
+
 type authorizer struct {
 }
 
@@ -22,9 +26,13 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		resourceID := vars["resourceID"]
-		var err error
 
-		if r.Method == "OPTIONS" || r.URL.Path == "/health" {
+		if r.Method == "OPTIONS" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if r.Method == "GET" && r.URL.Path == "/health" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -51,43 +59,83 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			}
 		}
 
-		if resourceID == model.RootID {
-			writeForbidden(w, resourceID)
-			return
-		}
+		checkRoles(resourceID, userID, next, w, r)
+	})
+}
 
-		roles := auth.GetRoles(model.DB, userID)
+func checkRoles(resourceID string, userID string, next http.Handler, w http.ResponseWriter, r *http.Request) {
+	var err error
 
-		for _, role := range roles {
-			if role.ResourceID == resourceID {
-				grantAccess(w, r, role.Role)
+	if resourceID == model.RootID {
+		writeForbidden(w, resourceID)
+		return
+	}
+
+	roles := auth.GetRoles(model.DB, userID)
+
+	if len(roles) == 0 {
+		writeForbidden(w, resourceID)
+		return
+	}
+
+	for _, role := range roles {
+		if role.ResourceID == resourceID {
+			if role.Role == RoleOwner || len(roles) == 1 {
+				attachRole(w, r, role.Role)
 				next.ServeHTTP(w, r)
 				return
 			}
 		}
+	}
 
-		var ancestors []model.Resource
+	var ancestors []model.Resource
 
-		if ancestors, err = model.GetAncestors(model.DB, resourceID); err != nil {
-			writeForbidden(w, resourceID)
-			return
-		}
+	if ancestors, err = model.GetAncestors(model.DB, resourceID); err != nil {
+		writeForbidden(w, resourceID)
+		return
+	}
 
-		for _, ancestor := range ancestors {
-			for _, role := range roles {
-				if role.ResourceID == ancestor.ID {
-					grantAccess(w, r, role.Role)
-					next.ServeHTTP(w, r)
-					return
-				}
+	var maxRole *auth.AssignedRole = nil
+
+	for _, ancestor := range ancestors {
+		for _, role := range roles {
+			if role.ResourceID == ancestor.ID {
+				maxRole = max(maxRole, &role)
 			}
 		}
+	}
 
-		writeForbidden(w, resourceID)
-	})
+	if maxRole != nil {
+		attachRole(w, r, maxRole.Role)
+		next.ServeHTTP(w, r)
+		return
+	}
+
+	writeForbidden(w, resourceID)
 }
 
-func grantAccess(w http.ResponseWriter, r *http.Request, role string) {
+func roleValue(role *auth.AssignedRole) int {
+	if role == nil {
+		return 0
+	}
+
+	switch role.Role {
+	case RoleOwner:
+		return 1
+	default:
+		return 0
+	}
+}
+
+func max(r1, r2 *auth.AssignedRole) *auth.AssignedRole {
+	if roleValue(r1) >= roleValue(r2) {
+		return r1
+	} else {
+		return r2
+	}
+}
+
+func attachRole(w http.ResponseWriter, r *http.Request, role string) {
 	if r.Method == "GET" || r.Method == "HEAD" {
 		w.Header().Set("Role", role)
 	}

@@ -86,8 +86,14 @@ func authenticate(tokenString string) (string, error) {
 func (authorizer *authenticator) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var userId string
+		var err error
 
-		if r.Method == "OPTIONS" || r.URL.Path == "/health" {
+		if r.Method == "OPTIONS" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if r.Method == "GET" && r.URL.Path == "/health" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -98,12 +104,12 @@ func (authorizer *authenticator) Middleware(next http.Handler) http.Handler {
 		} else {
 			var tokenString string
 
-			if n, err := fmt.Sscanf(auth, "Bearer %s", &tokenString); n == 1 && err == nil {
-				if userId, err = authenticate(tokenString); err != nil {
-					writeUnauthorized(w)
-					return
-				}
-			} else {
+			if n, err := fmt.Sscanf(auth, "Bearer %s", &tokenString); err != nil || n != 1 {
+				writeUnauthorized(w)
+				return
+			}
+
+			if userId, err = authenticate(tokenString); err != nil {
 				writeUnauthorized(w)
 				return
 			}

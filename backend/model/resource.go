@@ -81,7 +81,7 @@ func GetAncestors(db *gorm.DB, resourceID string) ([]Resource, error) {
 }
 
 func GetChildren(db *gorm.DB, resourceID string) ([]Resource, error) {
-	var children []Resource
+	var children []Resource = make([]Resource, 0)
 
 	err := db.Raw(`SELECT * FROM resource
 	WHERE parent_id = ?`, resourceID).Scan(&children).Error
