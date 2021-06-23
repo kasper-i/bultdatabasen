@@ -2,6 +2,7 @@ package authorizer
 
 import (
 	"bultdatabasen/auth"
+	"bultdatabasen/middleware/authenticator"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
@@ -27,27 +28,22 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 		vars := mux.Vars(r)
 		resourceID := vars["resourceID"]
 
-		if r.Method == "OPTIONS" {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		if r.Method == "GET" && r.URL.Path == "/health" {
+		if authenticator.IsPublic(r) {
 			next.ServeHTTP(w, r)
 			return
 		}
 
 		var userID string = r.Context().Value("user_id").(string)
 
-		if r.Method == "GET" && (r.URL.Path == "/users/myself" || r.URL.Path == "/resources") {
+		if r.Method == "POST" && r.URL.Path == "/areas" {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		if (r.Method == "GET" || r.Method == "POST") && r.URL.Path == "/areas" {
+		if r.Method == "GET" && r.URL.Path == "/users/myself" {
 			next.ServeHTTP(w, r)
 			return
-		}
+		}		
 
 		if strings.HasPrefix(r.URL.Path, "/users/") {
 			if userID == vars["userID"] {
@@ -63,7 +59,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-func checkRoles(resourceID string, userID string, next http.Handler, w http.ResponseWriter, r *http.Request) {
+func checkRoles(resourceID, userID string, next http.Handler, w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if resourceID == model.RootID {

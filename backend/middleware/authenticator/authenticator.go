@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -20,6 +21,35 @@ type authenticator struct {
 
 func New() *authenticator {
 	return &authenticator{}
+}
+
+func IsPublic(r *http.Request) bool {
+	if r.Method == "OPTIONS" {
+		return true
+	}	
+
+	if r.Method == "GET" || r.Method == "HEAD" {
+		switch {
+		case r.URL.Path == "/health":
+			return true
+		case strings.HasPrefix(r.URL.Path, "/resources"):
+			return true
+		case strings.HasPrefix(r.URL.Path, "/areas"):
+			return true
+		case strings.HasPrefix(r.URL.Path, "/crags"):
+			return true
+		case strings.HasPrefix(r.URL.Path, "/sectors"):
+			return true
+		case strings.HasPrefix(r.URL.Path, "/routes"):
+			return true
+		case strings.HasPrefix(r.URL.Path, "/points"):
+			return true
+		case strings.HasPrefix(r.URL.Path, "/bolts"):
+			return true
+		}
+	}
+
+	return false
 }
 
 type MyCustomClaims struct {
@@ -88,12 +118,7 @@ func (authorizer *authenticator) Middleware(next http.Handler) http.Handler {
 		var userId string
 		var err error
 
-		if r.Method == "OPTIONS" {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		if r.Method == "GET" && r.URL.Path == "/health" {
+		if IsPublic(r) {
 			next.ServeHTTP(w, r)
 			return
 		}

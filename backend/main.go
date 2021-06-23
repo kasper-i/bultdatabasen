@@ -77,9 +77,8 @@ func main() {
 	router.HandleFunc("/routes/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}", api.DeleteRoute).Methods(http.MethodDelete, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}/points", nil).Methods(http.MethodGet, http.MethodOptions)
-
-	router.HandleFunc("/routes/{resourceID}/points", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}/points", nil).Methods(http.MethodPost, http.MethodOptions)
+
 	router.HandleFunc("/points/{resourceID}", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/points/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/points/{resourceID}", nil).Methods(http.MethodDelete, http.MethodOptions)
@@ -89,12 +88,6 @@ func main() {
 	router.HandleFunc("/bolts/{resourceID}", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/bolts/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/bolts/{resourceID}", nil).Methods(http.MethodDelete, http.MethodOptions)
-
-	router.HandleFunc("/bolts/{boltID}/parts", nil).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/bolts/{boltID}/parts", nil).Methods(http.MethodPost, http.MethodOptions)
-	router.HandleFunc("/parts/{boltID}", nil).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/parts/{boltID}", nil).Methods(http.MethodPut, http.MethodOptions)
-	router.HandleFunc("/parts/{boltID}", nil).Methods(http.MethodDelete, http.MethodOptions)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
