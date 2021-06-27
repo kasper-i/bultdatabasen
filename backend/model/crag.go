@@ -28,8 +28,13 @@ func GetCrags(db *gorm.DB, resourceID string) ([]Crag, error) {
 func GetCrag(db *gorm.DB, resourceID string) (*Crag, error) {
 	var crag Crag
 
-	if err := db.First(&crag, "id = ?", resourceID).Error; err != nil {
+	if err := db.Raw(`SELECT * FROM crag LEFT JOIN resource ON crag.id = resource.id WHERE crag.id = ?`, resourceID).
+		Scan(&crag).Error; err != nil {
 		return nil, err
+	}
+
+	if crag.ID == "" {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &crag, nil

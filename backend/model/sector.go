@@ -28,8 +28,13 @@ func GetSectors(db *gorm.DB, resourceID string) ([]Sector, error) {
 func GetSector(db *gorm.DB, resourceID string) (*Sector, error) {
 	var sector Sector
 
-	if err := db.First(&sector, "id = ?", resourceID).Error; err != nil {
+	if err := db.Raw(`SELECT * FROM sector LEFT JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
+		Scan(&sector).Error; err != nil {
 		return nil, err
+	}
+
+	if sector.ID == "" {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &sector, nil

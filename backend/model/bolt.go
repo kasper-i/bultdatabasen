@@ -33,6 +33,10 @@ func GetBolt(db *gorm.DB, resourceID string) (*Bolt, error) {
 		return nil, err
 	}
 
+	if bolt.ID == "" {
+		return nil, gorm.ErrRecordNotFound
+	}
+
 	return &bolt, nil
 }
 

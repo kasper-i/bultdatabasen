@@ -28,8 +28,13 @@ func GetAreas(db *gorm.DB, resourceID string) ([]Area, error) {
 func GetArea(db *gorm.DB, resourceID string) (*Area, error) {
 	var area Area
 
-	if err := db.First(&area, "id = ?", resourceID).Error; err != nil {
+	if err := db.Raw(`SELECT * FROM area LEFT JOIN resource ON area.id = resource.id WHERE area.id = ?`, resourceID).
+		Scan(&area).Error; err != nil {
 		return nil, err
+	}
+
+	if area.ID == "" {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &area, nil

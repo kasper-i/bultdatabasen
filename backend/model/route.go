@@ -33,8 +33,13 @@ func GetRoutes(db *gorm.DB, resourceID string) ([]Route, error) {
 func GetRoute(db *gorm.DB, resourceID string) (*Route, error) {
 	var route Route
 
-	if err := db.First(&route, "id = ?", resourceID).Error; err != nil {
+	if err := db.Raw(`SELECT * FROM route LEFT JOIN resource ON route.id = resource.id WHERE route.id = ?`, resourceID).
+		Scan(&route).Error; err != nil {
 		return nil, err
+	}
+
+	if route.ID == "" {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &route, nil
