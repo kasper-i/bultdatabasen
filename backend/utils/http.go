@@ -34,6 +34,10 @@ func WriteError(w http.ResponseWriter, err error) {
 		status = http.StatusBadRequest
 	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
 		status = http.StatusConflict
+		error.Message = "Conflict"
+	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
+		status = http.StatusConflict
+		error.Message = "Duplicate entry"
 	} else if errors.Is(err, ErrIllegalChildResource) {
 		status = http.StatusConflict
 		error.Message = "Illegal child"

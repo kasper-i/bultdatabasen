@@ -16,7 +16,7 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 
 	if resource, err := model.GetResource(model.DB, parentResourceId); err != nil {
 		utils.WriteError(w, err)
-	} else if (resource.Type != "route") {
+	} else if resource.Type != "route" {
 		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
@@ -42,5 +42,33 @@ func CreatePoint(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusCreated, point)
+	}
+}
+
+func CreateConnection(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	src := vars["resourceID"]
+	dst := vars["linkedPointID"]
+
+	err := model.CreateConnection(model.DB, src, dst)
+
+	if err != nil {
+		utils.WriteError(w, err)
+	} else {
+		utils.WriteResponse(w, http.StatusCreated, nil)
+	}
+}
+
+func DeleteConnection(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	src := vars["resourceID"]
+	dst := vars["linkedPointID"]
+
+	err := model.DeleteConnection(model.DB, src, dst)
+
+	if err != nil {
+		utils.WriteError(w, err)
+	} else {
+		utils.WriteResponse(w, http.StatusNoContent, nil)
 	}
 }

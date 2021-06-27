@@ -10,8 +10,8 @@ import (
 type Point struct {
 	ID       string   `gorm:"primaryKey" json:"id"`
 	ParentID string   `gorm:"->" json:"parentId"`
-	Outgoing []string `gorm:"->" json:"outgoing"`
-	Incoming []string `gorm:"->" json:"incoming"`
+	Outgoing []string `gorm:"-" json:"outgoing"`
+	Incoming []string `gorm:"-" json:"incoming"`
 }
 
 type pointWithConnections struct {
@@ -81,6 +81,8 @@ func GetPoints(db *gorm.DB, resourceID string) ([]Point, error) {
 
 func CreatePoint(db *gorm.DB, point *Point, parentResourceID string) error {
 	point.ParentID = parentResourceID
+	point.Incoming = make([]string, 0)
+	point.Outgoing = make([]string, 0)
 
 	if point.ID != "" {
 		var childResource *Resource

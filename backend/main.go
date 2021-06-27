@@ -80,6 +80,8 @@ func main() {
 	router.HandleFunc("/routes/{resourceID}/points", api.CreatePoint).Methods(http.MethodPost, http.MethodOptions)
 
 	router.HandleFunc("/points/{resourceID}", nil).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/points/{resourceID}/outgoing/{linkedPointID}", api.CreateConnection).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/points/{resourceID}/outgoing/{linkedPointID}", api.DeleteConnection).Methods(http.MethodDelete, http.MethodOptions)
 
 	router.HandleFunc("/resources/{resourceID}/bolts", api.GetBolts).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/bolts", api.CreateBolt).Methods(http.MethodPost, http.MethodOptions)
