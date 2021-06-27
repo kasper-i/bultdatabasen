@@ -6,6 +6,7 @@ import { Resource, ResourceWithParents } from "models/resource";
 import { Route } from "models/route";
 import { Crag } from "models/crag";
 import { Sector } from "models/sector";
+import { Bolt } from "models/bolt";
 
 export class Api {
   static baseUrl: string = configData.API_URL;
@@ -139,5 +140,15 @@ export class Api {
     });
 
     return result.data as ResourceWithParents[];
+  };
+
+  static getBolts = async (resourceId?: string): Promise<Bolt[]> => {
+    let endpoint = `/resources/${resourceId}/bolts`;    
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Bolt[];
   };
 }

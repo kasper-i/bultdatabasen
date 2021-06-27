@@ -3,6 +3,7 @@ export interface Route {
   name: string;
   altName: string;
   year: number;
+  length: number;
   routeType: string;
   externalLink: string
 }
