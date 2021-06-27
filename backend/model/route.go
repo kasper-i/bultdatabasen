@@ -42,6 +42,7 @@ func GetRoute(db *gorm.DB, resourceID string) (*Route, error) {
 
 func CreateRoute(db *gorm.DB, route *Route, parentResourceID string) error {
 	route.ID = uuid.Must(uuid.NewRandom()).String()
+	route.ParentID = parentResourceID
 
 	resource := Resource{
 		ID:       route.ID,

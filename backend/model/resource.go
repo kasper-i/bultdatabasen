@@ -39,6 +39,7 @@ const (
 	DepthSector Depth = 300
 	DepthRoute  Depth = 400
 	DepthPoint  Depth = 500
+	DepthBolt   Depth = 600
 )
 
 func GetResourceDepth(resourceType string) Depth {
@@ -53,9 +54,21 @@ func GetResourceDepth(resourceType string) Depth {
 		return DepthRoute
 	case "point":
 		return DepthPoint
+	case "bolt":
+		return DepthBolt
 	default:
 		panic("illegal resource type")
 	}
+}
+
+func GetResource(db *gorm.DB, resourceID string) (*Resource, error) {
+	var resource Resource
+
+	if err := db.First(&resource, "id = ?", resourceID).Error; err != nil {
+		return nil, err
+	}
+
+	return &resource, nil
 }
 
 func GetAncestors(db *gorm.DB, resourceID string) ([]Resource, error) {

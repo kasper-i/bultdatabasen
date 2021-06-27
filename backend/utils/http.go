@@ -34,6 +34,12 @@ func WriteError(w http.ResponseWriter, err error) {
 		status = http.StatusBadRequest
 	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
 		status = http.StatusConflict
+	} else if errors.Is(err, ErrIllegalChildResource) {
+		status = http.StatusConflict
+		error.Message = "Illegal child"
+	} else if errors.Is(err, ErrIllegalParentResource) {
+		status = http.StatusConflict
+		error.Message = "Illegal parent"
 	} else {
 		status = http.StatusInternalServerError
 	}

@@ -37,6 +37,7 @@ func GetCrag(db *gorm.DB, resourceID string) (*Crag, error) {
 
 func CreateCrag(db *gorm.DB, crag *Crag, parentResourceID string) error {
 	crag.ID = uuid.Must(uuid.NewRandom()).String()
+	crag.ParentID = parentResourceID
 
 	resource := Resource{
 		ID:       crag.ID,

@@ -37,6 +37,7 @@ func GetSector(db *gorm.DB, resourceID string) (*Sector, error) {
 
 func CreateSector(db *gorm.DB, sector *Sector, parentResourceID string) error {
 	sector.ID = uuid.Must(uuid.NewRandom()).String()
+	sector.ParentID = parentResourceID
 
 	resource := Resource{
 		ID:       sector.ID,
