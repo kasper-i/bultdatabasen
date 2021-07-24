@@ -113,7 +113,7 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
                 key={image.id}
                 style={
                   image.width < image.height
-                    ? { width: 120, height: 160 }
+                    ? { width: 90, height: 120 }
                     : { width: 160, height: 120 }
                 }
                 className="cursor-pointer"
