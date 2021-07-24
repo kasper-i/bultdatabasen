@@ -21,6 +21,7 @@ interface Props {
 
 const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const [selectedPointId, setSelectedPointId] = useState<string>();
+  const { role } = useRole(routeId);
 
   const location = useLocation();
 
@@ -118,9 +119,11 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
     return orderedPoints.find((point) => point.id === selectedPointId);
   }, [orderedPoints, selectedPointId]);
 
+  const editable = role === "owner";
+
   return (
     <div className="flex items-start">
-      <Graph>
+      <Graph expandable={editable}>
         {orderedPoints
           .slice()
           .reverse()
@@ -131,7 +134,12 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
             const selected = point.id === selectedPointId;
 
             return (
-              <Junction key={point.id}>
+              <Junction
+                key={point.id}
+                compact={!editable}
+                compressTop={!editable && anchor}
+                compressBottom={!editable && first}
+              >
                 <Vertex>
                   <BoltCircle
                     active={selected}
@@ -156,7 +164,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                 {(first || intermediate) && (
                   <Vertex orientation={Orientation.NORTH}>
                     <Restricted>
-                      <Button circular icon="plus" />
+                      <Button size="mini" circular icon="plus" />
                     </Restricted>
                   </Vertex>
                 )}
@@ -166,6 +174,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                     <Branch main orientation={Orientation.NORTH}>
                       <Button
                         circular
+                        size="mini"
                         icon="plus"
                         onClick={() =>
                           createPoint.mutate({
@@ -183,6 +192,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                     <Branch main orientation={Orientation.SOUTH}>
                       <Button
                         circular
+                        size="mini"
                         icon="plus"
                         onClick={() =>
                           createPoint.mutate({
@@ -199,7 +209,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
           })}
         {orderedPoints.length === 0 && (
           <Restricted>
-            <Junction>
+            <Junction compact>
               <Vertex>
                 <Button
                   circular

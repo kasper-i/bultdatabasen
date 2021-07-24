@@ -1,4 +1,5 @@
 import React, { ReactElement } from "react";
+import clsx from "clsx";
 
 export enum Orientation {
   NORTH,
@@ -11,12 +12,28 @@ export enum Orientation {
 
 interface Props {
   children?: React.ReactNode;
+  compact: boolean;
+  compressTop?: boolean;
+  compressBottom?: boolean;
 }
 
-function Junction({ children }: Props): ReactElement {
+function Junction({
+  children,
+  compact,
+  compressTop,
+  compressBottom,
+}: Props): ReactElement {
   return (
     <div>
-      <div className={`relative w-20 h-20 mt-10 mb-10`}>{children}</div>
+      <div
+        className={clsx(
+          "relative w-16 h-16",
+          compressTop ? "mt-0" : compact ? "mt-4" : "mt-8",
+          compressBottom ? "mb-0" : compact ? "mb-4" : "mb-8"
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }
