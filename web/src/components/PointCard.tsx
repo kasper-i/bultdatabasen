@@ -7,7 +7,9 @@ import React, { ReactElement, useMemo, useState } from "react";
 import ImgsViewer from "react-images-viewer";
 import { useHistory } from "react-router";
 import { Button, Icon, List, Loader } from "semantic-ui-react";
+import Restricted from "./Restricted";
 import ImageDropzone from "./ImageDropzone";
+import clsx from "clsx";
 
 interface Props {
   point: Point;
@@ -19,7 +21,6 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
   const history = useHistory();
   const createBolt = useCreateBolt(routeId);
   const images = useImages(point.id);
-  const { canEdit } = useRole(routeId);
 
   const [currImg, setCurrImg] = useState<number>();
 
@@ -64,12 +65,12 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
       </div>
 
       <p className="pt-2">{`${point.bolts.length} bultar`}</p>
-      <List>
+      <ul className="list-disc list-inside py-2.5">
         {point.bolts.map((bolt) => (
-          <List.Item icon="circle" content={translateBoltType(bolt.type)} />
+          <li key={bolt.id}>{translateBoltType(bolt.type)}</li>
         ))}
-      </List>
-      {canEdit && (
+      </ul>
+      <Restricted>
         <div className="flex flex-wrap gap-2">
           <Button
             className="flex-shrink-0"
@@ -99,9 +100,9 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
             Limbult
           </Button>
         </div>
-      )}
+      </Restricted>
 
-      <h5 className="font-bold text-2xl">Bilder</h5>
+      <h5 className="font-bold text-2xl mt-5 py-2.5">Bilder</h5>
       <div className="flex flex-wrap pb-4 gap-5">
         {images.isLoading ? (
           <Loader />
@@ -118,9 +119,10 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
                 className="cursor-pointer"
               >
                 <img
-                  className={
-                    image.width < image.height ? "max-h-full" : "max-w-full"
-                  }
+                  className={clsx(
+                    image.width < image.height ? "max-h-full" : "max-w-full",
+                    "rounded"
+                  )}
                   onClick={() => setCurrImg(index)}
                   src={`${configData.API_URL}/images/${image.id}/thumb`}
                   alt=""
@@ -146,7 +148,9 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
             />
           </>
         )}
-        {canEdit && <ImageDropzone key={point.id} pointId={point.id} />}
+        <Restricted>
+          <ImageDropzone key={point.id} pointId={point.id} />
+        </Restricted>
       </div>
     </div>
   );

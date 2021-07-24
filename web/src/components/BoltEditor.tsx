@@ -11,6 +11,7 @@ import Edge from "./graph/Edge";
 import Graph from "./graph/Graph";
 import Junction, { Orientation } from "./graph/Junction";
 import Vertex from "./graph/Vertex";
+import Restricted from "./Restricted";
 import PointCard from "./PointCard";
 
 interface Props {
@@ -19,8 +20,6 @@ interface Props {
 }
 
 const BoltEditor = ({ points, routeId }: Props): ReactElement => {
-  const { canEdit } = useRole(routeId);
-
   const [selectedPointId, setSelectedPointId] = useState<string>();
 
   const location = useLocation();
@@ -156,52 +155,60 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
                 {(first || intermediate) && (
                   <Vertex orientation={Orientation.NORTH}>
-                    {canEdit && <Button circular icon="plus" />}
+                    <Restricted>
+                      <Button circular icon="plus" />
+                    </Restricted>
                   </Vertex>
                 )}
 
-                {anchor && canEdit && (
-                  <Branch main orientation={Orientation.NORTH}>
-                    <Button
-                      circular
-                      icon="plus"
-                      onClick={() =>
-                        createPoint.mutate({
-                          direction: "outgoing",
-                          linkedPointId: point.id,
-                        })
-                      }
-                    />
-                  </Branch>
+                {anchor && (
+                  <Restricted>
+                    <Branch main orientation={Orientation.NORTH}>
+                      <Button
+                        circular
+                        icon="plus"
+                        onClick={() =>
+                          createPoint.mutate({
+                            direction: "outgoing",
+                            linkedPointId: point.id,
+                          })
+                        }
+                      />
+                    </Branch>
+                  </Restricted>
                 )}
 
-                {first && canEdit && (
-                  <Branch main orientation={Orientation.SOUTH}>
-                    <Button
-                      circular
-                      icon="plus"
-                      onClick={() =>
-                        createPoint.mutate({
-                          direction: "incoming",
-                          linkedPointId: point.id,
-                        })
-                      }
-                    />
-                  </Branch>
+                {first && (
+                  <Restricted>
+                    <Branch main orientation={Orientation.SOUTH}>
+                      <Button
+                        circular
+                        icon="plus"
+                        onClick={() =>
+                          createPoint.mutate({
+                            direction: "incoming",
+                            linkedPointId: point.id,
+                          })
+                        }
+                      />
+                    </Branch>
+                  </Restricted>
                 )}
               </Junction>
             );
           })}
-        {orderedPoints.length === 0 && canEdit && (
-          <Junction>
-            <Vertex>
-              <Button
-                circular
-                icon="plus"
-                onClick={() => createPoint.mutate(undefined)}
-              />
-            </Vertex>
-          </Junction>
+        {orderedPoints.length === 0 && (
+          <Restricted>
+            <Junction>
+              <Vertex>
+                <Button
+                  circular
+                  icon="plus"
+                  onClick={() => createPoint.mutate(undefined)}
+                />
+              </Vertex>
+            </Junction>
+          </Restricted>
         )}
       </Graph>
       {selectedPoint && (

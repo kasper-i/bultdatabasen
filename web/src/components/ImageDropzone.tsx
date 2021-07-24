@@ -17,7 +17,7 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
       if (acceptedFiles.length === 1) {
         try {
           await Api.uploadImage(pointId, acceptedFiles[0], setProgress);
-          queryClient.refetchQueries(["images", { pointId }]);
+          queryClient.refetchQueries(["images", { resourceId: pointId }]);
           setProgress(undefined);
         } catch (error) {
           setError(true);
@@ -48,7 +48,7 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
       ) : (
         <div
           {...getRootProps()}
-          className="h-full border-gray-200 border-dashed border-2 flex justify-center items-center cursor-pointer"
+          className="h-full border-gray-200 border-dashed border-2 flex justify-center items-center cursor-pointer rounded"
         >
           <input {...getInputProps()} />
           {<Icon name="upload" size="big" className="text-gray-500" />}

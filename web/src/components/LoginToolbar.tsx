@@ -8,6 +8,8 @@ function LoginToolbar(): ReactElement {
   const { isAuthenticated, setAuthenticated } = useContext(AuthContext);
 
   const gotoCognito = () => {
+    localStorage.setItem("returnPath", window.location.pathname);
+
     const callback =
       window.location.protocol + "//" + window.location.host + "/signin";
     console.log(callback);

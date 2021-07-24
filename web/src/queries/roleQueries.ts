@@ -2,16 +2,14 @@ import { queryClient } from "index";
 import { useQuery } from "react-query";
 
 interface UseRole {
-  canCreate: boolean;
-  canEdit: boolean;
-  canDelete: boolean;
+  role?: string;
 }
 
 export const useRole = (resourceId: string): UseRole => {
-  const data = queryClient.getQueryData(["role", { resourceId }]) as string;
+  const data = queryClient.getQueryData(["role", { resourceId }]) as
+    | string
+    | undefined;
   return {
-    canCreate: data === "owner",
-    canEdit: data === "owner",
-    canDelete: data === "owner",
+    role: data,
   };
 };

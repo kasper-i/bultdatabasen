@@ -51,7 +51,10 @@ function SigninPage(): ReactElement {
         Api.saveTokens();
         setAuthenticated(true);
 
-        history.push("/");
+        const returnPath = localStorage.getItem("returnPath");
+        localStorage.removeItem("returnPath");
+
+        history.push(returnPath != null ? returnPath : "/");
       })
       .catch(function (error) {});
   }, [location, history]);
