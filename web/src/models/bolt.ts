@@ -1,5 +1,5 @@
 export interface Bolt {
   id: string;
-  type: string;
+  type: "glue" | "expansion";
   parentId: string;
 }

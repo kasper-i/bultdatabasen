@@ -10,7 +10,7 @@ import reportWebVitals from "./reportWebVitals";
 
 Api.restoreTokens();
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 ReactDOM.render(
   <QueryClientProvider client={queryClient}>

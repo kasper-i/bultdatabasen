@@ -26,7 +26,7 @@ func New() *authenticator {
 func IsPublic(r *http.Request) bool {
 	if r.Method == "OPTIONS" {
 		return true
-	}	
+	}
 
 	if r.Method == "GET" || r.Method == "HEAD" {
 		switch {
@@ -45,6 +45,8 @@ func IsPublic(r *http.Request) bool {
 		case strings.HasPrefix(r.URL.Path, "/points"):
 			return true
 		case strings.HasPrefix(r.URL.Path, "/bolts"):
+			return true
+		case strings.HasPrefix(r.URL.Path, "/images"):
 			return true
 		}
 	}

@@ -59,7 +59,7 @@ function Search() {
     ).map((result) => ({
       title: result.name,
       description: result.parents
-        .filter((parent) => parent.type != "root")
+        .filter((parent) => parent.type !== "root")
         .map((parent) => parent.name)
         .join(", "),
       key: result.id,

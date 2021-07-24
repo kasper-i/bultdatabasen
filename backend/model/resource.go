@@ -35,12 +35,14 @@ func (Resource) TableName() string {
 type Depth int32
 
 const (
-	DepthArea   Depth = 100
-	DepthCrag   Depth = 200
-	DepthSector Depth = 300
-	DepthRoute  Depth = 400
-	DepthPoint  Depth = 500
-	DepthBolt   Depth = 600
+	DepthArea    Depth = 100
+	DepthCrag    Depth = 200
+	DepthSector  Depth = 300
+	DepthRoute   Depth = 400
+	DepthPoint   Depth = 500
+	DepthBolt    Depth = 600
+	DepthImage   Depth = 700
+	DepthComment Depth = 700
 )
 
 func GetResourceDepth(resourceType string) Depth {
@@ -57,6 +59,10 @@ func GetResourceDepth(resourceType string) Depth {
 		return DepthPoint
 	case "bolt":
 		return DepthBolt
+	case "image":
+		return DepthImage
+	case "comment":
+		return DepthComment
 	default:
 		panic("illegal resource type")
 	}

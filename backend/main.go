@@ -83,6 +83,12 @@ func main() {
 	router.HandleFunc("/points/{resourceID}/outgoing/{linkedPointID}", api.CreateConnection).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/points/{resourceID}/outgoing/{linkedPointID}", api.DeleteConnection).Methods(http.MethodDelete, http.MethodOptions)
 
+	router.HandleFunc("/resources/{resourceID}/images", api.UploadImage).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/images", api.GetImages).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/images/{resourceID}", nil).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/images/{resourceID}", api.GetImage).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/images/{resourceID}/thumb", api.GetThumbnail).Methods(http.MethodGet, http.MethodOptions)
+
 	router.HandleFunc("/resources/{resourceID}/bolts", api.GetBolts).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/bolts", api.CreateBolt).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/bolts/{resourceID}", api.GetBolt).Methods(http.MethodGet, http.MethodOptions)

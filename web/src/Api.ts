@@ -7,6 +7,8 @@ import { Route } from "models/route";
 import { Crag } from "models/crag";
 import { Sector } from "models/sector";
 import { Bolt } from "models/bolt";
+import { Point } from "models/point";
+import { Image } from "models/image";
 
 export class Api {
   static baseUrl: string = configData.API_URL;
@@ -143,12 +145,118 @@ export class Api {
   };
 
   static getBolts = async (resourceId?: string): Promise<Bolt[]> => {
-    let endpoint = `/resources/${resourceId}/bolts`;    
+    let endpoint = `/resources/${resourceId}/bolts`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
     return result.data as Bolt[];
+  };
+
+  static getPoints = async (routeId?: string): Promise<Point[]> => {
+    let endpoint = `/routes/${routeId}/points`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Point[];
+  };
+
+  static createBolt = async (
+    pointId: string,
+    bolt: Pick<Bolt, "type">
+  ): Promise<Bolt> => {
+    let endpoint = `/resources/${pointId}/bolts`;
+
+    const result = await axios.post(`${Api.baseUrl}${endpoint}`, bolt, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Bolt;
+  };
+
+  static createPoint = async (routeId: string): Promise<Point> => {
+    let endpoint = `/routes/${routeId}/points`;
+
+    const result = await axios.post(
+      `${Api.baseUrl}${endpoint}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${Api.accessToken}` },
+      }
+    );
+
+    return result.data as Point;
+  };
+
+  static createConnection = async (
+    pointId: string,
+    linkedPointId: string
+  ): Promise<void> => {
+    let endpoint = `/points/${pointId}/outgoing/${linkedPointId}`;
+
+    await axios.put(
+      `${Api.baseUrl}${endpoint}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${Api.accessToken}` },
+      }
+    );
+
+    return;
+  };
+
+  static uploadImage = async (
+    pointId: string,
+    file: File,
+    onProgress?: (progress: number) => void
+  ): Promise<void> => {
+    let endpoint = `/resources/${pointId}/images`;
+
+    let fd = new FormData();
+    fd.append('image', file)
+
+    await axios.post(
+      `${Api.baseUrl}${endpoint}`,
+      fd,
+      {
+        headers: { Authorization: `Bearer ${Api.accessToken}` },
+        onUploadProgress: progressEvent => onProgress?.(Math.round( (progressEvent.loaded * 100) / progressEvent.total ))
+      }
+    );
+
+    return;
+  };
+
+  static getImages = async (
+    pointId: string,
+  ): Promise<Image[]> => {
+    let endpoint = `/resources/${pointId}/images`;
+
+    const result = await axios.get(
+      `${Api.baseUrl}${endpoint}`,
+      {
+        headers: { Authorization: `Bearer ${Api.accessToken}` },
+      }
+    );
+
+    return result.data as Image[];
+  };
+
+  static deleteImage = async (
+    imageId: string,
+  ): Promise<void> => {
+    let endpoint = `/images/${imageId}`;
+
+    await axios.delete(
+      `${Api.baseUrl}${endpoint}`,
+      {
+        headers: { Authorization: `Bearer ${Api.accessToken}` },
+      }
+    );
+
+    return;
   };
 }

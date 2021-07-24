@@ -11,7 +11,7 @@ function LoginToolbar(): ReactElement {
   };
 
   return (
-    <Button primary size="medium" fluid={false} onClick={gotoCognito}>
+    <Button compact primary size="medium" fluid={false} onClick={gotoCognito}>
       Logga In
     </Button>
   );

@@ -18,6 +18,8 @@
     "postcss": "^7.0.35",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-dropzone": "^11.3.4",
+    "react-images-viewer": "^1.6.7",
     "react-query": "^3.16.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",

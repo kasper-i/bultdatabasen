@@ -1,9 +1,10 @@
+import BoltEditor from "components/BoltEditor";
 import PageHeader from "components/PageHeader";
 import { useBolts } from "queries/boltQueries";
+import { usePoints } from "queries/pointQueries";
 import { useRoute } from "queries/routeQueries";
 import React, { Fragment, ReactElement } from "react";
 import { useParams } from "react-router";
-import { Button } from "semantic-ui-react";
 
 const renderRouteType = (routeType: string) => {
   switch (routeType) {
@@ -23,14 +24,15 @@ const RoutePage = (): ReactElement => {
     }>();
 
   const route = useRoute(routeId);
+  const points = usePoints(routeId);
   const bolts = useBolts(routeId);
 
-  if (route.data == null || bolts.data == null) {
+  if (route.data == null || points.data == null || bolts.data == null) {
     return <Fragment />;
   }
 
-  const glueBolts = bolts.data.filter((bolt) => bolt.type == "glue");
-  const expansionBolts = bolts.data.filter((bolt) => bolt.type == "expansion");
+  const glueBolts = bolts.data.filter((bolt) => bolt.type === "glue");
+  const expansionBolts = bolts.data.filter((bolt) => bolt.type === "expansion");
 
   const boltInfo = () => {
     return bolts.data.length > 0
@@ -48,11 +50,11 @@ const RoutePage = (): ReactElement => {
         <a href={route.data.externalLink}>{route.data.externalLink}</a>
       </div>
 
-      <h3 className="text-xl font-bold pt-5">Bultar ({bolts.data.length})</h3>
+      <h3 className="text-xl font-bold">Bultar ({bolts.data.length})</h3>
       <div>{boltInfo()}</div>
-      <Button fluid={false} disabled>
-        Lägg till bult
-      </Button>
+      <div className="mt-5">
+        <BoltEditor routeId={routeId} points={points.data} />
+      </div>
     </div>
   );
 };

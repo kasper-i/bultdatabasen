@@ -43,7 +43,7 @@ func checkParent(tx *gorm.DB, resource Resource) bool {
 
 	if err := tx.First(&parentResource, "id = ?", resource.ParentID).Error; err != nil {
 		return false
-	}	
+	}
 
 	pt := parentResource.Type
 
@@ -59,6 +59,10 @@ func checkParent(tx *gorm.DB, resource Resource) bool {
 	case "point":
 		return pt == "route"
 	case "bolt":
+		return pt == "point"
+	case "image":
+		return pt == "point"
+	case "comment":
 		return pt == "point"
 	default:
 		return false
