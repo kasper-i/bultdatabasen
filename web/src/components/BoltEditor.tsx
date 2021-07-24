@@ -1,5 +1,6 @@
 import { Point } from "models/point";
 import { useCreatePoint } from "queries/pointQueries";
+import { useRole } from "queries/roleQueries";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router";
 import { Button } from "semantic-ui-react";
@@ -18,6 +19,8 @@ interface Props {
 }
 
 const BoltEditor = ({ points, routeId }: Props): ReactElement => {
+  const { canEdit } = useRole(routeId);
+
   const [selectedPointId, setSelectedPointId] = useState<string>();
 
   const location = useLocation();
@@ -153,11 +156,11 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
                 {(first || intermediate) && (
                   <Vertex orientation={Orientation.NORTH}>
-                    <Button circular icon="plus" />
+                    {canEdit && <Button circular icon="plus" />}
                   </Vertex>
                 )}
 
-                {anchor && (
+                {anchor && canEdit && (
                   <Branch main orientation={Orientation.NORTH}>
                     <Button
                       circular
@@ -172,7 +175,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                   </Branch>
                 )}
 
-                {first && (
+                {first && canEdit && (
                   <Branch main orientation={Orientation.SOUTH}>
                     <Button
                       circular
@@ -189,7 +192,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
               </Junction>
             );
           })}
-        {orderedPoints.length === 0 && (
+        {orderedPoints.length === 0 && canEdit && (
           <Junction>
             <Vertex>
               <Button

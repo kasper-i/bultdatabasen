@@ -2,6 +2,7 @@ import configData from "config.json";
 import { Point } from "models/point";
 import { useCreateBolt } from "queries/boltQueries";
 import { useImages } from "queries/imageQueries";
+import { useRole } from "queries/roleQueries";
 import React, { ReactElement, useMemo, useState } from "react";
 import ImgsViewer from "react-images-viewer";
 import { useHistory } from "react-router";
@@ -18,6 +19,7 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
   const history = useHistory();
   const createBolt = useCreateBolt(routeId);
   const images = useImages(point.id);
+  const { canEdit } = useRole(routeId);
 
   const [currImg, setCurrImg] = useState<number>();
 
@@ -59,10 +61,6 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
             </div>
           )}
         </div>
-        <Button className="flex-shrink-0" compact primary size="small">
-          <Icon name="edit" />
-          Redigera
-        </Button>
       </div>
 
       <p className="pt-2">{`${point.bolts.length} bultar`}</p>
@@ -71,35 +69,37 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
           <List.Item icon="circle" content={translateBoltType(bolt.type)} />
         ))}
       </List>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          className="flex-shrink-0"
-          compact
-          primary
-          size="small"
-          onClick={() =>
-            createBolt.mutate({
-              pointId: point.id,
-              bolt: { type: "expansion" },
-            })
-          }
-        >
-          <Icon name="add" />
-          Expanderbult
-        </Button>
-        <Button
-          className="flex-shrink-0"
-          compact
-          primary
-          size="small"
-          onClick={() =>
-            createBolt.mutate({ pointId: point.id, bolt: { type: "glue" } })
-          }
-        >
-          <Icon name="add" />
-          Limbult
-        </Button>
-      </div>
+      {canEdit && (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            className="flex-shrink-0"
+            compact
+            primary
+            size="small"
+            onClick={() =>
+              createBolt.mutate({
+                pointId: point.id,
+                bolt: { type: "expansion" },
+              })
+            }
+          >
+            <Icon name="add" />
+            Expanderbult
+          </Button>
+          <Button
+            className="flex-shrink-0"
+            compact
+            primary
+            size="small"
+            onClick={() =>
+              createBolt.mutate({ pointId: point.id, bolt: { type: "glue" } })
+            }
+          >
+            <Icon name="add" />
+            Limbult
+          </Button>
+        </div>
+      )}
 
       <h5 className="font-bold text-2xl">Bilder</h5>
       <div className="flex flex-wrap pb-4 gap-5">
@@ -146,7 +146,7 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
             />
           </>
         )}
-        <ImageDropzone key={point.id} pointId={point.id} />
+        {canEdit && <ImageDropzone key={point.id} pointId={point.id} />}
       </div>
     </div>
   );

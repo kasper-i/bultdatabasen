@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { Area } from "./models/area";
 import { User } from "./models/user";
 import configData from "config.json";
@@ -9,6 +9,11 @@ import { Sector } from "models/sector";
 import { Bolt } from "models/bolt";
 import { Point } from "models/point";
 import { Image } from "models/image";
+import { queryClient } from "index";
+
+const updateRole = (resourceId: string, response: AxiosResponse) => {
+  queryClient.setQueryData(["role", { resourceId }], response.headers["role"]);
+};
 
 export class Api {
   static baseUrl: string = configData.API_URL;
@@ -71,37 +76,40 @@ export class Api {
     return result.data as Area[];
   };
 
-  static getArea = async (areaId?: string): Promise<Area> => {
+  static getArea = async (areaId: string): Promise<Area> => {
     const endpoint = `/areas/${areaId}`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
+    updateRole(areaId, result);
     return result.data as Area;
   };
 
-  static getCrag = async (cragId?: string): Promise<Crag> => {
+  static getCrag = async (cragId: string): Promise<Crag> => {
     const endpoint = `/crags/${cragId}`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
+    updateRole(cragId, result);
     return result.data as Crag;
   };
 
-  static getSector = async (sectorId?: string): Promise<Sector> => {
+  static getSector = async (sectorId: string): Promise<Sector> => {
     const endpoint = `/sectors/${sectorId}`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
+    updateRole(sectorId, result);
     return result.data as Sector;
   };
 
-  static getAncestors = async (resourceId?: string): Promise<Resource[]> => {
+  static getAncestors = async (resourceId: string): Promise<Resource[]> => {
     const endpoint = `/resources/${resourceId}/ancestors`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
@@ -111,7 +119,7 @@ export class Api {
     return result.data as Resource[];
   };
 
-  static getChildren = async (resourceId?: string): Promise<Resource[]> => {
+  static getChildren = async (resourceId: string): Promise<Resource[]> => {
     const endpoint = `/resources/${resourceId}/children`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
@@ -121,13 +129,14 @@ export class Api {
     return result.data as Resource[];
   };
 
-  static getRoute = async (routeId?: string): Promise<Route> => {
+  static getRoute = async (routeId: string): Promise<Route> => {
     const endpoint = `/routes/${routeId}`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
+    updateRole(routeId, result);
     return result.data as Route;
   };
 
@@ -144,7 +153,7 @@ export class Api {
     return result.data as ResourceWithParents[];
   };
 
-  static getBolts = async (resourceId?: string): Promise<Bolt[]> => {
+  static getBolts = async (resourceId: string): Promise<Bolt[]> => {
     let endpoint = `/resources/${resourceId}/bolts`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
@@ -154,7 +163,7 @@ export class Api {
     return result.data as Bolt[];
   };
 
-  static getPoints = async (routeId?: string): Promise<Point[]> => {
+  static getPoints = async (routeId: string): Promise<Point[]> => {
     let endpoint = `/routes/${routeId}/points`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
@@ -216,46 +225,35 @@ export class Api {
     let endpoint = `/resources/${pointId}/images`;
 
     let fd = new FormData();
-    fd.append('image', file)
+    fd.append("image", file);
 
-    await axios.post(
-      `${Api.baseUrl}${endpoint}`,
-      fd,
-      {
-        headers: { Authorization: `Bearer ${Api.accessToken}` },
-        onUploadProgress: progressEvent => onProgress?.(Math.round( (progressEvent.loaded * 100) / progressEvent.total ))
-      }
-    );
+    await axios.post(`${Api.baseUrl}${endpoint}`, fd, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+      onUploadProgress: (progressEvent) =>
+        onProgress?.(
+          Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        ),
+    });
 
     return;
   };
 
-  static getImages = async (
-    pointId: string,
-  ): Promise<Image[]> => {
+  static getImages = async (pointId: string): Promise<Image[]> => {
     let endpoint = `/resources/${pointId}/images`;
 
-    const result = await axios.get(
-      `${Api.baseUrl}${endpoint}`,
-      {
-        headers: { Authorization: `Bearer ${Api.accessToken}` },
-      }
-    );
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
 
     return result.data as Image[];
   };
 
-  static deleteImage = async (
-    imageId: string,
-  ): Promise<void> => {
+  static deleteImage = async (imageId: string): Promise<void> => {
     let endpoint = `/images/${imageId}`;
 
-    await axios.delete(
-      `${Api.baseUrl}${endpoint}`,
-      {
-        headers: { Authorization: `Bearer ${Api.accessToken}` },
-      }
-    );
+    await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
 
     return;
   };

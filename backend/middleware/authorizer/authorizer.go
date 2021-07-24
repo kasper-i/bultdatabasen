@@ -27,13 +27,24 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		resourceID := vars["resourceID"]
+		var userID string
+		var isAuthenticated bool
+		
+		if id, ok := r.Context().Value("user_id").(string); ok {
+			userID = id
+			isAuthenticated = true
+		}
 
 		if authenticator.IsPublic(r) {
+			if isAuthenticated && r.Method != "OPTIONS" {
+				if maxRole := getMaxRole(resourceID, userID); maxRole != nil {
+					attachRole(w, r, maxRole.Role)
+				}				
+			}	
+			
 			next.ServeHTTP(w, r)
 			return
 		}
-
-		var userID string = r.Context().Value("user_id").(string)
 
 		if r.Method == "POST" && r.URL.Path == "/areas" {
 			next.ServeHTTP(w, r)
@@ -43,7 +54,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 		if r.Method == "GET" && r.URL.Path == "/users/myself" {
 			next.ServeHTTP(w, r)
 			return
-		}		
+		}
 
 		if strings.HasPrefix(r.URL.Path, "/users/") {
 			if userID == vars["userID"] {
@@ -55,31 +66,32 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			}
 		}
 
-		checkRoles(resourceID, userID, next, w, r)
+		if maxRole := getMaxRole(resourceID, userID); maxRole == nil {
+			writeForbidden(w, resourceID)
+		} else {
+			attachRole(w, r, maxRole.Role)
+			next.ServeHTTP(w, r)
+		}
 	})
 }
 
-func checkRoles(resourceID, userID string, next http.Handler, w http.ResponseWriter, r *http.Request) {
+func getMaxRole(resourceID, userID string) *auth.AssignedRole {
 	var err error
 
 	if resourceID == model.RootID {
-		writeForbidden(w, resourceID)
-		return
+		return nil
 	}
 
 	roles := auth.GetRoles(model.DB, userID)
 
 	if len(roles) == 0 {
-		writeForbidden(w, resourceID)
-		return
+		return nil
 	}
 
 	for _, role := range roles {
 		if role.ResourceID == resourceID {
 			if role.Role == RoleOwner || len(roles) == 1 {
-				attachRole(w, r, role.Role)
-				next.ServeHTTP(w, r)
-				return
+				return &role
 			}
 		}
 	}
@@ -87,8 +99,7 @@ func checkRoles(resourceID, userID string, next http.Handler, w http.ResponseWri
 	var ancestors []model.Resource
 
 	if ancestors, err = model.GetAncestors(model.DB, resourceID); err != nil {
-		writeForbidden(w, resourceID)
-		return
+		return nil
 	}
 
 	var maxRole *auth.AssignedRole = nil
@@ -102,12 +113,10 @@ func checkRoles(resourceID, userID string, next http.Handler, w http.ResponseWri
 	}
 
 	if maxRole != nil {
-		attachRole(w, r, maxRole.Role)
-		next.ServeHTTP(w, r)
-		return
+		return maxRole
 	}
 
-	writeForbidden(w, resourceID)
+	return nil
 }
 
 func roleValue(role *auth.AssignedRole) int {

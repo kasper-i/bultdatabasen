@@ -115,36 +115,45 @@ func authenticate(tokenString string) (string, error) {
 	}
 }
 
+func getUserID(r *http.Request) *string {
+	if auth := r.Header.Get("Authorization"); auth == "" {
+		return nil
+	} else {
+		var tokenString string
+
+		if n, err := fmt.Sscanf(auth, "Bearer %s", &tokenString); err != nil || n != 1 {
+			return nil
+		}
+
+		if userId, err := authenticate(tokenString); err != nil {
+			return nil
+		} else {
+			return &userId
+		}
+	}
+}
+
 func (authorizer *authenticator) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var userId string
-		var err error
-
-		if IsPublic(r) {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		if auth := r.Header.Get("Authorization"); auth == "" {
-			writeUnauthorized(w)
-			return
+		userID := getUserID(r)
+		var ctx context.Context
+		
+		if userID != nil {
+			ctx = context.WithValue(r.Context(), "user_id", *userID)
 		} else {
-			var tokenString string
-
-			if n, err := fmt.Sscanf(auth, "Bearer %s", &tokenString); err != nil || n != 1 {
-				writeUnauthorized(w)
-				return
-			}
-
-			if userId, err = authenticate(tokenString); err != nil {
-				writeUnauthorized(w)
-				return
-			}
+			ctx = r.Context()
+		}
+		
+		if IsPublic(r) {
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
 		}
 
-		ctx := context.WithValue(r.Context(), "user_id", userId)
-		next.ServeHTTP(w, r.WithContext(ctx))
-		return
+		if userID == nil {
+			writeUnauthorized(w)
+		} else {
+			next.ServeHTTP(w, r.WithContext(ctx))
+		}
 	})
 }
 
