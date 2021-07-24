@@ -1,5 +1,7 @@
 import axios from "axios";
+import { AuthContext } from "contexts/AuthContext";
 import React, { Fragment, ReactElement, useEffect } from "react";
+import { useContext } from "react";
 import { useHistory, useLocation } from "react-router";
 import { Api } from "../Api";
 
@@ -20,6 +22,7 @@ const instance = axios.create({
 function SigninPage(): ReactElement {
   const location = useLocation();
   const history = useHistory();
+  const { setAuthenticated } = useContext(AuthContext);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -46,8 +49,8 @@ function SigninPage(): ReactElement {
 
         Api.setTokens(id_token, access_token, refresh_token);
         Api.saveTokens();
+        setAuthenticated(true);
 
-        console.log(Api.authValid());
         history.push("/");
       })
       .catch(function (error) {});

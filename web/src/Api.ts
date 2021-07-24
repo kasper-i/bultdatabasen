@@ -49,6 +49,16 @@ export class Api {
     Api.refreshToken = localStorage.getItem("refreshToken");
   };
 
+  static clearTokens = () => {
+    Api.idToken = null;
+    Api.accessToken = null;
+    Api.refreshToken = null;
+
+    localStorage.removeItem("idToken");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+  };
+
   static authValid = () => {
     return Api.accessToken != null;
   };
