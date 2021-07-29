@@ -1,15 +1,16 @@
 import axios, { AxiosResponse } from "axios";
-import { Area } from "./models/area";
-import { User } from "./models/user";
 import configData from "config.json";
+import { queryClient } from "index";
+import { Bolt } from "models/bolt";
+import { Crag } from "models/crag";
+import { Image } from "models/image";
+import { Point } from "models/point";
 import { Resource, ResourceWithParents } from "models/resource";
 import { Route } from "models/route";
-import { Crag } from "models/crag";
 import { Sector } from "models/sector";
-import { Bolt } from "models/bolt";
-import { Point } from "models/point";
-import { Image } from "models/image";
-import { queryClient } from "index";
+import { OAuthTokenResponse } from "pages/SigninPage";
+import { Area } from "./models/area";
+import { User } from "./models/user";
 
 const updateRole = (resourceId: string, response: AxiosResponse) => {
   queryClient.setQueryData(["role", { resourceId }], response.headers["role"]);
@@ -24,11 +25,13 @@ export class Api {
   static setTokens = (
     idToken: string,
     accessToken: string,
-    refreshToken: string
+    refreshToken?: string
   ) => {
     Api.idToken = idToken;
     Api.accessToken = accessToken;
-    Api.refreshToken = refreshToken;
+    if (refreshToken !== undefined) {
+      Api.refreshToken = refreshToken;
+    }
   };
 
   static saveTokens = () => {
@@ -61,6 +64,34 @@ export class Api {
 
   static authValid = () => {
     return Api.accessToken != null;
+  };
+
+  static refreshTokens = async (failedRequest: any) => {
+    if (Api.refreshToken == null) {
+      return Promise.reject();
+    }
+
+    const instance = axios.create({
+      baseURL: "https://bultdatabasen.auth.eu-west-1.amazoncognito.com",
+      timeout: 10000,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+
+    const params = new URLSearchParams();
+    params.append("grant_type", "refresh_token");
+    params.append("client_id", "4bc4eb6q54d9poodouksahhk86");
+    params.append("refresh_token", Api.refreshToken);
+
+    await instance.post("/oauth2/token", params).then((response) => {
+      const { id_token, access_token }: OAuthTokenResponse = response.data;
+
+      Api.setTokens(id_token, access_token);
+      Api.saveTokens();
+    });
+
+    failedRequest.response.config.headers["Authorization"] =
+      "Bearer " + Api.accessToken;
+    return Promise.resolve();
   };
 
   static getMySelf = async (): Promise<User> => {

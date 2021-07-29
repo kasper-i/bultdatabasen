@@ -1,11 +1,10 @@
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
-import React, { Fragment, ReactElement, useEffect } from "react";
-import { useContext } from "react";
+import React, { Fragment, ReactElement, useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
 import { Api } from "../Api";
 
-interface OAuthTokenResponse {
+export interface OAuthTokenResponse {
   id_token: string;
   access_token: string;
   refresh_token: string;

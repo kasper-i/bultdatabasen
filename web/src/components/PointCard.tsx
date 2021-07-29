@@ -2,14 +2,13 @@ import configData from "config.json";
 import { Point } from "models/point";
 import { useCreateBolt } from "queries/boltQueries";
 import { useImages } from "queries/imageQueries";
-import { useRole } from "queries/roleQueries";
 import React, { ReactElement, useMemo, useState } from "react";
 import ImgsViewer from "react-images-viewer";
 import { useHistory } from "react-router";
-import { Button, Icon, List, Loader } from "semantic-ui-react";
-import Restricted from "./Restricted";
+import { Button, Icon, Loader } from "semantic-ui-react";
 import ImageDropzone from "./ImageDropzone";
-import clsx from "clsx";
+import ImagePreview from "./ImagePreview";
+import Restricted from "./Restricted";
 
 interface Props {
   point: Point;
@@ -23,6 +22,7 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
   const images = useImages(point.id);
 
   const [currImg, setCurrImg] = useState<number>();
+  const [imagesLocked, setImagesLocked] = useState(false);
 
   const sharedParents = useMemo(
     () => point.parents.filter((parent) => parent.id !== routeId),
@@ -102,32 +102,28 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
         </div>
       </Restricted>
 
-      <h5 className="font-bold text-2xl mt-5 py-2.5">Bilder</h5>
-      <div className="flex flex-wrap pb-4 gap-5">
+      <div className="flex items-center w-full mt-5 py-2.5">
+        <h5 className="font-bold text-2xl pr-2">Bilder</h5>
+        <Restricted>
+          <Button
+            onClick={(e) => setImagesLocked((checked) => !checked)}
+            icon={imagesLocked ? "unlock" : "lock"}
+            size="small"
+          />
+        </Restricted>
+      </div>
+      <div className="flex flex-wrap pb-4 gap-5 pt-2.5">
         {images.isLoading ? (
           <Loader />
         ) : (
           <>
             {images.data?.map((image, index) => (
-              <div
-                key={image.id}
-                style={
-                  image.width < image.height
-                    ? { width: 90, height: 120 }
-                    : { width: 160, height: 120 }
-                }
-                className="cursor-pointer"
-              >
-                <img
-                  className={clsx(
-                    image.width < image.height ? "max-h-full" : "max-w-full",
-                    "rounded"
-                  )}
-                  onClick={() => setCurrImg(index)}
-                  src={`${configData.API_URL}/images/${image.id}/thumb`}
-                  alt=""
-                />
-              </div>
+              <ImagePreview
+                pointId={point.id}
+                image={image}
+                onClick={() => setCurrImg(index)}
+                locked={!imagesLocked}
+              />
             ))}
             <ImgsViewer
               imgs={images.data?.map((image) => ({

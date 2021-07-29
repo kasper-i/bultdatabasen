@@ -1,3 +1,5 @@
+import axios from "axios";
+import createAuthRefreshInterceptor from "axios-auth-refresh";
 import React from "react";
 import ReactDOM from "react-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -9,6 +11,7 @@ import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
 Api.restoreTokens();
+createAuthRefreshInterceptor(axios, Api.refreshTokens);
 
 export const queryClient = new QueryClient();
 
