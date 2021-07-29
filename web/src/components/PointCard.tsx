@@ -1,11 +1,12 @@
 import configData from "config.json";
+import { BoltType } from "models/bolt";
 import { Point } from "models/point";
 import { useCreateBolt } from "queries/boltQueries";
 import { useImages } from "queries/imageQueries";
 import React, { ReactElement, useMemo, useState } from "react";
 import ImgsViewer from "react-images-viewer";
 import { useHistory } from "react-router";
-import { Button, Icon, Loader } from "semantic-ui-react";
+import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
 import ImageDropzone from "./ImageDropzone";
 import ImagePreview from "./ImagePreview";
 import Restricted from "./Restricted";
@@ -23,13 +24,15 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
 
   const [currImg, setCurrImg] = useState<number>();
   const [imagesLocked, setImagesLocked] = useState(false);
+  const [selectedBoltType, setSelectedBoltType] =
+    useState<BoltType>("expansion");
 
   const sharedParents = useMemo(
     () => point.parents.filter((parent) => parent.id !== routeId),
     [point.parents, routeId]
   );
 
-  const translateBoltType = (boltType: "expansion" | "glue") => {
+  const translateBoltType = (boltType: BoltType) => {
     switch (boltType) {
       case "expansion":
         return "Borrbult";
@@ -72,33 +75,37 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
       </ul>
       <Restricted>
         <div className="flex flex-wrap gap-2">
-          <Button
-            className="flex-shrink-0"
-            compact
-            primary
-            size="small"
-            onClick={() =>
-              createBolt.mutate({
-                pointId: point.id,
-                bolt: { type: "expansion" },
-              })
-            }
-          >
-            <Icon name="add" />
-            Expanderbult
-          </Button>
-          <Button
-            className="flex-shrink-0"
-            compact
-            primary
-            size="small"
-            onClick={() =>
-              createBolt.mutate({ pointId: point.id, bolt: { type: "glue" } })
-            }
-          >
-            <Icon name="add" />
-            Limbult
-          </Button>
+          <Button.Group color="blue">
+            <Button
+              className="flex-shrink-0"
+              compact
+              primary
+              size="small"
+              loading={createBolt.isLoading}
+              onClick={() =>
+                createBolt.mutate({
+                  pointId: point.id,
+                  bolt: { type: selectedBoltType },
+                })
+              }
+            >
+              <Icon name="add" />
+              {translateBoltType(selectedBoltType)}
+            </Button>
+            <Dropdown
+              className="button icon"
+              value={selectedBoltType}
+              onChange={(_e, result) =>
+                result?.value !== undefined &&
+                setSelectedBoltType(result.value as BoltType)
+              }
+              options={[
+                { key: "expansion", text: "Expander", value: "expansion" },
+                { key: "glue", text: "Lim", value: "glue" },
+              ]}
+              trigger={<></>}
+            />
+          </Button.Group>
         </div>
       </Restricted>
 

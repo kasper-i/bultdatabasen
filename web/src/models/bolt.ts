@@ -1,5 +1,7 @@
+export type BoltType = "glue" | "expansion";
+
 export interface Bolt {
   id: string;
-  type: "glue" | "expansion";
+  type: BoltType;
   parentId: string;
 }
