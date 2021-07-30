@@ -2,8 +2,9 @@ import clsx from "clsx";
 import configData from "config.json";
 import { Image } from "models/image";
 import { useDeleteImage } from "queries/imageQueries";
-import React, { ReactElement } from "react";
+import React, { ReactElement, useState } from "react";
 import { Button } from "semantic-ui-react";
+import DeletePrompt from "./DeletePrompt";
 import Restricted from "./Restricted";
 
 interface Props {
@@ -20,6 +21,12 @@ const ImagePreview = ({
   onClick,
 }: Props): ReactElement => {
   const deleteImage = useDeleteImage(pointId, image.id);
+  const [deleteRequested, setDeleteRequested] = useState(false);
+
+  const confirmDelete = () => {
+    setDeleteRequested(false);
+    deleteImage.mutate();
+  };
 
   return (
     <div
@@ -53,7 +60,7 @@ const ImagePreview = ({
                 size="mini"
                 icon="trash"
                 loading={deleteImage.isLoading}
-                onClick={() => deleteImage.mutate()}
+                onClick={() => setDeleteRequested(true)}
               />
               <Button
                 color="blue"
@@ -67,6 +74,14 @@ const ImagePreview = ({
           </Restricted>
         )}
       </div>
+      {deleteRequested && (
+        <DeletePrompt
+          onCancel={() => setDeleteRequested(false)}
+          onConfirm={() => {
+            confirmDelete();
+          }}
+        />
+      )}
     </div>
   );
 };
