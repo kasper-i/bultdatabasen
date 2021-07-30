@@ -121,6 +121,14 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
   const editable = role === "owner";
 
+  const getOffset = () => {
+    if (editable) {
+      return (orderedPoints.length - selectedPointNumber) * 112 + 56;
+    } else {
+      return (orderedPoints.length - selectedPointNumber) * 84;
+    }
+  };
+
   return (
     <div className="flex items-start">
       <Graph expandable={editable}>
@@ -222,7 +230,12 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
         )}
       </Graph>
       {selectedPoint && (
-        <div className="w-full bg-white rounded shadow-sm ml-5 mb-5 flex-shrink">
+        <div
+          style={{
+            marginTop: getOffset(),
+          }}
+          className="w-full bg-white rounded shadow-sm ml-5 mb-5 flex-shrink"
+        >
           <PointCard
             point={selectedPoint}
             routeId={routeId}

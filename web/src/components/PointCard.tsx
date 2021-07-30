@@ -107,7 +107,7 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
         </Restricted>
       </div>
 
-      <div className="flex items-center w-full mt-5 py-2.5">
+      <div className="flex items-center w-full py-2.5">
         <h5 className="font-bold text-2xl pr-2">Bilder</h5>
         <Restricted>
           <Button
@@ -117,7 +117,10 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
           />
         </Restricted>
       </div>
-      <div className="flex flex-wrap pb-4 gap-5 pt-2.5">
+      {images.data?.length === 0 && (
+        <p className="italic text-gray-600">Här saknas det bilder.</p>
+      )}
+      <div className="flex flex-wrap gap-5 pt-2.5">
         {images.isLoading ? (
           <Loader />
         ) : (
