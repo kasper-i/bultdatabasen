@@ -227,6 +227,14 @@ export class Api {
     return result.data as Bolt;
   };
 
+  static deleteBolt = async (boltId: string): Promise<void> => {
+    let endpoint = `/bolts/${boltId}`;
+
+    const result = await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+  };
+
   static createPoint = async (routeId: string): Promise<Point> => {
     let endpoint = `/routes/${routeId}/points`;
 

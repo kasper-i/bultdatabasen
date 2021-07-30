@@ -34,3 +34,35 @@ export const useCreateBolt = (routeId: string) =>
       },
     }
   );
+
+export const useDeleteBolt = (
+  routeId: string,
+  pointId: string,
+  boltId: string
+) =>
+  useMutation(() => Api.deleteBolt(boltId), {
+    onSuccess: (data, variables, context) => {
+      queryClient.setQueryData<Point[]>(
+        ["points", { resourceId: routeId }],
+        (old) =>
+          old !== undefined
+            ? old.map((point) => {
+                if (point.id === pointId) {
+                  return {
+                    ...point,
+                    bolts: point.bolts.filter((bolt) => bolt.id !== boltId),
+                  };
+                } else {
+                  return point;
+                }
+              })
+            : []
+      );
+
+      queryClient.setQueryData<Bolt[]>(
+        ["bolts", { resourceId: routeId }],
+        (old) =>
+          old !== undefined ? old.filter((bolt) => bolt.id !== boltId) : []
+      );
+    },
+  });
