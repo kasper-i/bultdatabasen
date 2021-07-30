@@ -92,16 +92,6 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
     return orderedPoints;
   }, [points, mainPoints]);
 
-  useEffect(() => {
-    if (selectedPoint === undefined) {
-      setSelectedPointId(
-        orderedPoints.length > 0
-          ? orderedPoints[orderedPoints.length - 1].id
-          : undefined
-      );
-    }
-  }, [orderedPoints]);
-
   const selectedPointNumber = useMemo(() => {
     let number = 1;
     for (const point of orderedPoints) {
@@ -118,6 +108,16 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const selectedPoint = useMemo(() => {
     return orderedPoints.find((point) => point.id === selectedPointId);
   }, [orderedPoints, selectedPointId]);
+
+  useEffect(() => {
+    if (selectedPoint === undefined) {
+      setSelectedPointId(
+        orderedPoints.length > 0
+          ? orderedPoints[orderedPoints.length - 1].id
+          : undefined
+      );
+    }
+  }, [selectedPoint, orderedPoints]);
 
   const editable = role === "owner";
 

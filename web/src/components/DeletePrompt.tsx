@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import { Button, Header, Icon, Modal } from "semantic-ui-react";
+import { Button, Icon, Modal } from "semantic-ui-react";
 import { SemanticICONS } from "semantic-ui-react/dist/commonjs/generic";
 
 interface Props {

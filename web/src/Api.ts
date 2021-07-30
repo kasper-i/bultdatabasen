@@ -230,7 +230,7 @@ export class Api {
   static deleteBolt = async (boltId: string): Promise<void> => {
     let endpoint = `/bolts/${boltId}`;
 
-    const result = await axios.delete(`${Api.baseUrl}${endpoint}`, {
+    await axios.delete(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
   };

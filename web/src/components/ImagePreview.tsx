@@ -30,7 +30,6 @@ const ImagePreview = ({
 
   return (
     <div
-      key={image.id}
       style={
         image.width < image.height
           ? { width: 90, height: 120 }
@@ -45,7 +44,7 @@ const ImagePreview = ({
         )}
       >
         <img
-          className={clsx("rounded")}
+          className="rounded"
           onClick={() => onClick?.(image.id)}
           src={`${configData.API_URL}/images/${image.id}/thumb`}
           alt=""

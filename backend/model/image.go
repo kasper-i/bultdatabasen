@@ -10,6 +10,7 @@ import (
 	"golang.org/x/image/draw"
 
 	"github.com/google/uuid"
+	"github.com/rwcarlsen/goexif/exif"
 	"gorm.io/gorm"
 )
 
@@ -94,6 +95,13 @@ func UploadImage(db *gorm.DB, parentResourceID string, bytes []byte, mimeType st
 		return nil, err
 	}
 
+	f.Seek(0, io.SeekStart)
+	if timestamp, err := getDatetime(f); err != nil {
+		return nil, err
+	} else {
+		img.Timestamp = timestamp
+	}
+
 	err = db.Transaction(func(tx *gorm.DB) error {
 		if err := createResource(tx, resource); err != nil {
 			return err
@@ -173,4 +181,16 @@ func createThumbnail(src image.Image, dstPath string) error {
 	draw.BiLinear.Scale(thumbnail, thumbnail.Rect, src, src.Bounds(), draw.Over, nil)
 
 	return jpeg.Encode(output, thumbnail, &jpeg.Options{Quality: jpeg.DefaultQuality})
+}
+
+func getDatetime(f *os.File) (time.Time, error) {
+	var tm time.Time
+
+	x, err := exif.Decode(f)
+	if err != nil {
+		return tm, err
+	}
+
+	tm, err = x.DateTime()
+	return tm, err
 }

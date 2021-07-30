@@ -1,5 +1,4 @@
 import { queryClient } from "index";
-import { useQuery } from "react-query";
 
 interface UseRole {
   role?: string;

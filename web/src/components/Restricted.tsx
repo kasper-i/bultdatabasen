@@ -1,7 +1,5 @@
 import { RoleContext } from "contexts/RoleContext";
-import React, { Fragment, ReactElement } from "react";
-import { useContext } from "react";
-import { ReactNode } from "react";
+import React, { Fragment, ReactNode, useContext } from "react";
 
 interface Props {
   children: ReactNode;
@@ -10,7 +8,7 @@ interface Props {
 const Restricted = ({ children }: Props): JSX.Element => {
   const { role } = useContext(RoleContext);
 
-  if (role != "owner") {
+  if (role !== "owner") {
     return <Fragment />;
   }
 

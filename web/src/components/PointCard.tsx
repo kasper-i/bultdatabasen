@@ -1,9 +1,10 @@
 import configData from "config.json";
 import { BoltType } from "models/bolt";
+import { Image } from "models/image";
 import { Point } from "models/point";
 import { useCreateBolt } from "queries/boltQueries";
 import { useImages } from "queries/imageQueries";
-import React, { ReactElement, useMemo, useState } from "react";
+import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import ImgsViewer from "react-images-viewer";
 import { useHistory } from "react-router";
 import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
@@ -12,6 +13,7 @@ import BoltDetails from "./BoltDetails";
 import ImageDropzone from "./ImageDropzone";
 import ImagePreview from "./ImagePreview";
 import Restricted from "./Restricted";
+import moment from "moment";
 
 interface Props {
   point: Point;
@@ -29,10 +31,67 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
   const [selectedBoltType, setSelectedBoltType] =
     useState<BoltType>("expansion");
 
+  const imagesByYear = useMemo(() => {
+    const lookup: Map<number, Image[]> = new Map();
+
+    if (images.data !== undefined) {
+      for (const image of images.data) {
+        const timestamp = moment(image.timestamp);
+        const year: number = timestamp.year();
+
+        let images = lookup.get(year);
+        if (images === undefined) {
+          images = [];
+          lookup.set(year, images);
+        }
+
+        images.push(image);
+      }
+    }
+
+    return lookup;
+  }, [images]);
+
   const sharedParents = useMemo(
     () => point.parents.filter((parent) => parent.id !== routeId),
     [point.parents, routeId]
   );
+
+  const renderImages = () => {
+    const years = Array.from(imagesByYear.keys());
+
+    years.sort().reverse();
+
+    return (
+      <div className="flex flex-wrap gap-5 pt-2.5">
+        <>
+          {years.map((year) => (
+            <Fragment key={"year-" + year}>
+              <div
+                style={{ width: 90, height: 120 }}
+                className="rounded border-gray-200 border-4 border-dotted flex justify-center items-center"
+              >
+                <h5 className="text-2xl">{year}</h5>
+              </div>
+
+              {imagesByYear.get(year)?.map((image, index) => (
+                <ImagePreview
+                  key={image.id}
+                  pointId={point.id}
+                  image={image}
+                  onClick={() => setCurrImg(index)}
+                  locked={!imagesLocked}
+                />
+              ))}
+            </Fragment>
+          ))}
+          <Restricted>
+            <ImageDropzone key="new" pointId={point.id} />
+          </Restricted>
+        </>
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col items-start p-4">
@@ -120,42 +179,30 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
       {images.data?.length === 0 && (
         <p className="italic text-gray-600">Här saknas det bilder.</p>
       )}
-      <div className="flex flex-wrap gap-5 pt-2.5">
-        {images.isLoading ? (
-          <Loader />
-        ) : (
-          <>
-            {images.data?.map((image, index) => (
-              <ImagePreview
-                pointId={point.id}
-                image={image}
-                onClick={() => setCurrImg(index)}
-                locked={!imagesLocked}
-              />
-            ))}
-            <ImgsViewer
-              imgs={images.data?.map((image) => ({
-                src: `${configData.API_URL}/images/${image.id}`,
-                thumbnail: `${configData.API_URL}/images/${image.id}/thumb`,
-              }))}
-              isOpen={currImg !== undefined}
-              currImg={currImg}
-              onClose={() => setCurrImg(undefined)}
-              onClickPrev={() =>
-                setCurrImg((index) => (index != null ? index - 1 : undefined))
-              }
-              onClickNext={() =>
-                setCurrImg((index) => (index != null ? index + 1 : undefined))
-              }
-              onClickThumbnail={(index: number) => setCurrImg(index)}
-              showThumbnails
-            />
-          </>
-        )}
-        <Restricted>
-          <ImageDropzone key={point.id} pointId={point.id} />
-        </Restricted>
-      </div>
+      {images.isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          {renderImages()}
+          <ImgsViewer
+            imgs={images.data?.map((image) => ({
+              src: `${configData.API_URL}/images/${image.id}`,
+              thumbnail: `${configData.API_URL}/images/${image.id}/thumb`,
+            }))}
+            isOpen={currImg !== undefined}
+            currImg={currImg}
+            onClose={() => setCurrImg(undefined)}
+            onClickPrev={() =>
+              setCurrImg((index) => (index != null ? index - 1 : undefined))
+            }
+            onClickNext={() =>
+              setCurrImg((index) => (index != null ? index + 1 : undefined))
+            }
+            onClickThumbnail={(index: number) => setCurrImg(index)}
+            showThumbnails
+          />
+        </>
+      )}
     </div>
   );
 }

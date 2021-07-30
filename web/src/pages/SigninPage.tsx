@@ -56,7 +56,7 @@ function SigninPage(): ReactElement {
         history.push(returnPath != null ? returnPath : "/");
       })
       .catch(function (error) {});
-  }, [location, history]);
+  }, [location, history, setAuthenticated]);
 
   return <Fragment />;
 }
