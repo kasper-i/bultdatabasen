@@ -24,7 +24,10 @@ function BoltDetails({ routeId, pointId, bolt }: Props): ReactElement {
   };
 
   return (
-    <div style={{ width: 140 }} className="bg-gray-100 shadow rounded p-2">
+    <div
+      style={{ width: 140 }}
+      className="bg-gray-100 shadow rounded p-2 flex flex-col"
+    >
       <div className="flex justify-between items-center">
         <div className="flex space-x-2 font-bold">
           <BoltIcon />
@@ -46,6 +49,11 @@ function BoltDetails({ routeId, pointId, bolt }: Props): ReactElement {
             />
           )}
         </Restricted>
+      </div>
+      <div className="text-sm pt-2">
+        <p>Petzl {bolt.type === "glue" ? "Bat’inox" : "Coeur"}</p>
+        <p>316 (A4)</p>
+        <p>2012</p>
       </div>
     </div>
   );
