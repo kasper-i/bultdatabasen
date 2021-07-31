@@ -74,10 +74,10 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
           {years.map((year) => (
             <Fragment key={"year-" + year}>
               <div
-                style={{ width: 90, height: 120 }}
+                style={{ width: 40, height: 120 }}
                 className="rounded border-gray-200 border-4 border-dotted flex justify-center items-center"
               >
-                <h5 className="text-2xl">{year}</h5>
+                <h5 className="text-2xl transform -rotate-90">{year}</h5>
               </div>
 
               {imagesByYear.get(year)?.map((image, index) => (
