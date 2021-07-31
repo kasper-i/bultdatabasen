@@ -172,7 +172,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                 {(first || intermediate) && (
                   <Vertex orientation={Orientation.NORTH}>
                     <Restricted>
-                      <Button size="mini" circular icon="plus" />
+                      <Button disabled size="mini" circular icon="plus" />
                     </Restricted>
                   </Vertex>
                 )}

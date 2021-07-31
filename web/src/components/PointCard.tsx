@@ -2,7 +2,7 @@ import configData from "config.json";
 import { BoltType } from "models/bolt";
 import { Image } from "models/image";
 import { Point } from "models/point";
-import { useCreateBolt } from "queries/boltQueries";
+import { useCreateBolt, useDeleteBolt } from "queries/boltQueries";
 import { useImages } from "queries/imageQueries";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import ImgsViewer from "react-images-viewer";
@@ -14,6 +14,7 @@ import ImageDropzone from "./ImageDropzone";
 import ImagePreview from "./ImagePreview";
 import Restricted from "./Restricted";
 import moment from "moment";
+import { useDeletePoint } from "queries/pointQueries";
 
 interface Props {
   point: Point;
@@ -24,6 +25,7 @@ interface Props {
 function PointCard({ point, number, routeId }: Props): ReactElement {
   const history = useHistory();
   const createBolt = useCreateBolt(routeId);
+  const deletePoint = useDeletePoint(routeId, point.id);
   const images = useImages(point.id);
 
   const [currImg, setCurrImg] = useState<number>();
@@ -56,6 +58,10 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
     () => point.parents.filter((parent) => parent.id !== routeId),
     [point.parents, routeId]
   );
+
+  const allowDelete = useMemo(() => {
+    return images.data?.length === 0 && point.bolts.length === 0;
+  }, [images, point.bolts]);
 
   const renderImages = () => {
     const years = Array.from(imagesByYear.keys());
@@ -117,6 +123,13 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
             </div>
           )}
         </div>
+        <Button
+          loading={deletePoint.isLoading}
+          onClick={() => deletePoint.mutate()}
+          icon="trash"
+          color="red"
+          disabled={!allowDelete}
+        />
       </div>
 
       <p className="pt-2">{`${point.bolts.length} bultar`}</p>

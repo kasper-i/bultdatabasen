@@ -249,6 +249,16 @@ export class Api {
     return result.data as Point;
   };
 
+  static deletePoint = async (pointId: string): Promise<void> => {
+    let endpoint = `/points/${pointId}`;
+
+    const result = await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data;
+  };
+
   static createConnection = async (
     pointId: string,
     linkedPointId: string

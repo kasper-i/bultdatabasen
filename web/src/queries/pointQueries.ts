@@ -23,3 +23,10 @@ export const useCreatePoint = (routeId: string) =>
       },
     }
   );
+
+export const useDeletePoint = (routeId: string, pointId: string) =>
+  useMutation(() => Api.deletePoint(pointId), {
+    onSuccess: async (data, variables, context) => {
+      queryClient.refetchQueries(["points", { resourceId: routeId }]);
+    },
+  });
