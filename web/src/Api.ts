@@ -5,7 +5,7 @@ import { Bolt } from "models/bolt";
 import { Crag } from "models/crag";
 import { Image } from "models/image";
 import { Point } from "models/point";
-import { Resource, ResourceWithParents } from "models/resource";
+import { Resource, ResourceCount, ResourceWithParents } from "models/resource";
 import { Route } from "models/route";
 import { Sector } from "models/sector";
 import { OAuthTokenResponse } from "pages/SigninPage";
@@ -168,6 +168,16 @@ export class Api {
     });
 
     return result.data as Resource[];
+  };
+
+  static getCounts = async (resourceId: string): Promise<ResourceCount[]> => {
+    const endpoint = `/resources/${resourceId}/counts`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as ResourceCount[];
   };
 
   static getRoute = async (routeId: string): Promise<Route> => {

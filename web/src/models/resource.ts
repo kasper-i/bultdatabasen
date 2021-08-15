@@ -1,19 +1,35 @@
+export type ResourceType =
+  | "root"
+  | "area"
+  | "crag"
+  | "sector"
+  | "route"
+  | "point"
+  | "bolt"
+  | "comment"
+  | "image";
+
 export interface Resource {
   id: string;
   name: string;
-  type: string;
+  type: ResourceType;
   parentId: string;
 }
 
 export interface Parent {
   id: string;
   name: string;
-  type: string;
+  type: ResourceType;
 }
 
 export interface ResourceWithParents {
   id: string;
   name: string;
-  type: string;
-  parents: Parent[]
+  type: ResourceType;
+  parents: Parent[];
+}
+
+export interface ResourceCount {
+  type: ResourceType;
+  count: number;
 }

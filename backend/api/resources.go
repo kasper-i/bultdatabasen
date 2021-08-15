@@ -35,6 +35,17 @@ func GetChildren(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GetCounts(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["resourceID"]
+
+	if counts, err := model.GetCounts(model.DB, id); err != nil {
+		utils.WriteError(w, err)
+	} else {
+		utils.WriteResponse(w, http.StatusOK, counts)
+	}
+}
+
 func Search(w http.ResponseWriter, r *http.Request) {
 	names, ok := r.URL.Query()["name"]
 

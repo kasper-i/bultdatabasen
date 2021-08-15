@@ -5,10 +5,9 @@ import React, { Fragment, ReactElement } from "react";
 import { useParams } from "react-router";
 
 const CragPage = (): ReactElement => {
-  const { cragId } =
-    useParams<{
-      cragId: string;
-    }>();
+  const { cragId } = useParams<{
+    cragId: string;
+  }>();
 
   const crag = useCrag(cragId);
 
@@ -18,7 +17,11 @@ const CragPage = (): ReactElement => {
 
   return (
     <div className="flex flex-col space-y-5">
-      <PageHeader resourceId={cragId} resourceName={crag.data.name} />
+      <PageHeader
+        resourceId={cragId}
+        resourceName={crag.data.name}
+        showCounts
+      />
       <ChildrenTable resourceId={cragId} />
     </div>
   );

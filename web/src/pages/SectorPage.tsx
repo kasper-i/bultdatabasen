@@ -5,10 +5,9 @@ import React, { Fragment, ReactElement } from "react";
 import { useParams } from "react-router";
 
 const SectorPage = (): ReactElement => {
-  const { sectorId } =
-    useParams<{
-      sectorId: string;
-    }>();
+  const { sectorId } = useParams<{
+    sectorId: string;
+  }>();
 
   const sector = useSector(sectorId);
 
@@ -18,7 +17,11 @@ const SectorPage = (): ReactElement => {
 
   return (
     <div className="flex flex-col space-y-5">
-      <PageHeader resourceId={sectorId} resourceName={sector.data.name} />
+      <PageHeader
+        resourceId={sectorId}
+        resourceName={sector.data.name}
+        showCounts
+      />
       <ChildrenTable resourceId={sectorId} />
     </div>
   );

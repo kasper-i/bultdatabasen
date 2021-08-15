@@ -5,10 +5,9 @@ import React, { Fragment, ReactElement } from "react";
 import { useParams } from "react-router";
 
 const AreaPage = (): ReactElement => {
-  const { areaId } =
-    useParams<{
-      areaId: string;
-    }>();
+  const { areaId } = useParams<{
+    areaId: string;
+  }>();
 
   const area = useArea(areaId);
 
@@ -18,7 +17,11 @@ const AreaPage = (): ReactElement => {
 
   return (
     <div className="flex flex-col space-y-5">
-      <PageHeader resourceId={areaId} resourceName={area.data.name} />
+      <PageHeader
+        resourceId={areaId}
+        resourceName={area.data.name}
+        showCounts
+      />
       <ChildrenTable resourceId={areaId} />
     </div>
   );
