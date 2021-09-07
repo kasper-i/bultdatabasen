@@ -48,6 +48,7 @@ const (
 	DepthBolt    Depth = 600
 	DepthImage   Depth = 700
 	DepthComment Depth = 700
+	DepthTask    Depth = 700
 )
 
 func GetResourceDepth(resourceType string) Depth {
@@ -68,6 +69,8 @@ func GetResourceDepth(resourceType string) Depth {
 		return DepthImage
 	case "comment":
 		return DepthComment
+	case "task":
+		return DepthTask
 	default:
 		panic("illegal resource type")
 	}

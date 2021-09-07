@@ -96,5 +96,11 @@ func main() {
 	router.HandleFunc("/bolts/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/bolts/{resourceID}", api.DeleteBolt).Methods(http.MethodDelete, http.MethodOptions)
 
+	router.HandleFunc("/resources/{resourceID}/tasks", api.GetTasks).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/tasks", api.CreateTask).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/tasks/{resourceID}", api.GetTask).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/tasks/{resourceID}", api.UpdateTask).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/tasks/{resourceID}", api.DeleteTask).Methods(http.MethodDelete, http.MethodOptions)
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

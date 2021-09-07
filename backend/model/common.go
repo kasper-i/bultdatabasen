@@ -64,6 +64,8 @@ func checkParent(tx *gorm.DB, resource Resource) bool {
 		return pt == "point"
 	case "comment":
 		return pt == "point"
+	case "task":
+		return pt == "area" || pt == "crag" || pt == "sector" || pt == "route" || pt == "point"
 	default:
 		return false
 	}
