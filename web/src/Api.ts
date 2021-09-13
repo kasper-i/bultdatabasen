@@ -8,6 +8,7 @@ import { Point } from "models/point";
 import { Resource, ResourceCount, ResourceWithParents } from "models/resource";
 import { Route } from "models/route";
 import { Sector } from "models/sector";
+import { Task } from "models/task";
 import { OAuthTokenResponse } from "pages/SigninPage";
 import { Area } from "./models/area";
 import { User } from "./models/user";
@@ -323,7 +324,56 @@ export class Api {
     await axios.delete(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
+  };
 
-    return;
+  static getTasks = async (resourceId: string): Promise<Task[]> => {
+    const endpoint = `/resources/${resourceId}/tasks`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Task[];
+  };
+
+  static getTask = async (taskId: string): Promise<Task> => {
+    const endpoint = `/tasks/${taskId}`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Task;
+  };
+
+  static deleteTask = async (taskId: string): Promise<void> => {
+    const endpoint = `/tasks/${taskId}`;
+
+    await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+  };
+
+  static updateTask = async (taskId: string, task: Task): Promise<Task> => {
+    const endpoint = `/tasks/${taskId}`;
+
+    const result = await axios.put(`${Api.baseUrl}${endpoint}`, task, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Task;
+  };
+
+  static createTask = async (
+    parentId: string,
+    task: Pick<Task, "description">
+  ): Promise<Task> => {
+    const endpoint = `/resources/${parentId}/tasks`;
+
+    const result = await axios.post(`${Api.baseUrl}${endpoint}`, task, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Task;
   };
 }

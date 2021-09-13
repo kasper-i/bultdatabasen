@@ -2,8 +2,10 @@ import configData from "config.json";
 import { BoltType } from "models/bolt";
 import { Image } from "models/image";
 import { Point } from "models/point";
-import { useCreateBolt, useDeleteBolt } from "queries/boltQueries";
+import moment from "moment";
+import { useCreateBolt } from "queries/boltQueries";
 import { useImages } from "queries/imageQueries";
+import { useDeletePoint } from "queries/pointQueries";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import ImgsViewer from "react-images-viewer";
 import { useHistory } from "react-router";
@@ -13,8 +15,6 @@ import BoltDetails from "./BoltDetails";
 import ImageDropzone from "./ImageDropzone";
 import ImagePreview from "./ImagePreview";
 import Restricted from "./Restricted";
-import moment from "moment";
-import { useDeletePoint } from "queries/pointQueries";
 
 interface Props {
   point: Point;

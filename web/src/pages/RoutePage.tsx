@@ -20,14 +20,14 @@ const renderRouteType = (routeType: string) => {
 };
 
 const RoutePage = (): ReactElement => {
-  const { routeId } = useParams<{
-    routeId: string;
+  const { resourceId } = useParams<{
+    resourceId: string;
   }>();
 
-  const route = useRoute(routeId);
-  const points = usePoints(routeId);
-  const bolts = useBolts(routeId);
-  const { role } = useRole(routeId);
+  const route = useRoute(resourceId);
+  const points = usePoints(resourceId);
+  const bolts = useBolts(resourceId);
+  const { role } = useRole(resourceId);
 
   if (route.data == null || points.data == null || bolts.data == null) {
     return <Fragment />;
@@ -45,7 +45,7 @@ const RoutePage = (): ReactElement => {
   return (
     <RoleContext.Provider value={{ role }}>
       <div className="flex flex-col">
-        <PageHeader resourceId={routeId} resourceName={route.data.name} />
+        <PageHeader resourceId={resourceId} resourceName={route.data.name} />
         <div>{route.data.year}</div>
         <div>{route.data.length} m</div>
         <div>{renderRouteType(route.data.routeType)}</div>
@@ -56,7 +56,7 @@ const RoutePage = (): ReactElement => {
         <h3 className="text-xl font-bold">Bultar ({bolts.data.length})</h3>
         <div>{boltInfo()}</div>
         <div className="mt-5">
-          <BoltEditor routeId={routeId} points={points.data} />
+          <BoltEditor routeId={resourceId} points={points.data} />
         </div>
       </div>
     </RoleContext.Provider>

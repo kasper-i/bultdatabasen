@@ -1,4 +1,3 @@
-import { ResourceCount } from "models/resource";
 import React, { ReactElement } from "react";
 
 interface Props {

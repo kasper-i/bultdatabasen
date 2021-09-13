@@ -23,6 +23,7 @@ const ChildrenTable = ({ resourceId }: Props): ReactElement => {
           const url = getResourceUrl(resource.type, resource.id);
           return (
             <li
+              key={resource.id}
               className="cursor-pointer"
               onClick={() => url && history.push(url)}
             >

@@ -5,11 +5,11 @@ import React, { Fragment, ReactElement } from "react";
 import { useParams } from "react-router";
 
 const AreaPage = (): ReactElement => {
-  const { areaId } = useParams<{
-    areaId: string;
+  const { resourceId } = useParams<{
+    resourceId: string;
   }>();
 
-  const area = useArea(areaId);
+  const area = useArea(resourceId);
 
   if (area.data == null) {
     return <Fragment />;
@@ -18,11 +18,11 @@ const AreaPage = (): ReactElement => {
   return (
     <div className="flex flex-col space-y-5">
       <PageHeader
-        resourceId={areaId}
+        resourceId={resourceId}
         resourceName={area.data.name}
         showCounts
       />
-      <ChildrenTable resourceId={areaId} />
+      <ChildrenTable resourceId={resourceId} />
     </div>
   );
 };

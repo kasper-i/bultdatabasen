@@ -1,6 +1,5 @@
 import { useCounts } from "queries/commonQueries";
 import React, { ReactElement } from "react";
-import { useMemo } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import ResourceCountRenderer from "./ResourceCountRenderer";
 

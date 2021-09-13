@@ -1,5 +1,8 @@
+import CreateTask from "components/CreateTask";
 import LoginToolbar from "components/LoginToolbar";
 import Search from "components/Search";
+import SidePanel from "components/SidePanel";
+import TaskList from "components/TaskList";
 import { AuthContext } from "contexts/AuthContext";
 import AreaPage from "pages/AreaPage";
 import CragPage from "pages/CragPage";
@@ -37,22 +40,31 @@ function App() {
                   isAuthenticated ? <RootPage /> : <WelcomePage />
                 }
               ></Route>
-              <Route path="/area/:areaId">
+              <Route path="/area/:resourceId">
                 <AreaPage />
               </Route>
-              <Route path="/crag/:cragId">
+              <Route path="/crag/:resourceId">
                 <CragPage />
               </Route>
-              <Route path="/sector/:sectorId">
+              <Route path="/sector/:resourceId">
                 <SectorPage />
               </Route>
-              <Route path="/route/:routeId">
+              <Route path="/route/:resourceId">
                 <RoutePage />
               </Route>
               <Route path="/signin">
                 <SigninPage />
               </Route>
             </Switch>
+
+            <Route path="/(area|crag|sector|route)/:resourceId">
+              <SidePanel>
+                <TaskList />
+                <Route path="/route/:resourceId">
+                  <CreateTask />
+                </Route>
+              </SidePanel>
+            </Route>
           </div>
         </div>
       </Router>

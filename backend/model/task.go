@@ -82,7 +82,7 @@ func UpdateTask(db *gorm.DB, task *Task, taskID string) error {
 	task.ID = original.ID
 	task.ParentID = original.ParentID
 
-	if task.Assignee == nil {
+	if original.Assignee != nil && task.Assignee == nil {
 		task.Status = "open"
 	}
 
