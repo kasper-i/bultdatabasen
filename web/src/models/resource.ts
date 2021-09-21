@@ -7,7 +7,8 @@ export type ResourceType =
   | "point"
   | "bolt"
   | "comment"
-  | "image";
+  | "image"
+  | "task";
 
 export interface Resource {
   id: string;

@@ -21,6 +21,7 @@ export const useCounts = (resourceId: string) =>
         point: 0,
         image: 0,
         comment: 0,
+        task: 0,
       };
 
       for (const count of data) {

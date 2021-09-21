@@ -1,5 +1,6 @@
 import Pill from "components/Pill";
 import { useSelectedResource } from "contexts/SelectedResourceProvider";
+import { ResourceType } from "models/resource";
 import { useTasks } from "queries/taskQueries";
 import React, { ReactElement } from "react";
 import { Icon } from "semantic-ui-react";
@@ -10,7 +11,10 @@ interface Props {
   onClose: () => void;
 }
 
-const locationDescription = (resourceName: string, resourceType: string) => {
+const locationDescription = (
+  resourceName: string,
+  resourceType: ResourceType
+) => {
   switch (resourceType) {
     case "area":
     case "crag":
