@@ -1,15 +1,13 @@
+import { useSelectedResource } from "contexts/SelectedResourceProvider";
 import { useCreateTask } from "queries/taskQueries";
 import React, { ReactElement, useState } from "react";
-import { useParams } from "react-router-dom";
 import { Button, Input } from "semantic-ui-react";
-import Restricted from "./Restricted";
+import Restricted from "../../Restricted";
 
 const CreateTask = (): ReactElement => {
-  const { resourceId } = useParams<{
-    resourceId: string;
-  }>();
+  const { selectedResource } = useSelectedResource();
 
-  const createTask = useCreateTask(resourceId);
+  const createTask = useCreateTask(selectedResource.id);
 
   const [description, setDescription] = useState("");
 
@@ -26,7 +24,11 @@ const CreateTask = (): ReactElement => {
           placeholder="Ankare i dåligt skick"
           onChange={(event) => setDescription(event.target.value)}
         />
-        <Button onClick={handleCreateTask} loading={createTask.isLoading}>
+        <Button
+          color="blue"
+          onClick={handleCreateTask}
+          loading={createTask.isLoading}
+        >
           Skapa
         </Button>
       </div>

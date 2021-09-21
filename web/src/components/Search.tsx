@@ -80,6 +80,7 @@ function Search() {
       onSearchChange={handleSearchChange}
       results={results}
       value={value}
+      size="small"
     />
   );
 }

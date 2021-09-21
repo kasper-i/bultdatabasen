@@ -1,10 +1,11 @@
+import { useSelectedResource } from "contexts/SelectedResourceProvider";
 import { Task, TaskStatus } from "models/task";
 import { useAncestors } from "queries/commonQueries";
 import { useDeleteTask, useUpdateTask } from "queries/taskQueries";
 import React, { ReactElement, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button, Icon } from "semantic-ui-react";
-import Restricted from "./Restricted";
+import Restricted from "../../Restricted";
 
 interface Props {
   task: Task;
@@ -15,13 +16,11 @@ const finalStatuses: TaskStatus[] = ["closed", "rejected"];
 const TaskView = (props: Props): ReactElement => {
   const [task, setTask] = useState(props.task);
 
-  const { resourceId } = useParams<{
-    resourceId: string;
-  }>();
+  const { selectedResource } = useSelectedResource();
 
   const ancestors = useAncestors(task.id);
-  const deleteTask = useDeleteTask(resourceId, task.id);
-  const updateTask = useUpdateTask(resourceId, task.id);
+  const deleteTask = useDeleteTask(selectedResource.id, task.id);
+  const updateTask = useUpdateTask(selectedResource.id, task.id);
 
   const changeStatus = (status: TaskStatus) => {
     setTask((task) => {
@@ -34,9 +33,11 @@ const TaskView = (props: Props): ReactElement => {
   const routeName =
     ancestors.data?.find((ancestor) => ancestor.type === "route")?.name ?? "";
 
+  const isComplete = finalStatuses.includes(task.status);
+
   return (
     <div
-      className="flex flex-col space-y-2 bg-gray-100 p-5 rounded"
+      className="sm:w-96 flex flex-col space-y-2 bg-gray-50 p-5 rounded"
       key={task.id}
     >
       <div className="flex justify-between items-center">
@@ -51,30 +52,31 @@ const TaskView = (props: Props): ReactElement => {
             <div className="text-sm text-gray-500">{routeName}</div>
           </div>
         </Link>
-        {!finalStatuses.includes(task.status) && (
-          <Restricted>
-            <Button
-              icon
-              size="tiny"
-              compact
-              loading={deleteTask.isLoading}
-              onClick={() => deleteTask.mutate()}
-            >
-              <Icon name="trash" />
-            </Button>
-          </Restricted>
-        )}
+        <Restricted>
+          <Button
+            icon
+            size="tiny"
+            compact
+            loading={deleteTask.isLoading}
+            onClick={() => deleteTask.mutate()}
+          >
+            <Icon name="trash" />
+          </Button>
+        </Restricted>
       </div>
 
-      {!finalStatuses.includes(task.status) && (
-        <Restricted>
-          <div className="flex space-x-2">
-            <Button size="small" fluid onClick={() => changeStatus("closed")}>
-              <Icon name="check"></Icon> Utfört
-            </Button>
-          </div>
-        </Restricted>
-      )}
+      <Restricted>
+        <div className="flex space-x-2">
+          <Button
+            disabled={isComplete}
+            size="small"
+            fluid
+            onClick={() => changeStatus("closed")}
+          >
+            <Icon name="check"></Icon> Utfört
+          </Button>
+        </div>
+      </Restricted>
     </div>
   );
 };

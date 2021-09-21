@@ -11,9 +11,9 @@ export type ResourceType =
 
 export interface Resource {
   id: string;
-  name: string;
+  name?: string;
   type: ResourceType;
-  parentId: string;
+  parentId?: string;
 }
 
 export interface Parent {

@@ -5,5 +5,6 @@ export interface Route {
   year: number;
   length: number;
   routeType: string;
-  externalLink: string
+  externalLink: string;
+  parentId: string;
 }

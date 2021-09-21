@@ -1,12 +1,13 @@
 import BoltEditor from "components/BoltEditor";
 import PageHeader from "components/PageHeader";
 import { RoleContext } from "contexts/RoleContext";
+import { useSelectedResource } from "contexts/SelectedResourceProvider";
 import { useBolts } from "queries/boltQueries";
 import { usePoints } from "queries/pointQueries";
 import { useRole } from "queries/roleQueries";
 import { useRoute } from "queries/routeQueries";
-import React, { Fragment, ReactElement } from "react";
-import { useParams } from "react-router";
+import React, { Fragment, ReactElement, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 const renderRouteType = (routeType: string) => {
   switch (routeType) {
@@ -20,11 +21,25 @@ const renderRouteType = (routeType: string) => {
 };
 
 const RoutePage = (): ReactElement => {
+  const { updateSelectedResource } = useSelectedResource();
+
   const { resourceId } = useParams<{
     resourceId: string;
   }>();
 
   const route = useRoute(resourceId);
+
+  useEffect(() => {
+    if (route.data !== undefined) {
+      updateSelectedResource({
+        id: route.data.id,
+        name: route.data.name,
+        type: "route",
+        parentId: route.data.parentId,
+      });
+    }
+  }, [route.data, updateSelectedResource]);
+
   const points = usePoints(resourceId);
   const bolts = useBolts(resourceId);
   const { role } = useRole(resourceId);
