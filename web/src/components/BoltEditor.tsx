@@ -2,7 +2,7 @@ import { Point } from "models/point";
 import { useCreatePoint } from "queries/pointQueries";
 import { useRole } from "queries/roleQueries";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router";
+import { useParams } from "react-router-dom";
 import { Button } from "semantic-ui-react";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
@@ -11,8 +11,8 @@ import Edge from "./graph/Edge";
 import Graph from "./graph/Graph";
 import Junction, { Orientation } from "./graph/Junction";
 import Vertex from "./graph/Vertex";
-import Restricted from "./Restricted";
 import PointCard from "./PointCard";
+import Restricted from "./Restricted";
 
 interface Props {
   routeId: string;
@@ -23,18 +23,11 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const [selectedPointId, setSelectedPointId] = useState<string>();
   const { role } = useRole(routeId);
 
-  const location = useLocation();
-
   const createPoint = useCreatePoint(routeId);
 
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const point = query.get("point");
-
-    if (point != null) {
-      setSelectedPointId(point);
-    }
-  }, [location]);
+  const { pointId } = useParams<{
+    pointId?: string;
+  }>();
 
   const mainPoints = useMemo(() => {
     return new Map(points.map((point) => [point.id, point]));
@@ -92,6 +85,22 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
     return orderedPoints;
   }, [points, mainPoints]);
 
+  useEffect(() => {
+    if (selectedPointId !== undefined) {
+      return;
+    }
+
+    if (pointId !== undefined) {
+      setSelectedPointId(pointId);
+    } else {
+      setSelectedPointId(
+        orderedPoints.length > 0
+          ? orderedPoints[orderedPoints.length - 1].id
+          : undefined
+      );
+    }
+  }, [pointId, selectedPointId, orderedPoints]);
+
   const selectedPointNumber = useMemo(() => {
     let number = 1;
     for (const point of orderedPoints) {
@@ -108,16 +117,6 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const selectedPoint = useMemo(() => {
     return orderedPoints.find((point) => point.id === selectedPointId);
   }, [orderedPoints, selectedPointId]);
-
-  useEffect(() => {
-    if (selectedPoint === undefined) {
-      setSelectedPointId(
-        orderedPoints.length > 0
-          ? orderedPoints[orderedPoints.length - 1].id
-          : undefined
-      );
-    }
-  }, [selectedPoint, orderedPoints]);
 
   const editable = role === "owner";
 

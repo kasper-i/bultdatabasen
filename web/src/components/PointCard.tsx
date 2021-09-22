@@ -111,9 +111,10 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
               <div className="flex space-x-1">
                 {sharedParents.map((parent) => (
                   <span
+                    key={point.id}
                     className="underline cursor-pointer"
                     onClick={() =>
-                      history.push(`/route/${parent.id}?point=${point.id}`)
+                      history.push(`/route/${parent.id}/point/${point.id}`)
                     }
                   >
                     {parent.name}

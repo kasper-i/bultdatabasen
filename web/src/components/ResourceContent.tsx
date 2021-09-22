@@ -36,7 +36,7 @@ const ResourceContent = () => {
         <Route path="/sector/:resourceId">
           <SectorPage />
         </Route>
-        <Route path="/route/:resourceId">
+        <Route path="/route/:resourceId/(point)?/:pointId?">
           <RoutePage />
         </Route>
       </Switch>
