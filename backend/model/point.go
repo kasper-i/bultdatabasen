@@ -133,7 +133,7 @@ func GetPoints(db *gorm.DB, resourceID string) ([]*Point, error) {
 				FROM foster_care
 				WHERE foster_parent_id = ?
 		) AS resource
-		LEFT JOIN point ON point.id = resource.id
+		INNER JOIN point ON point.id = resource.id
 		LEFT JOIN connection connection_outgoing ON point.id = connection_outgoing.src_point_id
 		LEFT JOIN connection connection_incoming ON point.id = connection_incoming.dst_point_id`, resourceID, resourceID).
 		Scan(&raw).Error; err != nil {
