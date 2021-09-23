@@ -12,6 +12,7 @@ import { Task } from "models/task";
 import { OAuthTokenResponse } from "pages/SigninPage";
 import { Area } from "./models/area";
 import { User } from "./models/user";
+import jwtDecode, { JwtPayload } from "jwt-decode";
 
 const updateRole = (resourceId: string, response: AxiosResponse) => {
   queryClient.setQueryData(["role", { resourceId }], response.headers["role"]);
@@ -22,6 +23,7 @@ export class Api {
   static idToken: string | null;
   static accessToken: string | null;
   static refreshToken: string | null;
+  static expirationTime?: number;
 
   static setTokens = (
     idToken: string,
@@ -33,17 +35,16 @@ export class Api {
     if (refreshToken !== undefined) {
       Api.refreshToken = refreshToken;
     }
-  };
 
-  static saveTokens = () => {
-    if (Api.idToken != null) {
-      localStorage.setItem("idToken", Api.idToken);
-    }
-    if (Api.accessToken != null) {
-      localStorage.setItem("accessToken", Api.accessToken);
-    }
+    Api.extractExpirationTime();
+
+    localStorage.setItem("idToken", Api.idToken);
+    localStorage.setItem("accessToken", Api.accessToken);
+
     if (Api.refreshToken != null) {
       localStorage.setItem("refreshToken", Api.refreshToken);
+    } else {
+      localStorage.removeItem("refreshToken");
     }
   };
 
@@ -51,6 +52,8 @@ export class Api {
     Api.idToken = localStorage.getItem("idToken");
     Api.accessToken = localStorage.getItem("accessToken");
     Api.refreshToken = localStorage.getItem("refreshToken");
+
+    Api.extractExpirationTime();
   };
 
   static clearTokens = () => {
@@ -61,13 +64,41 @@ export class Api {
     localStorage.removeItem("idToken");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+
+    Api.expirationTime = undefined;
+  };
+
+  static extractExpirationTime = () => {
+    if (Api.accessToken == null) {
+      return;
+    }
+
+    const { exp } = jwtDecode<JwtPayload>(Api.accessToken);
+
+    if (exp !== undefined) {
+      Api.expirationTime = exp;
+    }
+  };
+
+  static isExpired = () => {
+    if (Api.expirationTime === undefined) {
+      return false;
+    }
+
+    const currentTime = new Date().getTime() / 1000;
+
+    if (currentTime > Api.expirationTime) {
+      return true;
+    }
+
+    return false;
   };
 
   static authValid = () => {
     return Api.accessToken != null;
   };
 
-  static refreshTokens = async (failedRequest: any) => {
+  static refreshTokens = async () => {
     if (Api.refreshToken == null) {
       return Promise.reject();
     }
@@ -87,11 +118,8 @@ export class Api {
       const { id_token, access_token }: OAuthTokenResponse = response.data;
 
       Api.setTokens(id_token, access_token);
-      Api.saveTokens();
     });
 
-    failedRequest.response.config.headers["Authorization"] =
-      "Bearer " + Api.accessToken;
     return Promise.resolve();
   };
 

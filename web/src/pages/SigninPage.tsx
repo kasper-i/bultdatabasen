@@ -47,7 +47,6 @@ function SigninPage(): ReactElement {
           response.data;
 
         Api.setTokens(id_token, access_token, refresh_token);
-        Api.saveTokens();
         setAuthenticated(true);
 
         const returnPath = localStorage.getItem("returnPath");

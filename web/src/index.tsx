@@ -11,7 +11,15 @@ import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
 Api.restoreTokens();
-createAuthRefreshInterceptor(axios, Api.refreshTokens);
+
+const refreshAuthLogic = async (failedRequest?: any) => {
+  await Api.refreshTokens();
+
+  failedRequest.response.config.headers["Authorization"] =
+    "Bearer " + Api.accessToken;
+};
+
+createAuthRefreshInterceptor(axios, refreshAuthLogic);
 
 export const queryClient = new QueryClient();
 
