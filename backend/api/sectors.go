@@ -38,7 +38,10 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var sector model.Sector
-	json.Unmarshal(reqBody, &sector)
+	if err := json.Unmarshal(reqBody, &sector); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	err := model.CreateSector(model.DB, &sector, parentResourceID)
 

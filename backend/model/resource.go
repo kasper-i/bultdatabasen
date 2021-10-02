@@ -17,10 +17,11 @@ type Resource struct {
 }
 
 type Parent struct {
-	ID      string  `json:"id"`
-	Name    *string `json:"name"`
-	Type    string  `json:"type"`
-	ChildId *string `json:"-"`
+	ID           string  `json:"id"`
+	Name         *string `json:"name"`
+	Type         string  `json:"type"`
+	ChildID      *string `json:"-"`
+	FosterParent bool    `json:"-"`
 }
 
 type ResourceWithParents struct {

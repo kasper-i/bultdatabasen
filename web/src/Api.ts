@@ -18,6 +18,16 @@ const updateRole = (resourceId: string, response: AxiosResponse) => {
   queryClient.setQueryData(["role", { resourceId }], response.headers["role"]);
 };
 
+export interface CreatePointRequest {
+  pointId: string;
+  position: InsertPosition;
+}
+
+export interface InsertPosition {
+  pointId: string;
+  order: "before" | "after";
+}
+
 export class Api {
   static baseUrl: string = configData.API_URL;
   static idToken: string | null;
@@ -274,12 +284,16 @@ export class Api {
     });
   };
 
-  static createPoint = async (routeId: string): Promise<Point> => {
+  static addPoint = async (
+    routeId: string,
+    pointId?: string,
+    position?: InsertPosition
+  ): Promise<Point> => {
     let endpoint = `/routes/${routeId}/points`;
 
     const result = await axios.post(
       `${Api.baseUrl}${endpoint}`,
-      {},
+      { pointId, position },
       {
         headers: { Authorization: `Bearer ${Api.accessToken}` },
       }
@@ -288,31 +302,17 @@ export class Api {
     return result.data as Point;
   };
 
-  static deletePoint = async (pointId: string): Promise<void> => {
-    let endpoint = `/points/${pointId}`;
+  static detachPoint = async (
+    routeId: string,
+    pointId: string
+  ): Promise<void> => {
+    let endpoint = `/routes/${routeId}/points/${pointId}`;
 
     const result = await axios.delete(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
     return result.data;
-  };
-
-  static createConnection = async (
-    pointId: string,
-    linkedPointId: string
-  ): Promise<void> => {
-    let endpoint = `/points/${pointId}/outgoing/${linkedPointId}`;
-
-    await axios.put(
-      `${Api.baseUrl}${endpoint}`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${Api.accessToken}` },
-      }
-    );
-
-    return;
   };
 
   static uploadImage = async (

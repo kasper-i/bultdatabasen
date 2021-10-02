@@ -38,7 +38,10 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var route model.Route
-	json.Unmarshal(reqBody, &route)
+	if err := json.Unmarshal(reqBody, &route); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	err := model.CreateRoute(model.DB, &route, parentResourceID)
 

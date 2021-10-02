@@ -38,7 +38,10 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var bolt model.Bolt
-	json.Unmarshal(reqBody, &bolt)
+	if err := json.Unmarshal(reqBody, &bolt); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	err := model.CreateBolt(model.DB, &bolt, parentResourceID)
 

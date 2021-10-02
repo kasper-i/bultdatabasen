@@ -3,9 +3,10 @@ import { BoltType } from "models/bolt";
 import { Image } from "models/image";
 import { Point } from "models/point";
 import moment from "moment";
-import { useCreateBolt } from "queries/boltQueries";
+import { useBolts, useCreateBolt } from "queries/boltQueries";
+import { useChildren } from "queries/commonQueries";
 import { useImages } from "queries/imageQueries";
-import { useDeletePoint } from "queries/pointQueries";
+import { useDetachPoint } from "queries/pointQueries";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import ImgsViewer from "react-images-viewer";
 import { useHistory } from "react-router";
@@ -24,9 +25,11 @@ interface Props {
 
 function PointCard({ point, number, routeId }: Props): ReactElement {
   const history = useHistory();
-  const createBolt = useCreateBolt(routeId);
-  const deletePoint = useDeletePoint(routeId, point.id);
+  const createBolt = useCreateBolt(routeId, point.id);
+  const deletePoint = useDetachPoint(routeId, point.id);
   const images = useImages(point.id);
+  const bolts = useBolts(point.id);
+  const children = useChildren(point.id);
 
   const [currImg, setCurrImg] = useState<number>();
   const [imagesLocked, setImagesLocked] = useState(false);
@@ -54,14 +57,11 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
     return lookup;
   }, [images]);
 
-  const sharedParents = useMemo(
-    () => point.parents.filter((parent) => parent.id !== routeId),
-    [point.parents, routeId]
-  );
+  const sharedParents = point.parents.filter((parent) => parent.id !== routeId);
 
-  const allowDelete = useMemo(() => {
-    return images.data?.length === 0 && point.bolts.length === 0;
-  }, [images, point.bolts]);
+  const allowDelete =
+    sharedParents.length > 0 ||
+    (children.data !== undefined && children.data.length === 0);
 
   const renderImages = () => {
     const years = Array.from(imagesByYear.keys());
@@ -124,18 +124,24 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
             </div>
           )}
         </div>
-        <Button
-          loading={deletePoint.isLoading}
-          onClick={() => deletePoint.mutate()}
-          icon="trash"
-          color="red"
-          disabled={!allowDelete}
-        />
+        <div className="flex gap-2">
+          <Button
+            onClick={() => sessionStorage.setItem("copiedPoint", point.id)}
+            icon="copy"
+          />
+          <Button
+            loading={deletePoint.isLoading}
+            onClick={() => deletePoint.mutate()}
+            icon="trash"
+            color="red"
+            disabled={!allowDelete}
+          />
+        </div>
       </div>
 
-      <p className="pt-2">{`${point.bolts.length} bultar`}</p>
+      <p className="pt-2">{`${bolts.data?.length} bultar`}</p>
       <div className="flex flex-wrap gap-5 py-5">
-        {point.bolts.map((bolt) => (
+        {bolts.data?.map((bolt) => (
           <BoltDetails
             routeId={routeId}
             pointId={point.id}
@@ -152,12 +158,7 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
                 primary
                 size="small"
                 loading={createBolt.isLoading}
-                onClick={() =>
-                  createBolt.mutate({
-                    pointId: point.id,
-                    bolt: { type: selectedBoltType },
-                  })
-                }
+                onClick={() => createBolt.mutate({ type: selectedBoltType })}
               >
                 <Icon name="add" />
                 {translateBoltType(selectedBoltType)}

@@ -38,7 +38,10 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var crag model.Crag
-	json.Unmarshal(reqBody, &crag)
+	if err := json.Unmarshal(reqBody, &crag); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	err := model.CreateCrag(model.DB, &crag, parentResourceID)
 

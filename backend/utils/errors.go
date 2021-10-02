@@ -5,7 +5,10 @@ import (
 )
 
 var (
-	ErrIllegalChildResource = errors.New("Illegal child")
-	ErrIllegalParentResource = errors.New("Illegal parent")
-	ErrMissingParent = errors.New("Missing parent")
+	ErrHierarchyStructureViolation = errors.New("Hierarchy structure violation")
+	ErrOrphanedResource            = errors.New("Orphaned resource")
+	ErrMissingAttachmentPoint      = errors.New("Missing attachment point")
+	ErrInvalidAttachmentPoint      = errors.New("Invalid attachment point")
+	ErrLoopDetected                = errors.New("Loop detected")
+	ErrCorruptResource             = errors.New("Corrupt resource")
 )

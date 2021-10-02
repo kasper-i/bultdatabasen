@@ -77,12 +77,10 @@ func main() {
 	router.HandleFunc("/routes/{resourceID}", api.GetRoute).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}", api.DeleteRoute).Methods(http.MethodDelete, http.MethodOptions)
-	router.HandleFunc("/routes/{resourceID}/points", api.GetPoints).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/routes/{resourceID}/points", api.CreatePoint).Methods(http.MethodPost, http.MethodOptions)
 
-	router.HandleFunc("/points/{resourceID}", nil).Methods(http.MethodDelete, http.MethodOptions)
-	router.HandleFunc("/points/{resourceID}/outgoing/{linkedPointID}", api.CreateConnection).Methods(http.MethodPut, http.MethodOptions)
-	router.HandleFunc("/points/{resourceID}/outgoing/{linkedPointID}", api.DeleteConnection).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}/points", api.GetPoints).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}/points", api.AttachPoint).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}/points/{pointID}", api.DetachPoint).Methods(http.MethodDelete, http.MethodOptions)
 
 	router.HandleFunc("/resources/{resourceID}/images", api.UploadImage).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/images", api.GetImages).Methods(http.MethodGet, http.MethodOptions)

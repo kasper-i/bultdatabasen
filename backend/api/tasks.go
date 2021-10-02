@@ -38,7 +38,10 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var task model.Task
-	json.Unmarshal(reqBody, &task)
+	if err := json.Unmarshal(reqBody, &task); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	err := model.CreateTask(model.DB, &task, parentResourceID)
 
@@ -55,7 +58,10 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var task model.Task
-	json.Unmarshal(reqBody, &task)
+	if err := json.Unmarshal(reqBody, &task); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	err := model.UpdateTask(model.DB, &task, taskID)
 

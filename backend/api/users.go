@@ -27,7 +27,10 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var desiredUser model.User
-	json.Unmarshal(reqBody, &desiredUser)
+	if err := json.Unmarshal(reqBody, &desiredUser); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if user, err := model.GetUser(model.DB, userId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

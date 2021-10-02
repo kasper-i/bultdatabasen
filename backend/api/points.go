@@ -10,63 +10,68 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type CreatePointRequest struct {
+	PointID  *string               `json:"pointId"`
+	Position *model.InsertPosition `json:"position"`
+}
+
 func GetPoints(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	parentResourceId := vars["resourceID"]
+	routeID := vars["resourceID"]
 
-	if resource, err := model.GetResource(model.DB, parentResourceId); err != nil {
+	if resource, err := model.GetResource(model.DB, routeID); err != nil {
 		utils.WriteError(w, err)
+		return
 	} else if resource.Type != "route" {
 		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
 
-	if points, err := model.GetPoints(model.DB, parentResourceId); err != nil {
+	if points, err := model.GetPoints(model.DB, routeID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, points)
 	}
 }
 
-func CreatePoint(w http.ResponseWriter, r *http.Request) {
+func AttachPoint(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	routeID := vars["resourceID"]
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	var point model.Point
-	json.Unmarshal(reqBody, &point)
+	var request CreatePointRequest
+	if err := json.Unmarshal(reqBody, &request); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	err := model.CreatePoint(model.DB, &point, parentResourceID)
+	if request.Position != nil {
+		order := request.Position.Order
+		if order != "before" && order != "after" {
+			utils.WriteResponse(w, http.StatusBadRequest, nil)
+			return
+		}
+	}
+
+	point, err := model.AttachPoint(model.DB, routeID, request.PointID, request.Position)
 
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, point)
+		if request.PointID == nil {
+			utils.WriteResponse(w, http.StatusCreated, point)
+		} else {
+			utils.WriteResponse(w, http.StatusOK, point)
+		}
 	}
 }
 
-func CreateConnection(w http.ResponseWriter, r *http.Request) {
+func DetachPoint(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	src := vars["resourceID"]
-	dst := vars["linkedPointID"]
+	routeID := vars["resourceID"]
+	pointID := vars["pointID"]
 
-	err := model.CreateConnection(model.DB, src, dst)
-
-	if err != nil {
-		utils.WriteError(w, err)
-	} else {
-		utils.WriteResponse(w, http.StatusCreated, nil)
-	}
-}
-
-func DeleteConnection(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	src := vars["resourceID"]
-	dst := vars["linkedPointID"]
-
-	err := model.DeleteConnection(model.DB, src, dst)
-
-	if err != nil {
+	if err := model.DetachPoint(model.DB, routeID, pointID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

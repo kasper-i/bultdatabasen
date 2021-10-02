@@ -7,33 +7,20 @@ import { queryClient } from "../index";
 export const useBolts = (resourceId: string) =>
   useQuery(["bolts", { resourceId }], () => Api.getBolts(resourceId));
 
-export const useCreateBolt = (routeId: string) =>
-  useMutation(
-    ({ pointId, bolt }: { pointId: string; bolt: Pick<Bolt, "type"> }) =>
-      Api.createBolt(pointId, bolt),
-    {
-      onSuccess: (data, variables, context) => {
-        queryClient.setQueryData<Point[]>(
-          ["points", { resourceId: routeId }],
-          (old) =>
-            old !== undefined
-              ? old.map((point) => {
-                  if (point.id === variables.pointId) {
-                    return { ...point, bolts: [...point.bolts, data] };
-                  } else {
-                    return point;
-                  }
-                })
-              : []
-        );
+export const useCreateBolt = (routeId: string, pointId: string) =>
+  useMutation((bolt: Pick<Bolt, "type">) => Api.createBolt(pointId, bolt), {
+    onSuccess: (data, variables, context) => {
+      queryClient.setQueryData<Bolt[]>(
+        ["bolts", { resourceId: pointId }],
+        (old) => (old !== undefined ? [...old, data] : [])
+      );
 
-        queryClient.setQueryData<Bolt[]>(
-          ["bolts", { resourceId: routeId }],
-          (old) => (old !== undefined ? [...old, data] : [])
-        );
-      },
-    }
-  );
+      queryClient.setQueryData<Bolt[]>(
+        ["bolts", { resourceId: routeId }],
+        (old) => (old !== undefined ? [...old, data] : [])
+      );
+    },
+  });
 
 export const useDeleteBolt = (
   routeId: string,
@@ -42,21 +29,10 @@ export const useDeleteBolt = (
 ) =>
   useMutation(() => Api.deleteBolt(boltId), {
     onSuccess: (data, variables, context) => {
-      queryClient.setQueryData<Point[]>(
-        ["points", { resourceId: routeId }],
+      queryClient.setQueryData<Bolt[]>(
+        ["bolts", { resourceId: pointId }],
         (old) =>
-          old !== undefined
-            ? old.map((point) => {
-                if (point.id === pointId) {
-                  return {
-                    ...point,
-                    bolts: point.bolts.filter((bolt) => bolt.id !== boltId),
-                  };
-                } else {
-                  return point;
-                }
-              })
-            : []
+          old !== undefined ? old.filter((bolt) => bolt.id !== boltId) : []
       );
 
       queryClient.setQueryData<Bolt[]>(

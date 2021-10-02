@@ -38,12 +38,15 @@ func WriteError(w http.ResponseWriter, err error) {
 	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
 		status = http.StatusConflict
 		error.Message = "Duplicate entry"
-	} else if errors.Is(err, ErrIllegalChildResource) {
+	} else if errors.Is(err, ErrLoopDetected) {
 		status = http.StatusConflict
-		error.Message = "Illegal child"
-	} else if errors.Is(err, ErrIllegalParentResource) {
-		status = http.StatusConflict
-		error.Message = "Illegal parent"
+		error.Message = err.Error()
+	} else if errors.Is(err, ErrMissingAttachmentPoint) || errors.Is(err, ErrInvalidAttachmentPoint) || errors.Is(err, ErrOrphanedResource) || errors.Is(err, ErrHierarchyStructureViolation) {
+		status = http.StatusBadRequest
+		error.Message = err.Error()
+	} else if errors.Is(err, ErrCorruptResource) {
+		status = http.StatusInternalServerError
+		error.Message = err.Error()
 	} else {
 		status = http.StatusInternalServerError
 	}

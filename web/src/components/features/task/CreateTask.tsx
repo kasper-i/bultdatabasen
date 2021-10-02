@@ -17,7 +17,7 @@ const CreateTask = (): ReactElement => {
 
   return (
     <Restricted>
-      <div className="flex space-x-2">
+      <div className="sm:w-96 flex space-x-2">
         <Input
           className="flex-grow"
           fluid

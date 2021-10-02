@@ -1,8 +1,9 @@
+import { InsertPosition } from "Api";
 import { Point } from "models/point";
-import { useCreatePoint } from "queries/pointQueries";
+import { useAttachPoint } from "queries/pointQueries";
 import { useRole } from "queries/roleQueries";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { Button } from "semantic-ui-react";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
@@ -22,68 +23,18 @@ interface Props {
 const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const [selectedPointId, setSelectedPointId] = useState<string>();
   const { role } = useRole(routeId);
+  const history = useHistory();
 
-  const createPoint = useCreatePoint(routeId);
+  const createPoint = useAttachPoint(routeId);
 
   const { pointId } = useParams<{
     pointId?: string;
   }>();
 
-  const mainPoints = useMemo(() => {
-    return new Map(points.map((point) => [point.id, point]));
-  }, [points]);
-
-  const orderedPoints = useMemo(() => {
-    let firstPoint: Point | undefined = undefined;
-
-    for (const point of points) {
-      if (
-        point.incoming == null ||
-        point.incoming.filter((point) => mainPoints.has(point.id)).length === 0
-      ) {
-        firstPoint = point;
-        break;
-      }
-    }
-
-    if (firstPoint == null) {
-      return [];
-    }
-
-    const orderedPoints: Point[] = [firstPoint];
-    let currentPoint: Point = firstPoint;
-
-    while (true) {
-      let nextPoint: Point | undefined = undefined;
-
-      if (
-        currentPoint?.outgoing == null ||
-        currentPoint.outgoing.length === 0
-      ) {
-        break;
-      } else {
-        const candidates = currentPoint.outgoing.filter((point) =>
-          mainPoints.has(point.id)
-        );
-
-        if (candidates.length !== 1) {
-          break;
-        } else {
-          const nextPointId = candidates[0].id;
-          nextPoint = mainPoints.get(nextPointId);
-        }
-      }
-
-      if (nextPoint != null) {
-        orderedPoints.push(nextPoint);
-        currentPoint = nextPoint;
-      } else {
-        break;
-      }
-    }
-
-    return orderedPoints;
-  }, [points, mainPoints]);
+  const changePoint = (pointId: string) => {
+    history.replace(`/route/${routeId}/point/${pointId}`);
+    setSelectedPointId(pointId);
+  };
 
   useEffect(() => {
     if (selectedPointId !== undefined) {
@@ -94,16 +45,14 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
       setSelectedPointId(pointId);
     } else {
       setSelectedPointId(
-        orderedPoints.length > 0
-          ? orderedPoints[orderedPoints.length - 1].id
-          : undefined
+        points.length > 0 ? points[points.length - 1].id : undefined
       );
     }
-  }, [pointId, selectedPointId, orderedPoints]);
+  }, [pointId, selectedPointId, points]);
 
   const selectedPointNumber = useMemo(() => {
     let number = 1;
-    for (const point of orderedPoints) {
+    for (const point of points) {
       if (point.id === selectedPointId) {
         break;
       }
@@ -112,30 +61,42 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
     }
 
     return number;
-  }, [orderedPoints, selectedPointId]);
+  }, [points, selectedPointId]);
 
   const selectedPoint = useMemo(() => {
-    return orderedPoints.find((point) => point.id === selectedPointId);
-  }, [orderedPoints, selectedPointId]);
+    return points.find((point) => point.id === selectedPointId);
+  }, [points, selectedPointId]);
 
   const editable = role === "owner";
 
   const getOffset = () => {
     if (editable) {
-      return (orderedPoints.length - selectedPointNumber) * 112 + 56;
+      return (points.length - selectedPointNumber) * 112 + 56;
     } else {
-      return (orderedPoints.length - selectedPointNumber) * 84;
+      return (points.length - selectedPointNumber) * 84;
     }
   };
+
+  const attachPoint = (position?: InsertPosition) => {
+    createPoint.mutate({
+      pointId: copiedPoint ?? undefined,
+      position,
+    });
+
+    sessionStorage.removeItem("copiedPoint");
+  };
+
+  const copiedPoint = sessionStorage.getItem("copiedPoint");
+  const attachIcon = copiedPoint != null ? "paste" : "plus";
 
   return (
     <div className="flex items-start">
       <Graph expandable={editable}>
-        {orderedPoints
+        {points
           .slice()
           .reverse()
           .map((point, index) => {
-            const first = index === orderedPoints.length - 1;
+            const first = index === points.length - 1;
             const anchor = index === 0;
             const intermediate = !first && !anchor;
             const selected = point.id === selectedPointId;
@@ -151,7 +112,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                   <BoltCircle
                     active={selected}
                     point={point}
-                    onClick={setSelectedPointId}
+                    onClick={changePoint}
                     main
                   />
 
@@ -171,7 +132,17 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                 {(first || intermediate) && (
                   <Vertex orientation={Orientation.NORTH}>
                     <Restricted>
-                      <Button disabled size="mini" circular icon="plus" />
+                      <Button
+                        circular
+                        size="mini"
+                        icon={attachIcon}
+                        onClick={() =>
+                          attachPoint({
+                            pointId: point.id,
+                            order: "after",
+                          })
+                        }
+                      />
                     </Restricted>
                   </Vertex>
                 )}
@@ -182,11 +153,11 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                       <Button
                         circular
                         size="mini"
-                        icon="plus"
+                        icon={attachIcon}
                         onClick={() =>
-                          createPoint.mutate({
-                            direction: "outgoing",
-                            linkedPointId: point.id,
+                          attachPoint({
+                            pointId: point.id,
+                            order: "after",
                           })
                         }
                       />
@@ -200,11 +171,11 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                       <Button
                         circular
                         size="mini"
-                        icon="plus"
+                        icon={attachIcon}
                         onClick={() =>
-                          createPoint.mutate({
-                            direction: "incoming",
-                            linkedPointId: point.id,
+                          attachPoint({
+                            pointId: point.id,
+                            order: "before",
                           })
                         }
                       />
@@ -214,14 +185,14 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
               </Junction>
             );
           })}
-        {orderedPoints.length === 0 && (
+        {points.length === 0 && (
           <Restricted>
             <Junction compact>
               <Vertex>
                 <Button
                   circular
-                  icon="plus"
-                  onClick={() => createPoint.mutate(undefined)}
+                  icon={attachIcon}
+                  onClick={() => attachPoint(undefined)}
                 />
               </Vertex>
             </Junction>

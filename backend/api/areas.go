@@ -46,7 +46,10 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var area model.Area
-	json.Unmarshal(reqBody, &area)
+	if err := json.Unmarshal(reqBody, &area); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	err := model.CreateArea(model.DB, &area, resourceId, userId)
 
