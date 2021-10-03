@@ -6,6 +6,11 @@ import (
 )
 
 func createSession(r *http.Request) model.Session {
-	userID := r.Context().Value("user_id").(string)
-	return model.NewSession(model.DB, &userID)
+	var userID *string
+
+	if value, ok := r.Context().Value("user_id").(string); ok {
+		userID = &value
+	}
+
+	return model.NewSession(model.DB, userID)
 }
