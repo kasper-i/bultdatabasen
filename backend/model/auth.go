@@ -1,18 +1,14 @@
-package auth
-
-import (
-	"gorm.io/gorm"
-)
+package model
 
 type AssignedRole struct {
 	Role       string
 	ResourceID string
 }
 
-func GetRoles(db *gorm.DB, userID string) []AssignedRole {
+func (sess Session) GetRoles(userID string) []AssignedRole {
 	var roles []AssignedRole
 
-	db.Raw(`SELECT resource_id, role
+	sess.DB.Raw(`SELECT resource_id, role
 			FROM user
 			RIGHT JOIN user_role ON user.id = user_role.user_id
 			WHERE user.id = ?

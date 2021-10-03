@@ -3,9 +3,26 @@ package model
 import (
 	"bultdatabasen/utils"
 	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
+
+type Session struct {
+	DB     *gorm.DB
+	UserID *string
+}
+
+func NewSession(db *gorm.DB, userID *string) Session {
+	return Session{DB: db, UserID: userID}
+}
+
+func (sess Session) Transaction(fn func(sess Session) error) error {
+	return sess.DB.Transaction(func(tx *gorm.DB) error {
+		sess := NewSession(tx, sess.UserID)
+		return fn(sess)
+	})
+}
 
 func getDescendantsQuery(resourceType string) string {
 	return fmt.Sprintf(`WITH RECURSIVE cte (id, name, type, parent_id, first) AS (
@@ -28,32 +45,43 @@ func getDescendantsQuery(resourceType string) string {
 	WHERE cte.first <> TRUE`, GetResourceDepth(resourceType), resourceType, resourceType, resourceType)
 }
 
-func createResource(tx *gorm.DB, resource Resource) error {
+func (sess Session) createResource(resource Resource) error {
 	resource.Depth = GetResourceDepth(resource.Type)
 
 	if resource.ParentID == nil {
 		return utils.ErrOrphanedResource
 	}
 
-	if !checkParentAllowed(tx, resource, *resource.ParentID) {
+	if !sess.checkParentAllowed(resource, *resource.ParentID) {
 		return utils.ErrHierarchyStructureViolation
 	}
 
-	return tx.Create(&resource).Error
+	resource.BirthTime = time.Now()
+	resource.ModifiedTime = time.Now()
+
+	resource.CreatorID = *sess.UserID
+	resource.LastUpdatedByID = *sess.UserID
+
+	return sess.DB.Create(&resource).Error
 }
 
-func moveResource(tx *gorm.DB, resource Resource, newParentID string) error {
-	if !checkParentAllowed(tx, resource, newParentID) {
+func (sess Session) moveResource(resource Resource, newParentID string) error {
+	if !sess.checkParentAllowed(resource, newParentID) {
 		return utils.ErrHierarchyStructureViolation
 	}
 
-	return tx.Exec(`UPDATE resource SET parent_id = ? WHERE id = ?`, newParentID, resource.ID).Error
+	return sess.DB.Exec(`UPDATE resource SET parent_id = ? WHERE id = ?`, newParentID, resource.ID).Error
 }
 
-func checkParentAllowed(tx *gorm.DB, resource Resource, parentID string) bool {
+func (sess Session) touchResource(resourceID string) error {
+	return sess.DB.Exec(`UPDATE resource SET mtime = ?, muser_id = ? WHERE id = ?`,
+		time.Now(), sess.UserID, resourceID).Error
+}
+
+func (sess Session) checkParentAllowed(resource Resource, parentID string) bool {
 	var parentResource Resource
 
-	if err := tx.First(&parentResource, "id = ?", parentID).Error; err != nil {
+	if err := sess.DB.First(&parentResource, "id = ?", parentID).Error; err != nil {
 		return false
 	}
 
@@ -83,10 +111,10 @@ func checkParentAllowed(tx *gorm.DB, resource Resource, parentID string) bool {
 	}
 }
 
-func checkSameParent(tx *gorm.DB, resourceID1, resourceID2 string) bool {
+func (sess Session) checkSameParent(resourceID1, resourceID2 string) bool {
 	var parents []Resource = make([]Resource, 0)
 
-	if err := tx.Raw(`SELECT parent.*
+	if err := sess.DB.Raw(`SELECT parent.*
 		FROM resource
 		LEFT JOIN resource parent ON resource.parent_id = parent.id
 		WHERE resource.id IN (?, ?)`, resourceID1, resourceID2).Scan(&parents).Error; err != nil {
@@ -100,19 +128,19 @@ func checkSameParent(tx *gorm.DB, resourceID1, resourceID2 string) bool {
 	return parents[0].ID == parents[1].ID
 }
 
-func addFosterParent(tx *gorm.DB, resource Resource, fosterParentID string) error {
+func (sess Session) addFosterParent(resource Resource, fosterParentID string) error {
 	if resource.ParentID == nil {
 		return utils.ErrOrphanedResource
 	}
 
-	if !checkSameParent(tx, fosterParentID, *resource.ParentID) {
+	if !sess.checkSameParent(fosterParentID, *resource.ParentID) {
 		return utils.ErrHierarchyStructureViolation
 	}
 
-	return tx.Exec(`INSERT INTO foster_care (id, foster_parent_id) VALUES (?, ?)`,
+	return sess.DB.Exec(`INSERT INTO foster_care (id, foster_parent_id) VALUES (?, ?)`,
 		resource.ID, fosterParentID).Error
 }
 
-func leaveFosterCare(tx *gorm.DB, resourceID, fosterParentID string) error {
-	return tx.Exec(`DELETE FROM foster_care WHERE id = ? AND foster_parent_id = ?`, resourceID, fosterParentID).Error
+func (sess Session) leaveFosterCare(resourceID, fosterParentID string) error {
+	return sess.DB.Exec(`DELETE FROM foster_care WHERE id = ? AND foster_parent_id = ?`, resourceID, fosterParentID).Error
 }

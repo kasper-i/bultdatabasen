@@ -11,10 +11,11 @@ import (
 )
 
 func GetRoutes(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceId := vars["resourceID"]
 
-	if routes, err := model.GetRoutes(model.DB, parentResourceId); err != nil {
+	if routes, err := sess.GetRoutes(parentResourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, routes)
@@ -22,10 +23,11 @@ func GetRoutes(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetRoute(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if route, err := model.GetRoute(model.DB, resourceId); err != nil {
+	if route, err := sess.GetRoute(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, route)
@@ -33,6 +35,7 @@ func GetRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateRoute(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
@@ -43,7 +46,7 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := model.CreateRoute(model.DB, &route, parentResourceID)
+	err := sess.CreateRoute(&route, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -53,10 +56,11 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteRoute(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if err := model.DeleteRoute(model.DB, resourceId); err != nil {
+	if err := sess.DeleteRoute(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

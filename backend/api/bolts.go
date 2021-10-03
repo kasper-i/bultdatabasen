@@ -11,10 +11,11 @@ import (
 )
 
 func GetBolts(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceId := vars["resourceID"]
 
-	if bolts, err := model.GetBolts(model.DB, parentResourceId); err != nil {
+	if bolts, err := sess.GetBolts(parentResourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, bolts)
@@ -22,10 +23,11 @@ func GetBolts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetBolt(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if bolt, err := model.GetBolt(model.DB, resourceId); err != nil {
+	if bolt, err := sess.GetBolt(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, bolt)
@@ -33,6 +35,7 @@ func GetBolt(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateBolt(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
@@ -43,7 +46,7 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := model.CreateBolt(model.DB, &bolt, parentResourceID)
+	err := sess.CreateBolt(&bolt, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -53,10 +56,11 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteBolt(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if err := model.DeleteBolt(model.DB, resourceId); err != nil {
+	if err := sess.DeleteBolt(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

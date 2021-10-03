@@ -11,10 +11,11 @@ import (
 )
 
 func GetCrags(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceId := vars["resourceID"]
 
-	if crags, err := model.GetCrags(model.DB, parentResourceId); err != nil {
+	if crags, err := sess.GetCrags(parentResourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, crags)
@@ -22,10 +23,11 @@ func GetCrags(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCrag(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if crag, err := model.GetCrag(model.DB, resourceId); err != nil {
+	if crag, err := sess.GetCrag(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, crag)
@@ -33,6 +35,7 @@ func GetCrag(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateCrag(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
@@ -43,7 +46,7 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := model.CreateCrag(model.DB, &crag, parentResourceID)
+	err := sess.CreateCrag(&crag, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -53,10 +56,11 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteCrag(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if err := model.DeleteCrag(model.DB, resourceId); err != nil {
+	if err := sess.DeleteCrag(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

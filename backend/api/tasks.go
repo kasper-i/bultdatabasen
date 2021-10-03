@@ -11,10 +11,11 @@ import (
 )
 
 func GetTasks(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceId := vars["resourceID"]
 
-	if tasks, err := model.GetTasks(model.DB, parentResourceId); err != nil {
+	if tasks, err := sess.GetTasks(parentResourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, tasks)
@@ -22,10 +23,11 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTask(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if task, err := model.GetTask(model.DB, resourceId); err != nil {
+	if task, err := sess.GetTask(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, task)
@@ -33,6 +35,7 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateTask(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
@@ -43,7 +46,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := model.CreateTask(model.DB, &task, parentResourceID)
+	err := sess.CreateTask(&task, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -53,6 +56,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateTask(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	taskID := vars["resourceID"]
 
@@ -63,7 +67,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := model.UpdateTask(model.DB, &task, taskID)
+	err := sess.UpdateTask(&task, taskID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -73,10 +77,11 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if err := model.DeleteTask(model.DB, resourceId); err != nil {
+	if err := sess.DeleteTask(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

@@ -16,10 +16,11 @@ type CreatePointRequest struct {
 }
 
 func GetPoints(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID := vars["resourceID"]
 
-	if resource, err := model.GetResource(model.DB, routeID); err != nil {
+	if resource, err := sess.GetResource(routeID); err != nil {
 		utils.WriteError(w, err)
 		return
 	} else if resource.Type != "route" {
@@ -27,7 +28,7 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if points, err := model.GetPoints(model.DB, routeID); err != nil {
+	if points, err := sess.GetPoints(routeID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, points)
@@ -35,6 +36,7 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 }
 
 func AttachPoint(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID := vars["resourceID"]
 
@@ -53,7 +55,7 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	point, err := model.AttachPoint(model.DB, routeID, request.PointID, request.Position)
+	point, err := sess.AttachPoint(routeID, request.PointID, request.Position)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -67,11 +69,12 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func DetachPoint(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID := vars["resourceID"]
 	pointID := vars["pointID"]
 
-	if err := model.DetachPoint(model.DB, routeID, pointID); err != nil {
+	if err := sess.DetachPoint(routeID, pointID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

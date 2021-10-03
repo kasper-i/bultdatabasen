@@ -2,18 +2,21 @@ package model
 
 import (
 	"fmt"
-
-	"gorm.io/gorm"
+	"time"
 )
 
 const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 
 type Resource struct {
-	ID       string  `gorm:"primaryKey" json:"id"`
-	Name     *string `json:"name"`
-	Type     string  `json:"type"`
-	Depth    Depth   `json:"-"`
-	ParentID *string `json:"parentId"`
+	ID              string    `gorm:"primaryKey" json:"id"`
+	Name            *string   `json:"name"`
+	Type            string    `json:"type"`
+	Depth           Depth     `json:"-"`
+	ParentID        *string   `json:"parentId"`
+	BirthTime       time.Time `gorm:"column:btime" json:"-"`
+	ModifiedTime    time.Time `gorm:"column:mtime" json:"-"`
+	CreatorID       string    `gorm:"column:buser_id" json:"-"`
+	LastUpdatedByID string    `gorm:"column:muser_id" json:"-"`
 }
 
 type Parent struct {
@@ -77,20 +80,20 @@ func GetResourceDepth(resourceType string) Depth {
 	}
 }
 
-func GetResource(db *gorm.DB, resourceID string) (*Resource, error) {
+func (sess Session) GetResource(resourceID string) (*Resource, error) {
 	var resource Resource
 
-	if err := db.First(&resource, "id = ?", resourceID).Error; err != nil {
+	if err := sess.DB.First(&resource, "id = ?", resourceID).Error; err != nil {
 		return nil, err
 	}
 
 	return &resource, nil
 }
 
-func GetAncestors(db *gorm.DB, resourceID string) ([]Resource, error) {
+func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	var ancestors []Resource
 
-	err := db.Raw(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
+	err := sess.DB.Raw(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
 		SELECT id, name, type, parent_id
 		FROM resource
 		WHERE id = ?
@@ -109,10 +112,10 @@ func GetAncestors(db *gorm.DB, resourceID string) ([]Resource, error) {
 	return ancestors, nil
 }
 
-func GetChildren(db *gorm.DB, resourceID string) ([]Resource, error) {
+func (sess Session) GetChildren(resourceID string) ([]Resource, error) {
 	var children []Resource = make([]Resource, 0)
 
-	err := db.Raw(`SELECT * FROM resource
+	err := sess.DB.Raw(`SELECT * FROM resource
 	WHERE parent_id = ?`, resourceID).Scan(&children).Error
 
 	if err != nil {
@@ -122,10 +125,10 @@ func GetChildren(db *gorm.DB, resourceID string) ([]Resource, error) {
 	return children, nil
 }
 
-func GetCounts(db *gorm.DB, resourceID string) ([]ResourceCount, error) {
+func (sess Session) GetCounts(resourceID string) ([]ResourceCount, error) {
 	var counts []ResourceCount = make([]ResourceCount, 0)
 
-	err := db.Raw(`WITH RECURSIVE cte (id, type, parent_id, first) AS (
+	err := sess.DB.Raw(`WITH RECURSIVE cte (id, type, parent_id, first) AS (
 		SELECT id, type, parent_id, TRUE
 		FROM resource
 		WHERE id = ?
@@ -154,11 +157,11 @@ func parseString(value interface{}) *string {
 	}
 }
 
-func Search(db *gorm.DB, name string) ([]ResourceWithParents, error) {
+func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	var results []map[string]interface{}
 	var resources []ResourceWithParents = make([]ResourceWithParents, 0)
 
-	err := db.Raw(`SELECT
+	err := sess.DB.Raw(`SELECT
 		r1.*,
 		r2.id as r2_id, r2.name as r2_name, r2.type as r2_type,
 		r3.id as r3_id, r3.name as r3_name, r3.type as r3_type

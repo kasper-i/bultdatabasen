@@ -29,20 +29,20 @@ func (Image) TableName() string {
 	return "image"
 }
 
-func GetImages(db *gorm.DB, resourceID string) ([]Image, error) {
+func (sess Session) GetImages(resourceID string) ([]Image, error) {
 	var images []Image = make([]Image, 0)
 
-	if err := db.Raw(getDescendantsQuery("image"), resourceID).Scan(&images).Error; err != nil {
+	if err := sess.DB.Raw(getDescendantsQuery("image"), resourceID).Scan(&images).Error; err != nil {
 		return nil, err
 	}
 
 	return images, nil
 }
 
-func GetImage(db *gorm.DB, resourceID string) (*Image, error) {
+func (sess Session) GetImage(resourceID string) (*Image, error) {
 	var image Image
 
-	if err := db.Raw(`SELECT * FROM image WHERE image.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM image WHERE image.id = ?`, resourceID).
 		Scan(&image).Error; err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func GetImage(db *gorm.DB, resourceID string) (*Image, error) {
 	return &image, nil
 }
 
-func UploadImage(db *gorm.DB, parentResourceID string, bytes []byte, mimeType string) (*Image, error) {
+func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType string) (*Image, error) {
 	img := Image{
 		ID:        uuid.Must(uuid.NewRandom()).String(),
 		Timestamp: time.Now(),
@@ -102,12 +102,12 @@ func UploadImage(db *gorm.DB, parentResourceID string, bytes []byte, mimeType st
 		img.Timestamp = timestamp
 	}
 
-	err = db.Transaction(func(tx *gorm.DB) error {
-		if err := createResource(tx, resource); err != nil {
+	err = sess.Transaction(func(sess Session) error {
+		if err := sess.createResource(resource); err != nil {
 			return err
 		}
 
-		if err := tx.Create(&img).Error; err != nil {
+		if err := sess.DB.Create(&img).Error; err != nil {
 			return err
 		}
 
@@ -133,13 +133,13 @@ func UploadImage(db *gorm.DB, parentResourceID string, bytes []byte, mimeType st
 	return &img, nil
 }
 
-func DeleteImage(db *gorm.DB, resourceID string) error {
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Delete(&Image{ID: resourceID}).Error; err != nil {
+func (sess Session) DeleteImage(resourceID string) error {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.DB.Delete(&Image{ID: resourceID}).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Delete(&Resource{ID: resourceID}).Error; err != nil {
+		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
 			return err
 		}
 

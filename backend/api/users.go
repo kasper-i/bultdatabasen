@@ -13,9 +13,10 @@ import (
 )
 
 func GetMyUser(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	userId := r.Context().Value("user_id").(string)
 
-	if user, err := model.GetUser(model.DB, userId); err != nil {
+	if user, err := sess.GetUser(userId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, user)
@@ -23,6 +24,7 @@ func GetMyUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	userId := r.Context().Value("user_id").(string)
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
@@ -32,7 +34,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user, err := model.GetUser(model.DB, userId); err != nil {
+	if user, err := sess.GetUser(userId); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			user = &model.User{
 				ID:       userId,
@@ -40,7 +42,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 				JoinDate: time.Now(),
 			}
 
-			if err := model.CreateUser(model.DB, user); err != nil {
+			if err := sess.CreateUser(user); err != nil {
 				utils.WriteError(w, err)
 				return
 			} else {
@@ -54,7 +56,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		user.Name = desiredUser.Name
 
-		err := model.UpdateUser(model.DB, user)
+		err := sess.UpdateUser(user)
 
 		if err != nil {
 			utils.WriteError(w, err)

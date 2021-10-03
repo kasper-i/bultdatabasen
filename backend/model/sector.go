@@ -15,20 +15,20 @@ func (Sector) TableName() string {
 	return "sector"
 }
 
-func GetSectors(db *gorm.DB, resourceID string) ([]Sector, error) {
+func (sess Session) GetSectors(resourceID string) ([]Sector, error) {
 	var sectors []Sector = make([]Sector, 0)
 
-	if err := db.Raw(getDescendantsQuery("sector"), resourceID).Scan(&sectors).Error; err != nil {
+	if err := sess.DB.Raw(getDescendantsQuery("sector"), resourceID).Scan(&sectors).Error; err != nil {
 		return nil, err
 	}
 
 	return sectors, nil
 }
 
-func GetSector(db *gorm.DB, resourceID string) (*Sector, error) {
+func (sess Session) GetSector(resourceID string) (*Sector, error) {
 	var sector Sector
 
-	if err := db.Raw(`SELECT * FROM sector LEFT JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM sector LEFT JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
 		Scan(&sector).Error; err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func GetSector(db *gorm.DB, resourceID string) (*Sector, error) {
 	return &sector, nil
 }
 
-func CreateSector(db *gorm.DB, sector *Sector, parentResourceID string) error {
+func (sess Session) CreateSector(sector *Sector, parentResourceID string) error {
 	sector.ID = uuid.Must(uuid.NewRandom()).String()
 	sector.ParentID = parentResourceID
 
@@ -51,12 +51,12 @@ func CreateSector(db *gorm.DB, sector *Sector, parentResourceID string) error {
 		ParentID: &parentResourceID,
 	}
 
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := createResource(tx, resource); err != nil {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.createResource(resource); err != nil {
 			return err
 		}
 
-		if err := tx.Create(&sector).Error; err != nil {
+		if err := sess.DB.Create(&sector).Error; err != nil {
 			return err
 		}
 		return nil
@@ -65,13 +65,13 @@ func CreateSector(db *gorm.DB, sector *Sector, parentResourceID string) error {
 	return err
 }
 
-func DeleteSector(db *gorm.DB, resourceID string) error {
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Delete(&Sector{ID: resourceID}).Error; err != nil {
+func (sess Session) DeleteSector(resourceID string) error {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.DB.Delete(&Sector{ID: resourceID}).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Delete(&Resource{ID: resourceID}).Error; err != nil {
+		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
 			return err
 		}
 

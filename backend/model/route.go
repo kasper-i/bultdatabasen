@@ -20,20 +20,20 @@ func (Route) TableName() string {
 	return "route"
 }
 
-func GetRoutes(db *gorm.DB, resourceID string) ([]Route, error) {
+func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
 	var routes []Route = make([]Route, 0)
 
-	if err := db.Raw(getDescendantsQuery("route"), resourceID).Scan(&routes).Error; err != nil {
+	if err := sess.DB.Raw(getDescendantsQuery("route"), resourceID).Scan(&routes).Error; err != nil {
 		return nil, err
 	}
 
 	return routes, nil
 }
 
-func GetRoute(db *gorm.DB, resourceID string) (*Route, error) {
+func (sess Session) GetRoute(resourceID string) (*Route, error) {
 	var route Route
 
-	if err := db.Raw(`SELECT * FROM route LEFT JOIN resource ON route.id = resource.id WHERE route.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM route LEFT JOIN resource ON route.id = resource.id WHERE route.id = ?`, resourceID).
 		Scan(&route).Error; err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func GetRoute(db *gorm.DB, resourceID string) (*Route, error) {
 	return &route, nil
 }
 
-func CreateRoute(db *gorm.DB, route *Route, parentResourceID string) error {
+func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 	route.ID = uuid.Must(uuid.NewRandom()).String()
 	route.ParentID = parentResourceID
 
@@ -56,12 +56,12 @@ func CreateRoute(db *gorm.DB, route *Route, parentResourceID string) error {
 		ParentID: &parentResourceID,
 	}
 
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := createResource(tx, resource); err != nil {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.createResource(resource); err != nil {
 			return err
 		}
 
-		if err := tx.Create(&route).Error; err != nil {
+		if err := sess.DB.Create(&route).Error; err != nil {
 			return err
 		}
 
@@ -71,13 +71,13 @@ func CreateRoute(db *gorm.DB, route *Route, parentResourceID string) error {
 	return err
 }
 
-func DeleteRoute(db *gorm.DB, resourceID string) error {
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Delete(&Route{ID: resourceID}).Error; err != nil {
+func (sess Session) DeleteRoute(resourceID string) error {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.DB.Delete(&Route{ID: resourceID}).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Delete(&Resource{ID: resourceID}).Error; err != nil {
+		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
 			return err
 		}
 

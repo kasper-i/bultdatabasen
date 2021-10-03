@@ -11,10 +11,11 @@ import (
 )
 
 func GetSectors(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceId := vars["resourceID"]
 
-	if sectors, err := model.GetSectors(model.DB, parentResourceId); err != nil {
+	if sectors, err := sess.GetSectors(parentResourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, sectors)
@@ -22,10 +23,11 @@ func GetSectors(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetSector(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if sector, err := model.GetSector(model.DB, resourceId); err != nil {
+	if sector, err := sess.GetSector(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, sector)
@@ -33,6 +35,7 @@ func GetSector(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateSector(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
@@ -43,7 +46,7 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := model.CreateSector(model.DB, &sector, parentResourceID)
+	err := sess.CreateSector(&sector, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -53,10 +56,11 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteSector(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if err := model.DeleteSector(model.DB, resourceId); err != nil {
+	if err := sess.DeleteSector(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

@@ -15,20 +15,20 @@ func (Area) TableName() string {
 	return "area"
 }
 
-func GetAreas(db *gorm.DB, resourceID string) ([]Area, error) {
+func (sess Session) GetAreas(resourceID string) ([]Area, error) {
 	var areas []Area = make([]Area, 0)
 
-	if err := db.Raw(getDescendantsQuery("area"), resourceID).Scan(&areas).Error; err != nil {
+	if err := sess.DB.Raw(getDescendantsQuery("area"), resourceID).Scan(&areas).Error; err != nil {
 		return nil, err
 	}
 
 	return areas, nil
 }
 
-func GetArea(db *gorm.DB, resourceID string) (*Area, error) {
+func (sess Session) GetArea(resourceID string) (*Area, error) {
 	var area Area
 
-	if err := db.Raw(`SELECT * FROM area LEFT JOIN resource ON area.id = resource.id WHERE area.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM area LEFT JOIN resource ON area.id = resource.id WHERE area.id = ?`, resourceID).
 		Scan(&area).Error; err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func GetArea(db *gorm.DB, resourceID string) (*Area, error) {
 	return &area, nil
 }
 
-func CreateArea(db *gorm.DB, area *Area, parentResourceID string, userID string) error {
+func (sess Session) CreateArea(area *Area, parentResourceID string, userID string) error {
 	area.ID = uuid.Must(uuid.NewRandom()).String()
 
 	resource := Resource{
@@ -50,16 +50,16 @@ func CreateArea(db *gorm.DB, area *Area, parentResourceID string, userID string)
 		ParentID: &parentResourceID,
 	}
 
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := createResource(tx, resource); err != nil {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.createResource(resource); err != nil {
 			return err
 		}
 
-		if err := tx.Create(&area).Error; err != nil {
+		if err := sess.DB.Create(&area).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Exec("INSERT INTO user_role VALUES (?, ?, ?)", userID, area.ID, "owner").Error; err != nil {
+		if err := sess.DB.Exec("INSERT INTO user_role VALUES (?, ?, ?)", userID, area.ID, "owner").Error; err != nil {
 			return err
 		}
 
@@ -69,13 +69,13 @@ func CreateArea(db *gorm.DB, area *Area, parentResourceID string, userID string)
 	return err
 }
 
-func DeleteArea(db *gorm.DB, resourceID string) error {
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Delete(&Area{ID: resourceID}).Error; err != nil {
+func (sess Session) DeleteArea(resourceID string) error {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.DB.Delete(&Area{ID: resourceID}).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Delete(&Resource{ID: resourceID}).Error; err != nil {
+		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
 			return err
 		}
 

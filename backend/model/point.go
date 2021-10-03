@@ -27,10 +27,10 @@ func (Point) TableName() string {
 	return "point"
 }
 
-func getParents(db *gorm.DB, pointIDs []string) ([]Parent, error) {
+func (sess Session) getParents(pointIDs []string) ([]Parent, error) {
 	var parents []Parent = make([]Parent, 0)
 
-	err := db.Raw(`
+	err := sess.DB.Raw(`
 		SELECT parent.*, child.id AS child_id, child.foster_care as foster_parent
 		FROM (
 				SELECT id, parent_id, FALSE as foster_care
@@ -46,11 +46,11 @@ func getParents(db *gorm.DB, pointIDs []string) ([]Parent, error) {
 	return parents, err
 }
 
-func getRouteGraph(db *gorm.DB, routeID string) (map[string]*routeGraphVertex, error) {
+func (sess Session) getRouteGraph(routeID string) (map[string]*routeGraphVertex, error) {
 	var connections []Connection = make([]Connection, 0)
 	var graph map[string]*routeGraphVertex = make(map[string]*routeGraphVertex)
 
-	err := db.Raw(`
+	err := sess.DB.Raw(`
 		SELECT connection.*
 		FROM connection
 		WHERE route_id = ?`, routeID).Scan(&connections).Error
@@ -58,7 +58,7 @@ func getRouteGraph(db *gorm.DB, routeID string) (map[string]*routeGraphVertex, e
 	if len(connections) == 0 {
 		var points []*Point = make([]*Point, 0)
 
-		if err := db.Raw(getDescendantsQuery("point"), routeID).Scan(&points).Error; err != nil {
+		if err := sess.DB.Raw(getDescendantsQuery("point"), routeID).Scan(&points).Error; err != nil {
 			return nil, err
 		}
 
@@ -101,13 +101,13 @@ func getRouteGraph(db *gorm.DB, routeID string) (map[string]*routeGraphVertex, e
 	return graph, err
 }
 
-func sortPoints(db *gorm.DB, routeID string, pointsMap map[string]*Point) ([]*Point, error) {
+func (sess Session) sortPoints(routeID string, pointsMap map[string]*Point) ([]*Point, error) {
 	var routeGraph map[string]*routeGraphVertex
 	var orderedPoints []*Point = make([]*Point, 0)
 	var err error
 	var startPointID string
 
-	if routeGraph, err = getRouteGraph(db, routeID); err != nil {
+	if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
 		return nil, err
 	}
 
@@ -149,11 +149,11 @@ func sortPoints(db *gorm.DB, routeID string, pointsMap map[string]*Point) ([]*Po
 	return orderedPoints, nil
 }
 
-func GetPoints(db *gorm.DB, resourceID string) ([]*Point, error) {
+func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 	var pointsMap map[string]*Point = make(map[string]*Point)
 	var points []*Point = make([]*Point, 0)
 
-	if err := db.Raw(getDescendantsQuery("point"), resourceID).Scan(&points).Error; err != nil {
+	if err := sess.DB.Raw(getDescendantsQuery("point"), resourceID).Scan(&points).Error; err != nil {
 		return nil, err
 	}
 
@@ -169,7 +169,7 @@ func GetPoints(db *gorm.DB, resourceID string) ([]*Point, error) {
 		index += 1
 	}
 
-	if parents, err := getParents(db, pointIDs); err == nil {
+	if parents, err := sess.getParents(pointIDs); err == nil {
 		for _, parent := range parents {
 			if point, ok := pointsMap[*parent.ChildID]; ok {
 				point.Parents = append(point.Parents, parent)
@@ -181,16 +181,16 @@ func GetPoints(db *gorm.DB, resourceID string) ([]*Point, error) {
 		return points, nil
 	}
 
-	return sortPoints(db, resourceID, pointsMap)
+	return sess.sortPoints(resourceID, pointsMap)
 }
 
-func AttachPoint(db *gorm.DB, routeID string, pointID *string, position *InsertPosition) (*Point, error) {
+func (sess Session) AttachPoint(routeID string, pointID *string, position *InsertPosition) (*Point, error) {
 	var err error
 	var point *Point = &Point{}
 	var pointResource *Resource
 	var routeGraph map[string]*routeGraphVertex
 
-	if routeGraph, err = getRouteGraph(db, routeID); err != nil {
+	if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
 		return nil, err
 	}
 
@@ -216,7 +216,7 @@ func AttachPoint(db *gorm.DB, routeID string, pointID *string, position *InsertP
 	if pointID != nil {
 		var err error
 
-		if pointResource, err = GetResource(db, *pointID); err != nil {
+		if pointResource, err = sess.GetResource(*pointID); err != nil {
 			return nil, err
 		}
 
@@ -225,11 +225,11 @@ func AttachPoint(db *gorm.DB, routeID string, pointID *string, position *InsertP
 		}
 	}
 
-	err = db.Transaction(func(tx *gorm.DB) error {
+	err = sess.Transaction(func(sess Session) error {
 		if pointID != nil {
 			point.ID = *pointID
 
-			if err := addFosterParent(tx, *pointResource, routeID); err != nil {
+			if err := sess.addFosterParent(*pointResource, routeID); err != nil {
 				return err
 			}
 		} else {
@@ -242,11 +242,11 @@ func AttachPoint(db *gorm.DB, routeID string, pointID *string, position *InsertP
 				ParentID: &routeID,
 			}
 
-			if err := createResource(tx, resource); err != nil {
+			if err := sess.createResource(resource); err != nil {
 				return err
 			}
 
-			if err := tx.Create(&point).Error; err != nil {
+			if err := sess.DB.Create(&point).Error; err != nil {
 				return err
 			}
 		}
@@ -264,19 +264,19 @@ func AttachPoint(db *gorm.DB, routeID string, pointID *string, position *InsertP
 				switch position.Order {
 				case "after":
 					if nextPoint != nil {
-						if err := DeleteConnection(tx, routeID, insertionPoint, *nextPoint); err != nil {
+						if err := sess.DeleteConnection(routeID, insertionPoint, *nextPoint); err != nil {
 							return err
 						}
-						if err := CreateConnection(tx, routeID, newPoint, *nextPoint); err != nil {
+						if err := sess.CreateConnection(routeID, newPoint, *nextPoint); err != nil {
 							return err
 						}
 					}
 				case "before":
 					if prevPoint != nil {
-						if err := DeleteConnection(tx, routeID, *prevPoint, insertionPoint); err != nil {
+						if err := sess.DeleteConnection(routeID, *prevPoint, insertionPoint); err != nil {
 							return err
 						}
-						if err := CreateConnection(tx, routeID, *prevPoint, newPoint); err != nil {
+						if err := sess.CreateConnection(routeID, *prevPoint, newPoint); err != nil {
 							return err
 						}
 					}
@@ -285,17 +285,17 @@ func AttachPoint(db *gorm.DB, routeID string, pointID *string, position *InsertP
 
 			switch position.Order {
 			case "after":
-				if err := CreateConnection(tx, routeID, insertionPoint, newPoint); err != nil {
+				if err := sess.CreateConnection(routeID, insertionPoint, newPoint); err != nil {
 					return err
 				}
 			case "before":
-				if err := CreateConnection(tx, routeID, newPoint, insertionPoint); err != nil {
+				if err := sess.CreateConnection(routeID, newPoint, insertionPoint); err != nil {
 					return err
 				}
 			}
 		}
 
-		if parents, err := getParents(tx, []string{point.ID}); err == nil {
+		if parents, err := sess.getParents([]string{point.ID}); err == nil {
 			point.Parents = parents
 		}
 
@@ -309,16 +309,16 @@ func AttachPoint(db *gorm.DB, routeID string, pointID *string, position *InsertP
 	return point, nil
 }
 
-func DetachPoint(db *gorm.DB, routeID string, pointID string) error {
+func (sess Session) DetachPoint(routeID string, pointID string) error {
 	var err error
 	var routeGraph map[string]*routeGraphVertex
 	var parents []Parent
 
-	if routeGraph, err = getRouteGraph(db, routeID); err != nil {
+	if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
 		return err
 	}
 
-	if parents, err = getParents(db, []string{pointID}); err != nil {
+	if parents, err = sess.getParents([]string{pointID}); err != nil {
 		return err
 	}
 
@@ -341,41 +341,41 @@ func DetachPoint(db *gorm.DB, routeID string, pointID string) error {
 
 	vertex, _ := routeGraph[pointID]
 
-	return db.Transaction(func(tx *gorm.DB) error {
+	return sess.Transaction(func(sess Session) error {
 		if vertex != nil {
 
 			nextPoint := vertex.OutgoingPointID
 			prevPoint := vertex.IncomingPointID
 
 			if prevPoint != nil {
-				if err := DeleteConnection(tx, routeID, *prevPoint, pointID); err != nil {
+				if err := sess.DeleteConnection(routeID, *prevPoint, pointID); err != nil {
 					return err
 				}
 			}
 
 			if nextPoint != nil {
-				if err := DeleteConnection(tx, routeID, pointID, *nextPoint); err != nil {
+				if err := sess.DeleteConnection(routeID, pointID, *nextPoint); err != nil {
 					return err
 				}
 			}
 
 			if prevPoint != nil && nextPoint != nil {
-				if err := CreateConnection(tx, routeID, *prevPoint, *nextPoint); err != nil {
+				if err := sess.CreateConnection(routeID, *prevPoint, *nextPoint); err != nil {
 					return err
 				}
 			}
 		}
 
 		if len(parents) == 1 {
-			if err := tx.Delete(&Point{ID: pointID}).Error; err != nil {
+			if err := sess.DB.Delete(&Point{ID: pointID}).Error; err != nil {
 				return err
 			}
 
-			if err := tx.Delete(&Resource{ID: pointID}).Error; err != nil {
+			if err := sess.DB.Delete(&Resource{ID: pointID}).Error; err != nil {
 				return err
 			}
 		} else if inFosterCare {
-			if err := leaveFosterCare(tx, pointID, routeID); err != nil {
+			if err := sess.leaveFosterCare(pointID, routeID); err != nil {
 				return err
 			}
 		} else {
@@ -388,11 +388,11 @@ func DetachPoint(db *gorm.DB, routeID string, pointID string) error {
 				}
 			}
 
-			if err := leaveFosterCare(tx, pointID, newOwnerID); err != nil {
+			if err := sess.leaveFosterCare(pointID, newOwnerID); err != nil {
 				return err
 			}
 
-			if err := moveResource(tx, Resource{ID: pointID, Type: "point"}, newOwnerID); err != nil {
+			if err := sess.moveResource(Resource{ID: pointID, Type: "point"}, newOwnerID); err != nil {
 				return err
 			}
 		}

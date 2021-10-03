@@ -15,20 +15,20 @@ func (Crag) TableName() string {
 	return "crag"
 }
 
-func GetCrags(db *gorm.DB, resourceID string) ([]Crag, error) {
+func (sess Session) GetCrags(resourceID string) ([]Crag, error) {
 	var crags []Crag = make([]Crag, 0)
 
-	if err := db.Raw(getDescendantsQuery("crag"), resourceID).Scan(&crags).Error; err != nil {
+	if err := sess.DB.Raw(getDescendantsQuery("crag"), resourceID).Scan(&crags).Error; err != nil {
 		return nil, err
 	}
 
 	return crags, nil
 }
 
-func GetCrag(db *gorm.DB, resourceID string) (*Crag, error) {
+func (sess Session) GetCrag(resourceID string) (*Crag, error) {
 	var crag Crag
 
-	if err := db.Raw(`SELECT * FROM crag LEFT JOIN resource ON crag.id = resource.id WHERE crag.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM crag LEFT JOIN resource ON crag.id = resource.id WHERE crag.id = ?`, resourceID).
 		Scan(&crag).Error; err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func GetCrag(db *gorm.DB, resourceID string) (*Crag, error) {
 	return &crag, nil
 }
 
-func CreateCrag(db *gorm.DB, crag *Crag, parentResourceID string) error {
+func (sess Session) CreateCrag(crag *Crag, parentResourceID string) error {
 	crag.ID = uuid.Must(uuid.NewRandom()).String()
 	crag.ParentID = parentResourceID
 
@@ -51,12 +51,12 @@ func CreateCrag(db *gorm.DB, crag *Crag, parentResourceID string) error {
 		ParentID: &parentResourceID,
 	}
 
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := createResource(tx, resource); err != nil {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.createResource(resource); err != nil {
 			return err
 		}
 
-		if err := tx.Create(&crag).Error; err != nil {
+		if err := sess.DB.Create(&crag).Error; err != nil {
 			return err
 		}
 		return nil
@@ -65,13 +65,13 @@ func CreateCrag(db *gorm.DB, crag *Crag, parentResourceID string) error {
 	return err
 }
 
-func DeleteCrag(db *gorm.DB, resourceID string) error {
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Delete(&Crag{ID: resourceID}).Error; err != nil {
+func (sess Session) DeleteCrag(resourceID string) error {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.DB.Delete(&Crag{ID: resourceID}).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Delete(&Resource{ID: resourceID}).Error; err != nil {
+		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
 			return err
 		}
 

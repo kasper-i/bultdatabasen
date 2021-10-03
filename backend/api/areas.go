@@ -11,13 +11,14 @@ import (
 )
 
 func GetAreas(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 	if resourceId == "" {
 		resourceId = model.RootID
 	}
 
-	if areas, err := model.GetAreas(model.DB, resourceId); err != nil {
+	if areas, err := sess.GetAreas(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, areas)
@@ -25,10 +26,11 @@ func GetAreas(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetArea(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if area, err := model.GetArea(model.DB, resourceId); err != nil {
+	if area, err := sess.GetArea(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, area)
@@ -36,6 +38,7 @@ func GetArea(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateArea(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 	if resourceId == "" {
@@ -51,7 +54,7 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := model.CreateArea(model.DB, &area, resourceId, userId)
+	err := sess.CreateArea(&area, resourceId, userId)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -61,10 +64,11 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteArea(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceId := vars["resourceID"]
 
-	if err := model.DeleteArea(model.DB, resourceId); err != nil {
+	if err := sess.DeleteArea(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

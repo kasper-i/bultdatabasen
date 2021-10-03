@@ -18,20 +18,20 @@ func (Task) TableName() string {
 	return "task"
 }
 
-func GetTasks(db *gorm.DB, resourceID string) ([]Task, error) {
+func (sess Session) GetTasks(resourceID string) ([]Task, error) {
 	var tasks []Task = make([]Task, 0)
 
-	if err := db.Raw(getDescendantsQuery("task"), resourceID).Scan(&tasks).Error; err != nil {
+	if err := sess.DB.Raw(getDescendantsQuery("task"), resourceID).Scan(&tasks).Error; err != nil {
 		return nil, err
 	}
 
 	return tasks, nil
 }
 
-func GetTask(db *gorm.DB, resourceID string) (*Task, error) {
+func (sess Session) GetTask(resourceID string) (*Task, error) {
 	var task Task
 
-	if err := db.Raw(`SELECT * FROM task LEFT JOIN resource ON task.id = resource.id WHERE task.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM task LEFT JOIN resource ON task.id = resource.id WHERE task.id = ?`, resourceID).
 		Scan(&task).Error; err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func GetTask(db *gorm.DB, resourceID string) (*Task, error) {
 	return &task, nil
 }
 
-func CreateTask(db *gorm.DB, task *Task, parentResourceID string) error {
+func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	task.ID = uuid.Must(uuid.NewRandom()).String()
 	task.ParentID = parentResourceID
 
@@ -59,12 +59,12 @@ func CreateTask(db *gorm.DB, task *Task, parentResourceID string) error {
 		ParentID: &parentResourceID,
 	}
 
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := createResource(tx, resource); err != nil {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.createResource(resource); err != nil {
 			return err
 		}
 
-		if err := tx.Create(&task).Error; err != nil {
+		if err := sess.DB.Create(&task).Error; err != nil {
 			return err
 		}
 		return nil
@@ -73,8 +73,8 @@ func CreateTask(db *gorm.DB, task *Task, parentResourceID string) error {
 	return err
 }
 
-func UpdateTask(db *gorm.DB, task *Task, taskID string) error {
-	original, err := GetTask(db, taskID)
+func (sess Session) UpdateTask(task *Task, taskID string) error {
+	original, err := sess.GetTask(taskID)
 	if err != nil {
 		return err
 	}
@@ -86,16 +86,26 @@ func UpdateTask(db *gorm.DB, task *Task, taskID string) error {
 		task.Status = "open"
 	}
 
-	return db.Updates(task).Error
-}
-
-func DeleteTask(db *gorm.DB, resourceID string) error {
-	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Delete(&Task{ID: resourceID}).Error; err != nil {
+	return sess.Transaction(func(sess Session) error {
+		if err := sess.touchResource(taskID); err != nil {
 			return err
 		}
 
-		if err := tx.Delete(&Resource{ID: resourceID}).Error; err != nil {
+		if err := sess.DB.Updates(task).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (sess Session) DeleteTask(resourceID string) error {
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.DB.Delete(&Task{ID: resourceID}).Error; err != nil {
+			return err
+		}
+
+		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
 			return err
 		}
 

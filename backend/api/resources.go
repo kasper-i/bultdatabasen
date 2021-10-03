@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"net/http"
 	"strings"
@@ -10,10 +9,11 @@ import (
 )
 
 func GetAncestors(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	id := vars["resourceID"]
 
-	if ancestors, err := model.GetAncestors(model.DB, id); err != nil {
+	if ancestors, err := sess.GetAncestors(id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		for i, j := 0, len(ancestors)-1; i < j; i, j = i+1, j-1 {
@@ -25,10 +25,11 @@ func GetAncestors(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetChildren(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	id := vars["resourceID"]
 
-	if children, err := model.GetChildren(model.DB, id); err != nil {
+	if children, err := sess.GetChildren(id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, children)
@@ -36,10 +37,11 @@ func GetChildren(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCounts(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	id := vars["resourceID"]
 
-	if counts, err := model.GetCounts(model.DB, id); err != nil {
+	if counts, err := sess.GetCounts(id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, counts)
@@ -47,6 +49,7 @@ func GetCounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func Search(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	names, ok := r.URL.Query()["name"]
 
 	if !ok {
@@ -61,7 +64,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if results, err := model.Search(model.DB, name); err != nil {
+	if results, err := sess.Search(name); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, results)

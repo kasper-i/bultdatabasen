@@ -1,7 +1,6 @@
 package authorizer
 
 import (
-	"bultdatabasen/auth"
 	"bultdatabasen/middleware/authenticator"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
@@ -29,7 +28,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 		resourceID := vars["resourceID"]
 		var userID string
 		var isAuthenticated bool
-		
+
 		if id, ok := r.Context().Value("user_id").(string); ok {
 			userID = id
 			isAuthenticated = true
@@ -39,9 +38,9 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			if isAuthenticated && r.Method != "OPTIONS" {
 				if maxRole := getMaxRole(resourceID, userID); maxRole != nil {
 					attachRole(w, r, maxRole.Role)
-				}				
-			}	
-			
+				}
+			}
+
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -75,14 +74,15 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-func getMaxRole(resourceID, userID string) *auth.AssignedRole {
+func getMaxRole(resourceID, userID string) *model.AssignedRole {
+	sess := model.NewSession(model.DB, &userID)
 	var err error
 
 	if resourceID == model.RootID {
 		return nil
 	}
 
-	roles := auth.GetRoles(model.DB, userID)
+	roles := sess.GetRoles(userID)
 
 	if len(roles) == 0 {
 		return nil
@@ -98,11 +98,11 @@ func getMaxRole(resourceID, userID string) *auth.AssignedRole {
 
 	var ancestors []model.Resource
 
-	if ancestors, err = model.GetAncestors(model.DB, resourceID); err != nil {
+	if ancestors, err = sess.GetAncestors(resourceID); err != nil {
 		return nil
 	}
 
-	var maxRole *auth.AssignedRole = nil
+	var maxRole *model.AssignedRole = nil
 
 	for _, ancestor := range ancestors {
 		for _, role := range roles {
@@ -119,7 +119,7 @@ func getMaxRole(resourceID, userID string) *auth.AssignedRole {
 	return nil
 }
 
-func roleValue(role *auth.AssignedRole) int {
+func roleValue(role *model.AssignedRole) int {
 	if role == nil {
 		return 0
 	}
@@ -132,7 +132,7 @@ func roleValue(role *auth.AssignedRole) int {
 	}
 }
 
-func max(r1, r2 *auth.AssignedRole) *auth.AssignedRole {
+func max(r1, r2 *model.AssignedRole) *model.AssignedRole {
 	if roleValue(r1) >= roleValue(r2) {
 		return r1
 	} else {

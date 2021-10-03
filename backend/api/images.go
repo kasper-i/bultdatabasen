@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"io/ioutil"
 	"net/http"
@@ -10,10 +9,11 @@ import (
 )
 
 func GetImages(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
-	if images, err := model.GetImages(model.DB, parentResourceID); err != nil {
+	if images, err := sess.GetImages(parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, images)
@@ -21,10 +21,11 @@ func GetImages(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetImage(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID := vars["resourceID"]
 
-	if image, err := model.GetImage(model.DB, resourceID); err != nil {
+	if image, err := sess.GetImage(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		w.Header().Set("Content-Type", image.MimeType)
@@ -33,10 +34,11 @@ func GetImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetThumbnail(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID := vars["resourceID"]
 
-	if image, err := model.GetImage(model.DB, resourceID); err != nil {
+	if image, err := sess.GetImage(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		w.Header().Set("Content-Type", image.MimeType)
@@ -45,6 +47,7 @@ func GetThumbnail(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
@@ -66,7 +69,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	switch mimeType {
 	case "image/jpeg", "image/jpg":
-		image, err := model.UploadImage(model.DB, parentResourceID, fileBytes, mimeType)
+		image, err := sess.UploadImage(parentResourceID, fileBytes, mimeType)
 
 		if err != nil {
 			utils.WriteError(w, err)
@@ -80,10 +83,11 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteImage(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID := vars["resourceID"]
 
-	err := model.DeleteImage(model.DB, resourceID)
+	err := sess.DeleteImage(resourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
