@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -100,5 +101,5 @@ func main() {
 	router.HandleFunc("/tasks/{resourceID}", api.UpdateTask).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/tasks/{resourceID}", api.DeleteTask).Methods(http.MethodDelete, http.MethodOptions)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(router)))
 }
