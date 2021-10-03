@@ -201,8 +201,8 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
           {renderImages()}
           <ImgsViewer
             imgs={images.data?.map((image) => ({
-              src: `${configData.API_URL}/images/${image.id}`,
-              thumbnail: `${configData.API_URL}/images/${image.id}/thumb`,
+              src: `${configData.API_URL}/images/${image.id}/lg`,
+              thumbnail: `${configData.API_URL}/images/${image.id}/xs`,
             }))}
             isOpen={currImg !== undefined}
             currImg={currImg}

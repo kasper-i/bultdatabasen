@@ -14,6 +14,19 @@ import (
 	"gorm.io/gorm"
 )
 
+var ImageSizes map[string]int
+
+func init() {
+	ImageSizes = make(map[string]int)
+
+	ImageSizes["xs"] = 300
+	ImageSizes["sm"] = 500
+	ImageSizes["md"] = 750
+	ImageSizes["lg"] = 1000
+	ImageSizes["xl"] = 1500
+	ImageSizes["2xl"] = 2500
+}
+
 type Image struct {
 	ID          string    `gorm:"primaryKey" json:"id"`
 	MimeType    string    `json:"mimeType"`
@@ -67,11 +80,8 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 		ParentID: &parentResourceID,
 	}
 
-	fileName := getImagePath(img.ID)
-	tempFileName := getImagePath("." + img.ID)
-
-	thumbName := getImagePath(img.ID + ".thumb")
-	tempThumbName := getImagePath("." + img.ID + ".thumb")
+	fileName := GetOriginalImageFilePath(img.ID)
+	tempFileName := GetOriginalImageFilePath("." + img.ID)
 
 	f, err := os.Create(tempFileName)
 	if err != nil {
@@ -90,10 +100,6 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 
 	img.Width = decodedImage.Bounds().Dx()
 	img.Height = decodedImage.Bounds().Dy()
-
-	if err := createThumbnail(decodedImage, tempThumbName); err != nil {
-		return nil, err
-	}
 
 	f.Seek(0, io.SeekStart)
 	if timestamp, err := getDatetime(f); err != nil {
@@ -115,18 +121,12 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 			return err
 		}
 
-		if err := os.Rename(tempThumbName, thumbName); err != nil {
-			return err
-		}
-
 		return nil
 	})
 
 	if err != nil {
 		os.Remove(fileName)
 		os.Remove(tempFileName)
-		os.Remove(thumbName)
-		os.Remove(tempThumbName)
 		return nil, err
 	}
 
@@ -143,12 +143,10 @@ func (sess Session) DeleteImage(resourceID string) error {
 			return err
 		}
 
-		if err := os.Remove(getImagePath(resourceID)); err != nil {
-			return err
-		}
+		os.Remove(GetOriginalImageFilePath(resourceID))
 
-		if err := os.Remove(getImagePath(resourceID + ".thumb")); err != nil {
-			return err
+		for version := range ImageSizes {
+			os.Remove(GetResizedImageFilePath(resourceID, version))
 		}
 
 		return nil
@@ -157,30 +155,54 @@ func (sess Session) DeleteImage(resourceID string) error {
 	return err
 }
 
-func getImagePath(imageID string) string {
+func GetOriginalImageFilePath(imageID string) string {
 	return "images/" + imageID
 }
 
-func createThumbnail(src image.Image, dstPath string) error {
-	var thumbnail *image.RGBA
-	output, err := os.Create(dstPath)
+func GetResizedImageFilePath(imageID string, version string) string {
+	return "images/" + imageID + "." + version
+}
+
+func ResizeImage(imageID string, version string) error {
+	dstPath := GetResizedImageFilePath(imageID, version)
+	tmpDstPath := GetResizedImageFilePath("."+imageID, version)
+	size := ImageSizes[version]
+
+	reader, err := os.Open(GetOriginalImageFilePath(imageID))
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	decodedImage, _, err := image.Decode(reader)
+	if err != nil {
+		return err
+	}
+
+	var canvas *image.RGBA
+	output, err := os.Create(tmpDstPath)
 	if err != nil {
 		return err
 	}
 	defer output.Close()
+	defer os.Remove(tmpDstPath)
 
-	width := src.Bounds().Dx()
-	height := src.Bounds().Dy()
+	width := float32(decodedImage.Bounds().Dx())
+	height := float32(decodedImage.Bounds().Dy())
 
 	if width >= height {
-		thumbnail = image.NewRGBA(image.Rect(0, 0, 200, int((200/float32(width))*float32(height))))
+		canvas = image.NewRGBA(image.Rect(0, 0, size, int((float32(size)/width)*height)))
 	} else {
-		thumbnail = image.NewRGBA(image.Rect(0, 0, int((200/float32(height))*float32(width)), 200))
+		canvas = image.NewRGBA(image.Rect(0, 0, int((float32(size)/height)*width), size))
 	}
 
-	draw.BiLinear.Scale(thumbnail, thumbnail.Rect, src, src.Bounds(), draw.Over, nil)
+	draw.CatmullRom.Scale(canvas, canvas.Rect, decodedImage, decodedImage.Bounds(), draw.Over, nil)
 
-	return jpeg.Encode(output, thumbnail, &jpeg.Options{Quality: jpeg.DefaultQuality})
+	if err := jpeg.Encode(output, canvas, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
+		return err
+	}
+
+	return os.Rename(tmpDstPath, dstPath)
 }
 
 func getDatetime(f *os.File) (time.Time, error) {

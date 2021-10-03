@@ -46,7 +46,7 @@ const ImagePreview = ({
         <img
           className="rounded"
           onClick={() => onClick?.(image.id)}
-          src={`${configData.API_URL}/images/${image.id}/thumb`}
+          src={`${configData.API_URL}/images/${image.id}/xs`}
           alt=""
         />
         {!locked && (

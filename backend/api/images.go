@@ -1,9 +1,11 @@
 package api
 
 import (
+	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -20,29 +22,37 @@ func GetImages(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetImage(w http.ResponseWriter, r *http.Request) {
+func DownloadImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID := vars["resourceID"]
+	version := vars["version"]
 
-	if image, err := sess.GetImage(resourceID); err != nil {
-		utils.WriteError(w, err)
-	} else {
-		w.Header().Set("Content-Type", image.MimeType)
-		http.ServeFile(w, r, "images/"+image.ID)
+	if _, ok := model.ImageSizes[version]; !ok && version != "original" {
+		utils.WriteResponse(w, http.StatusBadRequest, nil)
+		return
 	}
-}
-
-func GetThumbnail(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
-	vars := mux.Vars(r)
-	resourceID := vars["resourceID"]
 
 	if image, err := sess.GetImage(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		w.Header().Set("Content-Type", image.MimeType)
-		http.ServeFile(w, r, "images/"+image.ID+".thumb")
+
+		if version == "original" {
+			http.ServeFile(w, r, model.GetOriginalImageFilePath(image.ID))
+			return
+		}
+
+		path := model.GetResizedImageFilePath(image.ID, version)
+
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			if err := model.ResizeImage(image.ID, version); err != nil {
+				utils.WriteError(w, err)
+				return
+			}
+		}
+
+		http.ServeFile(w, r, path)
 	}
 }
 
