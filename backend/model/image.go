@@ -106,10 +106,22 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 	img.Height = decodedImage.Bounds().Dy()
 
 	f.Seek(0, io.SeekStart)
-	if timestamp, err := getDatetime(f); err != nil {
+
+	exifData, err := exif.Decode(f)
+	if err != nil {
+		return nil, err
+	}
+
+	if timestamp, err := exifData.DateTime(); err != nil {
 		return nil, err
 	} else {
 		img.Timestamp = timestamp
+	}
+
+	if rotation, err := getRotation(exifData); err != nil {
+		return nil, err
+	} else {
+		img.Rotation = rotation
 	}
 
 	err = sess.Transaction(func(sess Session) error {
@@ -232,14 +244,27 @@ func ResizeImage(imageID string, version string) error {
 	return os.Rename(tmpDstPath, dstPath)
 }
 
-func getDatetime(f *os.File) (time.Time, error) {
-	var tm time.Time
-
-	x, err := exif.Decode(f)
+func getRotation(exifData *exif.Exif) (int, error) {
+	raw, err := exifData.Get(exif.Orientation)
 	if err != nil {
-		return tm, err
+		return 0, err
 	}
 
-	tm, err = x.DateTime()
-	return tm, err
+	orientation, err := raw.Int(0)
+	if err != nil {
+		return 0, err
+	}
+
+	switch orientation {
+	case 1:
+		return 0, nil;
+	case 8:
+		return 270, nil;
+	case 3:
+		return 180, nil;
+	case 6:
+		return 90, nil;
+	}
+
+	return 0, nil
 }
