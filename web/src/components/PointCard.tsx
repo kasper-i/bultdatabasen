@@ -14,7 +14,7 @@ import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
 import { translateBoltType } from "utils/boltUtils";
 import BoltDetails from "./BoltDetails";
 import ImageDropzone from "./ImageDropzone";
-import ImagePreview from "./ImagePreview";
+import ImageThumbnail from "./ImageThumbnail";
 import Restricted from "./Restricted";
 
 interface Props {
@@ -81,7 +81,7 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
               </div>
 
               {imagesByYear.get(year)?.map((image, index) => (
-                <ImagePreview
+                <ImageThumbnail
                   key={image.id}
                   pointId={point.id}
                   image={image}

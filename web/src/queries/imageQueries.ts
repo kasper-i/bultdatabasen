@@ -17,3 +17,13 @@ export const useDeleteImage = (parentResourceId: string, imageId: string) =>
       );
     },
   });
+
+export const useUpdateImage = (parentResourceId: string, imageId: string) =>
+  useMutation((patch: Pick<Image, "rotation">) => Api.updateImage(imageId, patch), {
+    onSuccess: (data, variables, context) => {
+      queryClient.setQueryData<Image[]>(
+        ["images", { resourceId: parentResourceId }],
+        (old) => old?.map(image => image.id === imageId ? {...image, ...variables} : image) ?? []
+      );
+    },
+  });

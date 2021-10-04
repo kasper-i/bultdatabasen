@@ -354,6 +354,20 @@ export class Api {
     });
   };
 
+  static updateImage = async (
+    imageId: string,
+    patch: Pick<Image, "rotation">
+  ): Promise<void> => {
+    let endpoint = `/images/${imageId}`;
+
+    await axios.patch(`${Api.baseUrl}${endpoint}`, patch, {
+      headers: {
+        Authorization: `Bearer ${Api.accessToken}`,
+        ["Content-Type"]: "application/merge-patch+json",
+      },
+    });
+  };
+
   static getTasks = async (resourceId: string): Promise<Task[]> => {
     const endpoint = `/resources/${resourceId}/tasks`;
 

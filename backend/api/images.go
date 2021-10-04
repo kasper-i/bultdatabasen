@@ -3,6 +3,7 @@ package api
 import (
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -25,7 +26,7 @@ func GetImages(w http.ResponseWriter, r *http.Request) {
 func DownloadImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceID := vars["resourceID"]
+	imageID := vars["resourceID"]
 	version := vars["version"]
 
 	if _, ok := model.ImageSizes[version]; !ok && version != "original" {
@@ -33,7 +34,7 @@ func DownloadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if image, err := sess.GetImage(resourceID); err != nil {
+	if image, err := sess.GetImage(imageID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		w.Header().Set("Content-Type", image.MimeType)
@@ -95,9 +96,37 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 func DeleteImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceID := vars["resourceID"]
+	imageID := vars["resourceID"]
 
-	err := sess.DeleteImage(resourceID)
+	err := sess.DeleteImage(imageID)
+
+	if err != nil {
+		utils.WriteError(w, err)
+	} else {
+		utils.WriteResponse(w, http.StatusNoContent, nil)
+	}
+}
+
+func PatchImage(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
+	vars := mux.Vars(r)
+	imageID := vars["resourceID"]
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var patch model.ImagePatch
+	if err := json.Unmarshal(reqBody, &patch); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
+
+	if patch.Rotation != nil {
+		if *patch.Rotation != 0 && *patch.Rotation != 90 && *patch.Rotation != 180 && *patch.Rotation != 270 {
+			utils.WriteResponse(w, http.StatusBadRequest, nil)
+			return
+		}
+	}
+
+	err := sess.PatchImage(imageID, patch)
 
 	if err != nil {
 		utils.WriteError(w, err)

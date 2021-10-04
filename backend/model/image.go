@@ -38,6 +38,10 @@ type Image struct {
 	Height      int       `json:"height"`
 }
 
+type ImagePatch struct {
+	Rotation *int `json:"rotation"`
+}
+
 func (Image) TableName() string {
 	return "image"
 }
@@ -52,10 +56,10 @@ func (sess Session) GetImages(resourceID string) ([]Image, error) {
 	return images, nil
 }
 
-func (sess Session) GetImage(resourceID string) (*Image, error) {
+func (sess Session) GetImage(imageID string) (*Image, error) {
 	var image Image
 
-	if err := sess.DB.Raw(`SELECT * FROM image WHERE image.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM image WHERE image.id = ?`, imageID).
 		Scan(&image).Error; err != nil {
 		return nil, err
 	}
@@ -133,26 +137,49 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 	return &img, nil
 }
 
-func (sess Session) DeleteImage(resourceID string) error {
+func (sess Session) DeleteImage(imageID string) error {
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.DB.Delete(&Image{ID: resourceID}).Error; err != nil {
+		if err := sess.DB.Delete(&Image{ID: imageID}).Error; err != nil {
 			return err
 		}
 
-		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
+		if err := sess.DB.Delete(&Resource{ID: imageID}).Error; err != nil {
 			return err
 		}
 
-		os.Remove(GetOriginalImageFilePath(resourceID))
+		os.Remove(GetOriginalImageFilePath(imageID))
 
 		for version := range ImageSizes {
-			os.Remove(GetResizedImageFilePath(resourceID, version))
+			os.Remove(GetResizedImageFilePath(imageID, version))
 		}
 
 		return nil
 	})
 
 	return err
+}
+
+func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
+	original, err := sess.GetImage(imageID)
+	if err != nil {
+		return err
+	}
+
+	if patch.Rotation != nil {
+		original.Rotation = *patch.Rotation
+	}
+
+	return sess.Transaction(func(sess Session) error {
+		if err := sess.touchResource(imageID); err != nil {
+			return err
+		}
+
+		if err := sess.DB.Updates(original).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
 
 func GetOriginalImageFilePath(imageID string) string {
