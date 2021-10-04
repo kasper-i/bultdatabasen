@@ -52,23 +52,34 @@ export const ImageView = ({
     style = { ...style, height: `${targetHeight}px`, width: "auto" };
   }
 
+  const ratio = image.width / image.height;
+
   return (
     <div
+      className="relative"
       style={{
         height: targetHeight,
         width: portrait
-          ? Math.floor((image.height / image.width) * targetHeight)
-          : Math.floor((image.width / image.height) * targetHeight),
+          ? Math.floor((1 / ratio) * targetHeight)
+          : Math.floor(ratio * targetHeight),
       }}
     >
-      <img
-        onClick={onClick}
-        className={clsx("absolute", className)}
-        style={style}
-        src={`${configData.API_URL}/images/${image.id}/${version}`}
-        alt=""
-      />
-      <div className="relative w-full h-full">{children}</div>
+      <div
+        className="absolute"
+        style={{
+          height: targetHeight,
+          width: Math.floor(ratio * targetHeight),
+        }}
+      >
+        <img
+          onClick={onClick}
+          className={className}
+          style={style}
+          src={`${configData.API_URL}/images/${image.id}/${version}`}
+          alt=""
+        />
+      </div>
+      {children}
     </div>
   );
 };
