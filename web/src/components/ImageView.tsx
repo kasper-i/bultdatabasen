@@ -53,24 +53,19 @@ export const ImageView = ({
   }
 
   const ratio = image.width / image.height;
+  const width = portrait
+    ? Math.floor((1 / ratio) * targetHeight)
+    : Math.floor(ratio * targetHeight);
 
   return (
     <div
       className="relative"
       style={{
         height: targetHeight,
-        width: portrait
-          ? Math.floor((1 / ratio) * targetHeight)
-          : Math.floor(ratio * targetHeight),
+        width: width,
       }}
     >
-      <div
-        className="absolute"
-        style={{
-          height: targetHeight,
-          width: Math.floor(ratio * targetHeight),
-        }}
-      >
+      <div className="absolute">
         <img
           onClick={onClick}
           className={className}
