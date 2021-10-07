@@ -9,10 +9,10 @@ const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 
 type Resource struct {
 	ID              string    `gorm:"primaryKey" json:"id"`
-	Name            *string   `json:"name"`
+	Name            *string   `json:"name,omitempty"`
 	Type            string    `json:"type"`
 	Depth           Depth     `json:"-"`
-	ParentID        *string   `json:"parentId"`
+	ParentID        *string   `json:"parentId,omitempty"`
 	BirthTime       time.Time `gorm:"column:btime" json:"-"`
 	ModifiedTime    time.Time `gorm:"column:mtime" json:"-"`
 	CreatorID       string    `gorm:"column:buser_id" json:"-"`

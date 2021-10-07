@@ -50,7 +50,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if r.Method == "GET" && r.URL.Path == "/users/myself" {
+		if r.URL.Path == "/users/myself" {
 			next.ServeHTTP(w, r)
 			return
 		}

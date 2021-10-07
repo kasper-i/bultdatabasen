@@ -3,6 +3,7 @@ export type UserRole = "owner" | "guest";
 export interface User {
   id: string;
   email?: string;
-  name?: string;
-  joinDate?: string;
+  firstName?: string;
+  lastName?: string;
+  firstSeen: string;
 }

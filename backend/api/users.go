@@ -12,20 +12,36 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetMyUser(w http.ResponseWriter, r *http.Request) {
+func GetMyself(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
-	userId := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("user_id").(string)
 
-	if user, err := sess.GetUser(userId); err != nil {
-		utils.WriteError(w, err)
+	if user, err := sess.GetUser(userID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			user = &model.User{
+				ID:        userID,
+				FirstSeen:  time.Now(),
+			}
+
+			if err := sess.CreateUser(user); err != nil {
+				utils.WriteError(w, err)
+				return
+			} else {
+				utils.WriteResponse(w, http.StatusOK, user)
+				return
+			}
+		} else {
+			utils.WriteError(w, err)
+			return
+		}
 	} else {
 		utils.WriteResponse(w, http.StatusOK, user)
 	}
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func UpdateMyself(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
-	userId := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("user_id").(string)
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var desiredUser model.User
@@ -34,12 +50,13 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user, err := sess.GetUser(userId); err != nil {
+	if user, err := sess.GetUser(userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			user = &model.User{
-				ID:       userId,
-				Name:     desiredUser.Name,
-				JoinDate: time.Now(),
+				ID:        userID,
+				FirstName: desiredUser.FirstName,
+				LastName:  desiredUser.LastName,
+				FirstSeen:  time.Now(),
 			}
 
 			if err := sess.CreateUser(user); err != nil {
@@ -54,7 +71,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		user.Name = desiredUser.Name
+		user.FirstName = desiredUser.FirstName
+		user.LastName = desiredUser.LastName
 
 		err := sess.UpdateUser(user)
 

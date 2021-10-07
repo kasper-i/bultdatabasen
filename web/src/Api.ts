@@ -133,12 +133,22 @@ export class Api {
     return Promise.resolve();
   };
 
-  static getMySelf = async (): Promise<User> => {
+  static getMyself = async (): Promise<User> => {
     const result = await axios.get(`${Api.baseUrl}/users/myself`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
     return result.data as User;
+  };
+
+  static updateMyself = async (
+    user: Omit<User, "id" | "firstSeen">
+  ): Promise<void> => {
+    await axios.put(`${Api.baseUrl}/users/myself`, user, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return;
   };
 
   static getAreas = async (resourceId?: string): Promise<Area[]> => {
@@ -363,7 +373,7 @@ export class Api {
     await axios.patch(`${Api.baseUrl}${endpoint}`, patch, {
       headers: {
         Authorization: `Bearer ${Api.accessToken}`,
-        ["Content-Type"]: "application/merge-patch+json",
+        "Content-Type": "application/merge-patch+json",
       },
     });
   };

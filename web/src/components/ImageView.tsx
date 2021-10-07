@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import configData from "config.json";
 import { Image, ImageVersion } from "models/image";
 import React, { CSSProperties, ReactNode } from "react";

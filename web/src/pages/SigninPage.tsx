@@ -1,8 +1,10 @@
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
+import { User } from "models/user";
 import React, { Fragment, ReactElement, useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
 import { Api } from "../Api";
+import { isEqual } from "lodash";
 
 export interface OAuthTokenResponse {
   id_token: string;
@@ -17,6 +19,21 @@ const instance = axios.create({
   timeout: 10000,
   headers: { "Content-Type": "application/x-www-form-urlencoded" },
 });
+
+const parseJwt = (token: string) => {
+  var base64Url = token.split(".")[1];
+  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  var jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+};
 
 function SigninPage(): ReactElement {
   const location = useLocation();
@@ -42,12 +59,25 @@ function SigninPage(): ReactElement {
 
     instance
       .post("/oauth2/token", params)
-      .then((response) => {
+      .then(async (response) => {
         const { id_token, access_token, refresh_token }: OAuthTokenResponse =
           response.data;
 
         Api.setTokens(id_token, access_token, refresh_token);
         setAuthenticated(true);
+
+        const { given_name, family_name } = parseJwt(id_token);
+
+        const info = await Api.getMyself();
+        const updatedInfo = {
+          ...info,
+          firstName: info.firstName ?? given_name,
+          lastName: info.lastName ?? family_name,
+        };
+
+        if (!isEqual(info, updatedInfo)) {
+          await Api.updateMyself(updatedInfo);
+        }
 
         const returnPath = localStorage.getItem("returnPath");
         localStorage.removeItem("returnPath");

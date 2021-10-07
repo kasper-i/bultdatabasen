@@ -8,11 +8,11 @@ import (
 type Route struct {
 	ID           string  `gorm:"primaryKey" json:"id"`
 	Name         string  `json:"name"`
-	AltName      *string `json:"altName"`
-	Year         *int32  `json:"year"`
-	Length       *int32  `json:"length"`
-	ExternalLink *string `json:"externalLink"`
-	RouteType    *string `json:"routeType"`
+	AltName      *string `json:"altName,omitempty"`
+	Year         *int32  `json:"year,omitempty"`
+	Length       *int32  `json:"length,omitempty"`
+	ExternalLink *string `json:"externalLink,omitempty"`
+	RouteType    *string `json:"routeType,omitempty"`
 	ParentID     string  `gorm:"->" json:"parentId"`
 }
 

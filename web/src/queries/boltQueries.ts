@@ -1,5 +1,4 @@
 import { Bolt } from "models/bolt";
-import { Point } from "models/point";
 import { useMutation, useQuery } from "react-query";
 import { Api } from "../Api";
 import { queryClient } from "../index";

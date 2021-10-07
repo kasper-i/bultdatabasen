@@ -5,10 +5,11 @@ import (
 )
 
 type User struct {
-	ID       string    `gorm:"primaryKey" json:"id"`
-	Email    string    `json:"email"`
-	Name     string    `json:"name"`
-	JoinDate time.Time `json:"joinDate"`
+	ID        string    `gorm:"primaryKey" json:"id"`
+	Email     *string    `json:"email,omitempty"`
+	FirstName *string    `json:"firstName,omitempty"`
+	LastName  *string    `json:"lastName,omitempty"`
+	FirstSeen  time.Time `json:"firstSeen"`
 }
 
 func (User) TableName() string {
@@ -26,17 +27,9 @@ func (sess Session) GetUser(userID string) (*User, error) {
 }
 
 func (sess Session) UpdateUser(user *User) error {
-	if err := sess.DB.Save(&user).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return sess.DB.Save(&user).Error
 }
 
 func (sess Session) CreateUser(user *User) error {
-	if err := sess.DB.Create(&user).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return sess.DB.Create(&user).Error
 }

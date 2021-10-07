@@ -9,8 +9,8 @@ type Task struct {
 	ID          string  `gorm:"primaryKey" json:"id"`
 	Status      string  `json:"status"`
 	Description string  `json:"description"`
-	Assignee    *string `gorm:"->" json:"assignee"`
-	Comment     *string `json:"comment"`
+	Assignee    *string `gorm:"->" json:"assignee,omitempty"`
+	Comment     *string `json:"comment,omitempty"`
 	ParentID    string  `gorm:"->" json:"parentId"`
 }
 
