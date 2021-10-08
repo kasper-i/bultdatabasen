@@ -31,7 +31,7 @@ func (sess Session) GetTasks(resourceID string) ([]Task, error) {
 func (sess Session) GetTask(resourceID string) (*Task, error) {
 	var task Task
 
-	if err := sess.DB.Raw(`SELECT * FROM task LEFT JOIN resource ON task.id = resource.id WHERE task.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ?`, resourceID).
 		Scan(&task).Error; err != nil {
 		return nil, err
 	}

@@ -28,7 +28,7 @@ func (sess Session) GetAreas(resourceID string) ([]Area, error) {
 func (sess Session) GetArea(resourceID string) (*Area, error) {
 	var area Area
 
-	if err := sess.DB.Raw(`SELECT * FROM area LEFT JOIN resource ON area.id = resource.id WHERE area.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM area INNER JOIN resource ON area.id = resource.id WHERE area.id = ?`, resourceID).
 		Scan(&area).Error; err != nil {
 		return nil, err
 	}

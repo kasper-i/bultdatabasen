@@ -28,7 +28,7 @@ func (sess Session) GetCrags(resourceID string) ([]Crag, error) {
 func (sess Session) GetCrag(resourceID string) (*Crag, error) {
 	var crag Crag
 
-	if err := sess.DB.Raw(`SELECT * FROM crag LEFT JOIN resource ON crag.id = resource.id WHERE crag.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM crag INNER JOIN resource ON crag.id = resource.id WHERE crag.id = ?`, resourceID).
 		Scan(&crag).Error; err != nil {
 		return nil, err
 	}

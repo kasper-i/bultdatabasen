@@ -28,7 +28,7 @@ func (sess Session) GetSectors(resourceID string) ([]Sector, error) {
 func (sess Session) GetSector(resourceID string) (*Sector, error) {
 	var sector Sector
 
-	if err := sess.DB.Raw(`SELECT * FROM sector LEFT JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM sector INNER JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
 		Scan(&sector).Error; err != nil {
 		return nil, err
 	}

@@ -39,6 +39,7 @@ func getDescendantsQuery(resourceType string) string {
 		FROM foster_care f
 		INNER JOIN cte ON f.foster_parent_id = cte.id
 		INNER JOIN resource child ON child.id = f.id
+		WHERE cte.type = "route"
 	)
 	SELECT %s.*, cte.name, cte.parent_id FROM cte
 	INNER JOIN %s ON cte.id = %s.id
@@ -116,7 +117,7 @@ func (sess Session) checkSameParent(resourceID1, resourceID2 string) bool {
 
 	if err := sess.DB.Raw(`SELECT parent.*
 		FROM resource
-		LEFT JOIN resource parent ON resource.parent_id = parent.id
+		INNER JOIN resource parent ON resource.parent_id = parent.id
 		WHERE resource.id IN (?, ?)`, resourceID1, resourceID2).Scan(&parents).Error; err != nil {
 		return false
 	}

@@ -33,7 +33,7 @@ func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
 func (sess Session) GetRoute(resourceID string) (*Route, error) {
 	var route Route
 
-	if err := sess.DB.Raw(`SELECT * FROM route LEFT JOIN resource ON route.id = resource.id WHERE route.id = ?`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM route INNER JOIN resource ON route.id = resource.id WHERE route.id = ?`, resourceID).
 		Scan(&route).Error; err != nil {
 		return nil, err
 	}
