@@ -3,17 +3,14 @@ package authenticator
 import (
 	"bultdatabasen/utils"
 	"context"
-	"crypto/rsa"
-	"encoding/base64"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/big"
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"gopkg.in/square/go-jose.v2"
 )
 
 type authenticator struct {
@@ -54,65 +51,51 @@ func IsPublic(r *http.Request) bool {
 	return false
 }
 
-type MyCustomClaims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
+type Claims struct {
+	Username   string `json:"username"`
+	Expiration int64  `json:"exp"`
 }
 
-var jwtKeys = make(map[string]*rsa.PublicKey, 2)
+var keys jose.JSONWebKeySet
 
 func init() {
-	jwtKeys["gfmWfYBUTrl2CsA+5TzTr1bCO1lQIcYBsDYRviUvKvc="] = convertKey("AQAB", "whA_cKNimWDjUK6eElfabWALj0gVcoUjNwsa_VZkZzvzQJlcIXR_E4qZgPDHVaCgDrPZ1ViViUbrrZpIwUI1scZvUH6ZCJTZYuO0dfyvAIUQavvxak5v-ZzUNrm3sIwyxzs44OZaRxGg6NCthxHtks47YSmfcLniY9iNdkl32zU1HvEd-W6UJrPlrOTDlX564ZnTmdWPX2RFlRouCSBQl66LprzUKX71mE6dca4S7jsnuELK5CLjWkUaZWfmGgSJH38zzZ9eSWttIpTBAYEF81n6PaGBarv2tZgo3SeuwlI3TwXgn_ylRVaiLezLPBTh4H_WqkEeDE30NqeOMBMM1Q")
-	jwtKeys["P4lcFQ/F2RpTTQy0dEGefnbJkRw4n56TVRBoHBix194="] = convertKey("AQAB", "7P8wQGwo6hiGn6ocDl-YQd4QxMGwPFbC2BSdQlqELTkR-389Cdi975V1HsebrMTeDAc07Bw2Hum-pF0yG1b8vr4WpX6U4zU1MiRZDj28_uybZHYtURQb5PvHenoW7INQImw2gY4OTmcbf59S3YlHhTffIngGHjp2y0L2JeaO5IbUT6sCtzqlhuYkMaeSF_P6Zbmthp2KXP2XXXFE_oIUKv-KNpol6MZ9NMIkXBZem_epKn8SL02rUX64yxH1Hu6w4R8c5mYjo97lD3itHAlSpdr1P8TVSPS5k0Pd3rZAqWd4FKa32hlOJywb30XcT7FIYn4bMyGtM_d4YBD3jPDBhw")
+	j1 := []byte(`{"alg":"RS256","e":"AQAB","kid":"P4lcFQ/F2RpTTQy0dEGefnbJkRw4n56TVRBoHBix194=","kty":"RSA","n":"7P8wQGwo6hiGn6ocDl-YQd4QxMGwPFbC2BSdQlqELTkR-389Cdi975V1HsebrMTeDAc07Bw2Hum-pF0yG1b8vr4WpX6U4zU1MiRZDj28_uybZHYtURQb5PvHenoW7INQImw2gY4OTmcbf59S3YlHhTffIngGHjp2y0L2JeaO5IbUT6sCtzqlhuYkMaeSF_P6Zbmthp2KXP2XXXFE_oIUKv-KNpol6MZ9NMIkXBZem_epKn8SL02rUX64yxH1Hu6w4R8c5mYjo97lD3itHAlSpdr1P8TVSPS5k0Pd3rZAqWd4FKa32hlOJywb30XcT7FIYn4bMyGtM_d4YBD3jPDBhw","use":"sig"}`)
+	j2 := []byte(`{"alg":"RS256","e":"AQAB","kid":"gfmWfYBUTrl2CsA+5TzTr1bCO1lQIcYBsDYRviUvKvc=","kty":"RSA","n":"whA_cKNimWDjUK6eElfabWALj0gVcoUjNwsa_VZkZzvzQJlcIXR_E4qZgPDHVaCgDrPZ1ViViUbrrZpIwUI1scZvUH6ZCJTZYuO0dfyvAIUQavvxak5v-ZzUNrm3sIwyxzs44OZaRxGg6NCthxHtks47YSmfcLniY9iNdkl32zU1HvEd-W6UJrPlrOTDlX564ZnTmdWPX2RFlRouCSBQl66LprzUKX71mE6dca4S7jsnuELK5CLjWkUaZWfmGgSJH38zzZ9eSWttIpTBAYEF81n6PaGBarv2tZgo3SeuwlI3TwXgn_ylRVaiLezLPBTh4H_WqkEeDE30NqeOMBMM1Q","use":"sig"}`)
+
+	k1 := jose.JSONWebKey{}
+	k1.UnmarshalJSON(j1)
+
+	k2 := jose.JSONWebKey{}
+	k2.UnmarshalJSON(j2)
+
+	keys.Keys = append(keys.Keys, k1)
+	keys.Keys = append(keys.Keys, k2)
 }
 
-func convertKey(rawE, rawN string) *rsa.PublicKey {
-	decodedE, err := base64.RawURLEncoding.DecodeString(rawE)
+func authenticate(rawJWT string) (string, error) {
+	var userID string
+
+	signature, err := jose.ParseSigned(rawJWT)
 	if err != nil {
-		panic(err)
+		return userID, err
 	}
-	if len(decodedE) < 4 {
-		ndata := make([]byte, 4)
-		copy(ndata[4-len(decodedE):], decodedE)
-		decodedE = ndata
-	}
-	pubKey := &rsa.PublicKey{
-		N: &big.Int{},
-		E: int(binary.BigEndian.Uint32(decodedE[:])),
-	}
-	decodedN, err := base64.RawURLEncoding.DecodeString(rawN)
+
+	kid := signature.Signatures[0].Header.KeyID
+	payload, err := signature.Verify(keys.Key(kid)[0].Key)
 	if err != nil {
-		panic(err)
-	}
-	pubKey.N.SetBytes(decodedN)
-	return pubKey
-}
-
-func authenticate(tokenString string) (string, error) {
-	var userId string
-
-	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if kid, ok := token.Header["kid"]; ok {
-			if key, found := jwtKeys[kid.(string)]; found {
-				return key, nil
-			}
-
-			return nil, fmt.Errorf("no key found for kid %v", kid)
-		}
-
-		return nil, errors.New("no kid")
-	})
-
-	if err != nil {
-		return userId, err
+		return userID, err
 	}
 
-	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
-		userId := claims.Username
-		return userId, nil
+	var claims Claims
+	if err := json.Unmarshal(payload, &claims); err != nil {
+		return userID, err
+	} else if time.Unix(claims.Expiration, 0).Before(time.Now()) {
+		return userID, errors.New("JWT is expired")
 	} else {
-		return userId, claims.Valid()
+		userID = claims.Username
 	}
+
+	return userID, nil
 }
 
 func getUserID(r *http.Request) *string {
@@ -125,10 +108,10 @@ func getUserID(r *http.Request) *string {
 			return nil
 		}
 
-		if userId, err := authenticate(tokenString); err != nil {
+		if userID, err := authenticate(tokenString); err != nil {
 			return nil
 		} else {
-			return &userId
+			return &userID
 		}
 	}
 }
@@ -137,13 +120,13 @@ func (authorizer *authenticator) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID := getUserID(r)
 		var ctx context.Context
-		
+
 		if userID != nil {
 			ctx = context.WithValue(r.Context(), "user_id", *userID)
 		} else {
 			ctx = r.Context()
 		}
-		
+
 		if IsPublic(r) {
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
