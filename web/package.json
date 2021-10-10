@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.0.0",
+    "@reduxjs/toolkit": "^1.6.1",
     "@tailwindcss/postcss7-compat": "^2.0.2",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
@@ -27,6 +28,7 @@
     "react-query": "^3.16.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
+    "redux": "^4.1.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.3",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
