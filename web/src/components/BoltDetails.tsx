@@ -1,7 +1,7 @@
 import { Bolt } from "models/bolt";
 import { useDeleteBolt } from "queries/boltQueries";
 import React, { ReactElement, useState } from "react";
-import { Button } from "semantic-ui-react";
+import { Button, Icon, Table } from "semantic-ui-react";
 import { translateBoltType } from "utils/boltUtils";
 import DeletePrompt from "./DeletePrompt";
 import BoltIcon from "./icons/BoltIcon";
@@ -24,14 +24,13 @@ function BoltDetails({ routeId, pointId, bolt }: Props): ReactElement {
   };
 
   return (
-    <div
-      style={{ width: 140 }}
-      className="bg-gray-100 shadow rounded p-2 flex flex-col"
-    >
+    <div className="bg-gray-100 shadow rounded p-2 flex flex-col w-64">
       <div className="flex justify-between items-center">
-        <div className="flex space-x-2 font-bold">
-          <BoltIcon />
-          <div>{translateBoltType(bolt.type)}</div>
+        <div>
+          <div className="flex gap-2 font-bold">
+            <BoltIcon />
+            {translateBoltType(bolt.type)}
+          </div>
         </div>
         <Restricted>
           <Button
@@ -43,17 +42,12 @@ function BoltDetails({ routeId, pointId, bolt }: Props): ReactElement {
           ></Button>
           {deleteRequested && (
             <DeletePrompt
-              target={translateBoltType(bolt.type)}
+              target="bult"
               onCancel={() => setDeleteRequested(false)}
               onConfirm={confirmDelete}
             />
           )}
         </Restricted>
-      </div>
-      <div className="text-sm pt-2">
-        <p>Petzl {bolt.type === "glue" ? "Bat’inox" : "Coeur"}</p>
-        <p>316 (A4)</p>
-        <p>2012</p>
       </div>
     </div>
   );

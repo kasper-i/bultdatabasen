@@ -19,11 +19,10 @@ import Restricted from "./Restricted";
 
 interface Props {
   point: Point;
-  number: number;
   routeId: string;
 }
 
-function PointCard({ point, number, routeId }: Props): ReactElement {
+function PointCard({ point, routeId }: Props): ReactElement {
   const history = useHistory();
   const createBolt = useCreateBolt(routeId, point.id);
   const deletePoint = useDetachPoint(routeId, point.id);
@@ -103,7 +102,7 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
     <div className="flex flex-col items-start p-4">
       <div className="flex justify-between w-full items-start">
         <div>
-          <span className="text-4xl font-bold">#{number}</span>
+          <span className="text-4xl font-bold">#{point.number}</span>
 
           {sharedParents.length > 0 && (
             <div className="flex space-x-1">
@@ -124,19 +123,21 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
             </div>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => sessionStorage.setItem("copiedPoint", point.id)}
-            icon="copy"
-          />
-          <Button
-            loading={deletePoint.isLoading}
-            onClick={() => deletePoint.mutate()}
-            icon="trash"
-            color="red"
-            disabled={!allowDelete}
-          />
-        </div>
+        <Restricted>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => sessionStorage.setItem("copiedPoint", point.id)}
+              icon="copy"
+            />
+            <Button
+              loading={deletePoint.isLoading}
+              onClick={() => deletePoint.mutate()}
+              icon="trash"
+              color="red"
+              disabled={!allowDelete}
+            />
+          </div>
+        </Restricted>
       </div>
 
       <p className="pt-2">{`${bolts.data?.length} bultar`}</p>
@@ -171,7 +172,11 @@ function PointCard({ point, number, routeId }: Props): ReactElement {
                   setSelectedBoltType(result.value as BoltType)
                 }
                 options={[
-                  { key: "expansion", text: "Borrbult", value: "expansion" },
+                  {
+                    key: "expansion",
+                    text: "Expansionsbult",
+                    value: "expansion",
+                  },
                   { key: "glue", text: "Limbult", value: "glue" },
                 ]}
                 trigger={<></>}

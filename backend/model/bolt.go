@@ -6,9 +6,9 @@ import (
 )
 
 type Bolt struct {
-	ID       string `gorm:"primaryKey" json:"id"`
-	Type     string `json:"type"`
-	ParentID string `gorm:"->" json:"parentId"`
+	ID       string  `gorm:"primaryKey" json:"id"`
+	Type     *string `json:"type,omitempty"`
+	ParentID string  `gorm:"->" json:"parentId"`
 }
 
 func (Bolt) TableName() string {

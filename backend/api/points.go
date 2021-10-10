@@ -13,6 +13,7 @@ import (
 type CreatePointRequest struct {
 	PointID  *string               `json:"pointId"`
 	Position *model.InsertPosition `json:"position"`
+	Bolts    []model.Bolt          `json:"bolts"`
 }
 
 func GetPoints(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +56,12 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	point, err := sess.AttachPoint(routeID, request.PointID, request.Position)
+	if request.PointID == nil && len(request.Bolts) == 0 {
+		utils.WriteResponse(w, http.StatusBadRequest, nil)
+		return
+	}
+
+	point, err := sess.AttachPoint(routeID, request.PointID, request.Position, request.Bolts)
 
 	if err != nil {
 		utils.WriteError(w, err)

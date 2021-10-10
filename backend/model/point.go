@@ -10,6 +10,7 @@ import (
 type Point struct {
 	ID      string   `gorm:"primaryKey" json:"id"`
 	Parents []Parent `gorm:"-" json:"parents"`
+	Number  int      `gorm:"-" json:"number"`
 }
 
 type InsertPosition struct {
@@ -128,6 +129,7 @@ func (sess Session) sortPoints(routeID string, pointsMap map[string]*Point) ([]*
 			vertex := routeGraph[currentPointID]
 
 			if point, ok := pointsMap[currentPointID]; ok {
+				point.Number = index + 1
 				orderedPoints = append(orderedPoints, point)
 				index += 1
 			} else {
@@ -159,6 +161,7 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 
 	for _, point := range points {
 		point.Parents = make([]Parent, 0)
+		point.Number = 1
 		pointsMap[point.ID] = point
 	}
 
@@ -184,7 +187,7 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 	return sess.sortPoints(resourceID, pointsMap)
 }
 
-func (sess Session) AttachPoint(routeID string, pointID *string, position *InsertPosition) (*Point, error) {
+func (sess Session) AttachPoint(routeID string, pointID *string, position *InsertPosition, bolts []Bolt) (*Point, error) {
 	var err error
 	var point *Point = &Point{}
 	var pointResource *Resource
@@ -248,6 +251,12 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 
 			if err := sess.DB.Create(&point).Error; err != nil {
 				return err
+			}
+
+			for _, bolt := range bolts {
+				if err := sess.CreateBolt(&bolt, point.ID); err != nil {
+					return err
+				}
 			}
 		}
 

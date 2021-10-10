@@ -50,19 +50,6 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
     }
   }, [pointId, selectedPointId, points]);
 
-  const selectedPointNumber = useMemo(() => {
-    let number = 1;
-    for (const point of points) {
-      if (point.id === selectedPointId) {
-        break;
-      }
-
-      number += 1;
-    }
-
-    return number;
-  }, [points, selectedPointId]);
-
   const selectedPoint = useMemo(() => {
     return points.find((point) => point.id === selectedPointId);
   }, [points, selectedPointId]);
@@ -71,9 +58,9 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
   const getOffset = () => {
     if (editable) {
-      return (points.length - selectedPointNumber) * 112 + 56;
+      return (points.length - (selectedPoint?.number ?? 0)) * 112 + 56;
     } else {
-      return (points.length - selectedPointNumber) * 84;
+      return (points.length - (selectedPoint?.number ?? 0)) * 84;
     }
   };
 
@@ -81,6 +68,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
     createPoint.mutate({
       pointId: copiedPoint ?? undefined,
       position,
+      bolts: [{}],
     });
 
     sessionStorage.removeItem("copiedPoint");
@@ -206,11 +194,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
           }}
           className="w-full bg-white rounded shadow-sm ml-5 mb-5 flex-shrink"
         >
-          <PointCard
-            point={selectedPoint}
-            routeId={routeId}
-            number={selectedPointNumber}
-          />
+          <PointCard point={selectedPoint} routeId={routeId} />
         </div>
       )}
     </div>

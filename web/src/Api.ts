@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import configData from "config.json";
 import { queryClient } from "index";
-import { Bolt } from "models/bolt";
+import { Bolt, BoltType } from "models/bolt";
 import { Crag } from "models/crag";
 import { Image } from "models/image";
 import { Point } from "models/point";
@@ -19,8 +19,9 @@ const updateRole = (resourceId: string, response: AxiosResponse) => {
 };
 
 export interface CreatePointRequest {
-  pointId: string;
-  position: InsertPosition;
+  pointId?: string;
+  position?: InsertPosition;
+  bolts?: Pick<Bolt, "type">[];
 }
 
 export interface InsertPosition {
@@ -296,18 +297,13 @@ export class Api {
 
   static addPoint = async (
     routeId: string,
-    pointId?: string,
-    position?: InsertPosition
+    request: CreatePointRequest
   ): Promise<Point> => {
     let endpoint = `/routes/${routeId}/points`;
 
-    const result = await axios.post(
-      `${Api.baseUrl}${endpoint}`,
-      { pointId, position },
-      {
-        headers: { Authorization: `Bearer ${Api.accessToken}` },
-      }
-    );
+    const result = await axios.post(`${Api.baseUrl}${endpoint}`, request, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
 
     return result.data as Point;
   };
