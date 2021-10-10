@@ -28,7 +28,6 @@ function PointCard({ point, routeId }: Props): ReactElement {
   const deletePoint = useDetachPoint(routeId, point.id);
   const images = useImages(point.id);
   const bolts = useBolts(point.id);
-  const children = useChildren(point.id);
 
   const [currImg, setCurrImg] = useState<number>();
   const [imagesLocked, setImagesLocked] = useState(false);
@@ -60,7 +59,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
 
   const allowDelete =
     sharedParents.length > 0 ||
-    (children.data !== undefined && children.data.length === 0);
+    (bolts.data?.length === 0 && images.data?.length === 0);
 
   const renderImages = () => {
     const years = Array.from(imagesByYear.keys());

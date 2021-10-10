@@ -112,15 +112,11 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 		return nil, err
 	}
 
-	if timestamp, err := exifData.DateTime(); err != nil {
-		return nil, err
-	} else {
+	if timestamp, err := exifData.DateTime(); err == nil {
 		img.Timestamp = timestamp
 	}
-
-	if rotation, err := getRotation(exifData); err != nil {
-		return nil, err
-	} else {
+	
+	if rotation, err := getRotation(exifData); err == nil {
 		img.Rotation = rotation
 	}
 
