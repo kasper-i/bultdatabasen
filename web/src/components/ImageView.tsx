@@ -101,7 +101,7 @@ export const ImageView = ({
           onLoad={onLoad}
           onClick={onClick}
           className={clsx(className, "h-full w-full object-contain")}
-          style={rotatorClasses}
+          style={{ imageOrientation: "none", ...rotatorClasses }}
           src={`${configData.API_URL}/images/${image.id}/${version}`}
           alt=""
         />

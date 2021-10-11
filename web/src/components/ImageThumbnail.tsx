@@ -36,7 +36,7 @@ const ImageThumbnail = ({
       targetHeight={TARGET_HEIGHT}
       className="rounded cursor-pointer"
       onClick={() => onClick?.(image.id)}
-      version="xs"
+      version="sm"
     >
       {!locked && (
         <Restricted>
