@@ -1,6 +1,8 @@
+import clsx from "clsx";
 import configData from "config.json";
 import { Image, ImageVersion } from "models/image";
-import React, { CSSProperties, ReactNode } from "react";
+import React, { CSSProperties, ReactNode, useReducer, useRef } from "react";
+import { Loader } from "semantic-ui-react";
 
 interface Props {
   image: Image;
@@ -11,6 +13,8 @@ interface Props {
   version: ImageVersion;
 }
 
+type Orientation = "portrait" | "landscape";
+
 export const ImageView = ({
   image,
   targetHeight,
@@ -19,42 +23,68 @@ export const ImageView = ({
   children,
   version,
 }: Props) => {
-  let style: CSSProperties = {};
-  const portrait = (image.rotation ?? 0) % 180 === 90;
+  const imgRef = useRef<HTMLImageElement>(null);
+  const loading = !(imgRef.current?.complete ?? false);
+
+  const [, forceRender] = useReducer((s) => s + 1, 0);
+
+  let rotatorClasses: CSSProperties = {};
+  let innerStyle: CSSProperties = {};
+
+  const originalOrientation: Orientation =
+    image.height > image.width ? "portrait" : "landscape";
+  const targetOrientation =
+    (image.rotation ?? 0) % 180 === 0
+      ? originalOrientation
+      : originalOrientation === "portrait"
+      ? "landscape"
+      : "portrait";
 
   switch (image.rotation) {
     case 0:
       break;
     case 90:
-      style = {
+      rotatorClasses = {
         transform: "rotate(90deg) translateY(-100%)",
         transformOrigin: "left top",
       };
       break;
     case 180:
-      style = {
+      rotatorClasses = {
         transform: "rotate(180deg) translateX(-100%) translateY(-100%)",
         transformOrigin: "left top",
       };
       break;
     case 270:
-      style = {
+      rotatorClasses = {
         transform: "rotate(-90deg) translateX(-100%)",
         transformOrigin: "left top",
       };
       break;
   }
 
-  if (portrait) {
-    style = { ...style, width: `${targetHeight}px`, height: "auto" };
+  let width = 0;
+  if (targetOrientation === originalOrientation) {
+    width = (image.width / image.height) * 120;
   } else {
-    style = { ...style, height: `${targetHeight}px`, width: "auto" };
+    width = (image.height / image.width) * 120;
   }
 
-  const ratio = image.width / image.height;
-  const width = portrait
-    ? Math.floor((1 / ratio) * targetHeight)
-    : Math.floor(ratio * targetHeight);
+  if (targetOrientation === originalOrientation) {
+    innerStyle = {
+      height: targetHeight,
+      width: width,
+    };
+  } else {
+    innerStyle = {
+      height: width,
+      width: targetHeight,
+    };
+  }
+
+  const onLoad = (_event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    forceRender();
+  };
 
   return (
     <div
@@ -64,11 +94,14 @@ export const ImageView = ({
         width: width,
       }}
     >
-      <div className="absolute">
+      <Loader active={loading} size="small" />
+      <div className="absolute" style={innerStyle}>
         <img
+          ref={imgRef}
+          onLoad={onLoad}
           onClick={onClick}
-          className={className}
-          style={style}
+          className={clsx(className, "h-full w-full object-contain")}
+          style={rotatorClasses}
           src={`${configData.API_URL}/images/${image.id}/${version}`}
           alt=""
         />

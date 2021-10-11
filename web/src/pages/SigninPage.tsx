@@ -1,10 +1,9 @@
 import axios from "axios";
 import { AuthContext } from "contexts/AuthContext";
-import { User } from "models/user";
+import { isEqual } from "lodash";
 import React, { Fragment, ReactElement, useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
 import { Api } from "../Api";
-import { isEqual } from "lodash";
 
 export interface OAuthTokenResponse {
   id_token: string;

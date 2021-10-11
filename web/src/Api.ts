@@ -1,7 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import configData from "config.json";
 import { queryClient } from "index";
-import { Bolt, BoltType } from "models/bolt";
+import jwtDecode, { JwtPayload } from "jwt-decode";
+import { Bolt } from "models/bolt";
 import { Crag } from "models/crag";
 import { Image } from "models/image";
 import { Point } from "models/point";
@@ -12,7 +13,6 @@ import { Task } from "models/task";
 import { OAuthTokenResponse } from "pages/SigninPage";
 import { Area } from "./models/area";
 import { User } from "./models/user";
-import jwtDecode, { JwtPayload } from "jwt-decode";
 
 const updateRole = (resourceId: string, response: AxiosResponse) => {
   queryClient.setQueryData(["role", { resourceId }], response.headers["role"]);

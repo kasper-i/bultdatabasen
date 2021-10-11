@@ -115,7 +115,7 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 	if timestamp, err := exifData.DateTime(); err == nil {
 		img.Timestamp = timestamp
 	}
-	
+
 	if rotation, err := getRotation(exifData); err == nil {
 		img.Rotation = rotation
 	}
@@ -182,7 +182,7 @@ func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
 			return err
 		}
 
-		if err := sess.DB.Updates(original).Error; err != nil {
+		if err := sess.DB.Select("Rotation").Updates(original).Error; err != nil {
 			return err
 		}
 
@@ -253,13 +253,13 @@ func getRotation(exifData *exif.Exif) (int, error) {
 
 	switch orientation {
 	case 1:
-		return 0, nil;
+		return 0, nil
 	case 8:
-		return 270, nil;
+		return 270, nil
 	case 3:
-		return 180, nil;
+		return 180, nil
 	case 6:
-		return 90, nil;
+		return 90, nil
 	}
 
 	return 0, nil

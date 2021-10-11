@@ -4,7 +4,6 @@ import { Image } from "models/image";
 import { Point } from "models/point";
 import moment from "moment";
 import { useBolts, useCreateBolt } from "queries/boltQueries";
-import { useChildren } from "queries/commonQueries";
 import { useImages } from "queries/imageQueries";
 import { useDetachPoint } from "queries/pointQueries";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
