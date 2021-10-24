@@ -40,8 +40,8 @@ const ImageThumbnail = ({
     >
       {!locked && (
         <Restricted>
-          <div className="absolute z-10 opacity-70 bg-white h-1/3 w-full bottom-0 left-0 right-0"></div>
-          <div className="absolute z-20 h-1/3 w-full bottom-0 left-0 right-0 flex justify-center items-center px-2 space-x-1">
+          <div className="absolute opacity-70 bg-white h-1/3 w-full bottom-0 left-0 right-0"></div>
+          <div className="absolute h-1/3 w-full bottom-0 left-0 right-0 flex justify-center items-center px-2 space-x-1">
             <Button
               color="red"
               circular

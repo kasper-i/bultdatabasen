@@ -47,13 +47,10 @@ function App() {
   return (
     <AuthContext.Provider value={{ isAuthenticated, setAuthenticated }}>
       <Router>
-        <div className="w-full min-h-screen flex flex-col">
+        <div className="w-screen min-h-screen bg-gray-100">
           <NavBar />
-          <div className="flex w-full flex-grow relative bg-gray-100">
-            <div
-              className="mx-auto p-5 flex flex-col w-full"
-              style={{ maxWidth: 768 }}
-            >
+          <div className="relative">
+            <div className="mx-auto p-5" style={{ maxWidth: 768 }}>
               <Route path="/signin">
                 <SigninPage />
               </Route>

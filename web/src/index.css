@@ -26,6 +26,10 @@ code {
   margin-right: 0;
 }
 
+.no-scroll {
+  overflow: hidden;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

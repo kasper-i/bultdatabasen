@@ -7,7 +7,7 @@ import { Loader } from "semantic-ui-react";
 interface Props {
   image: Image;
   targetHeight: number;
-  className: string;
+  className?: string;
   onClick?: () => void;
   children?: ReactNode;
   version: ImageVersion;
@@ -65,9 +65,9 @@ export const ImageView = ({
 
   let width = 0;
   if (targetOrientation === originalOrientation) {
-    width = (image.width / image.height) * 120;
+    width = (image.width / image.height) * targetHeight;
   } else {
-    width = (image.height / image.width) * 120;
+    width = (image.height / image.width) * targetHeight;
   }
 
   if (targetOrientation === originalOrientation) {

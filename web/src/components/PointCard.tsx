@@ -7,13 +7,13 @@ import { useBolts, useCreateBolt } from "queries/boltQueries";
 import { useImages } from "queries/imageQueries";
 import { useDetachPoint } from "queries/pointQueries";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
-import ImgsViewer from "react-images-viewer";
 import { useHistory } from "react-router";
 import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
 import { translateBoltType } from "utils/boltUtils";
 import BoltDetails from "./BoltDetails";
 import ImageDropzone from "./ImageDropzone";
 import ImageThumbnail from "./ImageThumbnail";
+import { ImageCarousel } from "./ImageCarousel";
 import Restricted from "./Restricted";
 
 interface Props {
@@ -28,7 +28,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
   const images = useImages(point.id);
   const bolts = useBolts(point.id);
 
-  const [currImg, setCurrImg] = useState<number>();
+  const [currImg, setCurrImg] = useState<string>();
   const [imagesLocked, setImagesLocked] = useState(false);
   const [selectedBoltType, setSelectedBoltType] =
     useState<BoltType>("expansion");
@@ -82,7 +82,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
                   key={image.id}
                   pointId={point.id}
                   image={image}
-                  onClick={() => setCurrImg(index)}
+                  onClick={() => setCurrImg(image.id)}
                   locked={!imagesLocked}
                 />
               ))}
@@ -202,23 +202,13 @@ function PointCard({ point, routeId }: Props): ReactElement {
       ) : (
         <>
           {renderImages()}
-          <ImgsViewer
-            imgs={images.data?.map((image) => ({
-              src: `${configData.API_URL}/images/${image.id}/lg`,
-              thumbnail: `${configData.API_URL}/images/${image.id}/xs`,
-            }))}
-            isOpen={currImg !== undefined}
-            currImg={currImg}
-            onClose={() => setCurrImg(undefined)}
-            onClickPrev={() =>
-              setCurrImg((index) => (index != null ? index - 1 : undefined))
-            }
-            onClickNext={() =>
-              setCurrImg((index) => (index != null ? index + 1 : undefined))
-            }
-            onClickThumbnail={(index: number) => setCurrImg(index)}
-            showThumbnails
-          />
+          {currImg !== undefined && (
+            <ImageCarousel
+              selectedImageId={currImg}
+              images={images.data ?? []}
+              onClose={() => setCurrImg(undefined)}
+            />
+          )}
         </>
       )}
     </div>
