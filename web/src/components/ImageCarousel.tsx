@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useKey } from "react-use";
+import { useKeyPressEvent } from "react-use";
 import { Icon, Loader } from "semantic-ui-react";
 
 interface FullSizeImageProps {
@@ -21,6 +21,11 @@ interface FullSizeImageProps {
 
 type Orientation = "portrait" | "landscape";
 
+interface Coordinate {
+  x: number;
+  y: number;
+}
+
 export const FullSizeImage = ({
   image,
   onClose,
@@ -28,30 +33,35 @@ export const FullSizeImage = ({
   version,
 }: FullSizeImageProps) => {
   const imgRef = useRef<HTMLImageElement>(null);
-  const touchRef = useRef(0);
+  const touchRef = useRef<Coordinate>({ x: 0, y: 0 });
   const loading = !(imgRef.current?.complete ?? false);
 
   const [, forceRender] = useReducer((s) => s + 1, 0);
 
-  useKey("Escape", onClose);
+  useKeyPressEvent("Escape", onClose);
 
   const onTouchStart = useCallback((e: TouchEvent): void => {
-    touchRef.current = e.changedTouches[0].screenX;
+    touchRef.current.x = e.changedTouches[0].screenX;
+    touchRef.current.y = e.changedTouches[0].screenY;
   }, []);
 
   const onTouchEnd = useCallback(
-    (e: TouchEvent): void => {
-      const touchStartX = touchRef.current;
-      const touchEndX = e.changedTouches[0].screenX;
+    (e: TouchEvent) => {
+      const start = touchRef.current;
+      const end: Coordinate = {
+        x: e.changedTouches[0].screenX,
+        y: e.changedTouches[0].screenY,
+      };
 
-      if (touchEndX < touchStartX) {
-        onSwipe?.("left");
-      }
-      if (touchEndX > touchStartX) {
-        onSwipe?.("right");
+      if (Math.abs(end.x - start.x) < 50) {
+        return;
       }
 
-      touchRef.current = 0;
+      if (Math.abs(end.y - start.y) > 50) {
+        return;
+      }
+
+      onSwipe?.(end.x < start.x ? "left" : "right");
     },
     [onSwipe]
   );
@@ -60,15 +70,17 @@ export const FullSizeImage = ({
     var body = document.body;
     body?.classList.add("no-scroll");
 
-    imgRef.current?.addEventListener("touchstart", onTouchStart);
-    imgRef.current?.addEventListener("touchend", onTouchEnd);
+    const imgElement = imgRef.current;
+
+    imgElement?.addEventListener("touchstart", onTouchStart);
+    imgElement?.addEventListener("touchend", onTouchEnd);
 
     return () => {
       var body = document.body;
       body?.classList.remove("no-scroll");
 
-      imgRef.current?.removeEventListener("touchstart", onTouchStart);
-      imgRef.current?.removeEventListener("touchend", onTouchEnd);
+      imgElement?.removeEventListener("touchstart", onTouchStart);
+      imgElement?.removeEventListener("touchend", onTouchEnd);
     };
   });
 
@@ -125,7 +137,7 @@ export const FullSizeImage = ({
   return (
     <div>
       <Icon
-        className="fixed top-5 right-5 text-white"
+        className="fixed top-5 right-5 text-white cursor-pointer"
         size="big"
         onClick={onClose}
         name="close"
@@ -166,8 +178,8 @@ export const ImageCarousel = ({
     setIndex((index) => (index === 0 ? images.length - 1 : index - 1));
   const next = () => setIndex((index) => (index + 1) % images.length);
 
-  useKey("ArrowLeft", prev);
-  useKey("ArrowRight", next);
+  useKeyPressEvent("ArrowLeft", prev, undefined);
+  useKeyPressEvent("ArrowRight", next, undefined);
 
   const onSwipe = (direction: "left" | "right") => {
     if (direction === "left") {
