@@ -1,4 +1,3 @@
-import configData from "config.json";
 import { BoltType } from "models/bolt";
 import { Image } from "models/image";
 import { Point } from "models/point";
@@ -11,9 +10,9 @@ import { useHistory } from "react-router";
 import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
 import { translateBoltType } from "utils/boltUtils";
 import BoltDetails from "./BoltDetails";
+import { ImageCarousel } from "./ImageCarousel";
 import ImageDropzone from "./ImageDropzone";
 import ImageThumbnail from "./ImageThumbnail";
-import { ImageCarousel } from "./ImageCarousel";
 import Restricted from "./Restricted";
 
 interface Props {

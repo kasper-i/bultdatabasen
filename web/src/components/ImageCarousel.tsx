@@ -3,6 +3,7 @@ import { Image, ImageVersion } from "models/image";
 import React, {
   CSSProperties,
   Fragment,
+  useCallback,
   useEffect,
   useReducer,
   useRef,
@@ -14,6 +15,7 @@ import { Icon, Loader } from "semantic-ui-react";
 interface FullSizeImageProps {
   image: Image;
   onClose?: () => void;
+  onSwipe?: (direction: "left" | "right") => void;
   version: ImageVersion;
 }
 
@@ -22,22 +24,51 @@ type Orientation = "portrait" | "landscape";
 export const FullSizeImage = ({
   image,
   onClose,
+  onSwipe,
   version,
 }: FullSizeImageProps) => {
   const imgRef = useRef<HTMLImageElement>(null);
+  const touchRef = useRef(0);
   const loading = !(imgRef.current?.complete ?? false);
 
   const [, forceRender] = useReducer((s) => s + 1, 0);
 
   useKey("Escape", onClose);
 
+  const onTouchStart = useCallback((e: TouchEvent): void => {
+    touchRef.current = e.changedTouches[0].screenX;
+  }, []);
+
+  const onTouchEnd = useCallback(
+    (e: TouchEvent): void => {
+      const touchStartX = touchRef.current;
+      const touchEndX = e.changedTouches[0].screenX;
+
+      if (touchEndX < touchStartX) {
+        onSwipe?.("left");
+      }
+      if (touchEndX > touchStartX) {
+        onSwipe?.("right");
+      }
+
+      touchRef.current = 0;
+    },
+    [onSwipe]
+  );
+
   useEffect(() => {
     var body = document.body;
     body?.classList.add("no-scroll");
 
+    imgRef.current?.addEventListener("touchstart", onTouchStart);
+    imgRef.current?.addEventListener("touchend", onTouchEnd);
+
     return () => {
       var body = document.body;
       body?.classList.remove("no-scroll");
+
+      imgRef.current?.removeEventListener("touchstart", onTouchStart);
+      imgRef.current?.removeEventListener("touchend", onTouchEnd);
     };
   });
 
@@ -138,6 +169,14 @@ export const ImageCarousel = ({
   useKey("ArrowLeft", prev);
   useKey("ArrowRight", next);
 
+  const onSwipe = (direction: "left" | "right") => {
+    if (direction === "left") {
+      prev();
+    } else {
+      next();
+    }
+  };
+
   if (index === undefined) {
     return <Fragment />;
   }
@@ -146,7 +185,12 @@ export const ImageCarousel = ({
     <>
       <div className="fixed top-0 left-0 h-screen w-screen bg-black opacity-80"></div>
       <div className="fixed top-0 left-0 h-screen w-screen flex justify-center items-center">
-        <FullSizeImage image={images[index]} version="xl" onClose={onClose} />
+        <FullSizeImage
+          image={images[index]}
+          version="xl"
+          onClose={onClose}
+          onSwipe={onSwipe}
+        />
       </div>
     </>
   );
