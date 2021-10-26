@@ -18,8 +18,8 @@ function TaskIcon({ onClick }: Props): ReactElement {
       <Button icon primary size="tiny">
         <Icon name="wrench" />
       </Button>
-      {tasks.data && (
-        <Pill className="absolute -top-2.5 -right-2">{tasks.data?.length}</Pill>
+      {tasks.data && tasks.data.length > 0 && (
+        <Pill className="absolute -top-2.5 -right-2">{tasks.data.length}</Pill>
       )}
     </div>
   );

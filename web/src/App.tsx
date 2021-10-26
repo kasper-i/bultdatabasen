@@ -1,6 +1,5 @@
 import NavBar from "components/NavBar";
 import ResourceContent from "components/ResourceContent";
-import { AuthContext } from "contexts/AuthContext";
 import { SelectedResourceProvider } from "contexts/SelectedResourceProvider";
 import { queryClient } from "index";
 import SigninPage from "pages/SigninPage";
@@ -10,7 +9,6 @@ import { Dimmer, Loader } from "semantic-ui-react";
 import { Api } from "./Api";
 
 function App() {
-  const [isAuthenticated, setAuthenticated] = useState(Api.authValid());
   const [initialized, setInitialized] = useState(false);
 
   const onFocus = () => {
@@ -45,25 +43,23 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setAuthenticated }}>
-      <Router>
-        <div className="w-screen min-h-screen bg-gray-100">
-          <NavBar />
-          <div className="relative">
-            <div className="mx-auto p-5" style={{ maxWidth: 768 }}>
-              <Route path="/signin">
-                <SigninPage />
-              </Route>
-              <Route path="/">
-                <SelectedResourceProvider>
-                  <ResourceContent />
-                </SelectedResourceProvider>
-              </Route>
-            </div>
+    <Router>
+      <div className="w-screen min-h-screen bg-gray-100">
+        <NavBar />
+        <div className="relative">
+          <div className="mx-auto p-5" style={{ maxWidth: 768 }}>
+            <Route path="/signin">
+              <SigninPage />
+            </Route>
+            <Route path="/">
+              <SelectedResourceProvider>
+                <ResourceContent />
+              </SelectedResourceProvider>
+            </Route>
           </div>
         </div>
-      </Router>
-    </AuthContext.Provider>
+      </div>
+    </Router>
   );
 }
 

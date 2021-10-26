@@ -1,10 +1,12 @@
 import { InsertPosition } from "Api";
+import { useAppDispatch, useAppSelector } from "index";
 import { Point } from "models/point";
 import { useAttachPoint } from "queries/pointQueries";
 import { useRole } from "queries/roleQueries";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { Button } from "semantic-ui-react";
+import { clear, selectPointId } from "slices/clipboardSlice";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
 import Connector from "./graph/Connector";
@@ -24,6 +26,8 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const [selectedPointId, setSelectedPointId] = useState<string>();
   const { role } = useRole(routeId);
   const history = useHistory();
+  const copiedPointId = useAppSelector(selectPointId);
+  const dispatch = useAppDispatch();
 
   const createPoint = useAttachPoint(routeId);
 
@@ -71,10 +75,10 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
       bolts: [{}],
     });
 
-    sessionStorage.removeItem("copiedPoint");
+    dispatch(clear);
   };
 
-  const copiedPoint = sessionStorage.getItem("copiedPoint");
+  const copiedPoint = copiedPointId;
   const attachIcon = copiedPoint != null ? "paste" : "plus";
 
   return (

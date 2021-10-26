@@ -1,8 +1,9 @@
 import axios from "axios";
-import { AuthContext } from "contexts/AuthContext";
+import { useAppDispatch } from "index";
 import { isEqual } from "lodash";
-import React, { Fragment, ReactElement, useContext, useEffect } from "react";
+import React, { Fragment, ReactElement, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
+import { login } from "slices/authSlice";
 import { Api } from "../Api";
 
 export interface OAuthTokenResponse {
@@ -37,7 +38,7 @@ const parseJwt = (token: string) => {
 function SigninPage(): ReactElement {
   const location = useLocation();
   const history = useHistory();
-  const { setAuthenticated } = useContext(AuthContext);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -63,7 +64,6 @@ function SigninPage(): ReactElement {
           response.data;
 
         Api.setTokens(id_token, access_token, refresh_token);
-        setAuthenticated(true);
 
         const { given_name, family_name } = parseJwt(id_token);
 
@@ -81,10 +81,12 @@ function SigninPage(): ReactElement {
         const returnPath = localStorage.getItem("returnPath");
         localStorage.removeItem("returnPath");
 
+        dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
+
         history.push(returnPath != null ? returnPath : "/");
       })
       .catch(function (error) {});
-  }, [location, history, setAuthenticated]);
+  }, [location, history, dispatch]);
 
   return <Fragment />;
 }

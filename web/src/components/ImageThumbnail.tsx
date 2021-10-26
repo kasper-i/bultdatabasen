@@ -1,4 +1,5 @@
 import { Image, ImageRotation } from "models/image";
+import moment from "moment";
 import { useDeleteImage, useUpdateImage } from "queries/imageQueries";
 import React, { ReactElement, useState } from "react";
 import { Button } from "semantic-ui-react";
@@ -30,6 +31,9 @@ const ImageThumbnail = ({
     deleteImage.mutate();
   };
 
+  const timestamp = moment(image.timestamp);
+  const year: number = timestamp.year();
+
   return (
     <ImageView
       image={image}
@@ -38,6 +42,9 @@ const ImageThumbnail = ({
       onClick={() => onClick?.(image.id)}
       version="sm"
     >
+      <div className="absolute left-0 top-0 bg-yellow-700 rounded-sm p-1 text-xs -m-1.5 font-bold text-white">
+        {year}
+      </div>
       {!locked && (
         <Restricted>
           <div className="absolute opacity-70 bg-white h-1/3 w-full bottom-0 left-0 right-0"></div>

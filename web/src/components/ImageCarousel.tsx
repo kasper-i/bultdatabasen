@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useKeyPressEvent } from "react-use";
+import { useKeyPressEvent, usePrevious } from "react-use";
 import { Icon, Loader } from "semantic-ui-react";
 
 interface FullSizeImageProps {
@@ -36,7 +36,10 @@ export const FullSizeImage = ({
   const touchRef = useRef<Coordinate>({ x: 0, y: 0 });
   const loading = !(imgRef.current?.complete ?? false);
 
+  const prevImage = usePrevious(image);
   const [, forceRender] = useReducer((s) => s + 1, 0);
+
+  const hidden = image !== prevImage;
 
   useKeyPressEvent("Escape", onClose);
 
@@ -148,6 +151,7 @@ export const FullSizeImage = ({
         ref={imgRef}
         onLoad={onLoad}
         style={{
+          display: loading || hidden ? "none" : "block",
           imageOrientation: "none",
           ...dimensionClasses,
           ...rotatorClasses,

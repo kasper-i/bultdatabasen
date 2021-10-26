@@ -1,3 +1,4 @@
+import { useAppDispatch } from "index";
 import { BoltType } from "models/bolt";
 import { Image } from "models/image";
 import { Point } from "models/point";
@@ -8,6 +9,7 @@ import { useDetachPoint } from "queries/pointQueries";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import { useHistory } from "react-router";
 import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
+import { copy } from "slices/clipboardSlice";
 import { translateBoltType } from "utils/boltUtils";
 import BoltDetails from "./BoltDetails";
 import { ImageCarousel } from "./ImageCarousel";
@@ -26,6 +28,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
   const deletePoint = useDetachPoint(routeId, point.id);
   const images = useImages(point.id);
   const bolts = useBolts(point.id);
+  const dispatch = useAppDispatch();
 
   const [currImg, setCurrImg] = useState<string>();
   const [imagesLocked, setImagesLocked] = useState(false);
@@ -69,13 +72,6 @@ function PointCard({ point, routeId }: Props): ReactElement {
         <>
           {years.map((year) => (
             <Fragment key={"year-" + year}>
-              <div
-                style={{ width: 40, height: 120 }}
-                className="rounded border-gray-200 border-4 border-dotted flex justify-center items-center"
-              >
-                <h5 className="text-2xl transform -rotate-90">{year}</h5>
-              </div>
-
               {imagesByYear.get(year)?.map((image, index) => (
                 <ImageThumbnail
                   key={image.id}
@@ -123,7 +119,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
         <Restricted>
           <div className="flex gap-2">
             <Button
-              onClick={() => sessionStorage.setItem("copiedPoint", point.id)}
+              onClick={() => dispatch(copy({ pointId: point.id }))}
               icon="copy"
             />
             <Button

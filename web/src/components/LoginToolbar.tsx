@@ -1,11 +1,12 @@
 import { Api } from "Api";
-import { AuthContext } from "contexts/AuthContext";
-import { queryClient } from "index";
-import React, { ReactElement, useContext } from "react";
+import { queryClient, useAppDispatch, useAppSelector } from "index";
+import React, { ReactElement } from "react";
 import { Button } from "semantic-ui-react";
+import { logout, selectAuthenticated } from "slices/authSlice";
 
 function LoginToolbar(): ReactElement {
-  const { isAuthenticated, setAuthenticated } = useContext(AuthContext);
+  const isAuthenticated = useAppSelector(selectAuthenticated);
+  const dispatch = useAppDispatch();
 
   const gotoCognito = () => {
     localStorage.setItem("returnPath", window.location.pathname);
@@ -18,7 +19,7 @@ function LoginToolbar(): ReactElement {
 
   const signOut = () => {
     Api.clearTokens();
-    setAuthenticated(false);
+    dispatch(logout);
     queryClient.removeQueries(["role"]);
   };
 
