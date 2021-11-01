@@ -100,17 +100,5 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 }
 
 func (sess Session) DeleteTask(resourceID string) error {
-	err := sess.Transaction(func(sess Session) error {
-		if err := sess.DB.Delete(&Task{ID: resourceID}).Error; err != nil {
-			return err
-		}
-
-		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return err
+	return sess.deleteResource(resourceID)
 }

@@ -5,6 +5,7 @@ import (
 	"bultdatabasen/middleware/authenticator"
 	"bultdatabasen/middleware/authorizer"
 	"bultdatabasen/middleware/cors"
+	"bultdatabasen/middleware/trashbin"
 	"io"
 	"log"
 	"net/http"
@@ -23,10 +24,12 @@ func checkHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
+	trashbin := trashbin.New()
 	authenticator := authenticator.New()
 	authorizer := authorizer.New()
 
 	router.Use(cors.CORSMiddleware)
+	router.Use(trashbin.Middleware)
 	router.Use(authenticator.Middleware)
 	router.Use(authorizer.Middleware)
 
@@ -100,6 +103,9 @@ func main() {
 	router.HandleFunc("/tasks/{resourceID}", api.GetTask).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/tasks/{resourceID}", api.UpdateTask).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/tasks/{resourceID}", api.DeleteTask).Methods(http.MethodDelete, http.MethodOptions)
+
+	router.HandleFunc("/trash", nil).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/trash/{resourceID}/restore", nil).Methods(http.MethodPost, http.MethodOptions)
 
 	log.Fatal(http.ListenAndServe(":8080", handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(router)))
 }

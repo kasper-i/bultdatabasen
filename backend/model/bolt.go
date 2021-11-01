@@ -66,17 +66,5 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 }
 
 func (sess Session) DeleteBolt(resourceID string) error {
-	err := sess.Transaction(func(sess Session) error {
-		if err := sess.DB.Delete(&Bolt{ID: resourceID}).Error; err != nil {
-			return err
-		}
-
-		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return err
+	return sess.deleteResource(resourceID)
 }

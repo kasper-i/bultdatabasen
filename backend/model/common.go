@@ -79,6 +79,30 @@ func (sess Session) touchResource(resourceID string) error {
 		time.Now(), sess.UserID, resourceID).Error
 }
 
+func (sess Session) deleteResource(resourceID string) error {
+	return sess.Transaction(func(sess Session) error {
+		resource, err := sess.GetResource(resourceID)
+		if err != nil {
+			return err
+		}
+
+		trash := Trash{
+			ResourceID:   resource.ID,
+			DeletedTime:  time.Now(),
+			DeletedByID:  *sess.UserID,
+			OrigParentID: *resource.ParentID,
+		}
+
+		resource.ParentID = nil
+
+		if err := sess.DB.Select("ParentID").Updates(resource).Error; err != nil {
+			return err
+		}
+
+		return sess.DB.Create(&trash).Error
+	})
+}
+
 func (sess Session) checkParentAllowed(resource Resource, parentID string) bool {
 	var parentResource Resource
 

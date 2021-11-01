@@ -376,13 +376,7 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 		}
 
 		if len(parents) == 1 {
-			if err := sess.DB.Delete(&Point{ID: pointID}).Error; err != nil {
-				return err
-			}
-
-			if err := sess.DB.Delete(&Resource{ID: pointID}).Error; err != nil {
-				return err
-			}
+			return sess.deleteResource(pointID)
 		} else if inFosterCare {
 			if err := sess.leaveFosterCare(pointID, routeID); err != nil {
 				return err

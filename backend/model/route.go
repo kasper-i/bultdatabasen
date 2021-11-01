@@ -72,17 +72,5 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 }
 
 func (sess Session) DeleteRoute(resourceID string) error {
-	err := sess.Transaction(func(sess Session) error {
-		if err := sess.DB.Delete(&Route{ID: resourceID}).Error; err != nil {
-			return err
-		}
-
-		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return err
+	return sess.deleteResource(resourceID)
 }

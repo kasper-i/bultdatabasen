@@ -19,6 +19,13 @@ type Resource struct {
 	LastUpdatedByID string    `gorm:"column:muser_id" json:"-"`
 }
 
+type Trash struct {
+	ResourceID   string    `gorm:"primaryKey"`
+	DeletedTime  time.Time `gorm:"column:dtime"`
+	DeletedByID  string    `gorm:"column:duser_id"`
+	OrigParentID string
+}
+
 type Parent struct {
 	ID           string  `json:"id"`
 	Name         *string `json:"name"`
@@ -39,6 +46,10 @@ type ResourceCount struct {
 
 func (Resource) TableName() string {
 	return "resource"
+}
+
+func (Trash) TableName() string {
+	return "trash"
 }
 
 type Depth int32

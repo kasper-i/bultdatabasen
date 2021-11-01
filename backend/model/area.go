@@ -70,17 +70,5 @@ func (sess Session) CreateArea(area *Area, parentResourceID string, userID strin
 }
 
 func (sess Session) DeleteArea(resourceID string) error {
-	err := sess.Transaction(func(sess Session) error {
-		if err := sess.DB.Delete(&Area{ID: resourceID}).Error; err != nil {
-			return err
-		}
-
-		if err := sess.DB.Delete(&Resource{ID: resourceID}).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return err
+	return sess.deleteResource(resourceID)
 }

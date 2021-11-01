@@ -147,15 +147,9 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 
 func (sess Session) DeleteImage(imageID string) error {
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.DB.Delete(&Image{ID: imageID}).Error; err != nil {
+		if err := sess.deleteResource(imageID); err != nil {
 			return err
 		}
-
-		if err := sess.DB.Delete(&Resource{ID: imageID}).Error; err != nil {
-			return err
-		}
-
-		os.Remove(GetOriginalImageFilePath(imageID))
 
 		for version := range ImageSizes {
 			os.Remove(GetResizedImageFilePath(imageID, version))

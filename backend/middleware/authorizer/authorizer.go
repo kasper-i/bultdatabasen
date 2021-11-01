@@ -27,16 +27,21 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 		vars := mux.Vars(r)
 		resourceID := vars["resourceID"]
 		var userID string
+		var ancestors []model.Resource
 		var isAuthenticated bool
 
-		if id, ok := r.Context().Value("user_id").(string); ok {
-			userID = id
+		if value, ok := r.Context().Value("user_id").(string); ok {
+			userID = value
 			isAuthenticated = true
+		}
+
+		if value, ok := r.Context().Value("ancestors").([]model.Resource); ok {
+			ancestors = value
 		}
 
 		if authenticator.IsPublic(r) {
 			if isAuthenticated && r.Method != "OPTIONS" {
-				if maxRole := getMaxRole(resourceID, userID); maxRole != nil {
+				if maxRole := getMaxRole(resourceID, ancestors, userID); maxRole != nil {
 					attachRole(w, r, maxRole.Role)
 				}
 			}
@@ -65,7 +70,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			}
 		}
 
-		if maxRole := getMaxRole(resourceID, userID); maxRole == nil {
+		if maxRole := getMaxRole(resourceID, ancestors, userID); maxRole == nil {
 			writeForbidden(w, resourceID)
 		} else {
 			attachRole(w, r, maxRole.Role)
@@ -74,9 +79,8 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-func getMaxRole(resourceID, userID string) *model.AssignedRole {
+func getMaxRole(resourceID string, ancestors []model.Resource, userID string) *model.AssignedRole {
 	sess := model.NewSession(model.DB, &userID)
-	var err error
 
 	if resourceID == model.RootID {
 		return nil
@@ -94,12 +98,6 @@ func getMaxRole(resourceID, userID string) *model.AssignedRole {
 				return &role
 			}
 		}
-	}
-
-	var ancestors []model.Resource
-
-	if ancestors, err = sess.GetAncestors(resourceID); err != nil {
-		return nil
 	}
 
 	var maxRole *model.AssignedRole = nil
