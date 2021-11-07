@@ -1,5 +1,5 @@
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
-import { useCreateTask } from "queries/taskQueries";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { useCreateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";
 import { Button, Input } from "semantic-ui-react";
 import Restricted from "../../Restricted";

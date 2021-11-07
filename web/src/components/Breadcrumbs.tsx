@@ -1,4 +1,4 @@
-import { useAncestors } from "queries/commonQueries";
+import { useAncestors } from "@/queries/commonQueries";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import { Breadcrumb, StrictBreadcrumbSectionProps } from "semantic-ui-react";

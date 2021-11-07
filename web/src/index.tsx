@@ -12,12 +12,11 @@ import {
   useSelector,
 } from "react-redux";
 import "semantic-ui-css/semantic.min.css";
-import authReducer from "slices/authSlice";
-import clipboardReducer from "slices/clipboardSlice";
+import authReducer from "@/slices/authSlice";
+import clipboardReducer from "@/slices/clipboardSlice";
 import { Api } from "./Api";
 import App from "./App";
 import "./index.css";
-import reportWebVitals from "./reportWebVitals";
 
 Api.restoreTokens();
 
@@ -54,8 +53,3 @@ ReactDOM.render(
   </QueryClientProvider>,
   document.getElementById("root")
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

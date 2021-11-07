@@ -1,6 +1,6 @@
-import { queryClient } from "index";
-import { Bolt } from "models/bolt";
-import { Point } from "models/point";
+import { queryClient } from "@/index";
+import { Bolt } from "@/models/bolt";
+import { Point } from "@/models/point";
 import { useMutation, useQuery } from "react-query";
 import { Api, CreatePointRequest } from "../Api";
 

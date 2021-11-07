@@ -1,5 +1,5 @@
-import { Api } from "Api";
-import { queryClient } from "index";
+import { Api } from "@/Api";
+import { queryClient } from "@/index";
 import React, { ReactElement, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Icon, Progress } from "semantic-ui-react";

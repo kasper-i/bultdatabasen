@@ -1,4 +1,4 @@
-import { UserRole } from "models/user";
+import { UserRole } from "@/models/user";
 import { useQuery } from "react-query";
 
 export const useRole = (resourceId: string) => {

@@ -1,7 +1,7 @@
 import React, { Fragment, ReactElement } from "react";
-import { useChildren } from "queries/commonQueries";
+import { useChildren } from "@/queries/commonQueries";
 import { useHistory } from "react-router";
-import { getResourceLabel, getResourceUrl } from "utils/resourceUtils";
+import { getResourceLabel, getResourceUrl } from "@/utils/resourceUtils";
 
 interface Props {
   resourceId: string;

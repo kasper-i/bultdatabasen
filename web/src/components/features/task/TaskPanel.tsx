@@ -1,7 +1,7 @@
-import Pill from "components/Pill";
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
-import { ResourceType } from "models/resource";
-import { useTasks } from "queries/taskQueries";
+import Pill from "@/components/Pill";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { ResourceType } from "@/models/resource";
+import { useTasks } from "@/queries/taskQueries";
 import React, { ReactElement } from "react";
 import { Icon } from "semantic-ui-react";
 import CreateTask from "./CreateTask";

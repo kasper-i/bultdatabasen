@@ -1,4 +1,4 @@
-import { useCounts } from "queries/commonQueries";
+import { useCounts } from "@/queries/commonQueries";
 import React, { ReactElement } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import ResourceCountRenderer from "./ResourceCountRenderer";

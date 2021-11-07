@@ -1,5 +1,5 @@
-import configData from "config.json";
-import { Image, ImageVersion } from "models/image";
+import configData from "@/config.json";
+import { Image, ImageVersion } from "@/models/image";
 import React, {
   CSSProperties,
   Fragment,

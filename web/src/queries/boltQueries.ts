@@ -1,7 +1,7 @@
-import { Bolt } from "models/bolt";
+import { Bolt } from "@/models/bolt";
 import { useMutation, useQuery } from "react-query";
 import { Api } from "../Api";
-import { queryClient } from "../index";
+import { queryClient } from "@/index";
 
 export const useBolts = (resourceId: string) =>
   useQuery(["bolts", { resourceId }], () => Api.getBolts(resourceId));

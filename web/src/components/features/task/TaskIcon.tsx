@@ -1,6 +1,6 @@
-import Pill from "components/Pill";
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
-import { useTasks } from "queries/taskQueries";
+import Pill from "@/components/Pill";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { useTasks } from "@/queries/taskQueries";
 import React, { ReactElement } from "react";
 import { Button, Icon } from "semantic-ui-react";
 

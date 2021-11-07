@@ -1,8 +1,8 @@
-import { Api } from "Api";
+import { Api } from "@/Api";
 import React, { Reducer, useReducer } from "react";
 import { useHistory } from "react-router";
 import { Search as SemanticSearch, SearchProps } from "semantic-ui-react";
-import { getResourceUrl } from "utils/resourceUtils";
+import { getResourceUrl } from "@/utils/resourceUtils";
 
 interface State {
   loading: boolean;

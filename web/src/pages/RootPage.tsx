@@ -1,5 +1,5 @@
-import ChildrenTable from "components/ChildrenTable";
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
+import ChildrenTable from "@/components/ChildrenTable";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
 import React, { ReactElement, useEffect } from "react";
 
 function RootPage(): ReactElement {

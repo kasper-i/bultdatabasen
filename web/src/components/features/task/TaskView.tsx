@@ -1,7 +1,7 @@
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
-import { Task, TaskStatus } from "models/task";
-import { useAncestors } from "queries/commonQueries";
-import { useDeleteTask, useUpdateTask } from "queries/taskQueries";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { Task, TaskStatus } from "@/models/task";
+import { useAncestors } from "@/queries/commonQueries";
+import { useDeleteTask, useUpdateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Icon } from "semantic-ui-react";

@@ -1,4 +1,4 @@
-import { RoleContext } from "contexts/RoleContext";
+import { RoleContext } from "@/contexts/RoleContext";
 import React, { Fragment, ReactNode, useContext } from "react";
 
 interface Props {

@@ -1,5 +1,5 @@
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
-import { useTasks } from "queries/taskQueries";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { useTasks } from "@/queries/taskQueries";
 import React, { ReactElement } from "react";
 import TaskView from "./TaskView";
 

@@ -1,7 +1,7 @@
-import ChildrenTable from "components/ChildrenTable";
-import PageHeader from "components/PageHeader";
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
-import { useCrag } from "queries/cragQueries";
+import ChildrenTable from "@/components/ChildrenTable";
+import PageHeader from "@/components/PageHeader";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { useCrag } from "@/queries/cragQueries";
 import React, { Fragment, ReactElement, useEffect } from "react";
 import { useParams } from "react-router-dom";
 

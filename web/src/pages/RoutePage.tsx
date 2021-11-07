@@ -1,11 +1,11 @@
-import BoltEditor from "components/BoltEditor";
-import PageHeader from "components/PageHeader";
-import { RoleContext } from "contexts/RoleContext";
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
-import { useBolts } from "queries/boltQueries";
-import { usePoints } from "queries/pointQueries";
-import { useRole } from "queries/roleQueries";
-import { useRoute } from "queries/routeQueries";
+import BoltEditor from "@/components/BoltEditor";
+import PageHeader from "@/components/PageHeader";
+import { RoleContext } from "@/contexts/RoleContext";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { useBolts } from "@/queries/boltQueries";
+import { usePoints } from "@/queries/pointQueries";
+import { useRole } from "@/queries/roleQueries";
+import { useRoute } from "@/queries/routeQueries";
 import React, { Fragment, ReactElement, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
@@ -51,25 +51,18 @@ const RoutePage = (): ReactElement => {
   const glueBolts = bolts.data.filter((bolt) => bolt.type === "glue");
   const expansionBolts = bolts.data.filter((bolt) => bolt.type === "expansion");
 
-  const boltInfo = () => {
-    return bolts.data.length > 0
-      ? `${glueBolts.length} lim, ${expansionBolts.length} expander`
-      : "";
-  };
-
   return (
     <RoleContext.Provider value={{ role }}>
       <div className="flex flex-col">
         <PageHeader resourceId={resourceId} resourceName={route.data.name} />
-        <div>{route.data.year}</div>
-        <div>{route.data.length} m</div>
-        <div>{renderRouteType(route.data.routeType)}</div>
-        <div>
-          <a href={route.data.externalLink}>{route.data.externalLink}</a>
+        <a href={route.data.externalLink}>{route.data.externalLink}</a>
+        <div className="flex gap-2">
+          <div>{route.data.year}</div>
+          <div>{route.data.length} m</div>
+          <div>{renderRouteType(route.data.routeType)}</div>
+          <h3 className="text-xl font-bold">Bultar ({bolts.data.length})</h3>
         </div>
 
-        <h3 className="text-xl font-bold">Bultar ({bolts.data.length})</h3>
-        <div>{boltInfo()}</div>
         <div className="mt-5">
           <BoltEditor routeId={resourceId} points={points.data} />
         </div>

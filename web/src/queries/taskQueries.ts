@@ -1,5 +1,5 @@
-import { queryClient } from "index";
-import { Task } from "models/task";
+import { queryClient } from "@/index";
+import { Task } from "@/models/task";
 import { useMutation, useQuery } from "react-query";
 import { Api } from "../Api";
 

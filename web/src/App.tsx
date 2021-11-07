@@ -1,8 +1,8 @@
-import NavBar from "components/NavBar";
-import ResourceContent from "components/ResourceContent";
-import { SelectedResourceProvider } from "contexts/SelectedResourceProvider";
-import { queryClient } from "index";
-import SigninPage from "pages/SigninPage";
+import NavBar from "@/components/NavBar";
+import ResourceContent from "@/components/ResourceContent";
+import { SelectedResourceProvider } from "@/contexts/SelectedResourceProvider";
+import { queryClient } from "@/index";
+import SigninPage from "@/pages/SigninPage";
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { Dimmer, Loader } from "semantic-ui-react";

@@ -1,8 +1,8 @@
-import { Bolt } from "models/bolt";
-import { useDeleteBolt } from "queries/boltQueries";
+import { Bolt } from "@/models/bolt";
+import { useDeleteBolt } from "@/queries/boltQueries";
 import React, { ReactElement, useState } from "react";
 import { Button } from "semantic-ui-react";
-import { translateBoltType } from "utils/boltUtils";
+import { translateBoltType } from "@/utils/boltUtils";
 import DeletePrompt from "./DeletePrompt";
 import BoltIcon from "./icons/BoltIcon";
 import Restricted from "./Restricted";

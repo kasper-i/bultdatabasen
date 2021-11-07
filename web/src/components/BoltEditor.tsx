@@ -1,12 +1,12 @@
-import { InsertPosition } from "Api";
-import { useAppDispatch, useAppSelector } from "index";
-import { Point } from "models/point";
-import { useAttachPoint } from "queries/pointQueries";
-import { useRole } from "queries/roleQueries";
+import { InsertPosition } from "@/Api";
+import { useAppDispatch, useAppSelector } from "@/index";
+import { Point } from "@/models/point";
+import { useAttachPoint } from "@/queries/pointQueries";
+import { useRole } from "@/queries/roleQueries";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { Button } from "semantic-ui-react";
-import { clear, selectPointId } from "slices/clipboardSlice";
+import { clear, selectPointId } from "@/slices/clipboardSlice";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
 import Connector from "./graph/Connector";

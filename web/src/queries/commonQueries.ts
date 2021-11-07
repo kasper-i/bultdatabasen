@@ -1,5 +1,5 @@
-import { Api } from "Api";
-import { ResourceCount, ResourceType } from "models/resource";
+import { Api } from "@/Api";
+import { ResourceCount, ResourceType } from "@/models/resource";
 import { useQuery } from "react-query";
 
 export const useAncestors = (resourceId: string) =>

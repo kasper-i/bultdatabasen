@@ -1,7 +1,7 @@
-import ChildrenTable from "components/ChildrenTable";
-import PageHeader from "components/PageHeader";
-import { useSelectedResource } from "contexts/SelectedResourceProvider";
-import { useArea } from "queries/areaQueries";
+import ChildrenTable from "@/components/ChildrenTable";
+import PageHeader from "@/components/PageHeader";
+import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { useArea } from "@/queries/areaQueries";
 import React, { Fragment, ReactElement, useEffect } from "react";
 import { useParams } from "react-router-dom";
 

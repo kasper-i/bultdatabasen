@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Point } from "models/point";
+import { Point } from "@/models/point";
 import React, { ReactElement } from "react";
 
 interface Props {

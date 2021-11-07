@@ -1,4 +1,4 @@
-import { Resource } from "models/resource";
+import { Resource } from "@/models/resource";
 import * as React from "react";
 import {
   createContext,

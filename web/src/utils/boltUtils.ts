@@ -1,4 +1,4 @@
-import { BoltType } from "models/bolt";
+import { BoltType } from "@/models/bolt";
 
 export const translateBoltType = (boltType?: BoltType) => {
   switch (boltType) {

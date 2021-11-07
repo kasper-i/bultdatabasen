@@ -1,8 +1,8 @@
-import { Api } from "Api";
-import { queryClient, useAppDispatch, useAppSelector } from "index";
+import { Api } from "@/Api";
+import { queryClient, useAppDispatch, useAppSelector } from "@/index";
 import React, { ReactElement } from "react";
 import { Button } from "semantic-ui-react";
-import { logout, selectAuthenticated } from "slices/authSlice";
+import { logout, selectAuthenticated } from "@/slices/authSlice";
 
 function LoginToolbar(): ReactElement {
   const isAuthenticated = useAppSelector(selectAuthenticated);

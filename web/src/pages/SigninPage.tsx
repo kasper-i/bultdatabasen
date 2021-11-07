@@ -1,9 +1,9 @@
 import axios from "axios";
-import { useAppDispatch } from "index";
+import { useAppDispatch } from "@/index";
 import { isEqual } from "lodash";
 import React, { Fragment, ReactElement, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
-import { login } from "slices/authSlice";
+import { login } from "@/slices/authSlice";
 import { Api } from "../Api";
 
 export interface OAuthTokenResponse {
