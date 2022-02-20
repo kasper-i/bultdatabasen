@@ -6,5 +6,3 @@ chown -R bultdatabasen /usr/share/bultdatabasen/dist
 chown bultdatabasen /var/lib/bultdatabasen
 chown bultdatabasen /var/lib/bultdatabasen/images
 chmod 755 /var/lib/bultdatabasen/images
-
-systemctl restart bultdatabasen
