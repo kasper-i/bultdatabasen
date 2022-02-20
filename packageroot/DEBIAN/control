@@ -1,0 +1,7 @@
+Package: bultdatabasen
+Version: VERSION
+Architecture: amd64
+Maintainer: Kasper Ingelvide <kasper@hubben.xyz>
+Depends: nginx, certbot, python3-certbot-nginx
+Description: Bultdatabasen
+  A web application serving as a database of rock climbing bolts.

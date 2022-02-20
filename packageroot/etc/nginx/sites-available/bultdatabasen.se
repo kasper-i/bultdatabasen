@@ -1,0 +1,23 @@
+server {
+	listen 443 ssl;
+	server_name bultdatabasen.se www.bultdatabasen.se;
+
+	# Gzip Settings
+	include snippets/gzip.conf;
+
+	client_max_body_size 20M;
+
+	root /usr/share/bultdatabasen/dist;
+	index index.html;
+	try_files $uri /index.html;
+
+	include /etc/nginx/options-ssl.conf;
+	ssl_certificate /etc/letsencrypt/live/bultdatabasen.se/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/bultdatabasen.se/privkey.pem;
+}
+
+server {
+	listen 80;
+	server_name bultdatabasen.se www.bultdatabasen.se;
+	return 301 https://bultdatabasen.se$request_uri;
+}
