@@ -1,0 +1,8 @@
+#!/bin/bash
+
+id -u bultdatabasen &>/dev/null || adduser --system --no-create-home bultdatabasen
+
+chown -R bultdatabasen /usr/share/bultdatabasen/dist
+chown bultdatabasen /var/lib/bultdatabasen
+chown bultdatabasen /var/lib/bultdatabasen/images
+chmod 755 /var/lib/bultdatabasen/images

@@ -15,7 +15,7 @@ var DB *gorm.DB
 func init() {
 	var err error
 
-	cfg, err := ini.Load("bultdatabasen.ini")
+	cfg, err := ini.Load("/etc/bultdatabasen.ini")
 	if err != nil {
 		fmt.Printf("Fail to read file: %v", err)
 		os.Exit(1)

@@ -1,0 +1,20 @@
+server {
+	listen 443 ssl;
+	server_name api.bultdatabasen.se;
+
+	# Gzip Settings
+	include snippets/gzip.conf;
+
+	client_max_body_size 20M;
+
+	location / {
+		proxy_pass http://127.0.0.1:8080;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "Upgrade";
+	}
+
+	include /etc/nginx/options-ssl.conf;
+	ssl_certificate /etc/letsencrypt/live/bultdatabasen.se/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/bultdatabasen.se/privkey.pem;
+}

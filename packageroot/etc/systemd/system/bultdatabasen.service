@@ -1,0 +1,14 @@
+[Unit]
+Description=Bultdatabasen
+After=syslog.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+User=bultdatabasen
+ExecStart=/usr/bin/bultdatabasen
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
