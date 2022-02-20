@@ -40,6 +40,6 @@ jobs:
 on:
   push:
     branches:
-      - test
+      - develop
   release:
     types: [published]
