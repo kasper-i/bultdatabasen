@@ -7,9 +7,18 @@ server {
 
 	client_max_body_size 20M;
 
-	root /usr/share/bultdatabasen/dist;
-	index index.html;
-	try_files $uri /index.html;
+	location / {
+		root /usr/share/bultdatabasen/dist;
+		try_files $uri /;
+		expires 1d;
+		add_header Cache-Control "public";
+		access_log off;
+	}
+
+	location = / {
+		root /usr/share/bultdatabasen/dist;
+		try_files /index.html =404;
+	}
 
 	include /etc/nginx/options-ssl.conf;
 	ssl_certificate /etc/letsencrypt/live/bultdatabasen.se/fullchain.pem;
