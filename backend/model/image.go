@@ -185,11 +185,11 @@ func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
 }
 
 func GetOriginalImageFilePath(imageID string) string {
-	return "/var/lib/bultdatabasen/images/" + imageID
+	return cfgImagesPath + "/" + imageID
 }
 
 func GetResizedImageFilePath(imageID string, version string) string {
-	return "/var/lib/bultdatabasen/images/" + imageID + "." + version
+	return cfgImagesPath + "/" + imageID + "." + version
 }
 
 func ResizeImage(imageID string, version string) error {
