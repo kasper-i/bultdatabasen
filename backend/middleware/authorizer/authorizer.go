@@ -4,7 +4,6 @@ import (
 	"bultdatabasen/middleware/authenticator"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
-	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -63,11 +62,10 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			}
 		}
 
-		if maxRole := GetMaxRole(resourceID, ancestors, userID); maxRole == nil {
+		if maxRole := GetMaxRole(resourceID, ancestors, userID); maxRole == nil || maxRole.Role != "owner" {
 			writeForbidden(w, resourceID)
 		} else {
-			ctx := context.WithValue(r.Context(), "max_role", *maxRole)
-			next.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r)
 		}
 	})
 }
