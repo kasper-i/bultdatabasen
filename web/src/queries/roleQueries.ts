@@ -8,7 +8,7 @@ export const useRole = (resourceId: string) => {
     async () => Api.getUserRoleForResource(resourceId),
     {
       select: (role) => role.role,
-      staleTime: 1000 * 60 * 5,
+      staleTime: 1000 * 60 * 30,
     }
   );
   return { role: data };
