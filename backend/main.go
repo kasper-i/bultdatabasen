@@ -54,6 +54,7 @@ func main() {
 	router.HandleFunc("/resources/{resourceID}/ancestors", api.GetAncestors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/children", api.GetChildren).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/counts", api.GetCounts).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/role", api.GetUserRoleForResource).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources", api.Search).Methods(http.MethodGet, http.MethodOptions)
 
 	router.HandleFunc("/resources/{resourceID}/areas", api.GetAreas).Methods(http.MethodGet, http.MethodOptions)

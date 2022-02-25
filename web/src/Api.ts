@@ -17,10 +17,7 @@ import { Task } from "@/models/task";
 import { OAuthTokenResponse } from "@/pages/SigninPage";
 import { Area } from "@/models/area";
 import { User } from "@/models/user";
-
-const updateRole = (resourceId: string, response: AxiosResponse) => {
-  queryClient.setQueryData(["role", { resourceId }], response.headers["role"]);
-};
+import { Role } from "./models/role";
 
 export interface CreatePointRequest {
   pointId?: string;
@@ -156,6 +153,16 @@ export class Api {
     return;
   };
 
+  static getUserRoleForResource = async (resourceId: string): Promise<Role> => {
+    let endpoint = `/resources/${resourceId}/role`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Role;
+  };
+
   static getAreas = async (resourceId?: string): Promise<Area[]> => {
     let endpoint: string;
     if (resourceId != null) {
@@ -178,7 +185,6 @@ export class Api {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
-    updateRole(areaId, result);
     return result.data as Area;
   };
 
@@ -189,7 +195,6 @@ export class Api {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
-    updateRole(cragId, result);
     return result.data as Crag;
   };
 
@@ -200,7 +205,6 @@ export class Api {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
-    updateRole(sectorId, result);
     return result.data as Sector;
   };
 
@@ -241,7 +245,6 @@ export class Api {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
-    updateRole(routeId, result);
     return result.data as Route;
   };
 

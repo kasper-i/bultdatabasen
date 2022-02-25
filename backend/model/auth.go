@@ -1,8 +1,8 @@
 package model
 
 type AssignedRole struct {
-	Role       string
-	ResourceID string
+	Role       string `json:"role"`
+	ResourceID string `json:"resourceID"`
 }
 
 func (sess Session) GetRoles(userID string) []AssignedRole {
