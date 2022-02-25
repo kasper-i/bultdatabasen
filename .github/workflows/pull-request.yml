@@ -18,6 +18,4 @@ jobs:
           go build
         working-directory: backend
 
-on:
-  pull_request:
-    types: [ready_for_review]
+on: pull_request
