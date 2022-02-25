@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bultdatabasen/middleware/authorizer"
+	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"net/http"
 	"strings"
@@ -46,6 +48,31 @@ func GetCounts(w http.ResponseWriter, r *http.Request) {
 	} else {
 		utils.WriteResponse(w, http.StatusOK, counts)
 	}
+}
+
+func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["resourceID"]
+	var userID string
+	var ancestors []model.Resource
+	role := model.ResourceRole {
+		Role: "guest",
+		ResourceID: id,
+	}
+
+	if value, ok := r.Context().Value("user_id").(string); ok {
+		userID = value
+	}
+
+	if value, ok := r.Context().Value("ancestors").([]model.Resource); ok {
+		ancestors = value
+	}
+
+	if maxRole := authorizer.GetMaxRole(id, ancestors, userID); maxRole != nil {
+		role.Role = maxRole.Role
+	}
+
+	utils.WriteResponse(w, http.StatusOK, role)
 }
 
 func Search(w http.ResponseWriter, r *http.Request) {
