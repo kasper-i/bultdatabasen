@@ -4,6 +4,7 @@ import (
 	"bultdatabasen/middleware/authenticator"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -65,12 +66,13 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 		if maxRole := GetMaxRole(resourceID, ancestors, userID); maxRole == nil {
 			writeForbidden(w, resourceID)
 		} else {
-			next.ServeHTTP(w, r)
+			ctx := context.WithValue(r.Context(), "max_role", *maxRole)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	})
 }
 
-func GetMaxRole(resourceID string, ancestors []model.Resource, userID string) *model.AssignedRole {
+func GetMaxRole(resourceID string, ancestors []model.Resource, userID string) *model.ResourceRole {
 	sess := model.NewSession(model.DB, &userID)
 
 	if resourceID == model.RootID {
@@ -91,7 +93,7 @@ func GetMaxRole(resourceID string, ancestors []model.Resource, userID string) *m
 		}
 	}
 
-	var maxRole *model.AssignedRole = nil
+	var maxRole *model.ResourceRole = nil
 
 	for _, ancestor := range ancestors {
 		for _, role := range roles {
@@ -108,7 +110,7 @@ func GetMaxRole(resourceID string, ancestors []model.Resource, userID string) *m
 	return nil
 }
 
-func roleValue(role *model.AssignedRole) int {
+func roleValue(role *model.ResourceRole) int {
 	if role == nil {
 		return 0
 	}
@@ -121,7 +123,7 @@ func roleValue(role *model.AssignedRole) int {
 	}
 }
 
-func max(r1, r2 *model.AssignedRole) *model.AssignedRole {
+func max(r1, r2 *model.ResourceRole) *model.ResourceRole {
 	if roleValue(r1) >= roleValue(r2) {
 		return r1
 	} else {

@@ -1,5 +1,5 @@
 import { Api } from "@/Api";
-import { Role, UserRole } from "@/models/role";
+import { ResourceRole, UserRole } from "@/models/role";
 import { useQuery } from "react-query";
 
 export const useRole = (resourceId: string) => {

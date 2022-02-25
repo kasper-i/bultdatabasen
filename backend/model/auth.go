@@ -1,12 +1,12 @@
 package model
 
-type AssignedRole struct {
+type ResourceRole struct {
 	Role       string `json:"role"`
 	ResourceID string `json:"resourceID"`
 }
 
-func (sess Session) GetRoles(userID string) []AssignedRole {
-	var roles []AssignedRole
+func (sess Session) GetRoles(userID string) []ResourceRole {
+	var roles []ResourceRole
 
 	sess.DB.Raw(`SELECT resource_id, role
 			FROM user

@@ -17,7 +17,7 @@ import { Task } from "@/models/task";
 import { OAuthTokenResponse } from "@/pages/SigninPage";
 import { Area } from "@/models/area";
 import { User } from "@/models/user";
-import { Role } from "./models/role";
+import { ResourceRole } from "./models/role";
 
 export interface CreatePointRequest {
   pointId?: string;
@@ -153,14 +153,16 @@ export class Api {
     return;
   };
 
-  static getUserRoleForResource = async (resourceId: string): Promise<Role> => {
+  static getUserRoleForResource = async (
+    resourceId: string
+  ): Promise<ResourceRole> => {
     let endpoint = `/resources/${resourceId}/role`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
     });
 
-    return result.data as Role;
+    return result.data as ResourceRole;
   };
 
   static getAreas = async (resourceId?: string): Promise<Area[]> => {
