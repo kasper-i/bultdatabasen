@@ -239,9 +239,7 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 			point.ID = uuid.Must(uuid.NewRandom()).String()
 
 			resource := Resource{
-				ResourceBase: ResourceBase{
-					ID: point.ID,
-				},
+				ResourceBase: point.ResourceBase,
 				Type:     "point",
 				ParentID: &routeID,
 			}
