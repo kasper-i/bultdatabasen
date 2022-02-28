@@ -20,7 +20,7 @@ func GetMyself(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			user = &model.User{
 				ID:        userID,
-				FirstSeen:  time.Now(),
+				FirstSeen: time.Now(),
 			}
 
 			if err := sess.CreateUser(user); err != nil {
@@ -56,7 +56,7 @@ func UpdateMyself(w http.ResponseWriter, r *http.Request) {
 				ID:        userID,
 				FirstName: desiredUser.FirstName,
 				LastName:  desiredUser.LastName,
-				FirstSeen:  time.Now(),
+				FirstSeen: time.Now(),
 			}
 
 			if err := sess.CreateUser(user); err != nil {

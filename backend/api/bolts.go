@@ -30,6 +30,7 @@ func GetBolt(w http.ResponseWriter, r *http.Request) {
 	if bolt, err := sess.GetBolt(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
+		bolt.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, bolt)
 	}
 }
@@ -51,6 +52,7 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
+		bolt.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, bolt)
 	}
 }

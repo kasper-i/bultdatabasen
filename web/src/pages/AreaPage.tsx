@@ -34,6 +34,7 @@ const AreaPage = (): ReactElement => {
       <PageHeader
         resourceId={resourceId}
         resourceName={area.data.name}
+        ancestors={area.data.ancestors}
         showCounts
       />
       <ChildrenTable resourceId={resourceId} />

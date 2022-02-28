@@ -1,7 +1,8 @@
+import { ResourceBase } from "./resource";
+
 export type BoltType = "glue" | "expansion";
 
-export interface Bolt {
-  id: string;
+export type Bolt = ResourceBase & {
   type?: BoltType;
   parentId: string;
-}
+};

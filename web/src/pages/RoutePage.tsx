@@ -54,7 +54,11 @@ const RoutePage = (): ReactElement => {
   return (
     <RoleContext.Provider value={{ role }}>
       <div className="flex flex-col">
-        <PageHeader resourceId={resourceId} resourceName={route.data.name} />
+        <PageHeader
+          resourceId={resourceId}
+          resourceName={route.data.name}
+          ancestors={route.data.ancestors}
+        />
         <a href={route.data.externalLink}>{route.data.externalLink}</a>
         <div className="flex gap-2">
           <div>{route.data.year}</div>

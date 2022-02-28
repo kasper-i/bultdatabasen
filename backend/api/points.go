@@ -66,11 +66,16 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
+		var status int
+
 		if request.PointID == nil {
-			utils.WriteResponse(w, http.StatusCreated, point)
+			status = http.StatusCreated
 		} else {
-			utils.WriteResponse(w, http.StatusOK, point)
+			status = http.StatusOK
 		}
+
+		point.WithAncestors(r)
+		utils.WriteResponse(w, status, point)
 	}
 }
 

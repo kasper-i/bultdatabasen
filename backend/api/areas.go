@@ -33,6 +33,7 @@ func GetArea(w http.ResponseWriter, r *http.Request) {
 	if area, err := sess.GetArea(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
+		area.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, area)
 	}
 }
@@ -59,6 +60,7 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
+		area.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, area)
 	}
 }

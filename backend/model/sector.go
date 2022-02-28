@@ -6,8 +6,7 @@ import (
 )
 
 type Sector struct {
-	ID       string `gorm:"primaryKey" json:"id"`
-	Name     string `json:"name"`
+	ResourceBase
 	ParentID string `gorm:"->" json:"parentId"`
 }
 
@@ -45,10 +44,9 @@ func (sess Session) CreateSector(sector *Sector, parentResourceID string) error 
 	sector.ParentID = parentResourceID
 
 	resource := Resource{
-		ID:       sector.ID,
-		Name:     &sector.Name,
-		Type:     "sector",
-		ParentID: &parentResourceID,
+		ResourceBase: sector.ResourceBase,
+		Type:         "sector",
+		ParentID:     &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {

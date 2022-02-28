@@ -34,6 +34,7 @@ const CragPage = (): ReactElement => {
       <PageHeader
         resourceId={resourceId}
         resourceName={crag.data.name}
+        ancestors={crag.data.ancestors}
         showCounts
       />
       <ChildrenTable resourceId={resourceId} />

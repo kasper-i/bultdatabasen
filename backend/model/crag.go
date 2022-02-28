@@ -6,8 +6,7 @@ import (
 )
 
 type Crag struct {
-	ID       string `gorm:"primaryKey" json:"id"`
-	Name     string `json:"name"`
+	ResourceBase
 	ParentID string `gorm:"->" json:"parentId"`
 }
 
@@ -45,10 +44,9 @@ func (sess Session) CreateCrag(crag *Crag, parentResourceID string) error {
 	crag.ParentID = parentResourceID
 
 	resource := Resource{
-		ID:       crag.ID,
-		Name:     &crag.Name,
-		Type:     "crag",
-		ParentID: &parentResourceID,
+		ResourceBase: crag.ResourceBase,
+		Type:         "crag",
+		ParentID:     &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {

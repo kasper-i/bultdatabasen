@@ -55,8 +55,8 @@ func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 	id := vars["resourceID"]
 	var userID string
 	var ancestors []model.Resource
-	role := model.ResourceRole {
-		Role: "guest",
+	role := model.ResourceRole{
+		Role:       "guest",
 		ResourceID: id,
 	}
 

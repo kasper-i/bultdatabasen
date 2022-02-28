@@ -2,14 +2,20 @@ package model
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 )
 
 const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 
+type ResourceBase struct {
+	ID        string      `gorm:"primaryKey" json:"id"`
+	Name      *string     `json:"name,omitempty"`
+	Ancestors *[]Resource `gorm:"-" json:"ancestors,omitempty"`
+}
+
 type Resource struct {
-	ID              string    `gorm:"primaryKey" json:"id"`
-	Name            *string   `json:"name,omitempty"`
+	ResourceBase
 	Type            string    `json:"type"`
 	Depth           Depth     `json:"-"`
 	ParentID        *string   `json:"parentId,omitempty"`
@@ -65,6 +71,13 @@ const (
 	DepthComment Depth = 700
 	DepthTask    Depth = 700
 )
+
+func (resource *ResourceBase) WithAncestors(r *http.Request) {
+
+	if value, ok := r.Context().Value("ancestors").([]Resource); ok {
+		resource.Ancestors = &value
+	}
+}
 
 func GetResourceDepth(resourceType string) Depth {
 	switch resourceType {
@@ -203,8 +216,10 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 
 		resources = append(resources, ResourceWithParents{
 			Resource: Resource{
-				ID:       result["id"].(string),
-				Name:     parseString(result["name"]),
+				ResourceBase: ResourceBase{
+					ID:   result["id"].(string),
+					Name: parseString(result["name"]),
+				},
 				Type:     result["type"].(string),
 				ParentID: parseString(result["parent_id"])},
 			Parents: parents,

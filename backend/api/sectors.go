@@ -30,6 +30,7 @@ func GetSector(w http.ResponseWriter, r *http.Request) {
 	if sector, err := sess.GetSector(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
+		sector.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, sector)
 	}
 }
@@ -51,6 +52,7 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
+		sector.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, sector)
 	}
 }
