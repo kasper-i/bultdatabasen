@@ -81,9 +81,7 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 		Size:      len(bytes)}
 
 	resource := Resource{
-		ResourceBase: ResourceBase{
-			ID: img.ID,
-		},
+		ResourceBase: img.ResourceBase,
 		Type:     "image",
 		ParentID: &parentResourceID,
 	}
