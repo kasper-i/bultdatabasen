@@ -85,6 +85,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			utils.WriteError(w, err)
 		} else {
+			image.WithAncestors(r)
 			utils.WriteResponse(w, http.StatusCreated, image)
 		}
 	default:
