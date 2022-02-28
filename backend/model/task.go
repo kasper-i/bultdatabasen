@@ -54,9 +54,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	}
 
 	resource := Resource{
-		ResourceBase: ResourceBase{
-			ID: task.ID,
-		},
+		ResourceBase: task.ResourceBase,
 		Type:     "task",
 		ParentID: &parentResourceID,
 	}
