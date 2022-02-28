@@ -6,7 +6,7 @@ import (
 )
 
 type Task struct {
-	ID          string  `gorm:"primaryKey" json:"id"`
+	ResourceBase
 	Status      string  `json:"status"`
 	Description string  `json:"description"`
 	Assignee    *string `gorm:"->" json:"assignee,omitempty"`
@@ -54,7 +54,9 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	}
 
 	resource := Resource{
-		ID:       task.ID,
+		ResourceBase: ResourceBase{
+			ID: task.ID,
+		},
 		Type:     "task",
 		ParentID: &parentResourceID,
 	}

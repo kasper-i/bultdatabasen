@@ -6,7 +6,7 @@ import (
 )
 
 type Bolt struct {
-	ID       string  `gorm:"primaryKey" json:"id"`
+	ResourceBase
 	Type     *string `json:"type,omitempty"`
 	ParentID string  `gorm:"->" json:"parentId"`
 }
@@ -45,8 +45,9 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 	bolt.ParentID = parentResourceID
 
 	resource := Resource{
-		ID:       bolt.ID,
-		Name:     nil,
+		ResourceBase: ResourceBase{
+			ID: bolt.ID,
+		},
 		Type:     "bolt",
 		ParentID: &parentResourceID,
 	}

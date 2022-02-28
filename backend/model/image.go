@@ -28,7 +28,7 @@ func init() {
 }
 
 type Image struct {
-	ID          string    `gorm:"primaryKey" json:"id"`
+	ResourceBase
 	MimeType    string    `json:"mimeType"`
 	Timestamp   time.Time `json:"timestamp"`
 	Description string    `json:"description"`
@@ -73,13 +73,17 @@ func (sess Session) GetImage(imageID string) (*Image, error) {
 
 func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType string) (*Image, error) {
 	img := Image{
-		ID:        uuid.Must(uuid.NewRandom()).String(),
+		ResourceBase: ResourceBase{
+			ID: uuid.Must(uuid.NewRandom()).String(),
+		},
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
 		Size:      len(bytes)}
 
 	resource := Resource{
-		ID:       img.ID,
+		ResourceBase: ResourceBase{
+			ID: img.ID,
+		},
 		Type:     "image",
 		ParentID: &parentResourceID,
 	}

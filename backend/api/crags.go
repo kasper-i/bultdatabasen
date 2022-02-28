@@ -30,6 +30,7 @@ func GetCrag(w http.ResponseWriter, r *http.Request) {
 	if crag, err := sess.GetCrag(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
+		crag.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, crag)
 	}
 }
@@ -51,6 +52,7 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
+		crag.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, crag)
 	}
 }

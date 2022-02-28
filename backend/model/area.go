@@ -6,9 +6,7 @@ import (
 )
 
 type Area struct {
-	ID       string `gorm:"primaryKey" json:"id"`
-	Name     string `json:"name"`
-	ParentID string `gorm:"->" json:"parentId"`
+	ResourceBase
 }
 
 func (Area) TableName() string {
@@ -44,8 +42,10 @@ func (sess Session) CreateArea(area *Area, parentResourceID string, userID strin
 	area.ID = uuid.Must(uuid.NewRandom()).String()
 
 	resource := Resource{
-		ID:       area.ID,
-		Name:     &area.Name,
+		ResourceBase: ResourceBase{
+			ID:   area.ID,
+			Name: area.Name,
+		},
 		Type:     "area",
 		ParentID: &parentResourceID,
 	}

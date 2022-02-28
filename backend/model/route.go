@@ -6,8 +6,7 @@ import (
 )
 
 type Route struct {
-	ID           string  `gorm:"primaryKey" json:"id"`
-	Name         string  `json:"name"`
+	ResourceBase
 	AltName      *string `json:"altName,omitempty"`
 	Year         *int32  `json:"year,omitempty"`
 	Length       *int32  `json:"length,omitempty"`
@@ -50,10 +49,9 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 	route.ParentID = parentResourceID
 
 	resource := Resource{
-		ID:       route.ID,
-		Name:     &route.Name,
-		Type:     "route",
-		ParentID: &parentResourceID,
+		ResourceBase: route.ResourceBase,
+		Type:         "route",
+		ParentID:     &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {

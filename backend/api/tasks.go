@@ -30,6 +30,7 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 	if task, err := sess.GetTask(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
+		task.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, task)
 	}
 }
@@ -51,6 +52,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
+		task.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, task)
 	}
 }
@@ -72,6 +74,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
+		task.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, task)
 	}
 }

@@ -6,10 +6,10 @@ import (
 
 type User struct {
 	ID        string    `gorm:"primaryKey" json:"id"`
-	Email     *string    `json:"email,omitempty"`
-	FirstName *string    `json:"firstName,omitempty"`
-	LastName  *string    `json:"lastName,omitempty"`
-	FirstSeen  time.Time `json:"firstSeen"`
+	Email     *string   `json:"email,omitempty"`
+	FirstName *string   `json:"firstName,omitempty"`
+	LastName  *string   `json:"lastName,omitempty"`
+	FirstSeen time.Time `json:"firstSeen"`
 }
 
 func (User) TableName() string {

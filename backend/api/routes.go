@@ -30,6 +30,7 @@ func GetRoute(w http.ResponseWriter, r *http.Request) {
 	if route, err := sess.GetRoute(resourceId); err != nil {
 		utils.WriteError(w, err)
 	} else {
+		route.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, route)
 	}
 }
@@ -51,6 +52,7 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
+		route.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, route)
 	}
 }

@@ -8,7 +8,7 @@ import (
 )
 
 type Point struct {
-	ID      string   `gorm:"primaryKey" json:"id"`
+	ResourceBase
 	Parents []Parent `gorm:"-" json:"parents"`
 	Number  int      `gorm:"-" json:"number"`
 }
@@ -239,8 +239,9 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 			point.ID = uuid.Must(uuid.NewRandom()).String()
 
 			resource := Resource{
-				ID:       point.ID,
-				Name:     nil,
+				ResourceBase: ResourceBase{
+					ID: point.ID,
+				},
 				Type:     "point",
 				ParentID: &routeID,
 			}
@@ -395,7 +396,7 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 				return err
 			}
 
-			if err := sess.moveResource(Resource{ID: pointID, Type: "point"}, newOwnerID); err != nil {
+			if err := sess.moveResource(Resource{ResourceBase: ResourceBase{ID: pointID}, Type: "point"}, newOwnerID); err != nil {
 				return err
 			}
 		}
