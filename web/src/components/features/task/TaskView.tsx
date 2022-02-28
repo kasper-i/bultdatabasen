@@ -1,6 +1,5 @@
 import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
 import { Task, TaskStatus } from "@/models/task";
-import { useAncestors } from "@/queries/commonQueries";
 import { useDeleteTask, useUpdateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
@@ -18,7 +17,7 @@ const TaskView = (props: Props): ReactElement => {
 
   const { selectedResource } = useSelectedResource();
 
-  const ancestors = useAncestors(task.id);
+  const ancestors = task.ancestors;
   const deleteTask = useDeleteTask(selectedResource.id, task.id);
   const updateTask = useUpdateTask(selectedResource.id, task.id);
 
@@ -31,7 +30,7 @@ const TaskView = (props: Props): ReactElement => {
   };
 
   const routeName =
-    ancestors.data?.find((ancestor) => ancestor.type === "route")?.name ?? "";
+    ancestors?.find((ancestor) => ancestor.type === "route")?.name ?? "";
 
   const isComplete = finalStatuses.includes(task.status);
 

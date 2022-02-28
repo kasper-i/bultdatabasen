@@ -1,9 +1,10 @@
+import { ResourceBase } from "./resource";
+
 export type ImageRotation = 0 | 90 | 180 | 270;
 
 export type ImageVersion = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
-export interface Image {
-  id: string;
+export type Image = ResourceBase & {
   mimeType: string;
   timestamp: string;
   description?: string;
@@ -11,4 +12,4 @@ export interface Image {
   size: number;
   width: number;
   height: number;
-}
+};

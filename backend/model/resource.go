@@ -72,7 +72,7 @@ const (
 	DepthTask    Depth = 700
 )
 
-func (resource ResourceBase) WithAncestors(r *http.Request) {
+func (resource *ResourceBase) WithAncestors(r *http.Request) {
 
 	if value, ok := r.Context().Value("ancestors").([]Resource); ok {
 		resource.Ancestors = &value

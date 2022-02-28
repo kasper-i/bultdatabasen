@@ -10,12 +10,16 @@ export type ResourceType =
   | "image"
   | "task";
 
-export interface Resource {
+export interface ResourceBase {
   id: string;
   name?: string;
+  ancestors?: Omit<Resource, "ancestors">[];
+}
+
+export type Resource = ResourceBase & {
   type: ResourceType;
   parentId?: string;
-}
+};
 
 export interface Parent {
   id: string;

@@ -82,8 +82,8 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 
 	resource := Resource{
 		ResourceBase: img.ResourceBase,
-		Type:     "image",
-		ParentID: &parentResourceID,
+		Type:         "image",
+		ParentID:     &parentResourceID,
 	}
 
 	fileName := GetOriginalImageFilePath(img.ID)

@@ -1,7 +1,6 @@
-import { Parent } from "./resource";
+import { Parent, ResourceBase } from "./resource";
 
-export interface Point {
-  id: string;
+export type Point = ResourceBase & {
   parents: Parent[];
   number: number;
-}
+};

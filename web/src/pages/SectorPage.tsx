@@ -34,6 +34,7 @@ const SectorPage = (): ReactElement => {
       <PageHeader
         resourceId={resourceId}
         resourceName={sector.data.name}
+        ancestors={sector.data.ancestors}
         showCounts
       />
       <ChildrenTable resourceId={resourceId} />

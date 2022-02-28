@@ -240,8 +240,8 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 
 			resource := Resource{
 				ResourceBase: point.ResourceBase,
-				Type:     "point",
-				ParentID: &routeID,
+				Type:         "point",
+				ParentID:     &routeID,
 			}
 
 			if err := sess.createResource(resource); err != nil {

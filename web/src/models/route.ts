@@ -1,5 +1,6 @@
-export interface Route {
-  id: string;
+import { ResourceBase } from "./resource";
+
+export type Route = Omit<ResourceBase, "name"> & {
   name: string;
   altName: string;
   year: number;
@@ -7,4 +8,4 @@ export interface Route {
   routeType: string;
   externalLink: string;
   parentId: string;
-}
+};

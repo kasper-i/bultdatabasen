@@ -46,8 +46,8 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 
 	resource := Resource{
 		ResourceBase: bolt.ResourceBase,
-		Type:     "bolt",
-		ParentID: &parentResourceID,
+		Type:         "bolt",
+		ParentID:     &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
