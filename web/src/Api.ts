@@ -1,7 +1,5 @@
-import axios, { AxiosResponse } from "axios";
 import configData from "@/config.json";
-import { queryClient } from "@/index";
-import jwtDecode, { JwtPayload } from "jwt-decode";
+import { Area } from "@/models/area";
 import { Bolt } from "@/models/bolt";
 import { Crag } from "@/models/crag";
 import { Image } from "@/models/image";
@@ -14,9 +12,10 @@ import {
 import { Route } from "@/models/route";
 import { Sector } from "@/models/sector";
 import { Task } from "@/models/task";
-import { OAuthTokenResponse } from "@/pages/SigninPage";
-import { Area } from "@/models/area";
 import { User } from "@/models/user";
+import { OAuthTokenResponse } from "@/pages/SigninPage";
+import axios from "axios";
+import jwtDecode, { JwtPayload } from "jwt-decode";
 import { ResourceRole } from "./models/role";
 
 export interface CreatePointRequest {
@@ -156,7 +155,7 @@ export class Api {
   static getUserRoleForResource = async (
     resourceId: string
   ): Promise<ResourceRole> => {
-    let endpoint = `/resources/${resourceId}/role`;
+    const endpoint = `/resources/${resourceId}/role`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -264,7 +263,7 @@ export class Api {
   };
 
   static getBolts = async (resourceId: string): Promise<Bolt[]> => {
-    let endpoint = `/resources/${resourceId}/bolts`;
+    const endpoint = `/resources/${resourceId}/bolts`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -274,7 +273,7 @@ export class Api {
   };
 
   static getPoints = async (routeId: string): Promise<Point[]> => {
-    let endpoint = `/routes/${routeId}/points`;
+    const endpoint = `/routes/${routeId}/points`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -287,7 +286,7 @@ export class Api {
     pointId: string,
     bolt: Pick<Bolt, "type">
   ): Promise<Bolt> => {
-    let endpoint = `/resources/${pointId}/bolts`;
+    const endpoint = `/resources/${pointId}/bolts`;
 
     const result = await axios.post(`${Api.baseUrl}${endpoint}`, bolt, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -297,7 +296,7 @@ export class Api {
   };
 
   static deleteBolt = async (boltId: string): Promise<void> => {
-    let endpoint = `/bolts/${boltId}`;
+    const endpoint = `/bolts/${boltId}`;
 
     await axios.delete(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -308,7 +307,7 @@ export class Api {
     routeId: string,
     request: CreatePointRequest
   ): Promise<Point> => {
-    let endpoint = `/routes/${routeId}/points`;
+    const endpoint = `/routes/${routeId}/points`;
 
     const result = await axios.post(`${Api.baseUrl}${endpoint}`, request, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -321,7 +320,7 @@ export class Api {
     routeId: string,
     pointId: string
   ): Promise<void> => {
-    let endpoint = `/routes/${routeId}/points/${pointId}`;
+    const endpoint = `/routes/${routeId}/points/${pointId}`;
 
     const result = await axios.delete(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -335,9 +334,9 @@ export class Api {
     file: File,
     onProgress?: (progress: number) => void
   ): Promise<void> => {
-    let endpoint = `/resources/${pointId}/images`;
+    const endpoint = `/resources/${pointId}/images`;
 
-    let fd = new FormData();
+    const fd = new FormData();
     fd.append("image", file);
 
     await axios.post(`${Api.baseUrl}${endpoint}`, fd, {
@@ -352,7 +351,7 @@ export class Api {
   };
 
   static getImages = async (pointId: string): Promise<Image[]> => {
-    let endpoint = `/resources/${pointId}/images`;
+    const endpoint = `/resources/${pointId}/images`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -362,7 +361,7 @@ export class Api {
   };
 
   static deleteImage = async (imageId: string): Promise<void> => {
-    let endpoint = `/images/${imageId}`;
+    const endpoint = `/images/${imageId}`;
 
     await axios.delete(`${Api.baseUrl}${endpoint}`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },
@@ -373,7 +372,7 @@ export class Api {
     imageId: string,
     patch: Pick<Image, "rotation">
   ): Promise<void> => {
-    let endpoint = `/images/${imageId}`;
+    const endpoint = `/images/${imageId}`;
 
     await axios.patch(`${Api.baseUrl}${endpoint}`, patch, {
       headers: {

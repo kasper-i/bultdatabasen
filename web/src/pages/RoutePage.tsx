@@ -48,9 +48,6 @@ const RoutePage = (): ReactElement => {
     return <Fragment />;
   }
 
-  const glueBolts = bolts.data.filter((bolt) => bolt.type === "glue");
-  const expansionBolts = bolts.data.filter((bolt) => bolt.type === "expansion");
-
   return (
     <RoleContext.Provider value={{ role }}>
       <div className="flex flex-col">

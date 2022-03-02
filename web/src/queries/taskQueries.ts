@@ -13,7 +13,7 @@ export const useCreateTask = (parentId: string) =>
   useMutation(
     (task: Pick<Task, "description">) => Api.createTask(parentId, task),
     {
-      onSuccess: async (data, variables, context) => {
+      onSuccess: async (data) => {
         queryClient.setQueryData<Task>(
           ["task", { taskId: data.id }],
           () => data
@@ -28,7 +28,7 @@ export const useCreateTask = (parentId: string) =>
 
 export const useUpdateTask = (parentId: string, taskId: string) =>
   useMutation((task: Task) => Api.updateTask(taskId, task), {
-    onSuccess: async (data, variables, context) => {
+    onSuccess: async (data) => {
       queryClient.setQueryData<Task>(["task", { taskId: data.id }], () => data);
       queryClient.setQueryData<Task[]>(["tasks", { parentId }], (tasks) =>
         tasks?.find((task) => task.id === taskId)
@@ -40,7 +40,7 @@ export const useUpdateTask = (parentId: string, taskId: string) =>
 
 export const useDeleteTask = (parentId: string, taskId: string) =>
   useMutation(() => Api.deleteTask(taskId), {
-    onSuccess: async (data, variables, context) => {
+    onSuccess: async () => {
       queryClient.removeQueries(["task", { taskId }]);
       queryClient.setQueryData<Task[]>(
         ["tasks", { parentId }],

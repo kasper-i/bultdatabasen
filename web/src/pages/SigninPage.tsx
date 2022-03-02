@@ -21,9 +21,9 @@ const instance = axios.create({
 });
 
 const parseJwt = (token: string) => {
-  var base64Url = token.split(".")[1];
-  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  var jsonPayload = decodeURIComponent(
+  const base64Url = token.split(".")[1];
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  const jsonPayload = decodeURIComponent(
     atob(base64)
       .split("")
       .map(function (c) {
@@ -57,35 +57,32 @@ function SigninPage(): ReactElement {
       window.location.protocol + "//" + window.location.host + "/signin"
     );
 
-    instance
-      .post("/oauth2/token", params)
-      .then(async (response) => {
-        const { id_token, access_token, refresh_token }: OAuthTokenResponse =
-          response.data;
+    instance.post("/oauth2/token", params).then(async (response) => {
+      const { id_token, access_token, refresh_token }: OAuthTokenResponse =
+        response.data;
 
-        Api.setTokens(id_token, access_token, refresh_token);
+      Api.setTokens(id_token, access_token, refresh_token);
 
-        const { given_name, family_name } = parseJwt(id_token);
+      const { given_name, family_name } = parseJwt(id_token);
 
-        const info = await Api.getMyself();
-        const updatedInfo = {
-          ...info,
-          firstName: info.firstName ?? given_name,
-          lastName: info.lastName ?? family_name,
-        };
+      const info = await Api.getMyself();
+      const updatedInfo = {
+        ...info,
+        firstName: info.firstName ?? given_name,
+        lastName: info.lastName ?? family_name,
+      };
 
-        if (!isEqual(info, updatedInfo)) {
-          await Api.updateMyself(updatedInfo);
-        }
+      if (!isEqual(info, updatedInfo)) {
+        await Api.updateMyself(updatedInfo);
+      }
 
-        const returnPath = localStorage.getItem("returnPath");
-        localStorage.removeItem("returnPath");
+      const returnPath = localStorage.getItem("returnPath");
+      localStorage.removeItem("returnPath");
 
-        dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
+      dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
 
-        history.push(returnPath != null ? returnPath : "/");
-      })
-      .catch(function (error) {});
+      history.push(returnPath != null ? returnPath : "/");
+    });
   }, [location, history, dispatch]);
 
   return <Fragment />;

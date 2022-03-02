@@ -9,7 +9,7 @@ interface Props {
   half?: boolean;
 }
 
-function Connector({ orientation, main, children, half }: Props): ReactElement {
+function Connector({ orientation, children, half }: Props): ReactElement {
   let style: React.CSSProperties = {
     transformOrigin: "50% bottom",
     bottom: "50%",

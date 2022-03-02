@@ -1,3 +1,3 @@
 {
-  "API_URL": "https://api.bultdatabasen.se"
+  "API_URL": "http://localhost:8080"
 }

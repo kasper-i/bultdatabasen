@@ -5,7 +5,7 @@ interface Props {
   children: ReactNode;
 }
 
-const Restricted = ({ children }: Props): JSX.Element => {
+const Restricted = ({ children }: Props) => {
   const { role } = useContext(RoleContext);
 
   if (role !== "owner") {

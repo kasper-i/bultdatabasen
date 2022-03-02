@@ -11,7 +11,7 @@ export const clipboardSlice = createSlice({
   name: "clipboard",
   initialState,
   reducers: {
-    clear: (state) => {
+    clear: () => {
       return initialState;
     },
     copy: (state, action: PayloadAction<{ pointId: string }>) => {

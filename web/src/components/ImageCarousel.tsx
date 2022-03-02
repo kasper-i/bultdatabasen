@@ -70,7 +70,7 @@ export const FullSizeImage = ({
   );
 
   useEffect(() => {
-    var body = document.body;
+    const body = document.body;
     body?.classList.add("no-scroll");
 
     const imgElement = imgRef.current;
@@ -79,7 +79,7 @@ export const FullSizeImage = ({
     imgElement?.addEventListener("touchend", onTouchEnd);
 
     return () => {
-      var body = document.body;
+      const body = document.body;
       body?.classList.remove("no-scroll");
 
       imgElement?.removeEventListener("touchstart", onTouchStart);
@@ -118,7 +118,7 @@ export const FullSizeImage = ({
       break;
   }
 
-  const onLoad = (_event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const onLoad = () => {
     forceRender();
   };
 
