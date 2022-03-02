@@ -10,7 +10,7 @@ export const useImages = (resourceId: string) =>
 
 export const useDeleteImage = (parentResourceId: string, imageId: string) =>
   useMutation(() => Api.deleteImage(imageId), {
-    onSuccess: (data, variables, context) => {
+    onSuccess: () => {
       queryClient.setQueryData<Image[]>(
         ["images", { resourceId: parentResourceId }],
         (old) => old?.filter((image) => image.id !== imageId) ?? []
@@ -22,7 +22,7 @@ export const useUpdateImage = (parentResourceId: string, imageId: string) =>
   useMutation(
     (patch: Pick<Image, "rotation">) => Api.updateImage(imageId, patch),
     {
-      onSuccess: (data, variables, context) => {
+      onSuccess: (data, variables) => {
         queryClient.setQueryData<Image[]>(
           ["images", { resourceId: parentResourceId }],
           (old) =>

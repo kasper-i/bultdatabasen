@@ -11,7 +11,7 @@ export const usePoints = (routeId: string) =>
 
 export const useAttachPoint = (routeId: string) =>
   useMutation((request: CreatePointRequest) => Api.addPoint(routeId, request), {
-    onSuccess: async (data, variables, context) => {
+    onSuccess: async (data, variables) => {
       queryClient.setQueryData<Point[] | undefined>(
         ["points", { resourceId: routeId }],
         (points) => {
@@ -46,7 +46,7 @@ export const useAttachPoint = (routeId: string) =>
 
 export const useDetachPoint = (routeId: string, pointId: string) =>
   useMutation(() => Api.detachPoint(routeId, pointId), {
-    onSuccess: async (data, variables, context) => {
+    onSuccess: async () => {
       queryClient.setQueryData<Point[] | undefined>(
         ["points", { resourceId: routeId }],
         (points) => {

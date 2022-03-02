@@ -8,7 +8,7 @@ export const useBolts = (resourceId: string) =>
 
 export const useCreateBolt = (routeId: string, pointId: string) =>
   useMutation((bolt: Pick<Bolt, "type">) => Api.createBolt(pointId, bolt), {
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data) => {
       queryClient.setQueryData<Bolt[]>(
         ["bolts", { resourceId: pointId }],
         (old) => (old !== undefined ? [...old, data] : [])
@@ -27,7 +27,7 @@ export const useDeleteBolt = (
   boltId: string
 ) =>
   useMutation(() => Api.deleteBolt(boltId), {
-    onSuccess: (data, variables, context) => {
+    onSuccess: () => {
       queryClient.setQueryData<Bolt[]>(
         ["bolts", { resourceId: pointId }],
         (old) =>

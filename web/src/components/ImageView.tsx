@@ -82,7 +82,7 @@ export const ImageView = ({
     };
   }
 
-  const onLoad = (_event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const onLoad = () => {
     forceRender();
   };
 

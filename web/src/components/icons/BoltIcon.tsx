@@ -1,8 +1,6 @@
 import React, { ReactElement } from "react";
 
-interface Props {}
-
-function BoltIcon(props: Props): ReactElement {
+function BoltIcon(): ReactElement {
   return (
     <svg
       className="h-6"

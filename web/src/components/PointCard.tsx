@@ -72,7 +72,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
         <>
           {years.map((year) => (
             <Fragment key={"year-" + year}>
-              {imagesByYear.get(year)?.map((image, index) => (
+              {imagesByYear.get(year)?.map((image) => (
                 <ImageThumbnail
                   key={image.id}
                   pointId={point.id}
@@ -183,7 +183,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
         <h5 className="font-bold text-2xl pr-2">Bilder</h5>
         <Restricted>
           <Button
-            onClick={(e) => setImagesLocked((checked) => !checked)}
+            onClick={() => setImagesLocked((checked) => !checked)}
             icon={imagesLocked ? "unlock" : "lock"}
             size="small"
           />
