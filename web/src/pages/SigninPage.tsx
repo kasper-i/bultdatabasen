@@ -2,9 +2,9 @@ import axios from "axios";
 import { useAppDispatch } from "@/index";
 import { isEqual } from "lodash";
 import React, { Fragment, ReactElement, useEffect } from "react";
-import { useHistory, useLocation } from "react-router";
 import { login } from "@/slices/authSlice";
 import { Api } from "../Api";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export interface OAuthTokenResponse {
   id_token: string;
@@ -36,13 +36,12 @@ const parseJwt = (token: string) => {
 };
 
 function SigninPage(): ReactElement {
-  const location = useLocation();
-  const history = useHistory();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const code = query.get("code");
+    const code = searchParams.get("code");
 
     if (code == null) {
       return;
@@ -81,9 +80,9 @@ function SigninPage(): ReactElement {
 
       dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
 
-      history.push(returnPath != null ? returnPath : "/");
+      navigate(returnPath != null ? returnPath : "/");
     });
-  }, [location, history, dispatch]);
+  }, [location, navigate, dispatch]);
 
   return <Fragment />;
 }

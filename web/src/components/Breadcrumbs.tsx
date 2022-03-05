@@ -1,6 +1,6 @@
 import { Resource } from "@/models/resource";
 import React, { ReactElement } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { Breadcrumb, StrictBreadcrumbSectionProps } from "semantic-ui-react";
 import { SemanticShorthandCollection } from "semantic-ui-react/dist/commonjs/generic";
 
@@ -15,7 +15,7 @@ const Breadcrumbs = ({
   resourceName,
   ancestors,
 }: Props): ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const crumbs: SemanticShorthandCollection<StrictBreadcrumbSectionProps> = (
     ancestors ?? []
@@ -25,19 +25,19 @@ const Breadcrumbs = ({
     onClick: () => {
       switch (ancestor.type) {
         case "root":
-          history.push("/");
+          navigate("/");
           break;
         case "area":
-          history.push(`/area/${ancestor.id}`);
+          navigate(`/area/${ancestor.id}`);
           break;
         case "crag":
-          history.push(`/crag/${ancestor.id}`);
+          navigate(`/crag/${ancestor.id}`);
           break;
         case "sector":
-          history.push(`/sector/${ancestor.id}`);
+          navigate(`/sector/${ancestor.id}`);
           break;
         case "route":
-          history.push(`/route/${ancestor.id}`);
+          navigate(`/route/${ancestor.id}`);
           break;
       }
     },

@@ -1,4 +1,4 @@
-import NavBar from "@/components/NavBar";
+import NavigationBar from "@/components/NavigationBar";
 import ResourceContent from "@/components/ResourceContent";
 import { SelectedResourceProvider } from "@/contexts/SelectedResourceProvider";
 import { queryClient } from "@/index";
@@ -43,14 +43,12 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="w-screen min-h-screen bg-gray-100">
-        <NavBar />
+    <div className="w-screen min-h-screen bg-gray-100">
+      <Router>
+        <NavigationBar />
         <div className="relative">
           <div className="mx-auto p-5" style={{ maxWidth: 768 }}>
-            <Route path="/signin">
-              <SigninPage />
-            </Route>
+            <Route path="/signin" element={<SigninPage />} />
             <Route path="/">
               <SelectedResourceProvider>
                 <ResourceContent />
@@ -58,8 +56,8 @@ function App() {
             </Route>
           </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </div>
   );
 }
 

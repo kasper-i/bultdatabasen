@@ -3,10 +3,10 @@ import { useAppDispatch, useAppSelector } from "@/index";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
-import { Button } from "semantic-ui-react";
 import { clear, selectPointId } from "@/slices/clipboardSlice";
+import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button } from "semantic-ui-react";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
 import Connector from "./graph/Connector";
@@ -25,7 +25,7 @@ interface Props {
 const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const [selectedPointId, setSelectedPointId] = useState<string>();
   const { role } = useRole(routeId);
-  const history = useHistory();
+  const navigate = useNavigate();
   const copiedPointId = useAppSelector(selectPointId);
   const dispatch = useAppDispatch();
 
@@ -36,7 +36,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   }>();
 
   const changePoint = (pointId: string) => {
-    history.replace(`/route/${routeId}/point/${pointId}`);
+    navigate(`/route/${routeId}/point/${pointId}`);
     setSelectedPointId(pointId);
   };
 

@@ -98,11 +98,7 @@ export class Api {
 
     const currentTime = new Date().getTime() / 1000;
 
-    if (currentTime > Api.expirationTime) {
-      return true;
-    }
-
-    return false;
+    return currentTime > Api.expirationTime;
   };
 
   static authValid = () => {
