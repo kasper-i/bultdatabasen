@@ -205,6 +205,16 @@ export class Api {
     return result.data as Sector;
   };
 
+  static getResource = async (resourceId: string): Promise<Resource> => {
+    const endpoint = `/resources/${resourceId}`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Resource;
+  };
+
   static getAncestors = async (resourceId: string): Promise<Resource[]> => {
     const endpoint = `/resources/${resourceId}/ancestors`;
 

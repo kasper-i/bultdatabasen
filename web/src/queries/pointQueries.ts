@@ -1,7 +1,6 @@
-import { queryClient } from "@/index";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Api, CreatePointRequest } from "../Api";
 
 export const usePoints = (routeId: string) =>
@@ -9,43 +8,53 @@ export const usePoints = (routeId: string) =>
     Api.getPoints(routeId)
   );
 
-export const useAttachPoint = (routeId: string) =>
-  useMutation((request: CreatePointRequest) => Api.addPoint(routeId, request), {
-    onSuccess: async (data, variables) => {
-      queryClient.setQueryData<Point[] | undefined>(
-        ["points", { resourceId: routeId }],
-        (points) => {
-          if (points === undefined) {
-            return undefined;
+export const useAttachPoint = (routeId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (request: CreatePointRequest) => Api.addPoint(routeId, request),
+    {
+      onSuccess: async (data, variables) => {
+        queryClient.setQueryData<Point[] | undefined>(
+          ["points", { resourceId: routeId }],
+          (points) => {
+            if (points === undefined) {
+              return undefined;
+            }
+
+            if (points.length === 0) {
+              return [{ ...data, number: 1 }];
+            }
+
+            const index = points.findIndex(
+              (point) => point.id === variables.position?.pointId
+            );
+
+            const updatedPoints = [...points];
+
+            if (variables.position?.order === "after") {
+              updatedPoints.splice(index + 1, 0, data);
+            } else {
+              updatedPoints.splice(index, 0, data);
+            }
+
+            let number = 1;
+            return updatedPoints.map((point) => ({
+              ...point,
+              number: number++,
+            }));
           }
+        );
 
-          if (points.length === 0) {
-            return [{ ...data, number: 1 }];
-          }
+        queryClient.refetchQueries(["bolts", { resourceId: routeId }]);
+      },
+    }
+  );
+};
 
-          const index = points.findIndex(
-            (point) => point.id === variables.position?.pointId
-          );
+export const useDetachPoint = (routeId: string, pointId: string) => {
+  const queryClient = useQueryClient();
 
-          const updatedPoints = [...points];
-
-          if (variables.position?.order === "after") {
-            updatedPoints.splice(index + 1, 0, data);
-          } else {
-            updatedPoints.splice(index, 0, data);
-          }
-
-          let number = 1;
-          return updatedPoints.map((point) => ({ ...point, number: number++ }));
-        }
-      );
-
-      queryClient.refetchQueries(["bolts", { resourceId: routeId }]);
-    },
-  });
-
-export const useDetachPoint = (routeId: string, pointId: string) =>
-  useMutation(() => Api.detachPoint(routeId, pointId), {
+  return useMutation(() => Api.detachPoint(routeId, pointId), {
     onSuccess: async () => {
       queryClient.setQueryData<Point[] | undefined>(
         ["points", { resourceId: routeId }],
@@ -73,3 +82,4 @@ export const useDetachPoint = (routeId: string, pointId: string) =>
       );
     },
   });
+};

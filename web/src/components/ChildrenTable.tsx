@@ -1,4 +1,4 @@
-import { useChildren } from "@/queries/commonQueries";
+import { useChildren } from "@/queries/resourceQueries";
 import { getResourceLabel, getResourceUrl } from "@/utils/resourceUtils";
 import React, { Fragment, ReactElement } from "react";
 import { useNavigate } from "react-router-dom";

@@ -1,4 +1,4 @@
-import { useAppDispatch } from "@/index";
+import { useAppDispatch } from "@/store";
 import { BoltType } from "@/models/bolt";
 import { Image } from "@/models/image";
 import { Point } from "@/models/point";

@@ -1,5 +1,5 @@
 import { InsertPosition } from "@/Api";
-import { useAppDispatch, useAppSelector } from "@/index";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";

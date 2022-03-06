@@ -1,4 +1,3 @@
-import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
 import { Task, TaskStatus } from "@/models/task";
 import { useDeleteTask, useUpdateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";
@@ -8,18 +7,17 @@ import Restricted from "../../Restricted";
 
 interface Props {
   task: Task;
+  resourceId: string;
 }
 
 const finalStatuses: TaskStatus[] = ["closed", "rejected"];
 
-const TaskView = (props: Props): ReactElement => {
-  const [task, setTask] = useState(props.task);
-
-  const { selectedResource } = useSelectedResource();
+const TaskView = ({ resourceId, ...rest }: Props): ReactElement => {
+  const [task, setTask] = useState(rest.task);
 
   const ancestors = task.ancestors;
-  const deleteTask = useDeleteTask(selectedResource.id, task.id);
-  const updateTask = useUpdateTask(selectedResource.id, task.id);
+  const deleteTask = useDeleteTask(resourceId, task.id);
+  const updateTask = useUpdateTask(resourceId, task.id);
 
   const changeStatus = (status: TaskStatus) => {
     setTask((task) => {

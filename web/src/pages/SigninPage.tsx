@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAppDispatch } from "@/index";
+import { useAppDispatch } from "@/store";
 import { isEqual } from "lodash";
 import React, { Fragment, ReactElement, useEffect } from "react";
 import { login } from "@/slices/authSlice";

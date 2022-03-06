@@ -10,6 +10,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func GetResource(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
+	vars := mux.Vars(r)
+	id := vars["resourceID"]
+
+	if resource, err := sess.GetResource(id); err != nil {
+		utils.WriteError(w, err)
+	} else {
+		utils.WriteResponse(w, http.StatusOK, resource)
+	}
+}
+
 func GetAncestors(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)

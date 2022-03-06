@@ -1,13 +1,14 @@
-import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
 import { useCreateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";
 import { Button, Input } from "semantic-ui-react";
 import Restricted from "../../Restricted";
 
-const CreateTask = (): ReactElement => {
-  const { selectedResource } = useSelectedResource();
+interface Props {
+  resourceId: string;
+}
 
-  const createTask = useCreateTask(selectedResource.id);
+const CreateTask = ({ resourceId }: Props): ReactElement => {
+  const createTask = useCreateTask(resourceId);
 
   const [description, setDescription] = useState("");
 
