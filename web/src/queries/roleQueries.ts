@@ -10,5 +10,6 @@ export const useRole = (resourceId: string) => {
       staleTime: 1000 * 60 * 30,
     }
   );
+
   return { role: data };
 };

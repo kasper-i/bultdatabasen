@@ -1,16 +1,16 @@
-import { useAppDispatch } from "@/index";
 import { BoltType } from "@/models/bolt";
 import { Image } from "@/models/image";
 import { Point } from "@/models/point";
-import moment from "moment";
 import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
-import React, { Fragment, ReactElement, useMemo, useState } from "react";
-import { useHistory } from "react-router";
-import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
 import { copy } from "@/slices/clipboardSlice";
+import { useAppDispatch } from "@/store";
 import { translateBoltType } from "@/utils/boltUtils";
+import moment from "moment";
+import React, { Fragment, ReactElement, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
 import BoltDetails from "./BoltDetails";
 import { ImageCarousel } from "./ImageCarousel";
 import ImageDropzone from "./ImageDropzone";
@@ -23,7 +23,7 @@ interface Props {
 }
 
 function PointCard({ point, routeId }: Props): ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const createBolt = useCreateBolt(routeId, point.id);
   const deletePoint = useDetachPoint(routeId, point.id);
   const images = useImages(point.id);
@@ -105,9 +105,12 @@ function PointCard({ point, routeId }: Props): ReactElement {
                   <span
                     key={point.id}
                     className="underline cursor-pointer"
-                    onClick={() =>
-                      history.push(`/route/${parent.id}/point/${point.id}`)
-                    }
+                    onClick={() => {
+                      navigate({
+                        pathname: `/route/${parent.id}`,
+                        search: `?p=${point.id}`,
+                      });
+                    }}
                   >
                     {parent.name}
                   </span>

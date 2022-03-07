@@ -1,31 +1,15 @@
 import ChildrenTable from "@/components/ChildrenTable";
 import PageHeader from "@/components/PageHeader";
-import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
+import { useUnsafeParams } from "@/hooks/common";
 import { useSector } from "@/queries/sectorQueries";
-import React, { Fragment, ReactElement, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { Fragment, ReactElement } from "react";
 
 const SectorPage = (): ReactElement => {
-  const { updateSelectedResource } = useSelectedResource();
-
-  const { resourceId } = useParams<{
-    resourceId: string;
-  }>();
+  const { resourceId } = useUnsafeParams<"resourceId">();
 
   const sector = useSector(resourceId);
 
-  useEffect(() => {
-    if (sector.data !== undefined) {
-      updateSelectedResource({
-        id: sector.data.id,
-        name: sector.data.name,
-        type: "sector",
-        parentId: sector.data.parentId,
-      });
-    }
-  }, [sector.data, updateSelectedResource]);
-
-  if (sector.data == null) {
+  if (!sector.data) {
     return <Fragment />;
   }
 

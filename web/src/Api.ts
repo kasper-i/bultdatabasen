@@ -98,11 +98,7 @@ export class Api {
 
     const currentTime = new Date().getTime() / 1000;
 
-    if (currentTime > Api.expirationTime) {
-      return true;
-    }
-
-    return false;
+    return currentTime > Api.expirationTime;
   };
 
   static authValid = () => {
@@ -207,6 +203,16 @@ export class Api {
     });
 
     return result.data as Sector;
+  };
+
+  static getResource = async (resourceId: string): Promise<Resource> => {
+    const endpoint = `/resources/${resourceId}`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Resource;
   };
 
   static getAncestors = async (resourceId: string): Promise<Resource[]> => {

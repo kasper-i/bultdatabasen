@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RootState } from "@/index";
+import { RootState } from "@/store";
 
 interface ClipboardState {
   pointId?: string;
@@ -12,7 +12,7 @@ export const clipboardSlice = createSlice({
   initialState,
   reducers: {
     clear: () => {
-      return initialState;
+      return {};
     },
     copy: (state, action: PayloadAction<{ pointId: string }>) => {
       state.pointId = action.payload.pointId;

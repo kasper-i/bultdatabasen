@@ -1,20 +1,17 @@
 import Pill from "@/components/Pill";
-import { useSelectedResource } from "@/contexts/SelectedResourceProvider";
 import { useTasks } from "@/queries/taskQueries";
 import React, { ReactElement } from "react";
 import { Button, Icon } from "semantic-ui-react";
 
 interface Props {
-  onClick?: () => void;
+  resourceId: string;
 }
 
-function TaskIcon({ onClick }: Props): ReactElement {
-  const { selectedResource } = useSelectedResource();
-
-  const tasks = useTasks(selectedResource.id);
+function TaskButton({ resourceId }: Props): ReactElement {
+  const tasks = useTasks(resourceId);
 
   return (
-    <div className="w-min relative cursor-pointer" onClick={onClick}>
+    <div className="w-min relative cursor-pointer">
       <Button icon primary size="tiny">
         <Icon name="wrench" />
       </Button>
@@ -25,4 +22,4 @@ function TaskIcon({ onClick }: Props): ReactElement {
   );
 }
 
-export default TaskIcon;
+export default TaskButton;

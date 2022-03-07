@@ -1,12 +1,14 @@
 import { Api } from "@/Api";
-import { queryClient, useAppDispatch, useAppSelector } from "@/index";
+import { useAppDispatch, useAppSelector } from "@/store";
 import React, { ReactElement } from "react";
 import { Button } from "semantic-ui-react";
 import { logout, selectAuthenticated } from "@/slices/authSlice";
+import { useQueryClient } from "react-query";
 
 function LoginToolbar(): ReactElement {
   const isAuthenticated = useAppSelector(selectAuthenticated);
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
 
   const gotoCognito = () => {
     localStorage.setItem("returnPath", window.location.pathname);

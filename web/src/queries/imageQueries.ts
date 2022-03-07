@@ -1,6 +1,5 @@
-import { queryClient } from "@/index";
 import { Image } from "@/models/image";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Api } from "../Api";
 
 export const useImages = (resourceId: string) =>
@@ -8,8 +7,10 @@ export const useImages = (resourceId: string) =>
     Api.getImages(resourceId)
   );
 
-export const useDeleteImage = (parentResourceId: string, imageId: string) =>
-  useMutation(() => Api.deleteImage(imageId), {
+export const useDeleteImage = (parentResourceId: string, imageId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(() => Api.deleteImage(imageId), {
     onSuccess: () => {
       queryClient.setQueryData<Image[]>(
         ["images", { resourceId: parentResourceId }],
@@ -17,9 +18,12 @@ export const useDeleteImage = (parentResourceId: string, imageId: string) =>
       );
     },
   });
+};
 
-export const useUpdateImage = (parentResourceId: string, imageId: string) =>
-  useMutation(
+export const useUpdateImage = (parentResourceId: string, imageId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
     (patch: Pick<Image, "rotation">) => Api.updateImage(imageId, patch),
     {
       onSuccess: (data, variables) => {
@@ -33,3 +37,4 @@ export const useUpdateImage = (parentResourceId: string, imageId: string) =>
       },
     }
   );
+};

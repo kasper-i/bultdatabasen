@@ -1,7 +1,7 @@
 import { Api } from "@/Api";
-import { queryClient } from "@/index";
 import React, { ReactElement, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { useQueryClient } from "react-query";
 import { Icon, Progress } from "semantic-ui-react";
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
 const ImageDropzone = ({ pointId }: Props): ReactElement => {
   const [progress, setProgress] = useState<number>();
   const [error, setError] = useState(false);
+  const queryClient = useQueryClient();
 
   const onDrop = useCallback(
     async (acceptedFiles) => {

@@ -1,8 +1,8 @@
 import { Api } from "@/Api";
-import React, { Reducer, useReducer } from "react";
-import { useHistory } from "react-router";
-import { Search as SemanticSearch, SearchProps } from "semantic-ui-react";
 import { getResourceUrl } from "@/utils/resourceUtils";
+import React, { Reducer, useReducer } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search as SemanticSearch, SearchProps } from "semantic-ui-react";
 
 interface State {
   loading: boolean;
@@ -40,7 +40,7 @@ function Search() {
     initialState
   );
   const { loading, results, value } = state;
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleSearchChange = async (
     _event: React.MouseEvent<HTMLElement, MouseEvent>,
@@ -75,7 +75,7 @@ function Search() {
       onResultSelect={(_e, { result }) => {
         dispatch({ type: "UPDATE_SELECTION", payload: result.title });
         const url = getResourceUrl(result.type, result.key);
-        url && history.push(url);
+        url && navigate(url);
       }}
       onSearchChange={handleSearchChange}
       results={results}

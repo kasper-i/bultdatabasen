@@ -1,7 +1,7 @@
-import React, { Fragment, ReactElement } from "react";
-import { useChildren } from "@/queries/commonQueries";
-import { useHistory } from "react-router";
+import { useChildren } from "@/queries/resourceQueries";
 import { getResourceLabel, getResourceUrl } from "@/utils/resourceUtils";
+import React, { Fragment, ReactElement } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   resourceId: string;
@@ -9,7 +9,7 @@ interface Props {
 
 const ChildrenTable = ({ resourceId }: Props): ReactElement => {
   const children = useChildren(resourceId);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   if (children.data == null) {
     return <Fragment />;
@@ -25,7 +25,7 @@ const ChildrenTable = ({ resourceId }: Props): ReactElement => {
             <li
               key={resource.id}
               className="cursor-pointer"
-              onClick={() => url && history.push(url)}
+              onClick={() => url && navigate(url)}
             >
               <div className="flex justify-start items-center my-1.5">
                 <span className="text-xl">{resource.name}</span>

@@ -51,6 +51,7 @@ func main() {
 
 	router.HandleFunc("/invites", nil).Methods(http.MethodPost, http.MethodOptions)
 
+	router.HandleFunc("/resources/{resourceID}", api.GetResource).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/ancestors", api.GetAncestors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/children", api.GetChildren).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/counts", api.GetCounts).Methods(http.MethodGet, http.MethodOptions)

@@ -1,6 +1,5 @@
-import { queryClient } from "@/index";
 import { Task } from "@/models/task";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Api } from "../Api";
 
 export const useTasks = (parentId: string) =>
@@ -9,8 +8,10 @@ export const useTasks = (parentId: string) =>
 export const useTask = (taskId: string) =>
   useQuery(["task", { taskId }], () => Api.getTask(taskId));
 
-export const useCreateTask = (parentId: string) =>
-  useMutation(
+export const useCreateTask = (parentId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
     (task: Pick<Task, "description">) => Api.createTask(parentId, task),
     {
       onSuccess: async (data) => {
@@ -25,9 +26,12 @@ export const useCreateTask = (parentId: string) =>
       },
     }
   );
+};
 
-export const useUpdateTask = (parentId: string, taskId: string) =>
-  useMutation((task: Task) => Api.updateTask(taskId, task), {
+export const useUpdateTask = (parentId: string, taskId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation((task: Task) => Api.updateTask(taskId, task), {
     onSuccess: async (data) => {
       queryClient.setQueryData<Task>(["task", { taskId: data.id }], () => data);
       queryClient.setQueryData<Task[]>(["tasks", { parentId }], (tasks) =>
@@ -37,9 +41,12 @@ export const useUpdateTask = (parentId: string, taskId: string) =>
       );
     },
   });
+};
 
-export const useDeleteTask = (parentId: string, taskId: string) =>
-  useMutation(() => Api.deleteTask(taskId), {
+export const useDeleteTask = (parentId: string, taskId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(() => Api.deleteTask(taskId), {
     onSuccess: async () => {
       queryClient.removeQueries(["task", { taskId }]);
       queryClient.setQueryData<Task[]>(
@@ -48,3 +55,4 @@ export const useDeleteTask = (parentId: string, taskId: string) =>
       );
     },
   });
+};

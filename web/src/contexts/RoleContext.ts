@@ -1,7 +1,8 @@
+import { UserRole } from "@/models/role";
 import { createContext } from "react";
 
 interface RoleContextProps {
-  role?: string;
+  role?: UserRole;
 }
 
 export const RoleContext = createContext<RoleContextProps>({});
