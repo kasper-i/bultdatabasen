@@ -1,5 +1,22 @@
-import { useQuery } from "react-query";
+import { Resource } from "@/models/resource";
+import { useQuery, useQueryClient } from "react-query";
 import { Api } from "../Api";
 
-export const useSector = (sectorId: string) =>
-  useQuery(["sector", { sectorId }], () => Api.getSector(sectorId));
+export const useSector = (sectorId: string) => {
+  const queryClient = useQueryClient();
+
+  return useQuery(["sector", { sectorId }], () => Api.getSector(sectorId), {
+    onSuccess: ({ id, name, parentId, ancestors }) => {
+      queryClient.setQueryData<Resource>(
+        ["resource", { resourceId: sectorId }],
+        {
+          id,
+          name,
+          type: "sector",
+          parentId,
+          ancestors,
+        }
+      );
+    },
+  });
+};
