@@ -14,7 +14,7 @@ const Page = () => {
     <RoleContext.Provider value={{ role }}>
       <div className="absolute top-0 right-0 p-5">
         <Link to="tasks">
-          <TaskButton />
+          <TaskButton resourceId={resourceId} />
         </Link>
       </div>
       <Outlet />

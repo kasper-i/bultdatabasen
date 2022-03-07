@@ -1,12 +1,13 @@
 import Pill from "@/components/Pill";
-import { useUnsafeParams } from "@/hooks/common";
 import { useTasks } from "@/queries/taskQueries";
 import React, { ReactElement } from "react";
 import { Button, Icon } from "semantic-ui-react";
 
-function TaskButton(): ReactElement {
-  const { resourceId } = useUnsafeParams<"resourceId">();
+interface Props {
+  resourceId: string;
+}
 
+function TaskButton({ resourceId }: Props): ReactElement {
   const tasks = useTasks(resourceId);
 
   return (

@@ -10,6 +10,7 @@ export const usePoints = (routeId: string) =>
 
 export const useAttachPoint = (routeId: string) => {
   const queryClient = useQueryClient();
+
   return useMutation(
     (request: CreatePointRequest) => Api.addPoint(routeId, request),
     {
