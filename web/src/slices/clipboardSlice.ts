@@ -12,7 +12,7 @@ export const clipboardSlice = createSlice({
   initialState,
   reducers: {
     clear: () => {
-      return initialState;
+      return {};
     },
     copy: (state, action: PayloadAction<{ pointId: string }>) => {
       state.pointId = action.payload.pointId;
