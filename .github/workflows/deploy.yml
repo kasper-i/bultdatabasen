@@ -28,14 +28,14 @@ jobs:
           mkdir -p packageroot/usr/bin
           mv web/dist packageroot/usr/share/bultdatabasen/
           mv backend/bultdatabasen packageroot/usr/bin
-          sed -i "s/VERSION/${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ID}/g" packageroot/DEBIAN/control
+          sed -i "s/VERSION/${GITHUB_RUN_ID}/g" packageroot/DEBIAN/control
           dpkg-deb -b packageroot .
       - name: Publish archive
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
         run: |
           gem install package_cloud
-          package_cloud push kasperi89/bultdatabasen/debian/bullseye "bultdatabasen_${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ID}_amd64.deb"
+          package_cloud push kasperi89/bultdatabasen/debian/bullseye "bultdatabasen_${GITHUB_RUN_ID}_amd64.deb"
 
 on:
   push:
