@@ -8,7 +8,7 @@ export const useResource = (resourceId: string) =>
 export const useChildren = (resourceId: string) =>
   useQuery(["children", { resourceId }], () => Api.getChildren(resourceId));
 
-export const useCounts = (resourceId: string) =>
+export const useCounts = (resourceId: string, enabled = true) =>
   useQuery(["counts", { resourceId }], () => Api.getCounts(resourceId), {
     select: (data: ResourceCount[]) => {
       const map: Record<ResourceType, number> = {
@@ -30,4 +30,6 @@ export const useCounts = (resourceId: string) =>
 
       return map;
     },
+    enabled,
+    staleTime: 1000 * 60 * 5,
   });

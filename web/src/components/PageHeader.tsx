@@ -15,26 +15,26 @@ const PageHeader = ({
   resourceId,
   resourceName,
   ancestors,
-  showCounts,
+  showCounts = false,
 }: Props): ReactElement => {
-  const counts = useCounts(resourceId);
+  const counts = useCounts(resourceId, showCounts);
 
   return (
-    <div className="flex flex-col space-y-2.5">
+    <div className="flex flex-col gap-2.5">
       <Breadcrumbs
         resourceId={resourceId}
         resourceName={resourceName}
         ancestors={ancestors}
       />
-      <div className="flex justify-start space-x-10">
-        <h1 className="text-4xl font-bold">{resourceName}</h1>
-        {counts.data != null && showCounts && (
-          <>
-            <ResourceCountRenderer label="Leder" count={counts.data.route} />
-            <ResourceCountRenderer label="Bultar" count={counts.data.bolt} />
-          </>
-        )}
+      <div className="flex flex-col items-start">
+        <h1 className="text-3xl font-bold">{resourceName}</h1>
       </div>
+      {counts.data != null && showCounts && (
+        <div className="flex gap-2.5">
+          <ResourceCountRenderer label="Leder" count={counts.data.route} />
+          <ResourceCountRenderer label="Bultar" count={counts.data.bolt} />
+        </div>
+      )}
     </div>
   );
 };

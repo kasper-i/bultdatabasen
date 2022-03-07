@@ -6,6 +6,7 @@ import { useBolts } from "@/queries/boltQueries";
 import { usePoints } from "@/queries/pointQueries";
 import { useRoute } from "@/queries/routeQueries";
 import React, { Fragment, ReactElement } from "react";
+import { Button, Icon } from "semantic-ui-react";
 
 const renderRouteType = (routeType: RouteType) => {
   switch (routeType) {
@@ -29,6 +30,8 @@ const RoutePage = (): ReactElement => {
     return <Fragment />;
   }
 
+  const { routeType, year, length, externalLink } = route.data;
+
   return (
     <div className="flex flex-col">
       <PageHeader
@@ -36,12 +39,14 @@ const RoutePage = (): ReactElement => {
         resourceName={route.data.name}
         ancestors={route.data.ancestors}
       />
-      <a href={route.data.externalLink}>{route.data.externalLink}</a>
-      <div className="flex gap-2">
-        <div>{route.data.year}</div>
-        <div>{route.data.length} m</div>
-        <div>{renderRouteType(route.data.routeType)}</div>
-        <h3 className="text-xl font-bold">Bultar ({bolts.data.length})</h3>
+
+      <div className="flex items-center gap-2">
+        <div>{renderRouteType(routeType)}</div>
+        {year && <div>{year}</div>}
+        {length && <div>{length}m</div>}
+        <a href={externalLink}>
+          <Icon name="external" />
+        </a>
       </div>
 
       <div className="mt-5">
