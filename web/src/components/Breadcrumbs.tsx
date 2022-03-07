@@ -43,6 +43,8 @@ const Breadcrumbs = ({
     },
   }));
 
+  crumbs.reverse();
+
   crumbs.push({
     key: resourceId,
     content: resourceName,
