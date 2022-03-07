@@ -1,4 +1,3 @@
-import { useAppDispatch } from "@/store";
 import { BoltType } from "@/models/bolt";
 import { Image } from "@/models/image";
 import { Point } from "@/models/point";
@@ -6,6 +5,7 @@ import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
 import { copy } from "@/slices/clipboardSlice";
+import { useAppDispatch } from "@/store";
 import { translateBoltType } from "@/utils/boltUtils";
 import moment from "moment";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
@@ -105,9 +105,12 @@ function PointCard({ point, routeId }: Props): ReactElement {
                   <span
                     key={point.id}
                     className="underline cursor-pointer"
-                    onClick={() =>
-                      navigate(`/route/${parent.id}/point/${point.id}`)
-                    }
+                    onClick={() => {
+                      navigate({
+                        pathname: `/route/${parent.id}`,
+                        search: `?p=${point.id}`,
+                      });
+                    }}
                   >
                     {parent.name}
                   </span>

@@ -1,11 +1,11 @@
 import { InsertPosition } from "@/Api";
-import { useAppDispatch, useAppSelector } from "@/store";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
 import { clear, selectPointId } from "@/slices/clipboardSlice";
+import { useAppDispatch, useAppSelector } from "@/store";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "semantic-ui-react";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
@@ -25,18 +25,15 @@ interface Props {
 const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const [selectedPointId, setSelectedPointId] = useState<string>();
   const { role } = useRole(routeId);
-  const navigate = useNavigate();
   const copiedPointId = useAppSelector(selectPointId);
   const dispatch = useAppDispatch();
 
   const createPoint = useAttachPoint(routeId);
 
-  const { pointId } = useParams<{
-    pointId?: string;
-  }>();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const changePoint = (pointId: string) => {
-    navigate(`/route/${routeId}/point/${pointId}`);
+    setSearchParams({ p: pointId });
     setSelectedPointId(pointId);
   };
 
@@ -45,14 +42,16 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
       return;
     }
 
-    if (pointId !== undefined) {
+    const pointId = searchParams.get("p");
+
+    if (pointId !== null) {
       setSelectedPointId(pointId);
     } else {
       setSelectedPointId(
         points.length > 0 ? points[points.length - 1].id : undefined
       );
     }
-  }, [pointId, selectedPointId, points]);
+  }, [selectedPointId, points]);
 
   const selectedPoint = useMemo(() => {
     return points.find((point) => point.id === selectedPointId);
