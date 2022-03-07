@@ -14,6 +14,7 @@ const CreateTask = ({ resourceId }: Props): ReactElement => {
 
   const handleCreateTask = () => {
     createTask.mutate({ description });
+    setDescription("");
   };
 
   return (
@@ -24,6 +25,7 @@ const CreateTask = ({ resourceId }: Props): ReactElement => {
           fluid
           placeholder="Ankare i dåligt skick"
           onChange={(event) => setDescription(event.target.value)}
+          value={description}
         />
         <Button
           color="blue"

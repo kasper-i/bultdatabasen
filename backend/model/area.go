@@ -7,6 +7,7 @@ import (
 
 type Area struct {
 	ResourceBase
+	Name     string `json:"name"`
 	ParentID string `gorm:"->" json:"parentId"`
 }
 

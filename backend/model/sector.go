@@ -7,6 +7,7 @@ import (
 
 type Sector struct {
 	ResourceBase
+	Name     string `json:"name"`
 	ParentID string `gorm:"->" json:"parentId"`
 }
 

@@ -10,12 +10,12 @@ const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 
 type ResourceBase struct {
 	ID        string      `gorm:"primaryKey" json:"id"`
-	Name      *string     `json:"name,omitempty"`
 	Ancestors *[]Resource `gorm:"-" json:"ancestors,omitempty"`
 }
 
 type Resource struct {
 	ResourceBase
+	Name            *string   `json:"name,omitempty"`
 	Type            string    `json:"type"`
 	Depth           Depth     `json:"-"`
 	ParentID        *string   `json:"parentId,omitempty"`
@@ -217,9 +217,9 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 		resources = append(resources, ResourceWithParents{
 			Resource: Resource{
 				ResourceBase: ResourceBase{
-					ID:   result["id"].(string),
-					Name: parseString(result["name"]),
+					ID: result["id"].(string),
 				},
+				Name:     parseString(result["name"]),
 				Type:     result["type"].(string),
 				ParentID: parseString(result["parent_id"])},
 			Parents: parents,
