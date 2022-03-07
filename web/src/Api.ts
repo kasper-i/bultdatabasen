@@ -52,7 +52,7 @@ export class Api {
     localStorage.setItem("idToken", Api.idToken);
     localStorage.setItem("accessToken", Api.accessToken);
 
-    if (Api.refreshToken != null) {
+    if (Api.refreshToken !== null) {
       localStorage.setItem("refreshToken", Api.refreshToken);
     } else {
       localStorage.removeItem("refreshToken");
@@ -106,7 +106,7 @@ export class Api {
   };
 
   static refreshTokens = async () => {
-    if (Api.refreshToken == null) {
+    if (Api.refreshToken === null) {
       return Promise.reject();
     }
 

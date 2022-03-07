@@ -12,8 +12,11 @@ import RootPage from "./pages/RootPage";
 import RoutePage from "./pages/RoutePage";
 import SectorPage from "./pages/SectorPage";
 import TasksPage from "./pages/TasksPage";
+import { login } from "./slices/authSlice";
+import { useAppDispatch } from "./store";
 
 const App = () => {
+  const dispatch = useAppDispatch();
   const [initialized, setInitialized] = useState(false);
 
   const queryClient = useQueryClient();
@@ -28,11 +31,20 @@ const App = () => {
   useEffect(() => {
     window.addEventListener("focus", onFocus);
 
-    if (Api.isExpired()) {
-      Api.refreshTokens().finally(() => setInitialized(true));
-    } else {
-      setInitialized(true);
-    }
+    const initialize = async () => {
+      if (!Api.authValid()) {
+        return;
+      }
+
+      if (Api.isExpired()) {
+        await Api.refreshTokens();
+      }
+
+      const info = await Api.getMyself();
+      dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
+    };
+
+    initialize().finally(() => setInitialized(true));
 
     return () => {
       window.removeEventListener("focus", onFocus);
