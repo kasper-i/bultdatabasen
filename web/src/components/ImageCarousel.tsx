@@ -9,7 +9,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useKeyPressEvent, usePrevious } from "react-use";
+import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
+import usePrevious from "react-use/lib/usePrevious";
 import { Icon, Loader } from "semantic-ui-react";
 
 interface FullSizeImageProps {
