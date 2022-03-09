@@ -17,7 +17,6 @@ const SectorPage = (): ReactElement => {
     <div className="flex flex-col space-y-5">
       <PageHeader
         resourceId={resourceId}
-        resourceName={sector.data.name}
         ancestors={sector.data.ancestors}
         showCounts
       />

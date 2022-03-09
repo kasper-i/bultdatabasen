@@ -1,39 +1,44 @@
 import { Resource } from "@/models/resource";
-import { useCounts } from "@/queries/resourceQueries";
+import { useCounts, useResource } from "@/queries/resourceQueries";
+import { getResourceLabel } from "@/utils/resourceUtils";
 import React, { ReactElement } from "react";
 import Breadcrumbs from "./Breadcrumbs";
-import ResourceCountRenderer from "./ResourceCountRenderer";
+import { Underlined } from "./Underlined";
 
 interface Props {
   resourceId: string;
-  resourceName: string;
   ancestors?: Resource[];
   showCounts?: boolean;
 }
 
 const PageHeader = ({
   resourceId,
-  resourceName,
   ancestors,
   showCounts = false,
 }: Props): ReactElement => {
+  const { data: resource } = useResource(resourceId);
   const counts = useCounts(resourceId, showCounts);
+
+  if (!resource) {
+    return <></>;
+  }
 
   return (
     <div className="flex flex-col gap-2.5">
       <Breadcrumbs
         resourceId={resourceId}
-        resourceName={resourceName}
+        resourceName={resource.name ?? ""}
         ancestors={ancestors}
       />
       <div className="flex flex-col items-start">
-        <h1 className="text-3xl font-bold">{resourceName}</h1>
+        <h1 className="text-3xl font-bold">{resource.name}</h1>
       </div>
       {counts.data != null && showCounts && (
-        <div className="flex gap-2.5">
-          <ResourceCountRenderer label="Leder" count={counts.data.route} />
-          <ResourceCountRenderer label="Bultar" count={counts.data.bolt} />
-        </div>
+        <p className="text-lg">
+          {getResourceLabel(resource.type)} med{" "}
+          <Underlined>{counts.data.route}</Underlined> leder och{" "}
+          <Underlined>{counts.data.bolt}</Underlined> bultar.
+        </p>
       )}
     </div>
   );

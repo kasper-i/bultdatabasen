@@ -1,21 +1,22 @@
 import BoltEditor from "@/components/BoltEditor";
 import PageHeader from "@/components/PageHeader";
+import { Underlined } from "@/components/Underlined";
 import { useUnsafeParams } from "@/hooks/common";
 import { RouteType } from "@/models/route";
 import { useBolts } from "@/queries/boltQueries";
 import { usePoints } from "@/queries/pointQueries";
 import { useRoute } from "@/queries/routeQueries";
 import React, { Fragment, ReactElement } from "react";
-import { Button, Icon } from "semantic-ui-react";
+import { Icon } from "semantic-ui-react";
 
 const renderRouteType = (routeType: RouteType) => {
   switch (routeType) {
     case "sport":
-      return "Sport";
+      return "Sportled";
     case "traditional":
-      return "Trad";
+      return "Tradled";
     case "partially_bolted":
-      return "Mix";
+      return "Mixled";
   }
 };
 
@@ -34,16 +35,15 @@ const RoutePage = (): ReactElement => {
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        resourceId={resourceId}
-        resourceName={route.data.name}
-        ancestors={route.data.ancestors}
-      />
+      <PageHeader resourceId={resourceId} ancestors={route.data.ancestors} />
 
       <div className="flex items-center gap-2">
-        <div>{renderRouteType(routeType)}</div>
-        {year && <div>{year}</div>}
-        {length && <div>{length}m</div>}
+        <p className="text-lg">
+          <Underlined>{renderRouteType(routeType)}</Underlined> från{" "}
+          <Underlined>{year}</Underlined> som är{" "}
+          <Underlined>{length}m</Underlined> lång och består av{" "}
+          <Underlined>{bolts.data.length}</Underlined> bultar.
+        </p>
         <a href={externalLink}>
           <Icon name="external" />
         </a>

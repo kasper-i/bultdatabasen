@@ -17,7 +17,6 @@ const CragPage = (): ReactElement => {
     <div className="flex flex-col space-y-5">
       <PageHeader
         resourceId={resourceId}
-        resourceName={crag.data.name}
         ancestors={crag.data.ancestors}
         showCounts
       />

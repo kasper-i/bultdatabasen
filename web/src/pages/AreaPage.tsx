@@ -17,7 +17,6 @@ const AreaPage = (): ReactElement => {
     <div className="flex flex-col space-y-5">
       <PageHeader
         resourceId={resourceId}
-        resourceName={area.data.name}
         ancestors={area.data.ancestors}
         showCounts
       />
