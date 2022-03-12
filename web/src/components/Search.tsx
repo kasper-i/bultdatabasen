@@ -20,6 +20,8 @@ const initialState: State = {
   value: "",
 };
 
+type SearchProps = any;
+
 function searchReducer(state: State, action: Action) {
   switch (action.type) {
     case "START_SEARCH":
@@ -68,7 +70,7 @@ function Search() {
     dispatch({ type: "FINISH_SEARCH", payload: searchResults });
   };
 
-  return (
+  /*return (
     <SemanticSearch
       loading={loading}
       onResultSelect={(_e, { result }) => {
@@ -81,7 +83,9 @@ function Search() {
       value={value}
       size="small"
     />
-  );
+  );*/
+
+  return <div></div>;
 }
 
 export default Search;

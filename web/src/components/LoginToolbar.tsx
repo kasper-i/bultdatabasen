@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import React, { ReactElement } from "react";
 import { logout, selectAuthenticated } from "@/slices/authSlice";
 import { useQueryClient } from "react-query";
+import Button from "./base/Button";
 
 function LoginToolbar(): ReactElement {
   const isAuthenticated = useAppSelector(selectAuthenticated);

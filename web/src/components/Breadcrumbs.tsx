@@ -1,6 +1,6 @@
 import { Resource } from "@/models/resource";
-import React, { ReactElement } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { ReactElement, ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 interface Props {
   resourceId: string;
@@ -8,38 +8,44 @@ interface Props {
   ancestors?: Resource[];
 }
 
+interface Crumb {
+  key: string;
+  content: ReactNode;
+}
+
 const Breadcrumbs = ({
   resourceId,
   resourceName,
   ancestors,
 }: Props): ReactElement => {
-  const navigate = useNavigate();
+  const crumbs: Crumb[] = (ancestors ?? []).map((ancestor) => {
+    let to = "";
 
-  const crumbs: SemanticShorthandCollection<StrictBreadcrumbSectionProps> = (
-    ancestors ?? []
-  ).map((ancestor) => ({
-    key: ancestor.id,
-    content: ancestor.type === "root" ? "🌎" : ancestor.name,
-    onClick: () => {
-      switch (ancestor.type) {
-        case "root":
-          navigate("/");
-          break;
-        case "area":
-          navigate(`/area/${ancestor.id}`);
-          break;
-        case "crag":
-          navigate(`/crag/${ancestor.id}`);
-          break;
-        case "sector":
-          navigate(`/sector/${ancestor.id}`);
-          break;
-        case "route":
-          navigate(`/route/${ancestor.id}`);
-          break;
-      }
-    },
-  }));
+    switch (ancestor.type) {
+      case "root":
+        to = "/";
+        break;
+      case "area":
+        to = `/area/${ancestor.id}`;
+        break;
+      case "crag":
+        to = `/crag/${ancestor.id}`;
+        break;
+      case "sector":
+        to = `/sector/${ancestor.id}`;
+        break;
+      case "route":
+        to = `/route/${ancestor.id}`;
+        break;
+    }
+
+    return {
+      key: ancestor.id,
+      content: (
+        <Link to={to}>{ancestor.type === "root" ? "🌎" : ancestor.name}</Link>
+      ),
+    };
+  });
 
   crumbs.reverse();
 
@@ -50,7 +56,16 @@ const Breadcrumbs = ({
 
   return (
     <div className="h-5 flex items-center">
-      <Breadcrumb icon="right angle" sections={crumbs} />
+      {crumbs.map(({ key, content }, index) => (
+        <div key={key}>
+          {content}
+          {index !== crumbs.length - 1 && (
+            <span className="mx-1.5 text-sm font-extrabold text-gray-400">
+              &gt;
+            </span>
+          )}
+        </div>
+      ))}
     </div>
   );
 };

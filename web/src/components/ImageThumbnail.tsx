@@ -5,6 +5,7 @@ import React, { ReactElement, useState } from "react";
 import DeletePrompt from "./DeletePrompt";
 import { ImageView } from "./ImageView";
 import Restricted from "./Restricted";
+import Button from "./base/Button";
 
 interface Props {
   pointId: string;

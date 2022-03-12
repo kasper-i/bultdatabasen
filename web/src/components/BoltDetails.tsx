@@ -5,6 +5,7 @@ import { translateBoltType } from "@/utils/boltUtils";
 import DeletePrompt from "./DeletePrompt";
 import BoltIcon from "./icons/BoltIcon";
 import Restricted from "./Restricted";
+import Button from "./base/Button";
 
 interface Props {
   routeId: string;

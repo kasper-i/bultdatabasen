@@ -2,6 +2,7 @@ import clsx from "clsx";
 import configData from "@/config.json";
 import { Image, ImageVersion } from "@/models/image";
 import React, { CSSProperties, ReactNode, useReducer, useRef } from "react";
+import Loader from "./base/Loader";
 
 interface Props {
   image: Image;

@@ -10,6 +10,9 @@ import { translateBoltType } from "@/utils/boltUtils";
 import moment from "moment";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Button from "./base/Button";
+import Icon from "./base/Icon";
+import Loader from "./base/Loader";
 import BoltDetails from "./BoltDetails";
 import { ImageCarousel } from "./ImageCarousel";
 import ImageDropzone from "./ImageDropzone";
@@ -147,36 +150,17 @@ function PointCard({ point, routeId }: Props): ReactElement {
         ))}
         <Restricted>
           <div key="new" className="">
-            <Button.Group color="blue">
-              <Button
-                className="flex-shrink-0"
-                compact
-                primary
-                size="small"
-                loading={createBolt.isLoading}
-                onClick={() => createBolt.mutate({ type: selectedBoltType })}
-              >
-                <Icon name="add" />
-                {translateBoltType(selectedBoltType)}
-              </Button>
-              <Dropdown
-                className="button icon"
-                value={selectedBoltType}
-                onChange={(_e, result) =>
-                  result?.value !== undefined &&
-                  setSelectedBoltType(result.value as BoltType)
-                }
-                options={[
-                  {
-                    key: "expansion",
-                    text: "Expansionsbult",
-                    value: "expansion",
-                  },
-                  { key: "glue", text: "Limbult", value: "glue" },
-                ]}
-                trigger={<></>}
-              />
-            </Button.Group>
+            <Button
+              className="flex-shrink-0"
+              compact
+              primary
+              size="small"
+              loading={createBolt.isLoading}
+              onClick={() => createBolt.mutate({ type: selectedBoltType })}
+            >
+              <Icon name="add" />
+              {translateBoltType(selectedBoltType)}
+            </Button>
           </div>
         </Restricted>
       </div>

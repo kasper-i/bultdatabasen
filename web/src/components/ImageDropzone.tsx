@@ -2,6 +2,8 @@ import { Api } from "@/Api";
 import React, { ReactElement, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useQueryClient } from "react-query";
+import Icon from "./base/Icon";
+import Progress from "./base/Progress";
 
 interface Props {
   pointId: string;

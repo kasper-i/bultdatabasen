@@ -1,3 +1,4 @@
+import Icon from "@/components/base/Icon";
 import CreateTask from "@/components/features/task/CreateTask";
 import TaskList from "@/components/features/task/TaskList";
 import Pill from "@/components/Pill";
