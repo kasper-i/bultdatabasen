@@ -10,7 +10,6 @@ import { translateBoltType } from "@/utils/boltUtils";
 import moment from "moment";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
 import BoltDetails from "./BoltDetails";
 import { ImageCarousel } from "./ImageCarousel";
 import ImageDropzone from "./ImageDropzone";

@@ -5,7 +5,6 @@ import ReactDOM from "react-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Provider } from "react-redux";
-import "semantic-ui-css/semantic.min.css";
 import { Api } from "./Api";
 import App from "./App";
 import "./index.css";

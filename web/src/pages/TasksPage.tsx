@@ -7,7 +7,6 @@ import { useResource } from "@/queries/resourceQueries";
 import { useTasks } from "@/queries/taskQueries";
 import React, { Fragment, ReactElement } from "react";
 import { Link } from "react-router-dom";
-import { Icon } from "semantic-ui-react";
 
 const locationDescription = (
   resourceName: string,

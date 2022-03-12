@@ -1,7 +1,6 @@
 import Pill from "@/components/Pill";
 import { useTasks } from "@/queries/taskQueries";
 import React, { ReactElement } from "react";
-import { Button, Icon } from "semantic-ui-react";
 
 interface Props {
   resourceId: string;

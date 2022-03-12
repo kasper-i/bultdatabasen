@@ -1,8 +1,6 @@
 import { Resource } from "@/models/resource";
 import React, { ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
-import { Breadcrumb, StrictBreadcrumbSectionProps } from "semantic-ui-react";
-import { SemanticShorthandCollection } from "semantic-ui-react/dist/commonjs/generic";
 
 interface Props {
   resourceId: string;

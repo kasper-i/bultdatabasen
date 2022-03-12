@@ -2,7 +2,6 @@ import { Api } from "@/Api";
 import { getResourceUrl } from "@/utils/resourceUtils";
 import React, { Reducer, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search as SemanticSearch, SearchProps } from "semantic-ui-react";
 
 interface State {
   loading: boolean;

@@ -7,7 +7,6 @@ import { useBolts } from "@/queries/boltQueries";
 import { usePoints } from "@/queries/pointQueries";
 import { useRoute } from "@/queries/routeQueries";
 import React, { Fragment, ReactElement } from "react";
-import { Icon } from "semantic-ui-react";
 
 const renderRouteType = (routeType: RouteType) => {
   switch (routeType) {

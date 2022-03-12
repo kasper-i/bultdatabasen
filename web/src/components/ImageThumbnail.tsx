@@ -2,7 +2,6 @@ import { Image, ImageRotation } from "@/models/image";
 import moment from "moment";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import React, { ReactElement, useState } from "react";
-import { Button } from "semantic-ui-react";
 import DeletePrompt from "./DeletePrompt";
 import { ImageView } from "./ImageView";
 import Restricted from "./Restricted";

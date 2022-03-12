@@ -6,7 +6,6 @@ import { clear, selectPointId } from "@/slices/clipboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Button } from "semantic-ui-react";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
 import Connector from "./graph/Connector";

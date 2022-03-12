@@ -2,7 +2,6 @@ import SigninPage from "@/pages/SigninPage";
 import React, { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Dimmer, Loader } from "semantic-ui-react";
 import { Api } from "./Api";
 import Main from "./layouts/Main";
 import Page from "./layouts/Page";

@@ -1,7 +1,6 @@
 import { Api } from "@/Api";
 import { useAppDispatch, useAppSelector } from "@/store";
 import React, { ReactElement } from "react";
-import { Button } from "semantic-ui-react";
 import { logout, selectAuthenticated } from "@/slices/authSlice";
 import { useQueryClient } from "react-query";
 

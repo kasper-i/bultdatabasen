@@ -2,7 +2,6 @@ import { Task, TaskStatus } from "@/models/task";
 import { useDeleteTask, useUpdateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Icon } from "semantic-ui-react";
 import Restricted from "../../Restricted";
 
 interface Props {
