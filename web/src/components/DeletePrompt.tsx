@@ -17,13 +17,14 @@ const DeletePrompt = ({
   onConfirm,
 }: Props): ReactElement => {
   return (
-    <Modal onClose={onCancel} open={true}>
-      <div>
-        <p>Vill du ta bort objektet permanent?</p>
-      </div>
-      <div>
-        <Button onClick={onCancel}>
-          <Icon name="cancel" /> Avbryt
+    <Modal
+      onClose={onCancel}
+      title="Vill du radera objektet?"
+      description="Objektet kommer att flyttas till papperskorgen."
+    >
+      <div className="flex gap-2">
+        <Button icon="cancel" onClick={onCancel}>
+          Avbryt
         </Button>
         <Button color="danger" onClick={onConfirm} icon={icon}>
           Radera {target != null ? target : ""}

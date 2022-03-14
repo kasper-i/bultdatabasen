@@ -53,6 +53,7 @@ const TaskView = ({ resourceId, ...rest }: Props): ReactElement => {
         </Link>
         <Restricted>
           <IconButton
+            color="danger"
             loading={deleteTask.isLoading}
             onClick={() => deleteTask.mutate()}
             icon="trash"
