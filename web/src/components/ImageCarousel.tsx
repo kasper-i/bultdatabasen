@@ -143,12 +143,11 @@ export const FullSizeImage = ({
     <div>
       <Icon
         className="fixed top-5 right-5 text-white cursor-pointer"
-        size="big"
         onClick={onClose}
         name="close"
       />
 
-      <Loader active={loading} size="big" />
+      <Loader active={loading} />
       <img
         ref={imgRef}
         onLoad={onLoad}

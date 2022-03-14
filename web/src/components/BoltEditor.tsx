@@ -6,7 +6,7 @@ import { clear, selectPointId } from "@/slices/clipboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Button from "./base/Button";
+import IconButton from "./base/IconButton";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
 import Connector from "./graph/Connector";
@@ -123,9 +123,8 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                 {(first || intermediate) && (
                   <Vertex orientation={Orientation.NORTH}>
                     <Restricted>
-                      <Button
+                      <IconButton
                         circular
-                        size="mini"
                         icon={attachIcon}
                         onClick={() =>
                           attachPoint({
@@ -141,9 +140,8 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                 {anchor && (
                   <Restricted>
                     <Branch main orientation={Orientation.NORTH}>
-                      <Button
+                      <IconButton
                         circular
-                        size="mini"
                         icon={attachIcon}
                         onClick={() =>
                           attachPoint({
@@ -159,9 +157,8 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                 {first && (
                   <Restricted>
                     <Branch main orientation={Orientation.SOUTH}>
-                      <Button
+                      <IconButton
                         circular
-                        size="mini"
                         icon={attachIcon}
                         onClick={() =>
                           attachPoint({
@@ -180,7 +177,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
           <Restricted>
             <Junction compact>
               <Vertex>
-                <Button
+                <IconButton
                   circular
                   icon={attachIcon}
                   onClick={() => attachPoint(undefined)}

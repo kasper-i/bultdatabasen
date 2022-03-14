@@ -35,22 +35,22 @@ const TasksPage = (): ReactElement => {
   }
 
   return (
-    <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-300">
-      <div className="p-5 space-y-5">
-        <div className="flex justify-start mt-2 mr-2">
-          <Link to="..">
+    <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-5">
+      <div className="flex justify-start mt-2 mr-2">
+        <Link to="..">
+          <div className="flex items-center">
             <Icon name="arrow left" className="cursor-pointer" />{" "}
             {`Tillbaka till ${resource.name}`}
-          </Link>
-        </div>
-        <h1 className="text-3xl font-bold pb-2 flex items-start">
-          Uppdrag <Pill className="ml-2">{tasks.data?.length}</Pill>
-        </h1>
-        {resource.name !== undefined &&
-          locationDescription(resource.name, resource.type)}
-        <CreateTask resourceId={resourceId} />
-        <TaskList resourceId={resourceId} />
+          </div>
+        </Link>
       </div>
+      <h1 className="text-3xl font-bold pb-2 flex items-start">
+        Uppdrag <Pill className="ml-2">{tasks.data?.length}</Pill>
+      </h1>
+      {resource.name !== undefined &&
+        locationDescription(resource.name, resource.type)}
+      <CreateTask resourceId={resourceId} />
+      <TaskList resourceId={resourceId} />
     </div>
   );
 };

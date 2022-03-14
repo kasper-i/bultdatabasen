@@ -11,7 +11,7 @@ import moment from "moment";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "./base/Button";
-import Icon from "./base/Icon";
+import IconButton from "./base/IconButton";
 import Loader from "./base/Loader";
 import BoltDetails from "./BoltDetails";
 import { ImageCarousel } from "./ImageCarousel";
@@ -123,15 +123,15 @@ function PointCard({ point, routeId }: Props): ReactElement {
         </div>
         <Restricted>
           <div className="flex gap-2">
-            <Button
+            <IconButton
               onClick={() => dispatch(copy({ pointId: point.id }))}
               icon="copy"
             />
-            <Button
+            <IconButton
               loading={deletePoint.isLoading}
               onClick={() => deletePoint.mutate()}
               icon="trash"
-              color="red"
+              color="danger"
               disabled={!allowDelete}
             />
           </div>
@@ -152,13 +152,10 @@ function PointCard({ point, routeId }: Props): ReactElement {
           <div key="new" className="">
             <Button
               className="flex-shrink-0"
-              compact
-              primary
-              size="small"
               loading={createBolt.isLoading}
               onClick={() => createBolt.mutate({ type: selectedBoltType })}
+              icon="add"
             >
-              <Icon name="add" />
               {translateBoltType(selectedBoltType)}
             </Button>
           </div>
@@ -168,10 +165,9 @@ function PointCard({ point, routeId }: Props): ReactElement {
       <div className="flex items-center w-full py-2.5">
         <h5 className="font-bold text-2xl pr-2">Bilder</h5>
         <Restricted>
-          <Button
+          <IconButton
             onClick={() => setImagesLocked((checked) => !checked)}
             icon={imagesLocked ? "unlock" : "lock"}
-            size="small"
           />
         </Restricted>
       </div>

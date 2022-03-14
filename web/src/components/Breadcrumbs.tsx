@@ -1,6 +1,7 @@
 import { Resource } from "@/models/resource";
 import React, { ReactElement, ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { ChevronRightIcon } from "@heroicons/react/solid";
 
 interface Props {
   resourceId: string;
@@ -57,12 +58,10 @@ const Breadcrumbs = ({
   return (
     <div className="h-5 flex items-center">
       {crumbs.map(({ key, content }, index) => (
-        <div key={key}>
+        <div key={key} className="flex items-center">
           {content}
           {index !== crumbs.length - 1 && (
-            <span className="mx-1.5 text-sm font-extrabold text-gray-400">
-              &gt;
-            </span>
+            <ChevronRightIcon className="mx-0.5 h-4 text-gray-400" />
           )}
         </div>
       ))}

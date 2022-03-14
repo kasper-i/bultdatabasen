@@ -3,28 +3,6 @@
   src: local("Inter"), url(@/fonts/Inter-VariableFont.ttf) format("truetype");
 }
 
-html {
-  box-sizing: border-box;
-}
-
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-}
-
-.button.ui {
-  margin-right: 0;
-}
-
-.no-scroll {
-  overflow: hidden;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-*:not(i) {
-  font-family: "Inter";
-}

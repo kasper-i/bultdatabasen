@@ -1,5 +1,4 @@
-import Button from "@/components/base/Button";
-import Icon from "@/components/base/Icon";
+import IconButton from "@/components/base/IconButton";
 import Pill from "@/components/Pill";
 import { useTasks } from "@/queries/taskQueries";
 import React, { ReactElement } from "react";
@@ -13,9 +12,7 @@ function TaskButton({ resourceId }: Props): ReactElement {
 
   return (
     <div className="w-min relative cursor-pointer">
-      <Button icon primary size="tiny">
-        <Icon name="wrench" />
-      </Button>
+      <IconButton icon="wrench" />
       {tasks.data && tasks.data.length > 0 && (
         <Pill className="absolute -top-2.5 -right-2">{tasks.data.length}</Pill>
       )}

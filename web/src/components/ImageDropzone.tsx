@@ -36,10 +36,7 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
   });
 
   return (
-    <div
-      className="flex flex-col justify-start"
-      style={{ width: 160, height: 120 }}
-    >
+    <div className="flex flex-col justify-start w-full h-[120px]">
       {progress ? (
         <Progress
           percent={progress}
@@ -50,10 +47,21 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
       ) : (
         <div
           {...getRootProps()}
-          className="h-full border-gray-200 border-dashed border-4 flex justify-center items-center cursor-pointer rounded"
+          className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md"
         >
           <input {...getInputProps()} />
-          {<Icon name="upload" size="big" className="text-gray-500" />}
+          <div className="space-y-1 text-center">
+            <Icon name="upload" className="text-gray-500" />
+            <div className="flex text-sm text-gray-600">
+              <p className="cursor-pointer font-medium">
+                <span className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                  Ladda upp fil
+                </span>
+                <span className="pl-1">eller dra och släpp</span>
+              </p>
+            </div>
+            <p className="text-xs text-gray-500">JPG upp till 10MB</p>
+          </div>
         </div>
       )}
     </div>

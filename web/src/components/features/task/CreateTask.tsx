@@ -20,18 +20,18 @@ const CreateTask = ({ resourceId }: Props): ReactElement => {
 
   return (
     <Restricted>
-      <div className="sm:w-96 flex space-x-2">
+      <div className="sm:w-96 flex items-end space-x-2">
         <Input
-          className="flex-grow"
-          fluid
+          id="description"
+          label="Beskrivning"
           placeholder="Ankare i dåligt skick"
           onChange={(event) => setDescription(event.target.value)}
           value={description}
         />
         <Button
-          color="blue"
           onClick={handleCreateTask}
           loading={createTask.isLoading}
+          disabled={description.length === 0}
         >
           Skapa
         </Button>

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Api } from "./Api";
-import Loader from "./components/base/Loader";
+import { Spinner } from "./components/base/Spinner";
 import Main from "./layouts/Main";
 import Page from "./layouts/Page";
 import AreaPage from "./pages/AreaPage";
@@ -53,8 +53,8 @@ const App = () => {
 
   if (!initialized) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center">
-        <Loader />
+      <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-gray-400">
+        <Spinner big />
       </div>
     );
   }

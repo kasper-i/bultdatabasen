@@ -27,20 +27,14 @@ function LoginToolbar(): ReactElement {
 
   if (isAuthenticated) {
     return (
-      <Button
-        compact
-        primary
-        size="medium"
-        fluid={false}
-        onClick={() => signOut()}
-      >
+      <Button onClick={() => signOut()} className="ring-offset-gray-900">
         Logga Ut
       </Button>
     );
   }
 
   return (
-    <Button compact primary size="medium" fluid={false} onClick={gotoCognito}>
+    <Button onClick={gotoCognito} className="ring-offset-gray-900">
       Logga In
     </Button>
   );

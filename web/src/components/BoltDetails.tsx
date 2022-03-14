@@ -1,11 +1,11 @@
 import { Bolt } from "@/models/bolt";
 import { useDeleteBolt } from "@/queries/boltQueries";
-import React, { ReactElement, useState } from "react";
 import { translateBoltType } from "@/utils/boltUtils";
+import React, { ReactElement, useState } from "react";
+import IconButton from "./base/IconButton";
 import DeletePrompt from "./DeletePrompt";
 import BoltIcon from "./icons/BoltIcon";
 import Restricted from "./Restricted";
-import Button from "./base/Button";
 
 interface Props {
   routeId: string;
@@ -33,13 +33,12 @@ function BoltDetails({ routeId, pointId, bolt }: Props): ReactElement {
           </div>
         </div>
         <Restricted>
-          <Button
+          <IconButton
             icon="trash"
-            color="red"
-            size="mini"
+            color="danger"
             loading={deleteBolt.isLoading}
             onClick={() => setDeleteRequested(true)}
-          ></Button>
+          />
           {deleteRequested && (
             <DeletePrompt
               target="bult"

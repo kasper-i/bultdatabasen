@@ -1,11 +1,11 @@
 import React, { ReactElement } from "react";
 import Button from "./base/Button";
-import Icon from "./base/Icon";
+import Icon, { IconType } from "./base/Icon";
 import Modal from "./base/Modal";
 
 interface Props {
   target?: string;
-  icon?: string;
+  icon?: IconType;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -17,7 +17,7 @@ const DeletePrompt = ({
   onConfirm,
 }: Props): ReactElement => {
   return (
-    <Modal onClose={onCancel} open={true} size="mini" s>
+    <Modal onClose={onCancel} open={true}>
       <div>
         <p>Vill du ta bort objektet permanent?</p>
       </div>
@@ -25,8 +25,8 @@ const DeletePrompt = ({
         <Button onClick={onCancel}>
           <Icon name="cancel" /> Avbryt
         </Button>
-        <Button color="red" onClick={onConfirm}>
-          <Icon name={icon ?? "trash"} /> Radera {target != null ? target : ""}
+        <Button color="danger" onClick={onConfirm} icon={icon}>
+          Radera {target != null ? target : ""}
         </Button>
       </div>
     </Modal>
