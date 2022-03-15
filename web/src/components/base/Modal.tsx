@@ -8,11 +8,7 @@ const Modal: FC<{
 }> = ({ children, onClose, title, description }) => {
   return (
     <Transition appear show as={Fragment}>
-      <Dialog
-        as="div"
-        className="fixed inset-0 z-10 overflow-y-auto"
-        onClose={onClose}
-      >
+      <Dialog className="fixed inset-0 z-10 overflow-y-auto" onClose={onClose}>
         <div className="min-h-screen flex justify-center items-center">
           <Transition.Child
             as={Fragment}
