@@ -1,7 +1,8 @@
 import clsx from "clsx";
 import React, { FC } from "react";
+import { Windmill } from "react-activity";
+import "react-activity/dist/Windmill.css";
 import Icon from "./Icon";
-import { Spinner } from "./Spinner";
 import { ColorType, IconType } from "./types";
 
 const IconButton: FC<{
@@ -17,7 +18,7 @@ const IconButton: FC<{
     <button
       onClick={onClick}
       className={clsx(
-        "flex justify-center items-center py-2 px-2 border border-transparent text-sm shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
+        "relative flex justify-center items-center py-2 px-2 border border-transparent text-sm shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
         disabled
           ? "bg-gray-400"
           : color === "danger"
@@ -28,7 +29,18 @@ const IconButton: FC<{
       )}
       disabled={disabled}
     >
-      {loading ? <Spinner /> : <Icon name={icon} />}
+      <Icon name={icon} className={clsx(loading && "invisible")} />
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Windmill
+            size={14}
+            className={clsx(
+              color === "danger" ? "text-danger-100" : "text-primary-100",
+              "flex items-center"
+            )}
+          />
+        </div>
+      )}
     </button>
   );
 };

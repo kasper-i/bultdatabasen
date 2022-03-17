@@ -1,7 +1,8 @@
 import clsx from "clsx";
 import React, { FC } from "react";
+import { Dots } from "react-activity";
+import "react-activity/dist/Dots.css";
 import Icon from "./Icon";
-import { Spinner } from "./Spinner";
 import { ColorType, IconType } from "./types";
 
 const Button: FC<{
@@ -43,7 +44,12 @@ const Button: FC<{
       <div className={clsx(loading && "invisible")}>{children}</div>
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <Spinner />
+          <Dots
+            className={clsx(
+              color === "danger" ? "text-danger-100" : "text-primary-100",
+              "flex items-center"
+            )}
+          />
         </div>
       )}
     </button>
