@@ -13,10 +13,7 @@ export const getResourceLabel = (type: string): string | undefined => {
   }
 };
 
-export const getResourceUrl = (
-  type: string,
-  resourceId: string
-): string | undefined => {
+export const getResourceRoute = (type: string, resourceId: string): string => {
   switch (type) {
     case "area":
       return `/area/${resourceId}`;
@@ -27,6 +24,6 @@ export const getResourceUrl = (
     case "route":
       return `/route/${resourceId}`;
     default:
-      return undefined;
+      return "/";
   }
 };

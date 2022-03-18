@@ -70,7 +70,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
     years.sort().reverse();
 
     return (
-      <div className="flex flex-wrap gap-3 pt-2.5">
+      <div className="w-full flex flex-wrap gap-3 pt-2.5">
         <>
           {years.map((year) => (
             <Fragment key={"year-" + year}>
