@@ -14,6 +14,7 @@ export type IconType =
   | "paste"
   | "plus"
   | "redo"
-  | "copy";
+  | "copy"
+  | "home";
 
 export type ColorType = "primary" | "danger";

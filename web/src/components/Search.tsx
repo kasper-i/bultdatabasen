@@ -1,5 +1,5 @@
 import { Api } from "@/Api";
-import { ResourceWithParents } from "@/models/resource";
+import { SearchResult } from "@/models/resource";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import { Combobox } from "@headlessui/react";
 import clsx from "clsx";
@@ -8,22 +8,21 @@ import { useNavigate } from "react-router-dom";
 
 interface State {
   loading: boolean;
-  results: ResourceWithParents[];
-  value?: ResourceWithParents;
+  results: SearchResult[];
+  value?: SearchResult;
 }
 
 type Action =
   | {
-      type: "START_SEARCH";
-      payload: string;
+      type: "start_search";
     }
   | {
-      type: "FINISH_SEARCH";
-      payload: ResourceWithParents[];
+      type: "finish_search";
+      payload: SearchResult[];
     }
   | {
-      type: "UPDATE_SELECTION";
-      payload: ResourceWithParents;
+      type: "update_selection";
+      payload: SearchResult;
     };
 
 const initialState: State = {
@@ -33,11 +32,11 @@ const initialState: State = {
 
 function searchReducer(state: State, action: Action): State {
   switch (action.type) {
-    case "START_SEARCH":
+    case "start_search":
       return { ...state, loading: true };
-    case "FINISH_SEARCH":
+    case "finish_search":
       return { ...state, loading: false, results: action.payload };
-    case "UPDATE_SELECTION":
+    case "update_selection":
       return { ...state, value: action.payload };
     default:
       throw new Error();
@@ -61,11 +60,11 @@ function Search() {
       return;
     }
 
-    dispatch({ type: "START_SEARCH", payload: query });
+    dispatch({ type: "start_search" });
 
     const searchResults = await Api.searchResources(query);
 
-    dispatch({ type: "FINISH_SEARCH", payload: searchResults });
+    dispatch({ type: "finish_search", payload: searchResults });
   };
 
   console.log(results);
@@ -76,7 +75,7 @@ function Search() {
         value={value}
         onChange={(value) => {
           if (value) {
-            dispatch({ type: "UPDATE_SELECTION", payload: value });
+            dispatch({ type: "update_selection", payload: value });
             const { type, id } = value;
             navigate(getResourceRoute(type, id));
           }
@@ -84,13 +83,13 @@ function Search() {
       >
         <div className="relative">
           <Combobox.Input
-            displayValue={(value: ResourceWithParents) => value.name}
+            displayValue={(value: SearchResult) => value.name}
             onChange={handleSearchChange}
             className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-3xl"
           />
-          <Combobox.Options className="absolute w-full py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-            {results.length !== 0 &&
-              results.map((resource, index) => (
+          {results.length > 0 && (
+            <Combobox.Options className="absolute z-50 w-full py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              {results.map((resource, index) => (
                 <Combobox.Option
                   key={resource.id}
                   value={resource}
@@ -104,12 +103,12 @@ function Search() {
                 >
                   {({ active }) => (
                     <>
-                      <p className={clsx("block truncate font-bold text-sm")}>
+                      <p className="truncate font-bold text-sm">
                         {resource.name}
                       </p>
                       <p
                         className={clsx(
-                          "block truncate text-sm ",
+                          "truncate text-sm ",
                           active ? "text-primary-200" : "text-gray-500"
                         )}
                       >
@@ -122,7 +121,8 @@ function Search() {
                   )}
                 </Combobox.Option>
               ))}
-          </Combobox.Options>
+            </Combobox.Options>
+          )}
         </div>
       </Combobox>
     </div>

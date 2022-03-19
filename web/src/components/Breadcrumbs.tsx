@@ -1,7 +1,8 @@
 import { Resource } from "@/models/resource";
-import React, { ReactElement, ReactNode } from "react";
+import React, { Fragment, ReactElement, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRightIcon } from "@heroicons/react/solid";
+import Icon from "./base/Icon";
 
 interface Props {
   resourceId: string;
@@ -43,7 +44,13 @@ const Breadcrumbs = ({
     return {
       key: ancestor.id,
       content: (
-        <Link to={to}>{ancestor.type === "root" ? "🌎" : ancestor.name}</Link>
+        <Link to={to} className="flex items-center">
+          {ancestor.type === "root" ? (
+            <Icon className="text-gray-800 h-4" name="home" />
+          ) : (
+            ancestor.name
+          )}
+        </Link>
       ),
     };
   });
@@ -58,12 +65,12 @@ const Breadcrumbs = ({
   return (
     <div className="h-5 flex items-center">
       {crumbs.map(({ key, content }, index) => (
-        <div key={key} className="flex items-center">
+        <Fragment key={key}>
           {content}
           {index !== crumbs.length - 1 && (
             <ChevronRightIcon className="mx-0.5 h-4 text-gray-400" />
           )}
-        </div>
+        </Fragment>
       ))}
     </div>
   );
