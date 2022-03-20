@@ -27,7 +27,7 @@ export interface Parent {
   type: ResourceType;
 }
 
-export interface ResourceWithParents {
+export interface SearchResult {
   id: string;
   name: string;
   type: ResourceType;

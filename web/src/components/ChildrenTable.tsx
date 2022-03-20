@@ -1,5 +1,5 @@
 import { useChildren } from "@/queries/resourceQueries";
-import { getResourceLabel, getResourceUrl } from "@/utils/resourceUtils";
+import { getResourceLabel, getResourceRoute } from "@/utils/resourceUtils";
 import React, { Fragment, ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -20,7 +20,7 @@ const ChildrenTable = ({ resourceId }: Props): ReactElement => {
       <ul>
         {children.data.map((resource) => {
           const label = getResourceLabel(resource.type);
-          const url = getResourceUrl(resource.type, resource.id);
+          const url = getResourceRoute(resource.type, resource.id);
           return (
             <li
               key={resource.id}

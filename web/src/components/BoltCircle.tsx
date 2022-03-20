@@ -24,15 +24,15 @@ function BoltCircle({ main, active, point, onClick }: Props): ReactElement {
     <div
       onClick={() => onClick(point.id)}
       className={clsx(
-        "cursor-pointer rounded-full h-16 w-16 flex items-center justify-center shadow-md z-20",
-        active ? "bg-blue-200" : "bg-gray-100"
+        "cursor-pointer rounded-full h-14 w-14 flex items-center justify-center shadow-md z-20",
+        "bg-gray-100"
       )}
       style={style}
     >
       <div
         className={clsx(
           "rounded-full h-12 w-12 flex items-center justify-center z-20",
-          active ? "bg-blue-400" : "bg-gray-200"
+          active ? "bg-primary-400 text-white" : "bg-gray-200"
         )}
       >
         <span className="font-bold">{point.number}</span>

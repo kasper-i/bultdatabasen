@@ -1,8 +1,8 @@
-import clsx from "clsx";
 import configData from "@/config.json";
 import { Image, ImageVersion } from "@/models/image";
+import clsx from "clsx";
 import React, { CSSProperties, ReactNode, useReducer, useRef } from "react";
-import { Loader } from "semantic-ui-react";
+import Loader from "./base/Loader";
 
 interface Props {
   image: Image;
@@ -94,7 +94,7 @@ export const ImageView = ({
         width: width,
       }}
     >
-      <Loader active={loading} size="small" />
+      <Loader active={loading} />
       <div className="absolute" style={innerStyle}>
         <img
           ref={imgRef}

@@ -1,3 +1,4 @@
+import Icon from "@/components/base/Icon";
 import BoltEditor from "@/components/BoltEditor";
 import PageHeader from "@/components/PageHeader";
 import { Underlined } from "@/components/Underlined";
@@ -7,7 +8,6 @@ import { useBolts } from "@/queries/boltQueries";
 import { usePoints } from "@/queries/pointQueries";
 import { useRoute } from "@/queries/routeQueries";
 import React, { Fragment, ReactElement } from "react";
-import { Icon } from "semantic-ui-react";
 
 const renderRouteType = (routeType: RouteType) => {
   switch (routeType) {

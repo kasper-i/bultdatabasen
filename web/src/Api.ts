@@ -4,11 +4,7 @@ import { Bolt } from "@/models/bolt";
 import { Crag } from "@/models/crag";
 import { Image } from "@/models/image";
 import { Point } from "@/models/point";
-import {
-  Resource,
-  ResourceCount,
-  ResourceWithParents,
-} from "@/models/resource";
+import { Resource, ResourceCount, SearchResult } from "@/models/resource";
 import { Route } from "@/models/route";
 import { Sector } from "@/models/sector";
 import { Task } from "@/models/task";
@@ -257,7 +253,7 @@ export class Api {
 
   static searchResources = async (
     searchTerm?: string
-  ): Promise<ResourceWithParents[]> => {
+  ): Promise<SearchResult[]> => {
     const endpoint = `/resources`;
 
     const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
@@ -265,7 +261,7 @@ export class Api {
       params: { name: searchTerm },
     });
 
-    return result.data as ResourceWithParents[];
+    return result.data as SearchResult[];
   };
 
   static getBolts = async (resourceId: string): Promise<Bolt[]> => {

@@ -1,8 +1,8 @@
 import { Image, ImageRotation } from "@/models/image";
-import moment from "moment";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
+import moment from "moment";
 import React, { ReactElement, useState } from "react";
-import { Button } from "semantic-ui-react";
+import IconButton from "./base/IconButton";
 import DeletePrompt from "./DeletePrompt";
 import { ImageView } from "./ImageView";
 import Restricted from "./Restricted";
@@ -42,17 +42,16 @@ const ImageThumbnail = ({
       onClick={() => onClick?.(image.id)}
       version="sm"
     >
-      <div className="absolute left-0 top-0 bg-yellow-700 rounded-sm p-1 text-xs -m-1.5 font-bold text-white">
+      <div className="absolute z-10 left-0 top-0 bg-gray-300 rounded-sm p-1 text-xs -m-1.5 font-bold text-gray-800">
         {year}
       </div>
       {!locked && (
         <Restricted>
-          <div className="absolute opacity-70 bg-white h-1/3 w-full bottom-0 left-0 right-0"></div>
-          <div className="absolute h-1/3 w-full bottom-0 left-0 right-0 flex justify-center items-center px-2 space-x-1">
-            <Button
-              color="red"
+          <div className="absolute opacity-70 bg-white h-full w-full bottom-0 left-0 right-0"></div>
+          <div className="absolute h-full w-full bottom-0 left-0 right-0 flex flex-col justify-center items-center px-2 gap-1.5">
+            <IconButton
+              color="danger"
               circular
-              size="mini"
               icon="trash"
               loading={deleteImage.isLoading}
               onClick={(e) => {
@@ -60,10 +59,9 @@ const ImageThumbnail = ({
                 setDeleteRequested(true);
               }}
             />
-            <Button
-              color="blue"
+            <IconButton
+              color="primary"
               circular
-              size="mini"
               icon="redo"
               onClick={(e) => {
                 e.stopPropagation();

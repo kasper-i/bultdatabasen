@@ -1,8 +1,9 @@
 import SigninPage from "@/pages/SigninPage";
 import React, { useEffect, useState } from "react";
+import { Digital } from "react-activity";
+import "react-activity/dist/Digital.css";
 import { useQueryClient } from "react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Dimmer, Loader } from "semantic-ui-react";
 import { Api } from "./Api";
 import Main from "./layouts/Main";
 import Page from "./layouts/Page";
@@ -53,10 +54,8 @@ const App = () => {
 
   if (!initialized) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center">
-        <Dimmer active>
-          <Loader />
-        </Dimmer>
+      <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-gray-400">
+        <Digital size={32} />
       </div>
     );
   }

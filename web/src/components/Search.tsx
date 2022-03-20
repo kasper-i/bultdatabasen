@@ -1,33 +1,43 @@
 import { Api } from "@/Api";
-import { getResourceUrl } from "@/utils/resourceUtils";
+import { SearchResult } from "@/models/resource";
+import { getResourceRoute } from "@/utils/resourceUtils";
+import { Combobox } from "@headlessui/react";
+import { SearchIcon } from "@heroicons/react/solid";
+import clsx from "clsx";
 import React, { Reducer, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search as SemanticSearch, SearchProps } from "semantic-ui-react";
 
 interface State {
   loading: boolean;
-  results: Record<string, string>[];
-  value: string;
+  results: SearchResult[];
+  value?: SearchResult;
 }
 
-interface Action {
-  type: "START_SEARCH" | "FINISH_SEARCH" | "UPDATE_SELECTION";
-  payload?: any;
-}
+type Action =
+  | {
+      type: "start_search";
+    }
+  | {
+      type: "finish_search";
+      payload: SearchResult[];
+    }
+  | {
+      type: "update_selection";
+      payload: SearchResult;
+    };
 
 const initialState: State = {
   loading: false,
   results: [],
-  value: "",
 };
 
-function searchReducer(state: State, action: Action) {
+function searchReducer(state: State, action: Action): State {
   switch (action.type) {
-    case "START_SEARCH":
+    case "start_search":
       return { ...state, loading: true };
-    case "FINISH_SEARCH":
+    case "finish_search":
       return { ...state, loading: false, results: action.payload };
-    case "UPDATE_SELECTION":
+    case "update_selection":
       return { ...state, value: action.payload };
     default:
       throw new Error();
@@ -39,49 +49,85 @@ function Search() {
     searchReducer,
     initialState
   );
-  const { loading, results, value } = state;
+  const { results, value } = state;
   const navigate = useNavigate();
 
   const handleSearchChange = async (
-    _event: React.MouseEvent<HTMLElement, MouseEvent>,
-    data: SearchProps
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    dispatch({ type: "UPDATE_SELECTION", payload: data.value ?? "" });
+    const query = event.target.value;
 
-    if (data.value == null || data.value.length < 3) {
+    if (query.length < 3) {
       return;
     }
 
-    dispatch({ type: "START_SEARCH", payload: value });
+    dispatch({ type: "start_search" });
 
-    const searchResults = await (
-      await Api.searchResources(data.value)
-    ).map((result) => ({
-      title: result.name,
-      description: result.parents
-        .filter((parent) => parent.type !== "root")
-        .map((parent) => parent.name)
-        .join(", "),
-      key: result.id,
-      type: result.type,
-    }));
+    const searchResults = await Api.searchResources(query);
 
-    dispatch({ type: "FINISH_SEARCH", payload: searchResults });
+    dispatch({ type: "finish_search", payload: searchResults });
   };
 
   return (
-    <SemanticSearch
-      loading={loading}
-      onResultSelect={(_e, { result }) => {
-        dispatch({ type: "UPDATE_SELECTION", payload: result.title });
-        const url = getResourceUrl(result.type, result.key);
-        url && navigate(url);
-      }}
-      onSearchChange={handleSearchChange}
-      results={results}
-      value={value}
-      size="small"
-    />
+    <div className="w-full max-w-xs">
+      <Combobox
+        value={value}
+        onChange={(value) => {
+          if (value) {
+            dispatch({ type: "update_selection", payload: value });
+            const { type, id } = value;
+            navigate(getResourceRoute(type, id));
+          }
+        }}
+      >
+        <div className="relative">
+          <Combobox.Input
+            displayValue={(value: SearchResult) => value.name}
+            onChange={handleSearchChange}
+            className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-3xl"
+          />
+          <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+            <SearchIcon className="w-5 h-5 text-gray-400" aria-hidden="true" />
+          </Combobox.Button>
+          {results.length > 0 && (
+            <Combobox.Options className="absolute z-50 w-full py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              {results.map((resource, index) => (
+                <Combobox.Option
+                  key={resource.id}
+                  value={resource}
+                  className={({ active }) =>
+                    clsx(
+                      `cursor-default select-none relative py-2 pl-4 pr-4`,
+                      active ? "bg-primary-500 text-white" : "text-black",
+                      index !== results.length - 1 && "border-b border-gray-300"
+                    )
+                  }
+                >
+                  {({ active }) => (
+                    <>
+                      <p className="truncate font-bold text-sm">
+                        {resource.name}
+                      </p>
+                      <p
+                        className={clsx(
+                          "truncate text-sm ",
+                          active ? "text-primary-200" : "text-gray-500"
+                        )}
+                      >
+                        {resource.parents
+                          .filter((parent) => parent.type !== "root")
+                          .map((parent) => parent.name)
+                          .join(", ")}
+                      </p>
+                    </>
+                  )}
+                </Combobox.Option>
+              ))}
+            </Combobox.Options>
+          )}
+        </div>
+      </Combobox>
+    </div>
   );
 }
 

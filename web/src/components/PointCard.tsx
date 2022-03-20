@@ -10,7 +10,9 @@ import { translateBoltType } from "@/utils/boltUtils";
 import moment from "moment";
 import React, { Fragment, ReactElement, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Dropdown, Icon, Loader } from "semantic-ui-react";
+import Button from "./base/Button";
+import IconButton from "./base/IconButton";
+import Loader from "./base/Loader";
 import BoltDetails from "./BoltDetails";
 import { ImageCarousel } from "./ImageCarousel";
 import ImageDropzone from "./ImageDropzone";
@@ -68,7 +70,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
     years.sort().reverse();
 
     return (
-      <div className="flex flex-wrap gap-3 pt-2.5">
+      <div className="w-full flex flex-wrap gap-3 pt-2.5">
         <>
           {years.map((year) => (
             <Fragment key={"year-" + year}>
@@ -121,15 +123,15 @@ function PointCard({ point, routeId }: Props): ReactElement {
         </div>
         <Restricted>
           <div className="flex gap-2">
-            <Button
+            <IconButton
               onClick={() => dispatch(copy({ pointId: point.id }))}
               icon="copy"
             />
-            <Button
+            <IconButton
               loading={deletePoint.isLoading}
               onClick={() => deletePoint.mutate()}
               icon="trash"
-              color="red"
+              color="danger"
               disabled={!allowDelete}
             />
           </div>
@@ -148,36 +150,14 @@ function PointCard({ point, routeId }: Props): ReactElement {
         ))}
         <Restricted>
           <div key="new" className="">
-            <Button.Group color="blue">
-              <Button
-                className="flex-shrink-0"
-                compact
-                primary
-                size="small"
-                loading={createBolt.isLoading}
-                onClick={() => createBolt.mutate({ type: selectedBoltType })}
-              >
-                <Icon name="add" />
-                {translateBoltType(selectedBoltType)}
-              </Button>
-              <Dropdown
-                className="button icon"
-                value={selectedBoltType}
-                onChange={(_e, result) =>
-                  result?.value !== undefined &&
-                  setSelectedBoltType(result.value as BoltType)
-                }
-                options={[
-                  {
-                    key: "expansion",
-                    text: "Expansionsbult",
-                    value: "expansion",
-                  },
-                  { key: "glue", text: "Limbult", value: "glue" },
-                ]}
-                trigger={<></>}
-              />
-            </Button.Group>
+            <Button
+              className="flex-shrink-0"
+              loading={createBolt.isLoading}
+              onClick={() => createBolt.mutate({ type: selectedBoltType })}
+              icon="add"
+            >
+              {translateBoltType(selectedBoltType)}
+            </Button>
           </div>
         </Restricted>
       </div>
@@ -185,10 +165,9 @@ function PointCard({ point, routeId }: Props): ReactElement {
       <div className="flex items-center w-full py-2.5">
         <h5 className="font-bold text-2xl pr-2">Bilder</h5>
         <Restricted>
-          <Button
+          <IconButton
             onClick={() => setImagesLocked((checked) => !checked)}
             icon={imagesLocked ? "unlock" : "lock"}
-            size="small"
           />
         </Restricted>
       </div>

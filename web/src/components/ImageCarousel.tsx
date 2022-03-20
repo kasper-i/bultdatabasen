@@ -11,7 +11,8 @@ import React, {
 } from "react";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import usePrevious from "react-use/lib/usePrevious";
-import { Icon, Loader } from "semantic-ui-react";
+import IconButton from "./base/IconButton";
+import Loader from "./base/Loader";
 
 interface FullSizeImageProps {
   image: Image;
@@ -140,14 +141,13 @@ export const FullSizeImage = ({
 
   return (
     <div>
-      <Icon
+      <IconButton
         className="fixed top-5 right-5 text-white cursor-pointer"
-        size="big"
         onClick={onClose}
-        name="close"
+        icon="close"
       />
 
-      <Loader active={loading} size="big" />
+      <Loader active={loading} />
       <img
         ref={imgRef}
         onLoad={onLoad}

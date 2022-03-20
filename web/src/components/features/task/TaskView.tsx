@@ -1,8 +1,10 @@
+import Button from "@/components/base/Button";
+import Icon from "@/components/base/Icon";
+import IconButton from "@/components/base/IconButton";
 import { Task, TaskStatus } from "@/models/task";
 import { useDeleteTask, useUpdateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Icon } from "semantic-ui-react";
 import Restricted from "../../Restricted";
 
 interface Props {
@@ -34,13 +36,13 @@ const TaskView = ({ resourceId, ...rest }: Props): ReactElement => {
 
   return (
     <div
-      className="sm:w-96 flex flex-col space-y-2 bg-gray-50 p-5 rounded"
+      className="sm:w-96 flex flex-col space-y-2 bg-gray-200 p-5 rounded"
       key={task.id}
     >
       <div className="flex justify-between items-center">
         <Link to={`/route/${task.parentId}`}>
           <div className="flex flex-col">
-            <div>
+            <div className="flex items-center">
               {task.status === "closed" && (
                 <Icon className="text-green-600" name="check" />
               )}
@@ -50,15 +52,12 @@ const TaskView = ({ resourceId, ...rest }: Props): ReactElement => {
           </div>
         </Link>
         <Restricted>
-          <Button
-            icon
-            size="tiny"
-            compact
+          <IconButton
+            color="danger"
             loading={deleteTask.isLoading}
             onClick={() => deleteTask.mutate()}
-          >
-            <Icon name="trash" />
-          </Button>
+            icon="trash"
+          />
         </Restricted>
       </div>
 
@@ -66,11 +65,11 @@ const TaskView = ({ resourceId, ...rest }: Props): ReactElement => {
         <div className="flex space-x-2">
           <Button
             disabled={isComplete}
-            size="small"
-            fluid
             onClick={() => changeStatus("closed")}
+            icon="check"
+            full
           >
-            <Icon name="check"></Icon> Utfört
+            Utfört
           </Button>
         </div>
       </Restricted>

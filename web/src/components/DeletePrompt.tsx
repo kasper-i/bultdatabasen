@@ -1,10 +1,11 @@
 import React, { ReactElement } from "react";
-import { Button, Icon, Modal } from "semantic-ui-react";
-import { SemanticICONS } from "semantic-ui-react/dist/commonjs/generic";
+import Button from "./base/Button";
+import Modal from "./base/Modal";
+import { IconType } from "./base/types";
 
 interface Props {
   target?: string;
-  icon?: SemanticICONS;
+  icon?: IconType;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -16,18 +17,19 @@ const DeletePrompt = ({
   onConfirm,
 }: Props): ReactElement => {
   return (
-    <Modal onClose={onCancel} open={true} size="mini" s>
-      <Modal.Content>
-        <p>Vill du ta bort objektet permanent?</p>
-      </Modal.Content>
-      <Modal.Actions>
-        <Button onClick={onCancel}>
-          <Icon name="cancel" /> Avbryt
+    <Modal
+      onClose={onCancel}
+      title="Vill du radera objektet?"
+      description="Objektet kommer att flyttas till papperskorgen."
+    >
+      <div className="flex gap-2">
+        <Button icon="cancel" onClick={onCancel}>
+          Avbryt
         </Button>
-        <Button color="red" onClick={onConfirm}>
-          <Icon name={icon ?? "trash"} /> Radera {target != null ? target : ""}
+        <Button color="danger" onClick={onConfirm} icon={icon}>
+          Radera {target != null ? target : ""}
         </Button>
-      </Modal.Actions>
+      </div>
     </Modal>
   );
 };

@@ -2,6 +2,7 @@ import { Concatenator } from "@/components/Concatenator";
 import { rootNodeId } from "@/constants";
 import { useAreas } from "@/queries/areaQueries";
 import React from "react";
+
 import { Link } from "react-router-dom";
 
 const RootPage = () => {
