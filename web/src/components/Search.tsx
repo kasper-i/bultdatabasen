@@ -67,8 +67,6 @@ function Search() {
     dispatch({ type: "finish_search", payload: searchResults });
   };
 
-  console.log(results);
-
   return (
     <div className="w-64">
       <Combobox
