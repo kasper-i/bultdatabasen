@@ -41,7 +41,9 @@ const Button: FC<{
       disabled={disabled}
     >
       {icon && <Icon name={icon} className={clsx(loading && "invisible")} />}
-      <div className={clsx(loading && "invisible")}>{children}</div>
+      <div className={clsx(loading && "invisible", "whitespace-nowrap")}>
+        {children}
+      </div>
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Dots
