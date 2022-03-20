@@ -68,7 +68,7 @@ function Search() {
   };
 
   return (
-    <div className="w-64">
+    <div className="w-56 sm:w-80">
       <Combobox
         value={value}
         onChange={(value) => {
