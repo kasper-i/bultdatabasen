@@ -11,7 +11,7 @@ interface Props {
 
 const ImageDropzone = ({ pointId }: Props): ReactElement => {
   const [progress, setProgress] = useState<number>();
-  const [error, setError] = useState(false);
+  const [_error, setError] = useState(false);
   const queryClient = useQueryClient();
 
   const onDrop = useCallback(

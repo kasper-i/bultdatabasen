@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 import Button from "./base/Button";
-import Icon, { IconType } from "./base/Icon";
 import Modal from "./base/Modal";
+import { IconType } from "./base/types";
 
 interface Props {
   target?: string;

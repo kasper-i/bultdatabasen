@@ -2,11 +2,7 @@ import { Api } from "@/Api";
 import { SearchResult } from "@/models/resource";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import { Combobox } from "@headlessui/react";
-import {
-  SearchCircleIcon,
-  SearchIcon,
-  SelectorIcon,
-} from "@heroicons/react/solid";
+import { SearchIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
 import React, { Reducer, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
