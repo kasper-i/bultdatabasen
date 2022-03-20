@@ -3,6 +3,7 @@ import React, { Fragment, ReactElement, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRightIcon } from "@heroicons/react/solid";
 import Icon from "./base/Icon";
+import { getResourceRoute } from "@/utils/resourceUtils";
 
 interface Props {
   resourceId: string;
@@ -28,16 +29,10 @@ const Breadcrumbs = ({
         to = "/";
         break;
       case "area":
-        to = `/area/${ancestor.id}`;
-        break;
       case "crag":
-        to = `/crag/${ancestor.id}`;
-        break;
       case "sector":
-        to = `/sector/${ancestor.id}`;
-        break;
       case "route":
-        to = `/route/${ancestor.id}`;
+        to = getResourceRoute(ancestor.type, ancestor.id);
         break;
     }
 
