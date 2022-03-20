@@ -1,3 +1,5 @@
+import { ResourceType } from "@/models/resource";
+
 export const getResourceLabel = (type: string): string | undefined => {
   switch (type) {
     case "area":
@@ -13,7 +15,10 @@ export const getResourceLabel = (type: string): string | undefined => {
   }
 };
 
-export const getResourceRoute = (type: string, resourceId: string): string => {
+export const getResourceRoute = (
+  type: ResourceType,
+  resourceId: string
+): string => {
   switch (type) {
     case "area":
       return `/area/${resourceId}`;
