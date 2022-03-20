@@ -49,7 +49,7 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
             <Icon name="upload" className="text-gray-500" />
             <div className="flex text-sm text-gray-600">
               <p className="cursor-pointer font-medium">
-                <span className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                <span className="text-indigo-600 hover:text-indigo-500">
                   Ladda upp fil
                 </span>
                 <span className="pl-1">eller dra och släpp</span>
