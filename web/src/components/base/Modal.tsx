@@ -32,14 +32,11 @@ const Modal: FC<{
             leaveFrom="scale-100"
             leaveTo="scale-95"
           >
-            <div className="inline-block w-full max-w-md p-5 my-8 overflow-hidden transition-all transform bg-white shadow-xl rounded-lg">
-              <Dialog.Title
-                as="h3"
-                className="text-xl font-bold leading-6 text-gray-900"
-              >
+            <div className="inline-block p-5 my-8 mx-4 max-w-md overflow-hidden transition-all transform bg-white shadow-xl rounded-lg">
+              <Dialog.Title as="h3" className="text-xl font-bold text-gray-900">
                 {title}
               </Dialog.Title>
-              <Dialog.Description className="mt-1 mb-2 text-md">
+              <Dialog.Description className="mt-1 mb-4 text-md leading-tight">
                 {description}
               </Dialog.Description>
               {children}

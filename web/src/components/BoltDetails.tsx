@@ -24,7 +24,7 @@ function BoltDetails({ routeId, pointId, bolt }: Props): ReactElement {
   };
 
   return (
-    <div className="bg-gray-100 shadow rounded p-2 flex flex-col w-64">
+    <div className="bg-gray-100 shadow rounded p-2 flex flex-col">
       <div className="flex justify-between items-center">
         <div>
           <div className="flex gap-2 font-bold">
