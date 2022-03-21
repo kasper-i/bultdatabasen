@@ -12,7 +12,7 @@ function TaskButton({ resourceId }: Props): ReactElement {
 
   return (
     <div className="w-min relative cursor-pointer">
-      <IconButton icon="wrench" />
+      <IconButton circular icon="wrench" />
       {tasks.data && tasks.data.length > 0 && (
         <Pill className="absolute -top-2.5 -right-2">{tasks.data.length}</Pill>
       )}

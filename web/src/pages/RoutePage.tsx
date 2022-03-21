@@ -44,9 +44,6 @@ const RoutePage = (): ReactElement => {
           <Underlined>{length}m</Underlined> lång och består av{" "}
           <Underlined>{bolts.data.length}</Underlined> bultar.
         </p>
-        <a href={externalLink}>
-          <Icon name="external" />
-        </a>
       </div>
 
       <div className="mt-5">

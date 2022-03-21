@@ -3,6 +3,7 @@ import { useCounts, useResource } from "@/queries/resourceQueries";
 import { getResourceLabel } from "@/utils/resourceUtils";
 import React, { ReactElement } from "react";
 import BackLink from "./BackLink";
+import TaskButton from "./features/task/TaskButton";
 import { Underlined } from "./Underlined";
 
 interface Props {
@@ -28,9 +29,7 @@ const PageHeader = ({
   return (
     <div className="flex flex-col gap-2.5">
       {parent && <BackLink resource={parent} />}
-      <div className="flex flex-col items-start">
-        <h1 className="text-3xl font-bold">{resource.name}</h1>
-      </div>
+      <h1 className="text-3xl font-bold">{resource.name}</h1>
       {counts.data != null && showCounts && (
         <p className="text-lg">
           {getResourceLabel(resource.type)} med{" "}
