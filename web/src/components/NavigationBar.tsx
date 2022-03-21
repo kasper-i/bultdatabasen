@@ -4,7 +4,7 @@ import Search from "./Search";
 
 const NavigationBar = (): ReactElement => {
   return (
-    <div className="bg-gray-900 h-16 shadow-md flex justify-between items-center px-2 gap-4">
+    <div className="bg-gray-800 h-14 shadow-md flex justify-between items-center px-2 gap-4">
       <Search />
       <LoginToolbar />
     </div>

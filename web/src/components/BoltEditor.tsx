@@ -6,7 +6,6 @@ import { clear, selectPointId } from "@/slices/clipboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Icon from "./base/Icon";
 import IconButton from "./base/IconButton";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
