@@ -6,6 +6,7 @@ import { clear, selectPointId } from "@/slices/clipboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import Icon from "./base/Icon";
 import IconButton from "./base/IconButton";
 import BoltCircle from "./BoltCircle";
 import Branch from "./graph/Branch";
@@ -79,6 +80,32 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
   const copiedPoint = copiedPointId;
   const attachIcon = copiedPoint != null ? "paste" : "plus";
+
+  if (points.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-4 border-2 border-gray-300 border-dashed rounded-md">
+        <IconButton
+          onClick={() => attachPoint(undefined)}
+          icon="plus"
+          className="mb-2.5"
+        />
+        <div className="text-sm text-gray-600 text-center">
+          <p className="mb-2">
+            På den här leden finns ännu inga dokumenterade bultar.
+          </p>
+          <p className="font-medium">
+            <span
+              onClick={() => attachPoint(undefined)}
+              className="text-primary-500 hover:text-primary-400 pr-1 cursor-pointer"
+            >
+              Lägg till
+            </span>
+            en första bult eller ankare.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-start">
@@ -173,19 +200,6 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
               </Junction>
             );
           })}
-        {points.length === 0 && (
-          <Restricted>
-            <Junction compact>
-              <Vertex>
-                <IconButton
-                  circular
-                  icon={attachIcon}
-                  onClick={() => attachPoint(undefined)}
-                />
-              </Vertex>
-            </Junction>
-          </Restricted>
-        )}
       </Graph>
       {selectedPoint && (
         <div

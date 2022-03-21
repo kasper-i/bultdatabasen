@@ -1,27 +1,27 @@
 import {
-  BeakerIcon,
-  XCircleIcon,
-  TrashIcon,
-  XIcon,
-  UploadIcon,
-  PlusCircleIcon,
-  PlusIcon,
-  CheckIcon,
   ArrowSmLeftIcon,
+  BeakerIcon,
+  CheckIcon,
+  ClipboardIcon,
+  DuplicateIcon,
+  ExternalLinkIcon,
   LockClosedIcon,
   LockOpenIcon,
-  ClipboardIcon,
-  ExternalLinkIcon,
-  DuplicateIcon,
+  PlusIcon,
+  TrashIcon,
+  UploadIcon,
+  XCircleIcon,
+  XIcon,
 } from "@heroicons/react/outline";
 import { HomeIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
 import React, { FC } from "react";
 import { IconType } from "./types";
 
-const Icon: FC<{ name: IconType; className?: string }> = ({
+const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
   name,
   className,
+  big,
 }) => {
   const getIcon = () => {
     switch (name) {
@@ -33,8 +33,6 @@ const Icon: FC<{ name: IconType; className?: string }> = ({
         return XIcon;
       case "upload":
         return UploadIcon;
-      case "add":
-        return PlusCircleIcon;
       case "check":
         return CheckIcon;
       case "arrow left":
@@ -62,7 +60,15 @@ const Icon: FC<{ name: IconType; className?: string }> = ({
 
   const Icon = getIcon();
 
-  return <Icon className={clsx("inline-block h-4 w-4", className)} />;
+  return (
+    <Icon
+      className={clsx(
+        "inline-block",
+        big === true ? "h-10 w-10" : "h-4 w-4",
+        className
+      )}
+    />
+  );
 };
 
 export default Icon;

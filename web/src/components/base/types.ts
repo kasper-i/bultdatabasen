@@ -4,7 +4,6 @@ export type IconType =
   | "trash"
   | "close"
   | "upload"
-  | "add"
   | "wrench"
   | "check"
   | "external"

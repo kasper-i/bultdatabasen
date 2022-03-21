@@ -154,7 +154,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
               className="flex-shrink-0"
               loading={createBolt.isLoading}
               onClick={() => createBolt.mutate({ type: selectedBoltType })}
-              icon="add"
+              icon="plus"
             >
               {translateBoltType(selectedBoltType)}
             </Button>

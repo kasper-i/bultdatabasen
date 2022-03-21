@@ -27,11 +27,15 @@ const RoutePage = (): ReactElement => {
   const points = usePoints(resourceId);
   const bolts = useBolts(resourceId);
 
-  if (route.data == null || points.data == null || bolts.data == null) {
+  if (
+    route.data === undefined ||
+    points.data === undefined ||
+    bolts.data === undefined
+  ) {
     return <Fragment />;
   }
 
-  const { routeType, year, length, externalLink } = route.data;
+  const { routeType, year, length } = route.data;
 
   return (
     <div className="flex flex-col">
