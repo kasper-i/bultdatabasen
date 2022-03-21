@@ -62,7 +62,7 @@ const Icon: FC<{ name: IconType; className?: string }> = ({
 
   const Icon = getIcon();
 
-  return <Icon className={clsx("inline-block h-5 w-5", className)} />;
+  return <Icon className={clsx("inline-block h-4 w-4", className)} />;
 };
 
 export default Icon;

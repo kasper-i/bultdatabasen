@@ -28,14 +28,13 @@ const Button: FC<{
     <button
       onClick={onClick}
       className={clsx(
-        "relative flex justify-center items-center py-2 gap-2 border border-transparent text-sm shadow-sm rounded-md font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
+        "relative flex justify-center items-center py-1.5 px-3 gap-1.5 border border-transparent text-sm shadow-sm rounded-md font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
         disabled
           ? "bg-gray-400"
           : color === "danger"
           ? "bg-red-500 hover:bg-red-600 focus:ring-red-400"
           : "bg-primary-500 hover:bg-primary-600 focus:ring-primary-400",
         full && "w-full",
-        children ? "px-4" : "px-2",
         className
       )}
       disabled={disabled}
