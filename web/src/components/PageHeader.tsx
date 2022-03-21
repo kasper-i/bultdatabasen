@@ -2,7 +2,7 @@ import { Resource } from "@/models/resource";
 import { useCounts, useResource } from "@/queries/resourceQueries";
 import { getResourceLabel } from "@/utils/resourceUtils";
 import React, { ReactElement } from "react";
-import Breadcrumbs from "./Breadcrumbs";
+import BackLink from "./BackLink";
 import { Underlined } from "./Underlined";
 
 interface Props {
@@ -23,13 +23,11 @@ const PageHeader = ({
     return <></>;
   }
 
+  const parent = ancestors?.[0];
+
   return (
     <div className="flex flex-col gap-2.5">
-      <Breadcrumbs
-        resourceId={resourceId}
-        resourceName={resource.name ?? ""}
-        ancestors={ancestors}
-      />
+      {parent && <BackLink resource={parent} />}
       <div className="flex flex-col items-start">
         <h1 className="text-3xl font-bold">{resource.name}</h1>
       </div>

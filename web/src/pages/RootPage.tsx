@@ -14,8 +14,11 @@ const RootPage = () => {
 
   return (
     <div className="flex flex-grow flex-col space-y-2.5">
-      <h1 className="text-5xl text-center font-bold">
-        bult<span className="text-green-600 font-normal">databasen</span>
+      <h1 className="text-center text-4xl">
+        <span className="text-transparent font-bold bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400">
+          bult
+        </span>
+        databasen
       </h1>
       <p className="text-lg text-center">
         En databas över borrbultar i klätterområdena{" "}
