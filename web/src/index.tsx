@@ -27,7 +27,7 @@ ReactDOM.render(
   <QueryClientProvider client={queryClient}>
     <Provider store={store}>
       <App />
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
     </Provider>
   </QueryClientProvider>,
   document.getElementById("root")

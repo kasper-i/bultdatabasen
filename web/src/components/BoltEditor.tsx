@@ -4,18 +4,10 @@ import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
 import { clear, selectPointId } from "@/slices/clipboardSlice";
 import { useAppDispatch, useAppSelector } from "@/store";
+import clsx from "clsx";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import IconButton from "./base/IconButton";
-import BoltCircle from "./BoltCircle";
-import Branch from "./graph/Branch";
-import Connector from "./graph/Connector";
-import Edge from "./graph/Edge";
-import Graph from "./graph/Graph";
-import Junction, { Orientation } from "./graph/Junction";
-import Vertex from "./graph/Vertex";
-import PointCard from "./PointCard";
-import Restricted from "./Restricted";
 
 interface Props {
   routeId: string;
@@ -27,10 +19,8 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const { role } = useRole(routeId);
   const copiedPointId = useAppSelector(selectPointId);
   const dispatch = useAppDispatch();
-
-  const createPoint = useAttachPoint(routeId);
-
   const [searchParams, setSearchParams] = useSearchParams();
+  const createPoint = useAttachPoint(routeId);
 
   const changePoint = (pointId: string) => {
     setSearchParams({ p: pointId });
@@ -59,14 +49,6 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
   const editable = role === "owner";
 
-  const getOffset = () => {
-    if (editable) {
-      return (points.length - (selectedPoint?.number ?? 0)) * 112 + 56;
-    } else {
-      return (points.length - (selectedPoint?.number ?? 0)) * 84;
-    }
-  };
-
   const attachPoint = (position?: InsertPosition) => {
     createPoint.mutate({
       pointId: copiedPoint ?? undefined,
@@ -78,7 +60,6 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   };
 
   const copiedPoint = copiedPointId;
-  const attachIcon = copiedPoint != null ? "paste" : "plus";
 
   if (points.length === 0) {
     return (
@@ -107,110 +88,55 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   }
 
   return (
-    <div className="flex items-start">
-      <Graph expandable={editable}>
-        {points
-          .slice()
-          .reverse()
-          .map((point, index) => {
-            const first = index === points.length - 1;
-            const anchor = index === 0;
-            const intermediate = !first && !anchor;
-            const selected = point.id === selectedPointId;
+    <ul className="flex flex-col">
+      {points
+        .slice()
+        .reverse()
+        .map((point, index) => {
+          const first = index === points.length - 1;
+          const anchor = index === 0;
+          const intermediate = !first && !anchor;
+          const selected = point.id === selectedPointId;
 
-            return (
-              <Junction
-                key={point.id}
-                compact={!editable}
-                compressTop={!editable && anchor}
-                compressBottom={!editable && first}
-              >
-                <Vertex>
-                  <BoltCircle
-                    active={selected}
-                    point={point}
-                    onClick={changePoint}
-                    main
+          return (
+            <li key={point.id} className="flex items-start gap-4">
+              <div className="flex flex-col items-start">
+                <div
+                  className="flex items-center cursor-pointer"
+                  onClick={() => changePoint(point.id)}
+                >
+                  <div
+                    className={clsx(
+                      "relative rounded-full h-3 w-3 ring-2 ring-offset-2 ring-offset-gray-100",
+
+                      selected
+                        ? "bg-primary-500 ring-primary-500"
+                        : "bg-gray-100 ring-primary-500"
+                    )}
                   />
-
-                  {(anchor || intermediate) && (
-                    <Connector half orientation={Orientation.SOUTH}>
-                      <Edge main />
-                    </Connector>
-                  )}
-
-                  {(first || intermediate) && (
-                    <Connector half orientation={Orientation.NORTH}>
-                      <Edge main />
-                    </Connector>
-                  )}
-                </Vertex>
-
-                {(first || intermediate) && (
-                  <Vertex orientation={Orientation.NORTH}>
-                    <Restricted>
-                      <IconButton
-                        circular
-                        icon={attachIcon}
-                        onClick={() =>
-                          attachPoint({
-                            pointId: point.id,
-                            order: "after",
-                          })
-                        }
-                      />
-                    </Restricted>
-                  </Vertex>
+                  <div className="ml-4 text-gray-600">
+                    {index === 0 ? (
+                      "Ankare"
+                    ) : (
+                      <span>
+                        Placering
+                        <span className="font-medium text-primary-600 ml-1">
+                          #{points.length - index}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {index !== points.length - 1 && (
+                  <div className="w-3 flex justify-center">
+                    <div className="mx-auto h-10 border-l-4 border-dotted my-0.5 border-primary-500"></div>
+                  </div>
                 )}
-
-                {anchor && (
-                  <Restricted>
-                    <Branch main orientation={Orientation.NORTH}>
-                      <IconButton
-                        circular
-                        icon={attachIcon}
-                        onClick={() =>
-                          attachPoint({
-                            pointId: point.id,
-                            order: "after",
-                          })
-                        }
-                      />
-                    </Branch>
-                  </Restricted>
-                )}
-
-                {first && (
-                  <Restricted>
-                    <Branch main orientation={Orientation.SOUTH}>
-                      <IconButton
-                        circular
-                        icon={attachIcon}
-                        onClick={() =>
-                          attachPoint({
-                            pointId: point.id,
-                            order: "before",
-                          })
-                        }
-                      />
-                    </Branch>
-                  </Restricted>
-                )}
-              </Junction>
-            );
-          })}
-      </Graph>
-      {selectedPoint && (
-        <div
-          style={{
-            marginTop: getOffset(),
-          }}
-          className="w-full bg-white rounded shadow-sm ml-5 mb-5 flex-shrink"
-        >
-          <PointCard point={selectedPoint} routeId={routeId} />
-        </div>
-      )}
-    </div>
+              </div>
+            </li>
+          );
+        })}
+    </ul>
   );
 };
 
