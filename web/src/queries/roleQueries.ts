@@ -20,8 +20,8 @@ export const useRole = (resourceId: string) => {
         return failureCount <= 2;
       },
       enabled: isAuthenticated,
-      staleTime: 1000 * 60 * 15,
-      cacheTime: 1000 * 60 * 15,
+      staleTime: 1000 * 60 * 60,
+      cacheTime: 1000 * 60 * 60,
     }
   );
 
