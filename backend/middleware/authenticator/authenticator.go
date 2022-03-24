@@ -30,7 +30,7 @@ func IsPublic(r *http.Request) bool {
 		case r.URL.Path == "/health":
 			return true
 		case strings.HasPrefix(r.URL.Path, "/resources"):
-			return true
+			return !strings.HasSuffix(r.URL.Path, "/role")
 		case strings.HasPrefix(r.URL.Path, "/areas"):
 			return true
 		case strings.HasPrefix(r.URL.Path, "/crags"):
