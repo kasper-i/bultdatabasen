@@ -12,6 +12,7 @@ import { User } from "@/models/user";
 import { OAuthTokenResponse } from "@/pages/SigninPage";
 import axios from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
+import { cognitoClientId, cognitoUrl } from "./constants";
 import { ResourceRole } from "./models/role";
 
 export interface CreatePointRequest {
@@ -107,14 +108,14 @@ export class Api {
     }
 
     const instance = axios.create({
-      baseURL: "https://bultdatabasen.auth.eu-west-1.amazoncognito.com",
+      baseURL: cognitoUrl,
       timeout: 10000,
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
 
     const params = new URLSearchParams();
     params.append("grant_type", "refresh_token");
-    params.append("client_id", "4bc4eb6q54d9poodouksahhk86");
+    params.append("client_id", cognitoClientId);
     params.append("refresh_token", Api.refreshToken);
 
     await instance.post("/oauth2/token", params).then((response) => {

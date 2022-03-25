@@ -5,6 +5,7 @@ import React, { Fragment, ReactElement, useEffect } from "react";
 import { login } from "@/slices/authSlice";
 import { Api } from "../Api";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { cognitoClientId, cognitoUrl } from "@/constants";
 
 export interface OAuthTokenResponse {
   id_token: string;
@@ -15,7 +16,7 @@ export interface OAuthTokenResponse {
 }
 
 const instance = axios.create({
-  baseURL: "https://bultdatabasen.auth.eu-west-1.amazoncognito.com",
+  baseURL: cognitoUrl,
   timeout: 10000,
   headers: { "Content-Type": "application/x-www-form-urlencoded" },
 });
@@ -49,7 +50,7 @@ function SigninPage(): ReactElement {
 
     const params = new URLSearchParams();
     params.append("grant_type", "authorization_code");
-    params.append("client_id", "4bc4eb6q54d9poodouksahhk86");
+    params.append("client_id", cognitoClientId);
     params.append("code", code);
     params.append(
       "redirect_uri",

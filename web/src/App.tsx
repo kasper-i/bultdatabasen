@@ -12,6 +12,7 @@ import CragPage from "./pages/CragPage";
 import RootPage from "./pages/RootPage";
 import RoutePage from "./pages/RoutePage";
 import SectorPage from "./pages/SectorPage";
+import SignoutPage from "./pages/SignoutPage";
 import TasksPage from "./pages/TasksPage";
 import { login } from "./slices/authSlice";
 import { useAppDispatch } from "./store";
@@ -65,6 +66,7 @@ const App = () => {
       <Routes>
         <Route element={<Main />}>
           <Route path="/signin" element={<SigninPage />} />
+          <Route path="/signout" element={<SignoutPage />} />
           <Route path="/" element={<RootPage />} />
 
           <Route path="area/:resourceId" element={<Page />}>

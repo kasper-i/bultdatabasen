@@ -1,43 +1,43 @@
-import { Api } from "@/Api";
-import { useAppDispatch, useAppSelector } from "@/store";
+import { cognitoClientId, cognitoUrl } from "@/constants";
+import { selectAuthenticated } from "@/slices/authSlice";
+import { useAppSelector } from "@/store";
 import React, { ReactElement } from "react";
-import { logout, selectAuthenticated } from "@/slices/authSlice";
-import { useQueryClient } from "react-query";
 import Button from "./base/Button";
 
 function LoginToolbar(): ReactElement {
   const isAuthenticated = useAppSelector(selectAuthenticated);
-  const dispatch = useAppDispatch();
-  const queryClient = useQueryClient();
 
-  const gotoCognito = () => {
+  const gotoCognitoSignin = () => {
     localStorage.setItem("returnPath", window.location.pathname);
 
     const callback =
       window.location.protocol + "//" + window.location.host + "/signin";
 
-    window.location.href = `https://bultdatabasen.auth.eu-west-1.amazoncognito.com/login?client_id=4bc4eb6q54d9poodouksahhk86&response_type=code&scope=profile+openid&redirect_uri=${callback}`;
+    window.location.href = `${cognitoUrl}/login?client_id=${cognitoClientId}&response_type=code&scope=profile+openid&redirect_uri=${callback}`;
   };
 
-  const signOut = () => {
-    Api.clearTokens();
-    dispatch(logout);
-    queryClient.removeQueries(["role"]);
+  const gotoCognitoSignout = () => {
+    localStorage.setItem("returnPath", window.location.pathname);
+
+    const callback =
+      window.location.protocol + "//" + window.location.host + "/signout";
+
+    window.location.href = `${cognitoUrl}/logout?client_id=${cognitoClientId}&logout_uri=${callback}`;
   };
 
   if (isAuthenticated) {
     return (
-      <Button onClick={() => signOut()} className="ring-offset-gray-900">
+      <Button onClick={gotoCognitoSignout} className="ring-offset-gray-900">
         Logga Ut
       </Button>
     );
+  } else {
+    return (
+      <Button onClick={gotoCognitoSignin} className="ring-offset-gray-900">
+        Logga In
+      </Button>
+    );
   }
-
-  return (
-    <Button onClick={gotoCognito} className="ring-offset-gray-900">
-      Logga In
-    </Button>
-  );
 }
 
 export default LoginToolbar;
