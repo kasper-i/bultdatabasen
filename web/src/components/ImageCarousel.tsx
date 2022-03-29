@@ -11,8 +11,8 @@ import React, {
 } from "react";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import usePrevious from "react-use/lib/usePrevious";
-import IconButton from "./base/IconButton";
-import Loader from "./base/Loader";
+import IconButton from "./atoms/IconButton";
+import Loader from "./atoms/Loader";
 
 interface FullSizeImageProps {
   image: Image;

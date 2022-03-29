@@ -1,10 +1,11 @@
 import { Image, ImageRotation } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import moment from "moment";
-import React, { ReactElement, useState } from "react";
-import IconButton from "./base/IconButton";
-import DeletePrompt from "./DeletePrompt";
+import React, { ReactElement } from "react";
+import IconButton from "./atoms/IconButton";
 import { ImageView } from "./ImageView";
+import ConfirmedDeleteButton from "./molecules/ConfirmedDeleteButton";
+import Pill from "./Pill";
 import Restricted from "./Restricted";
 
 interface Props {
@@ -24,12 +25,6 @@ const ImageThumbnail = ({
 }: Props): ReactElement => {
   const deleteImage = useDeleteImage(pointId, image.id);
   const updateImage = useUpdateImage(pointId, image.id);
-  const [deleteRequested, setDeleteRequested] = useState(false);
-
-  const confirmDelete = () => {
-    setDeleteRequested(false);
-    deleteImage.mutate();
-  };
 
   const timestamp = moment(image.timestamp);
   const year: number = timestamp.year();
@@ -38,7 +33,7 @@ const ImageThumbnail = ({
     <ImageView
       image={image}
       targetHeight={TARGET_HEIGHT}
-      className="rounded cursor-pointer"
+      className="rounded-sm shadow-sm cursor-pointer"
       onClick={() => onClick?.(image.id)}
       version="sm"
     >
@@ -49,15 +44,10 @@ const ImageThumbnail = ({
         <Restricted>
           <div className="absolute opacity-70 bg-white h-full w-full bottom-0 left-0 right-0"></div>
           <div className="absolute h-full w-full bottom-0 left-0 right-0 flex flex-col justify-center items-center px-2 gap-1.5">
-            <IconButton
-              color="danger"
+            <ConfirmedDeleteButton
               circular
-              icon="trash"
-              loading={deleteImage.isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                setDeleteRequested(true);
-              }}
+              mutation={deleteImage}
+              target="bilden"
             />
             <IconButton
               color="primary"
@@ -74,14 +64,6 @@ const ImageThumbnail = ({
             />
           </div>
         </Restricted>
-      )}
-      {deleteRequested && (
-        <DeletePrompt
-          onCancel={() => setDeleteRequested(false)}
-          onConfirm={() => {
-            confirmDelete();
-          }}
-        />
       )}
     </ImageView>
   );

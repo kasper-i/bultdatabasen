@@ -1,4 +1,4 @@
-import Icon from "@/components/base/Icon";
+import Icon from "@/components/atoms/Icon";
 import BoltEditor from "@/components/BoltEditor";
 import PageHeader from "@/components/PageHeader";
 import { Underlined } from "@/components/Underlined";

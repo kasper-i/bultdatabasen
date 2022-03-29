@@ -7,7 +7,8 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import clsx from "clsx";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import IconButton from "./base/IconButton";
+import IconButton from "./atoms/IconButton";
+import PointCard from "./PointCard";
 
 interface Props {
   routeId: string;
@@ -36,10 +37,6 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
     if (pointId !== null) {
       setSelectedPointId(pointId);
-    } else {
-      setSelectedPointId(
-        points.length > 0 ? points[points.length - 1].id : undefined
-      );
     }
   }, [selectedPointId, points]);
 
@@ -100,30 +97,44 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
           return (
             <li key={point.id} className="flex items-start gap-4">
-              <div className="flex flex-col items-start">
+              <div className="flex flex-col items-start w-full">
                 <div
-                  className="flex items-center cursor-pointer"
+                  className="flex items-center cursor-pointer w-full"
                   onClick={() => changePoint(point.id)}
                 >
                   <div
                     className={clsx(
-                      "relative rounded-full h-3 w-3 ring-2 ring-offset-2 ring-offset-gray-100",
-
+                      "relative rounded-full h-3 w-3 ring-2 ring-offset-2 ring-offset-gray-100 mr-4",
                       selected
                         ? "bg-primary-500 ring-primary-500"
                         : "bg-gray-100 ring-primary-500"
                     )}
                   />
-                  <div className="ml-4 text-gray-600">
-                    {index === 0 ? (
-                      "Ankare"
-                    ) : (
-                      <span>
-                        Placering
-                        <span className="font-medium text-primary-600 ml-1">
-                          #{points.length - index}
+                  <div className={clsx("relative w-full text-gray-600")}>
+                    <div
+                      className={clsx(
+                        "text-gray-600",
+                        selectedPointId && "opacity-50"
+                      )}
+                    >
+                      {index === 0 ? (
+                        "Ankare"
+                      ) : (
+                        <span>
+                          Placering
+                          <span className="font-medium text-primary-600 ml-1">
+                            #{points.length - index}
+                          </span>
                         </span>
-                      </span>
+                      )}
+                    </div>
+
+                    {point.id === selectedPointId && (
+                      <div className="z-10 absolute top-0 left-0 right-0 pb-4">
+                        <div className="bg-white shadow-sm border border-gray-300 border-t-4 border-t-primary-500">
+                          <PointCard point={point} routeId={routeId} />
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>

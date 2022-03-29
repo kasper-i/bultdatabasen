@@ -1,6 +1,6 @@
-import Button from "@/components/base/Button";
-import Icon from "@/components/base/Icon";
-import IconButton from "@/components/base/IconButton";
+import Button from "@/components/atoms/Button";
+import Icon from "@/components/atoms/Icon";
+import IconButton from "@/components/atoms/IconButton";
 import { Task, TaskStatus } from "@/models/task";
 import { useDeleteTask, useUpdateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";

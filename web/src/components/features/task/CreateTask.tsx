@@ -1,5 +1,5 @@
-import Button from "@/components/base/Button";
-import Input from "@/components/base/Input";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
 import { useCreateTask } from "@/queries/taskQueries";
 import React, { ReactElement, useState } from "react";
 import Restricted from "../../Restricted";
