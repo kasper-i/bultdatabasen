@@ -98,13 +98,11 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
           return (
             <li key={point.id} className="flex items-start gap-4">
               <div className="flex flex-col items-start w-full">
-                <div
-                  className="flex items-center cursor-pointer w-full"
-                  onClick={() => changePoint(point.id)}
-                >
+                <div className="flex items-center w-full">
                   <div
+                    onClick={() => changePoint(point.id)}
                     className={clsx(
-                      "relative rounded-full h-3 w-3 ring-2 ring-offset-2 ring-offset-gray-100 mr-4",
+                      "relative cursor-pointer rounded-full h-3 w-3 ring-2 ring-offset-2 ring-offset-gray-100 mr-4",
                       selected
                         ? "bg-primary-500 ring-primary-500"
                         : "bg-gray-100 ring-primary-500"
@@ -112,9 +110,10 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
                   />
                   <div className={clsx("relative w-full text-gray-600")}>
                     <div
+                      onClick={() => changePoint(point.id)}
                       className={clsx(
-                        "text-gray-600",
-                        selectedPointId && "opacity-50"
+                        "cursor-pointer text-gray-600",
+                        selectedPointId && "opacity-20"
                       )}
                     >
                       {index === 0 ? (
@@ -131,9 +130,7 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
                     {point.id === selectedPointId && (
                       <div className="z-10 absolute top-0 left-0 right-0 pb-4">
-                        <div className="bg-white shadow-sm border border-gray-300 border-t-4 border-t-primary-500">
-                          <PointCard point={point} routeId={routeId} />
-                        </div>
+                        <PointCard point={point} routeId={routeId} />
                       </div>
                     )}
                   </div>

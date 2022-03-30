@@ -94,7 +94,9 @@ export const ImageView = ({
         width: width,
       }}
     >
-      <Loader active={loading} />
+      <div className="absolute inset-0 flex justify-center items-center">
+        <Loader active={loading} />
+      </div>
       <div className="absolute" style={innerStyle}>
         <img
           ref={imgRef}

@@ -9,14 +9,14 @@ export const Concatenator: FC<{ className?: string }> = ({
   return (
     <>
       {Children.map(Children.toArray(children), (child, index) => (
-        <span>
+        <>
           <span className={className}>{child}</span>
-          {count > 2 && index === count - 2
+          {count > 1 && index === count - 2
             ? " och "
             : index !== count - 1
             ? ", "
             : ""}
-        </span>
+        </>
       ))}
     </>
   );

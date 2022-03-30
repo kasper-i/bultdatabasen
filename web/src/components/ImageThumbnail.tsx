@@ -15,7 +15,7 @@ interface Props {
   onClick?: (imageId: string) => void;
 }
 
-const TARGET_HEIGHT = 120;
+const TARGET_HEIGHT = 80;
 
 const ImageThumbnail = ({
   pointId,
@@ -26,20 +26,14 @@ const ImageThumbnail = ({
   const deleteImage = useDeleteImage(pointId, image.id);
   const updateImage = useUpdateImage(pointId, image.id);
 
-  const timestamp = moment(image.timestamp);
-  const year: number = timestamp.year();
-
   return (
     <ImageView
       image={image}
       targetHeight={TARGET_HEIGHT}
-      className="rounded-sm shadow-sm cursor-pointer"
+      className="rounded-sm cursor-pointer ring-2 ring-gray-200 hover:ring-2 hover:ring-primary-500 ring-offset-2"
       onClick={() => onClick?.(image.id)}
       version="sm"
     >
-      <div className="absolute z-10 left-0 top-0 bg-gray-300 rounded-sm p-1 text-xs -m-1.5 font-bold text-gray-800">
-        {year}
-      </div>
       {!locked && (
         <Restricted>
           <div className="absolute opacity-70 bg-white h-full w-full bottom-0 left-0 right-0"></div>

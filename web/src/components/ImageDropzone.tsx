@@ -36,7 +36,7 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
   });
 
   return (
-    <div className="flex flex-col justify-start w-full h-[120px]">
+    <div className="flex flex-col w-full">
       {progress ? (
         <Progress percent={progress} />
       ) : (
