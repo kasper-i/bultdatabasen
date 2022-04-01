@@ -9,6 +9,7 @@ import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import IconButton from "./atoms/IconButton";
 import PointCard from "./PointCard";
+import PointWizard from "./PointWizard";
 
 interface Props {
   routeId: string;
@@ -24,8 +25,13 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
   const createPoint = useAttachPoint(routeId);
 
   const changePoint = (pointId: string) => {
-    setSearchParams({ p: pointId });
-    setSelectedPointId(pointId);
+    if (pointId === selectedPointId) {
+      setSearchParams({});
+      setSelectedPointId(undefined);
+    } else {
+      setSearchParams({ p: pointId });
+      setSelectedPointId(pointId);
+    }
   };
 
   useEffect(() => {
@@ -130,7 +136,11 @@ const BoltEditor = ({ points, routeId }: Props): ReactElement => {
 
                     {point.id === selectedPointId && (
                       <div className="z-10 absolute top-0 left-0 right-0 pb-4">
-                        <PointCard point={point} routeId={routeId} />
+                        {false ? (
+                          <PointCard point={point} routeId={routeId} />
+                        ) : (
+                          <PointWizard point={point} routeId={routeId} />
+                        )}
                       </div>
                     )}
                   </div>
