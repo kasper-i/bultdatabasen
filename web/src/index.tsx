@@ -9,6 +9,7 @@ import { Api } from "./Api";
 import App from "./App";
 import "./index.css";
 import { store } from "./store";
+import { createRoot } from "react-dom/client";
 
 Api.restoreTokens();
 
@@ -23,12 +24,17 @@ createAuthRefreshInterceptor(axios, refreshAuthLogic);
 
 const queryClient = new QueryClient();
 
-ReactDOM.render(
-  <QueryClientProvider client={queryClient}>
-    <Provider store={store}>
-      <App />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </Provider>
-  </QueryClientProvider>,
-  document.getElementById("root")
-);
+const container = document.getElementById("root");
+
+if (container !== null) {
+  const root = createRoot(container);
+
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <App />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </Provider>
+    </QueryClientProvider>
+  );
+}
