@@ -63,7 +63,10 @@ function PointCard({ point, routeId }: Props): ReactElement {
           )}
         </div>
         <Restricted>
-          <ConfirmedDeleteButton mutation={deletePoint} target="punkten" />
+          <ConfirmedDeleteButton
+            mutation={deletePoint}
+            target={`#${point.number}`}
+          />
         </Restricted>
       </div>
 

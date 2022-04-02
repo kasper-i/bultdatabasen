@@ -1,10 +1,8 @@
 import { InsertPosition } from "@/Api";
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
-import IconButton from "@/components/atoms/IconButton";
-import RadioGroup, { Option } from "@/components/atoms/RadioGroup";
 import { Switch } from "@/components/atoms/Switch";
-import { Bolt, BoltType } from "@/models/bolt";
+import { Bolt } from "@/models/bolt";
 import { useAttachPoint } from "@/queries/pointQueries";
 import React, { ReactElement, useEffect, useState } from "react";
 import BoltDetails from "./BoltDetails";
@@ -40,12 +38,15 @@ function PointWizard({
         },
       ])
   );
-
-  useEffect(() => {
-    if (isAnchor && bolts.length === 1) {
+  const toggleAnchor = (state: boolean) => {
+    if (state && bolts.length === 1) {
       addRightBolt();
+    } else {
+      removeBolt(1);
     }
-  }, [isAnchor]);
+
+    setIsAnchor(state);
+  };
 
   useEffect(() => {
     if (createPoint.isSuccess) {
@@ -89,7 +90,7 @@ function PointWizard({
 
   return (
     <div>
-      <Switch enabled={isAnchor} onChange={setIsAnchor} label="Ankare" />
+      <Switch enabled={isAnchor} onChange={toggleAnchor} label="Ankare" />
       <p className="mt-4 mb-1 font-medium">Bultar</p>
       <div className="flex flex-wrap gap-4 mb-4">
         {bolts.map(([index, bolt]) => (

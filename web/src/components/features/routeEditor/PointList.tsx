@@ -15,7 +15,7 @@ const Line: FC<{ short?: boolean }> = ({ short }) => {
   return (
     <div
       className={clsx(
-        "mx-auto border-l-4 border-dotted border-primary-500",
+        "mx-auto border-l-2 border-dotted border-primary-400",
         short ? "h-2.5" : "h-10"
       )}
     ></div>

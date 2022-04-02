@@ -47,7 +47,12 @@ const ConfirmedDeleteButton = ({ mutation, target, ...buttonProps }: Props) => {
             <Button icon="cancel" onClick={abortDelete}>
               Avbryt
             </Button>
-            <Button color="danger" onClick={confirmDelete} icon="trash">
+            <Button
+              outlined
+              color="danger"
+              onClick={confirmDelete}
+              icon="trash"
+            >
               Radera
             </Button>
           </div>
