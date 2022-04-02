@@ -14,6 +14,7 @@ export interface ButtonProps {
   circular?: boolean;
   disabled?: boolean;
   full?: boolean;
+  outlined?: boolean;
 }
 
 const Button: FC<ButtonProps> = ({
@@ -25,17 +26,33 @@ const Button: FC<ButtonProps> = ({
   loading,
   disabled,
   full,
+  outlined,
 }) => {
+  const solidStyle = () => {
+    return [
+      disabled
+        ? "bg-gray-400"
+        : color === "danger"
+        ? "bg-red-500 hover:bg-red-600 focus:ring-red-400"
+        : "bg-primary-500 hover:bg-primary-600 focus:ring-primary-400",
+      "text-white",
+    ];
+  };
+
+  const outlinedStyle = () => {
+    return disabled
+      ? "border-2 border-gray-400"
+      : color === "danger"
+      ? "text-red-500 border-2 border-red-500 hover:border-red-600 hover:text-red-600 focus:ring-red-400"
+      : "text-primary-500 border-2 border-primary-500 hover:border-primary-600 hover:text-primary-600 focus:ring-primary-400";
+  };
+
   return (
     <button
       onClick={onClick}
       className={clsx(
-        "relative flex justify-center items-center py-1.5 px-3 gap-1.5 border border-transparent text-sm shadow-sm rounded-md font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
-        disabled
-          ? "bg-gray-400"
-          : color === "danger"
-          ? "bg-red-500 hover:bg-red-600 focus:ring-red-400"
-          : "bg-primary-500 hover:bg-primary-600 focus:ring-primary-400",
+        "relative flex justify-center items-center py-1.5 px-3 gap-1.5 text-sm shadow-sm rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
+        outlined ? outlinedStyle() : solidStyle(),
         full && "w-full",
         className
       )}

@@ -1,25 +1,34 @@
 import { Switch as HeadlessSwitch } from "@headlessui/react";
+import clsx from "clsx";
 import React from "react";
 
 interface Props {
   enabled: boolean;
   onChange: (enabled: boolean) => void;
+  label: string;
 }
 
-export const Switch = ({ enabled, onChange }: Props) => {
+export const Switch = ({ enabled, onChange, label }: Props) => {
   return (
-    <HeadlessSwitch
-      checked={enabled}
-      onChange={onChange}
-      className={`${enabled ? "bg-primary-900" : "bg-primary-700"}
-          relative inline-flex flex-shrink-0 h-[38px] w-[74px] border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus-visible:ring-2  focus-visible:ring-white focus-visible:ring-opacity-75`}
-    >
-      <span className="sr-only">Use setting</span>
-      <span
-        aria-hidden="true"
-        className={`${enabled ? "translate-x-9" : "translate-x-0"}
-            pointer-events-none inline-block h-[34px] w-[34px] rounded-full bg-white shadow-lg transform ring-0 transition ease-in-out duration-200`}
-      />
-    </HeadlessSwitch>
+    <HeadlessSwitch.Group>
+      <div className="flex items-center">
+        <HeadlessSwitch
+          checked={enabled}
+          onChange={onChange}
+          className={clsx(
+            enabled ? "bg-primary-500" : "bg-gray-300",
+            "relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400"
+          )}
+        >
+          <span
+            className={clsx(
+              enabled ? "translate-x-6" : "translate-x-1",
+              "absolute inline-block w-4 h-4 transform bg-white rounded-full transition-transform"
+            )}
+          />
+        </HeadlessSwitch>
+        <HeadlessSwitch.Label className="ml-2">{label}</HeadlessSwitch.Label>
+      </div>
+    </HeadlessSwitch.Group>
   );
 };

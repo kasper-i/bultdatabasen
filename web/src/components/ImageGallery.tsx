@@ -2,7 +2,7 @@ import { Image } from "@/models/image";
 import { PhotographIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
 import moment from "moment";
-import React, { useMemo, useState } from "react";
+import React, { Fragment, useMemo, useState } from "react";
 import { ImageCarousel } from "./ImageCarousel";
 import ImageThumbnail from "./ImageThumbnail";
 
@@ -40,6 +40,10 @@ const ImageGallery = ({ images, pointId, locked, className }: Props) => {
   const years = Array.from(imagesByYear.keys());
 
   years.sort().reverse();
+
+  if (images.length === 0) {
+    return <Fragment />;
+  }
 
   return (
     <div className={clsx("w-full flex flex-col", className)}>

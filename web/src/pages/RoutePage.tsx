@@ -1,5 +1,4 @@
-import Icon from "@/components/atoms/Icon";
-import BoltEditor from "@/components/BoltEditor";
+import PointEditor from "@/components/features/routeEditor/PointEditor";
 import PageHeader from "@/components/PageHeader";
 import { Underlined } from "@/components/Underlined";
 import { useUnsafeParams } from "@/hooks/common";
@@ -51,7 +50,7 @@ const RoutePage = (): ReactElement => {
       </div>
 
       <div className="mt-5">
-        <BoltEditor routeId={resourceId} points={points.data} />
+        <PointEditor routeId={resourceId} points={points.data} />
       </div>
     </div>
   );

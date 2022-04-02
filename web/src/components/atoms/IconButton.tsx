@@ -13,6 +13,7 @@ export interface IconButtonProps {
   loading?: boolean;
   circular?: boolean;
   disabled?: boolean;
+  tiny?: boolean;
 }
 
 const IconButton: FC<IconButtonProps> = ({
@@ -23,20 +24,35 @@ const IconButton: FC<IconButtonProps> = ({
   loading,
   circular,
   disabled,
+  tiny,
 }) => {
+  const regularStyle = () => {
+    return [
+      "relative flex justify-center items-center py-2 px-2 border border-transparent text-sm shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
+      disabled
+        ? "bg-gray-400"
+        : color === "danger"
+        ? "bg-red-500 hover:bg-red-600 focus:ring-red-400"
+        : "bg-primary-500 hover:bg-primary-600 focus:ring-primary-400",
+      circular ? "rounded-full" : "rounded-md",
+    ];
+  };
+
+  const tinyStyle = () => {
+    return [
+      "relative flex justify-center items-center focus:outline-none",
+      disabled
+        ? "text-gray-400"
+        : color === "danger"
+        ? "text-red-500"
+        : "text-primary-500",
+    ];
+  };
+
   return (
     <button
       onClick={onClick}
-      className={clsx(
-        "relative flex justify-center items-center py-2 px-2 border border-transparent text-sm shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
-        disabled
-          ? "bg-gray-400"
-          : color === "danger"
-          ? "bg-red-500 hover:bg-red-600 focus:ring-red-400"
-          : "bg-primary-500 hover:bg-primary-600 focus:ring-primary-400",
-        circular ? "rounded-full" : "rounded-md",
-        className
-      )}
+      className={clsx(tiny ? tinyStyle() : regularStyle(), className)}
       disabled={disabled}
     >
       <Icon name={icon} className={clsx(loading && "invisible")} />

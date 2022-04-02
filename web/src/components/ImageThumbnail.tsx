@@ -36,14 +36,16 @@ const ImageThumbnail = ({
     >
       {!locked && (
         <Restricted>
-          <div className="absolute opacity-70 bg-white h-full w-full bottom-0 left-0 right-0"></div>
-          <div className="absolute h-full w-full bottom-0 left-0 right-0 flex flex-col justify-center items-center px-2 gap-1.5">
+          <div className="absolute opacity-60 bg-white h-full w-full bottom-0 left-0 right-0"></div>
+          <div className="absolute h-full w-full bottom-0 left-0 right-0 flex flex-col justify-center items-center px-2 gap-2">
             <ConfirmedDeleteButton
               circular
               mutation={deleteImage}
               target="bilden"
+              tiny
             />
             <IconButton
+              tiny
               color="primary"
               circular
               icon="redo"
