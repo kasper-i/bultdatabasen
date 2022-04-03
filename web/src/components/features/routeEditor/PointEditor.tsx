@@ -56,7 +56,6 @@ const PointEditor = ({ points, routeId }: Props): ReactElement => {
             routeId={routeId}
             onCancel={() => setOpenInitialWizard(false)}
             onDone={(pointId) => {
-              console.log("created", pointId);
               setOpenInitialWizard(false);
               changePoint(pointId);
             }}

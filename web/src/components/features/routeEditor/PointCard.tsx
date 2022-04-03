@@ -10,7 +10,7 @@ import { Point } from "@/models/point";
 import { useBolts } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
-import React, { ReactElement, useEffect, useRef, useState } from "react";
+import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 
 interface Props {
@@ -22,13 +22,8 @@ function PointCard({ point, routeId }: Props): ReactElement {
   const deletePoint = useDetachPoint(routeId, point.id);
   const images = useImages(point.id);
   const bolts = useBolts(point.id);
-  const ref = useRef<HTMLDivElement>(null);
 
   const [imagesLocked, setImagesLocked] = useState(false);
-
-  useEffect(() => {
-    ref.current?.scrollIntoView(false);
-  }, []);
 
   const sharedParents = point.parents.filter((parent) => parent.id !== routeId);
 
@@ -70,7 +65,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
         </Restricted>
       </div>
 
-      <div className="flex flex-wrap gap-5 py-5">
+      <div className="flex flex-wrap gap-4 py-5">
         {bolts.data?.map((bolt) => (
           <BoltDetails
             key={bolt.id}

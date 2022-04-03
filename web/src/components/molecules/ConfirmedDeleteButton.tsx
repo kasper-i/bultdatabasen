@@ -7,7 +7,7 @@ import Modal from "../atoms/Modal";
 
 type Props = Omit<IconButtonProps, "icon" | "color" | "loading" | "onClick"> & {
   mutation: UseMutationResult<void, unknown, void, unknown>;
-  target?: string;
+  target: string;
 };
 
 const ConfirmedDeleteButton = ({ mutation, target, ...buttonProps }: Props) => {
@@ -38,10 +38,10 @@ const ConfirmedDeleteButton = ({ mutation, target, ...buttonProps }: Props) => {
       {deleteRequested && (
         <Modal
           onClose={abortDelete}
-          title={`Vill du radera ${target ?? "objektet"}?`}
-          description={`${
-            target ? capitalizeFirstLetter(target) : "Objektet"
-          } kommer att flyttas till papperskorgen.`}
+          title={`Vill du radera ${target}?`}
+          description={`${capitalizeFirstLetter(
+            target
+          )} kommer att flyttas till papperskorgen.`}
         >
           <div className="flex gap-2">
             <Button icon="cancel" onClick={abortDelete}>

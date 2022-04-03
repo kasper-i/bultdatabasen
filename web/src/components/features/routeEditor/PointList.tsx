@@ -38,18 +38,10 @@ const PointListRoot: FC<{
       )}
 
       {Children.map(Children.toArray(children), (child, index) => {
-        let position: "first" | "last" | "intermediate" = "intermediate";
-
-        if (index === 0) {
-          position = "last";
-        } else if (index === count - 1) {
-          position = "first";
-        }
-
         return (
           <div className="flex flex-col items-start w-full">
             {child}
-            {count > 1 && position !== "first" && (
+            {count > 1 && index !== count - 1 && (
               <Tunnel>
                 {expandable ? (
                   <>
