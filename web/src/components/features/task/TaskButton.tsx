@@ -1,4 +1,4 @@
-import IconButton from "@/components/base/IconButton";
+import IconButton from "@/components/atoms/IconButton";
 import Pill from "@/components/Pill";
 import { useTasks } from "@/queries/taskQueries";
 import React, { ReactElement } from "react";
