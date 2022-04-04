@@ -6,6 +6,7 @@ import ImageDropzone from "@/components/ImageDropzone";
 import ImageGallery from "@/components/ImageGallery";
 import ConfirmedDeleteButton from "@/components/molecules/ConfirmedDeleteButton";
 import Restricted from "@/components/Restricted";
+import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
 import { useBolts } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
@@ -68,13 +69,16 @@ function PointCard({ point, routeId }: Props): ReactElement {
       </div>
 
       <div className="flex flex-wrap gap-4 py-5">
-        {bolts.data?.map((bolt) => (
-          <BoltDetails
-            key={bolt.id}
-            bolt={bolt}
-            totalNumberOfBolts={bolts.data.length}
-          />
-        ))}
+        {bolts.data
+          ?.slice()
+          ?.sort((b1: Bolt) => (b1.position === "left" ? -1 : 1))
+          ?.map((bolt) => (
+            <BoltDetails
+              key={bolt.id}
+              bolt={bolt}
+              totalNumberOfBolts={bolts.data.length}
+            />
+          ))}
       </div>
 
       <div className="flex items-center w-full py-2.5 gap-2">
