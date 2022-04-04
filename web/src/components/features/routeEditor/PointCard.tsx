@@ -31,7 +31,9 @@ function PointCard({ point, routeId }: Props): ReactElement {
     <div>
       <div className="flex justify-between">
         <div>
-          <span className="text-4xl font-bold">#{point.number}</span>
+          <span className="text-3xl font-medium">
+            {point.anchor ? "Ankare" : `Ledbult #${point.number}`}
+          </span>
 
           {sharedParents.length > 0 && (
             <div className="fle flex-wrap space-x-1">

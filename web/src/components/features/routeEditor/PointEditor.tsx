@@ -106,17 +106,16 @@ const PointEditor = ({ points, routeId }: Props): ReactElement => {
         .map((point, index) => {
           const selected = point.id === selectedPointId;
 
-          const label =
-            index === 0 ? (
-              "Ankare"
-            ) : (
-              <span>
-                Ledbult
-                <span className="font-medium text-primary-600 ml-1">
-                  #{points.length - index}
-                </span>
+          const label = point.anchor ? (
+            "Ankare"
+          ) : (
+            <span>
+              Ledbult
+              <span className="font-medium text-primary-600 ml-1">
+                #{points.length - index}
               </span>
-            );
+            </span>
+          );
 
           if (insertPosition && insertPosition.pointId === point.id) {
             return (
