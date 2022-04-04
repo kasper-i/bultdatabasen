@@ -9,6 +9,7 @@ type Bolt struct {
 	ResourceBase
 	Type     *string `json:"type,omitempty"`
 	ParentID string  `gorm:"->" json:"parentId"`
+	Position *string `json:"position,omitempty"`
 }
 
 func (Bolt) TableName() string {

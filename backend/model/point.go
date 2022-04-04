@@ -11,6 +11,7 @@ type Point struct {
 	ResourceBase
 	Parents []Parent `gorm:"-" json:"parents"`
 	Number  int      `gorm:"-" json:"number"`
+	Anchor  bool     `json:"anchor"`
 }
 
 type InsertPosition struct {
@@ -187,7 +188,7 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 	return sess.sortPoints(resourceID, pointsMap)
 }
 
-func (sess Session) AttachPoint(routeID string, pointID *string, position *InsertPosition, bolts []Bolt) (*Point, error) {
+func (sess Session) AttachPoint(routeID string, pointID *string, position *InsertPosition, anchor bool, bolts []Bolt) (*Point, error) {
 	var err error
 	var point *Point = &Point{}
 	var pointResource *Resource
@@ -237,6 +238,7 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 			}
 		} else {
 			point.ID = uuid.Must(uuid.NewRandom()).String()
+			point.Anchor = anchor
 
 			resource := Resource{
 				ResourceBase: point.ResourceBase,

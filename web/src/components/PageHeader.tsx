@@ -3,7 +3,6 @@ import { useCounts, useResource } from "@/queries/resourceQueries";
 import { getResourceLabel } from "@/utils/resourceUtils";
 import React, { ReactElement } from "react";
 import BackLink from "./BackLink";
-import TaskButton from "./features/task/TaskButton";
 import { Underlined } from "./Underlined";
 
 interface Props {
