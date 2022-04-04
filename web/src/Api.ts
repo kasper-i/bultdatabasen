@@ -15,11 +15,16 @@ import jwtDecode, { JwtPayload } from "jwt-decode";
 import { cognitoClientId, cognitoUrl } from "./constants";
 import { ResourceRole } from "./models/role";
 
-export interface CreatePointRequest {
-  pointId?: string;
-  position?: InsertPosition;
-  bolts?: Pick<Bolt, "type">[];
-}
+export type CreatePointRequest =
+  | {
+      pointId: string;
+      position?: InsertPosition;
+    }
+  | {
+      position?: InsertPosition;
+      anchor: Point["anchor"];
+      bolts?: Pick<Bolt, "type" | "position">[];
+    };
 
 export interface InsertPosition {
   pointId: string;

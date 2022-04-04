@@ -58,6 +58,7 @@ function PointWizard({
     createPoint.mutate({
       pointId: undefined,
       position,
+      anchor: isAnchor,
       bolts: bolts.map(([_, bolt]) => bolt),
     });
   };

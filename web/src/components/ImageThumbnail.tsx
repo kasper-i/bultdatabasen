@@ -1,11 +1,9 @@
 import { Image, ImageRotation } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
-import moment from "moment";
 import React, { ReactElement } from "react";
 import IconButton from "./atoms/IconButton";
 import { ImageView } from "./ImageView";
 import ConfirmedDeleteButton from "./molecules/ConfirmedDeleteButton";
-import Pill from "./Pill";
 import Restricted from "./Restricted";
 
 interface Props {
