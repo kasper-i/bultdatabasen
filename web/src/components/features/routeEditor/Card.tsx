@@ -1,6 +1,7 @@
+import clsx from "clsx";
 import React, { FC, useEffect, useRef } from "react";
 
-export const Card: FC = ({ children }) => {
+export const Card: FC<{ dashed?: boolean }> = ({ children, dashed }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -12,13 +13,20 @@ export const Card: FC = ({ children }) => {
   }, []);
 
   return (
-    <div
-      ref={ref}
-      className="bg-white shadow-sm flex flex-col items-start text-black"
-    >
-      <div className="w-full h-1 bg-primary-500"></div>
-      <div className="border border-gray-300 border-t-0 flex flex-col w-full p-4">
-        {children}
+    <div className="w-full h-0 relative">
+      <div className="absolute z-10 left-0 top-0 right-0 pb-4">
+        <div ref={ref}>
+          <div
+            className={clsx(
+              "shadow-sm rounded-md w-full p-4",
+              dashed
+                ? "border-2 border-gray-300 border-dashed bg-gray-100"
+                : "border border-gray-300 bg-white"
+            )}
+          >
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

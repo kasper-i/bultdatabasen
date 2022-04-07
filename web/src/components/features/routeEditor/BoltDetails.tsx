@@ -44,7 +44,7 @@ const BoltDetails = ({
             totalNumberOfBolts === 1 ? undefined : bolt.position
           )}
         </p>
-        {bolt.position === "right" && (
+        {onRemove && (
           <IconButton tiny onClick={onRemove} icon="trash" color="danger" />
         )}
       </div>
