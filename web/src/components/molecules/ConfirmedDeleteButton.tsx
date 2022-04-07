@@ -1,4 +1,3 @@
-import { capitalizeFirstLetter } from "@/utils/common";
 import React, { useState } from "react";
 import { UseMutationResult } from "react-query";
 import Button from "../atoms/Button";
@@ -38,21 +37,14 @@ const ConfirmedDeleteButton = ({ mutation, target, ...buttonProps }: Props) => {
       {deleteRequested && (
         <Modal
           onClose={abortDelete}
-          title={`Vill du radera ${target}?`}
-          description={`${capitalizeFirstLetter(
-            target
-          )} kommer att flyttas till papperskorgen.`}
+          title={`Bekräfta borttagning`}
+          description={`Vill du flytta ${target.toLocaleLowerCase()} till papperskorgen?`}
         >
           <div className="flex gap-2">
             <Button icon="cancel" onClick={abortDelete}>
               Avbryt
             </Button>
-            <Button
-              outlined
-              color="danger"
-              onClick={confirmDelete}
-              icon="trash"
-            >
+            <Button color="danger" onClick={confirmDelete} icon="trash">
               Radera
             </Button>
           </div>

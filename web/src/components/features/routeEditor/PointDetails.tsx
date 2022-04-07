@@ -13,13 +13,15 @@ import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
 import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
+import { PointLabel } from "./hooks";
 
 interface Props {
   point: Point;
   routeId: string;
+  label: PointLabel;
 }
 
-function PointCard({ point, routeId }: Props): ReactElement {
+function PointDetails({ point, routeId, label }: Props): ReactElement {
   const deletePoint = useDetachPoint(routeId, point.id);
   const images = useImages(point.id);
   const bolts = useBolts(point.id);
@@ -32,8 +34,10 @@ function PointCard({ point, routeId }: Props): ReactElement {
     <div>
       <div className="flex justify-between">
         <div>
-          <span className="text-3xl font-medium">
-            {point.anchor ? "Ankare" : `Ledbult #${point.number}`}
+          <span className="text-2xl">
+            <span>
+              {label.name} <span className="font-bold">#{label.no}</span>
+            </span>
           </span>
 
           {sharedParents.length > 0 && (
@@ -63,7 +67,7 @@ function PointCard({ point, routeId }: Props): ReactElement {
         <Restricted>
           <ConfirmedDeleteButton
             mutation={deletePoint}
-            target={`#${point.number}`}
+            target={`${label.name} #${label.no}`}
           />
         </Restricted>
       </div>
@@ -110,4 +114,4 @@ function PointCard({ point, routeId }: Props): ReactElement {
   );
 }
 
-export default PointCard;
+export default PointDetails;

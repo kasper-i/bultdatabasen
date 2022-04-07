@@ -1,29 +1,27 @@
-import { InsertPosition } from "@/Api";
+import { CreatePointRequest, InsertPosition } from "@/Api";
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
 import { Switch } from "@/components/atoms/Switch";
 import { Bolt } from "@/models/bolt";
-import { useAttachPoint } from "@/queries/pointQueries";
-import React, { ReactElement, useEffect, useState } from "react";
+import { Point } from "@/models/point";
+import React, { ReactElement, useState } from "react";
+import { UseMutationResult } from "react-query";
 import BoltDetails from "./BoltDetails";
 
 interface Props {
-  routeId: string;
+  mutation: UseMutationResult<Point, unknown, CreatePointRequest, unknown>;
   hint?: "anchor";
   position?: InsertPosition;
   onCancel: () => void;
-  onDone: (pointId: string) => void;
 }
 
 function PointWizard({
-  routeId,
+  mutation,
   hint,
   position,
   onCancel,
-  onDone,
 }: Props): ReactElement {
   const [isAnchor, setIsAnchor] = useState(hint === "anchor");
-  const createPoint = useAttachPoint(routeId);
 
   const [bolts, setBolts] = useState<
     [number, Pick<Bolt, "type" | "position">][]
@@ -48,14 +46,8 @@ function PointWizard({
     setIsAnchor(state);
   };
 
-  useEffect(() => {
-    if (createPoint.isSuccess) {
-      onDone(createPoint.data.id);
-    }
-  }, [createPoint.isSuccess]);
-
   const attachPoint = () => {
-    createPoint.mutate({
+    mutation.mutate({
       pointId: undefined,
       position,
       anchor: isAnchor,
@@ -92,13 +84,17 @@ function PointWizard({
   return (
     <div>
       <Switch enabled={isAnchor} onChange={toggleAnchor} label="Ankare" />
+
       <p className="mt-4 mb-1 font-medium">Bultar</p>
+
       <div className="flex flex-wrap gap-4 mb-4">
         {bolts.map(([index, bolt]) => (
           <BoltDetails
             key={index}
             bolt={bolt}
-            onRemove={() => removeBolt(index)}
+            onRemove={
+              bolt.position === "right" ? () => removeBolt(index) : undefined
+            }
             onChange={(bolt) => updateBolt(index, bolt)}
             totalNumberOfBolts={bolts.length}
           />
@@ -125,7 +121,7 @@ function PointWizard({
         <Button onClick={onCancel} outlined>
           Avbryt
         </Button>
-        <Button onClick={attachPoint} loading={createPoint.isLoading}>
+        <Button onClick={attachPoint} loading={mutation.isLoading}>
           Lägg till
         </Button>
       </div>

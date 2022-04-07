@@ -1,12 +1,14 @@
 import { InsertPosition } from "@/Api";
 import { Point } from "@/models/point";
+import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import IconButton from "../../atoms/IconButton";
 import { Card } from "./Card";
-import PointCard from "./PointCard";
-import { PointList } from "./PointList";
+import { usePointLabeler } from "./hooks";
+import PointDetails from "./PointDetails";
+import { Entry, PointNavigator } from "./PointNavigator";
 import PointWizard from "./PointWizard";
 
 interface Props {
@@ -18,15 +20,29 @@ const PointEditor = ({ points, routeId }: Props): ReactElement => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [insertPosition, setInsertPosition] = useState<InsertPosition>();
   const [openInitialWizard, setOpenInitialWizard] = useState(false);
+  const createPoint = useAttachPoint(routeId);
+
   const { role } = useRole(routeId);
 
   const selectedPointId = searchParams.get("p");
+
+  useEffect(() => {
+    const { data, isSuccess } = createPoint;
+
+    if (isSuccess) {
+      setInsertPosition(undefined);
+      setOpenInitialWizard(false);
+      changePoint(data.id);
+    }
+  }, [createPoint.isSuccess]);
 
   useEffect(() => {
     if (!points.some((point) => point.id === selectedPointId)) {
       deselectPoint();
     }
   }, [points]);
+
+  const pointLabeler = usePointLabeler(points);
 
   const changePoint = (pointId: string) => {
     setInsertPosition(undefined);
@@ -51,14 +67,10 @@ const PointEditor = ({ points, routeId }: Props): ReactElement => {
       <div className="p-4 border-2 border-gray-300 border-dashed rounded-md">
         {openInitialWizard ? (
           <PointWizard
+            mutation={createPoint}
             hint="anchor"
             position={insertPosition}
-            routeId={routeId}
             onCancel={() => setOpenInitialWizard(false)}
-            onDone={(pointId) => {
-              setOpenInitialWizard(false);
-              changePoint(pointId);
-            }}
           />
         ) : (
           <div className="flex flex-col items-center justify-center">
@@ -87,76 +99,76 @@ const PointEditor = ({ points, routeId }: Props): ReactElement => {
     );
   }
 
-  const dimmed = selectedPointId !== null;
+  const hideLabels = selectedPointId !== null || insertPosition !== undefined;
+
+  const selectedPoint = points.find((point) => point.id === selectedPointId);
+
+  const entries = points
+    .slice()
+    .reverse()
+    .map<Entry>((point) => {
+      const selected = point.id === selectedPointId;
+
+      const { name, no } = pointLabeler(point.id);
+
+      return {
+        pointId: point.id,
+        label: (
+          <p>
+            {name}
+            <span className="font-medium text-primary-600 ml-1">#{no}</span>
+          </p>
+        ),
+        selected,
+        onClick: () => changePoint(point.id),
+      };
+    });
+
+  const renderCard = () => {
+    if (insertPosition) {
+      return (
+        <Card dashed>
+          <PointWizard
+            mutation={createPoint}
+            position={insertPosition}
+            onCancel={() => setInsertPosition(undefined)}
+          />
+        </Card>
+      );
+    }
+
+    if (selectedPoint) {
+      return (
+        <Card>
+          <PointDetails
+            point={selectedPoint}
+            label={pointLabeler(selectedPoint.id)}
+            routeId={routeId}
+          />
+        </Card>
+      );
+    }
+
+    return null;
+  };
 
   return (
-    <PointList
+    <PointNavigator
       expandable={role === "owner"}
-      onExpand={(index, order) => {
+      onExpand={(pointId, order) => {
         deselectPoint();
         setInsertPosition({
-          pointId: points[points.length - 1 - index].id,
+          pointId,
           order,
         });
       }}
+      entries={entries}
+      contentPointId={insertPosition ? insertPosition.pointId : selectedPointId}
+      position={insertPosition?.order}
+      hideLabels={hideLabels}
     >
-      {points
-        .slice()
-        .reverse()
-        .map((point, index) => {
-          const selected = point.id === selectedPointId;
-
-          const label = point.anchor ? (
-            "Ankare"
-          ) : (
-            <span>
-              Ledbult
-              <span className="font-medium text-primary-600 ml-1">
-                #{points.length - index}
-              </span>
-            </span>
-          );
-
-          if (insertPosition && insertPosition.pointId === point.id) {
-            return (
-              <PointList.Entry
-                key={point.id}
-                label={label}
-                selected={false}
-                position={insertPosition.order === "after" ? "above" : "below"}
-              >
-                <Card>
-                  <PointWizard
-                    position={insertPosition}
-                    routeId={routeId}
-                    onCancel={() => setInsertPosition(undefined)}
-                    onDone={(pointId) => {
-                      setInsertPosition(undefined);
-                      changePoint(pointId);
-                    }}
-                  />
-                </Card>
-              </PointList.Entry>
-            );
-          } else {
-            return (
-              <PointList.Entry
-                key={point.id}
-                label={label}
-                onClick={() => changePoint(point.id)}
-                selected={selected}
-                dimmed={dimmed}
-              >
-                {selected && (
-                  <Card>
-                    <PointCard point={point} routeId={routeId} />
-                  </Card>
-                )}
-              </PointList.Entry>
-            );
-          }
-        })}
-    </PointList>
+      {renderCard()}
+    </PointNavigator>
   );
 };
 
