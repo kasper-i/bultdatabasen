@@ -4,7 +4,6 @@ import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { usePrevious } from "react-use";
 import IconButton from "../../atoms/IconButton";
 import { Card } from "./Card";
 import { usePointLabeler } from "./hooks";
