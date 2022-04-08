@@ -1,10 +1,9 @@
 import { Image, ImageRotation } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
-import moment from "moment";
-import React, { ReactElement, useState } from "react";
-import IconButton from "./base/IconButton";
-import DeletePrompt from "./DeletePrompt";
+import React, { ReactElement } from "react";
+import IconButton from "./atoms/IconButton";
 import { ImageView } from "./ImageView";
+import ConfirmedDeleteButton from "./molecules/ConfirmedDeleteButton";
 import Restricted from "./Restricted";
 
 interface Props {
@@ -14,7 +13,7 @@ interface Props {
   onClick?: (imageId: string) => void;
 }
 
-const TARGET_HEIGHT = 120;
+const TARGET_HEIGHT = 80;
 
 const ImageThumbnail = ({
   pointId,
@@ -24,42 +23,27 @@ const ImageThumbnail = ({
 }: Props): ReactElement => {
   const deleteImage = useDeleteImage(pointId, image.id);
   const updateImage = useUpdateImage(pointId, image.id);
-  const [deleteRequested, setDeleteRequested] = useState(false);
-
-  const confirmDelete = () => {
-    setDeleteRequested(false);
-    deleteImage.mutate();
-  };
-
-  const timestamp = moment(image.timestamp);
-  const year: number = timestamp.year();
 
   return (
     <ImageView
       image={image}
       targetHeight={TARGET_HEIGHT}
-      className="rounded cursor-pointer"
+      className="rounded-sm cursor-pointer ring-2 ring-gray-200 hover:ring-2 hover:ring-primary-500 ring-offset-2"
       onClick={() => onClick?.(image.id)}
       version="sm"
     >
-      <div className="absolute z-10 left-0 top-0 bg-gray-300 rounded-sm p-1 text-xs -m-1.5 font-bold text-gray-800">
-        {year}
-      </div>
       {!locked && (
         <Restricted>
-          <div className="absolute opacity-70 bg-white h-full w-full bottom-0 left-0 right-0"></div>
-          <div className="absolute h-full w-full bottom-0 left-0 right-0 flex flex-col justify-center items-center px-2 gap-1.5">
-            <IconButton
-              color="danger"
+          <div className="absolute opacity-60 bg-white h-full w-full bottom-0 left-0 right-0"></div>
+          <div className="absolute h-full w-full bottom-0 left-0 right-0 flex flex-col justify-center items-center px-2 gap-2">
+            <ConfirmedDeleteButton
               circular
-              icon="trash"
-              loading={deleteImage.isLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                setDeleteRequested(true);
-              }}
+              mutation={deleteImage}
+              target="bilden"
+              tiny
             />
             <IconButton
+              tiny
               color="primary"
               circular
               icon="redo"
@@ -74,14 +58,6 @@ const ImageThumbnail = ({
             />
           </div>
         </Restricted>
-      )}
-      {deleteRequested && (
-        <DeletePrompt
-          onCancel={() => setDeleteRequested(false)}
-          onConfirm={() => {
-            confirmDelete();
-          }}
-        />
       )}
     </ImageView>
   );

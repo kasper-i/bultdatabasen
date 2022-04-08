@@ -2,7 +2,7 @@ import configData from "@/config.json";
 import { Image, ImageVersion } from "@/models/image";
 import clsx from "clsx";
 import React, { CSSProperties, ReactNode, useReducer, useRef } from "react";
-import Loader from "./base/Loader";
+import Loader from "./atoms/Loader";
 
 interface Props {
   image: Image;
@@ -94,7 +94,9 @@ export const ImageView = ({
         width: width,
       }}
     >
-      <Loader active={loading} />
+      <div className="absolute inset-0 flex justify-center items-center">
+        <Loader active={loading} />
+      </div>
       <div className="absolute" style={innerStyle}>
         <img
           ref={imgRef}

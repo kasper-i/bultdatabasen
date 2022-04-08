@@ -2,7 +2,7 @@ import { cognitoClientId, cognitoUrl } from "@/constants";
 import { selectAuthenticated } from "@/slices/authSlice";
 import { useAppSelector } from "@/store";
 import React, { ReactElement } from "react";
-import Button from "./base/Button";
+import Button from "./atoms/Button";
 
 function LoginToolbar(): ReactElement {
   const isAuthenticated = useAppSelector(selectAuthenticated);

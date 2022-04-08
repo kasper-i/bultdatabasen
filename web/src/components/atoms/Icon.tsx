@@ -7,6 +7,7 @@ import {
   ExternalLinkIcon,
   LockClosedIcon,
   LockOpenIcon,
+  PhotographIcon,
   PlusIcon,
   TrashIcon,
   UploadIcon,
@@ -51,6 +52,8 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return DuplicateIcon;
       case "home":
         return HomeIcon;
+      case "image":
+        return PhotographIcon;
       case "redo":
       case "wrench":
       default:

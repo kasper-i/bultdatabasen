@@ -2,7 +2,7 @@ import { Resource } from "@/models/resource";
 import React, { Fragment, ReactElement, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRightIcon } from "@heroicons/react/solid";
-import Icon from "./base/Icon";
+import Icon from "./atoms/Icon";
 import { getResourceRoute } from "@/utils/resourceUtils";
 
 interface Props {

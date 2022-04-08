@@ -11,8 +11,8 @@ import React, {
 } from "react";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import usePrevious from "react-use/lib/usePrevious";
-import IconButton from "./base/IconButton";
-import Loader from "./base/Loader";
+import IconButton from "./atoms/IconButton";
+import Loader from "./atoms/Loader";
 
 interface FullSizeImageProps {
   image: Image;
@@ -200,8 +200,8 @@ export const ImageCarousel = ({
 
   return (
     <>
-      <div className="fixed top-0 left-0 h-screen w-screen bg-black opacity-80"></div>
-      <div className="fixed top-0 left-0 h-screen w-screen flex justify-center items-center">
+      <div className="fixed inset-0 bg-black opacity-80"></div>
+      <div className="fixed z-50 inset-0 flex justify-center items-center">
         <FullSizeImage
           image={images[index]}
           version="xl"

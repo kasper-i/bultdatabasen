@@ -2,8 +2,8 @@ import { Api } from "@/Api";
 import React, { ReactElement, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useQueryClient } from "react-query";
-import Icon from "./base/Icon";
-import Progress from "./base/Progress";
+import Icon from "./atoms/Icon";
+import Progress from "./atoms/Progress";
 
 interface Props {
   pointId: string;
@@ -36,7 +36,7 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
   });
 
   return (
-    <div className="flex flex-col justify-start w-full h-[120px]">
+    <div className="flex flex-col w-full">
       {progress ? (
         <Progress percent={progress} />
       ) : (

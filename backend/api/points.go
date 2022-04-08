@@ -13,6 +13,7 @@ import (
 type CreatePointRequest struct {
 	PointID  *string               `json:"pointId"`
 	Position *model.InsertPosition `json:"position"`
+	Anchor   bool                  `json:"anchor"`
 	Bolts    []model.Bolt          `json:"bolts"`
 }
 
@@ -61,7 +62,7 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	point, err := sess.AttachPoint(routeID, request.PointID, request.Position, request.Bolts)
+	point, err := sess.AttachPoint(routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
 
 	if err != nil {
 		utils.WriteError(w, err)

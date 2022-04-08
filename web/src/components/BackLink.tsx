@@ -2,7 +2,7 @@ import { Resource } from "@/models/resource";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import React from "react";
 import { Link } from "react-router-dom";
-import Icon from "./base/Icon";
+import Icon from "./atoms/Icon";
 
 interface Props {
   resource: Resource;
