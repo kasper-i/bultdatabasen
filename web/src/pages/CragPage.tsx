@@ -20,7 +20,10 @@ const CragPage = (): ReactElement => {
         ancestors={crag.data.ancestors}
         showCounts
       />
-      <ChildrenTable resourceId={resourceId} />
+      <ChildrenTable
+        resourceId={resourceId}
+        filters={{ types: ["sector", "route"] }}
+      />
     </div>
   );
 };
