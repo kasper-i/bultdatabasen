@@ -20,7 +20,7 @@ const SectorPage = (): ReactElement => {
         ancestors={sector.data.ancestors}
         showCounts
       />
-      <ChildrenTable resourceId={resourceId} />
+      <ChildrenTable resourceId={resourceId} filters={{ types: ["route"] }} />
     </div>
   );
 };

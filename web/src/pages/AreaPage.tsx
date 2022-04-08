@@ -20,7 +20,10 @@ const AreaPage = (): ReactElement => {
         ancestors={area.data.ancestors}
         showCounts
       />
-      <ChildrenTable resourceId={resourceId} />
+      <ChildrenTable
+        resourceId={resourceId}
+        filters={{ types: ["area", "crag", "route"] }}
+      />
     </div>
   );
 };
