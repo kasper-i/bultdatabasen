@@ -45,6 +45,7 @@ func (sess Session) CreateArea(area *Area, parentResourceID string, userID strin
 
 	resource := Resource{
 		ResourceBase: area.ResourceBase,
+		Name:         &area.Name,
 		Type:         "area",
 		ParentID:     &parentResourceID,
 	}
