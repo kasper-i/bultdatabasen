@@ -16,6 +16,10 @@ const renderRouteType = (routeType: RouteType) => {
       return "Tradled";
     case "partially_bolted":
       return "Mixled";
+    case "top_rope":
+      return "Topprepsled";
+    case "aid":
+      return "Aidled";
   }
 };
 
