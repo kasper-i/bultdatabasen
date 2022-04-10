@@ -13,10 +13,15 @@ import PointWizard from "./PointWizard";
 
 interface Props {
   routeId: string;
+  routeParentId: string;
   points: Point[];
 }
 
-const PointEditor = ({ points, routeId }: Props): ReactElement => {
+const PointEditor = ({
+  points,
+  routeId,
+  routeParentId,
+}: Props): ReactElement => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [insertPosition, setInsertPosition] = useState<InsertPosition>();
   const [openInitialWizard, setOpenInitialWizard] = useState(false);
@@ -71,6 +76,9 @@ const PointEditor = ({ points, routeId }: Props): ReactElement => {
             hint="anchor"
             position={insertPosition}
             onCancel={() => setOpenInitialWizard(false)}
+            routeId={routeId}
+            routeParentId={routeParentId}
+            illegalPoints={points.map((point) => point.id)}
           />
         ) : (
           <div className="flex flex-col items-center justify-center">
@@ -132,6 +140,9 @@ const PointEditor = ({ points, routeId }: Props): ReactElement => {
             mutation={createPoint}
             position={insertPosition}
             onCancel={() => setInsertPosition(undefined)}
+            routeId={routeId}
+            routeParentId={routeParentId}
+            illegalPoints={points.map((point) => point.id)}
           />
         </Card>
       );

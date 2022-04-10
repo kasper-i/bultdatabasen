@@ -7,12 +7,16 @@ import { Point } from "@/models/point";
 import React, { ReactElement, useState } from "react";
 import { UseMutationResult } from "react-query";
 import BoltDetails from "./BoltDetails";
+import PointPicker from "./PointPicker";
 
 interface Props {
   mutation: UseMutationResult<Point, unknown, CreatePointRequest, unknown>;
   hint?: "anchor";
   position?: InsertPosition;
   onCancel: () => void;
+  routeId: string;
+  routeParentId: string;
+  illegalPoints: string[];
 }
 
 function PointWizard({
@@ -20,7 +24,12 @@ function PointWizard({
   hint,
   position,
   onCancel,
+  routeId,
+  routeParentId,
+  illegalPoints,
 }: Props): ReactElement {
+  const [mergeMode, setMergeMode] = useState(false);
+  const [selectedPointId, setSelectedPointId] = useState<string>();
   const [isAnchor, setIsAnchor] = useState(hint === "anchor");
 
   const [bolts, setBolts] = useState<
@@ -47,12 +56,16 @@ function PointWizard({
   };
 
   const attachPoint = () => {
-    mutation.mutate({
-      pointId: undefined,
-      position,
-      anchor: isAnchor,
-      bolts: bolts.map(([_, bolt]) => bolt),
-    });
+    mutation.mutate(
+      selectedPointId
+        ? { pointId: selectedPointId, position }
+        : {
+            pointId: undefined,
+            position,
+            anchor: isAnchor,
+            bolts: bolts.map(([_, bolt]) => bolt),
+          }
+    );
   };
 
   const addRightBolt = () => {
@@ -83,46 +96,74 @@ function PointWizard({
 
   return (
     <div>
-      <Switch enabled={isAnchor} onChange={toggleAnchor} label="Ankare" />
+      {!mergeMode && (
+        <button
+          className="text-primary-500 underline mb-4"
+          onClick={() => setMergeMode((mode) => !mode)}
+        >
+          Anslut till närliggande led
+        </button>
+      )}
 
-      <p className="mt-4 mb-1 font-medium">Bultar</p>
+      {mergeMode ? (
+        <PointPicker
+          targetRouteId={routeId}
+          targetRouteParentId={routeParentId}
+          illegalPoints={illegalPoints}
+          value={selectedPointId}
+          onSelect={setSelectedPointId}
+        />
+      ) : (
+        <>
+          <Switch enabled={isAnchor} onChange={toggleAnchor} label="Ankare" />
 
-      <div className="flex flex-wrap gap-4 mb-4">
-        {bolts.map(([index, bolt]) => (
-          <BoltDetails
-            key={index}
-            bolt={bolt}
-            onRemove={
-              bolt.position === "right" ? () => removeBolt(index) : undefined
-            }
-            onChange={(bolt) => updateBolt(index, bolt)}
-            totalNumberOfBolts={bolts.length}
-          />
-        ))}
-        {bolts.length < 2 && (
-          <div
-            key="new"
-            className="h-24 w-28 border-2 border-gray-300 border-dashed rounded-md flex justify-center items-center"
-          >
-            <div className="text-center" onClick={addRightBolt}>
-              <Icon
-                big
-                name="plus"
-                className="cursor-pointer text-primary-500"
+          <p className="mt-4 mb-1 font-medium">Bultar</p>
+
+          <div className="flex flex-wrap gap-4">
+            {bolts.map(([index, bolt]) => (
+              <BoltDetails
+                key={index}
+                bolt={bolt}
+                onRemove={
+                  bolt.position === "right"
+                    ? () => removeBolt(index)
+                    : undefined
+                }
+                onChange={(bolt) => updateBolt(index, bolt)}
+                totalNumberOfBolts={bolts.length}
               />
-              <p className="cursor-pointer text-gray-700 text-sm">
-                Lägg till en högerbult
-              </p>
-            </div>
+            ))}
+            {bolts.length < 2 && (
+              <div
+                key="new"
+                className="h-24 w-28 border-2 border-gray-300 border-dashed rounded-md flex justify-center items-center"
+              >
+                <div className="text-center" onClick={addRightBolt}>
+                  <Icon
+                    big
+                    name="plus"
+                    className="cursor-pointer text-primary-500"
+                  />
+                  <p className="cursor-pointer text-gray-700 text-sm">
+                    Lägg till en högerbult
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      <div className="flex justify-start gap-2 w-full">
+        </>
+      )}
+
+      <div className="flex justify-start gap-2 w-full mt-4">
         <Button onClick={onCancel} outlined>
           Avbryt
         </Button>
-        <Button onClick={attachPoint} loading={mutation.isLoading}>
-          Lägg till
+        <Button
+          onClick={attachPoint}
+          loading={mutation.isLoading}
+          disabled={mergeMode && selectedPointId === undefined}
+        >
+          {mergeMode ? "Sammanfoga" : "Lägg till ny"}
         </Button>
       </div>
     </div>
