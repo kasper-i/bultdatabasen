@@ -15,7 +15,7 @@ interface Props<T> {
   noOptionsText?: string;
 }
 
-export const Combobox = <T extends any>({
+export function Combobox<T>({
   label,
   value,
   options,
@@ -23,7 +23,7 @@ export const Combobox = <T extends any>({
   displayValue,
   disabled,
   noOptionsText,
-}: Props<T>) => {
+}: Props<T>) {
   const [query, setQuery] = useState("");
 
   const filteredOptions =
@@ -39,13 +39,13 @@ export const Combobox = <T extends any>({
   const renderOptions = () => {
     if (options.length === 0) {
       return (
-        <div className="cursor-default select-none relative py-2 px-4 text-gray-700">
+        <div className="cursor-default select-none py-2 px-4 text-gray-700">
           {noOptionsText}
         </div>
       );
     } else if (filteredOptions.length === 0) {
       return (
-        <div className="cursor-default select-none relative py-2 px-4 text-gray-700">
+        <div className="cursor-default select-none py-2 px-4 text-gray-700">
           Inga träffar
         </div>
       );
@@ -96,40 +96,38 @@ export const Combobox = <T extends any>({
   };
 
   return (
-    <div>
-      <HeadlessCombobox value={value} onChange={onSelect} disabled={disabled}>
-        <HeadlessCombobox.Label className="block text-sm font-medium text-gray-700 mb-1">
-          {label}
-        </HeadlessCombobox.Label>
-        <div className="relative">
-          <HeadlessCombobox.Button className="w-full">
-            <HeadlessCombobox.Input
-              displayValue={displayValue}
-              onChange={(event) => setQuery(event.target.value)}
-              className="relative focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[34px]"
+    <HeadlessCombobox value={value} onChange={onSelect} disabled={disabled}>
+      <HeadlessCombobox.Label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </HeadlessCombobox.Label>
+      <div className="relative">
+        <HeadlessCombobox.Button className="w-full">
+          <HeadlessCombobox.Input
+            displayValue={displayValue}
+            onChange={(event) => setQuery(event.target.value)}
+            className="relative focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[34px]"
+          />
+          <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+            <SelectorIcon
+              className="w-5 h-5 text-gray-400"
+              aria-hidden="true"
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <SelectorIcon
-                className="w-5 h-5 text-gray-400"
-                aria-hidden="true"
-              />
-            </div>
-          </HeadlessCombobox.Button>
-          <Transition
-            as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-            afterLeave={() => setQuery("")}
-          >
-            <div className="absolute z-50 w-full">
-              <HeadlessCombobox.Options className="w-full mt-2 mb-4 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm text-sm">
-                {renderOptions()}
-              </HeadlessCombobox.Options>
-            </div>
-          </Transition>
-        </div>
-      </HeadlessCombobox>
-    </div>
+          </div>
+        </HeadlessCombobox.Button>
+        <Transition
+          as={Fragment}
+          leave="transition ease-in duration-100"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+          afterLeave={() => setQuery("")}
+        >
+          <div className="absolute z-50 w-full">
+            <HeadlessCombobox.Options className="w-full mt-2 mb-4 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
+              {renderOptions()}
+            </HeadlessCombobox.Options>
+          </div>
+        </Transition>
+      </div>
+    </HeadlessCombobox>
   );
-};
+}

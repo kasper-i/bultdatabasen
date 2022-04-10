@@ -154,7 +154,7 @@ function PointWizard({
         </>
       )}
 
-      <div className="flex justify-start gap-2 w-full mt-4">
+      <div className="flex gap-2 w-full mt-4">
         <Button onClick={onCancel} outlined>
           Avbryt
         </Button>
