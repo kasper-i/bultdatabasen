@@ -48,7 +48,6 @@ const PointPicker = ({
           }
           onSelect={(route) => {
             onSelect(undefined);
-            console.log("selecting route", route);
             setSelectedRoute(route);
           }}
           displayValue={(route) => route.name}
