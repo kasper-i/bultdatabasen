@@ -152,6 +152,21 @@ func (sess Session) sortPoints(routeID string, pointsMap map[string]*Point) ([]*
 	return orderedPoints, nil
 }
 
+func (sess Session) getPoint(pointID string) (*Point, error) {
+	var point Point
+
+	if err := sess.DB.Raw(`SELECT * FROM point LEFT JOIN resource ON point.id = resource.id WHERE point.id = ?`, pointID).
+		Scan(&point).Error; err != nil {
+		return nil, err
+	}
+
+	if point.ID == "" {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return &point, nil
+}
+
 func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 	var pointsMap map[string]*Point = make(map[string]*Point)
 	var points []*Point = make([]*Point, 0)
@@ -231,7 +246,11 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 
 	err = sess.Transaction(func(sess Session) error {
 		if pointID != nil {
-			point.ID = *pointID
+			if details, err := sess.getPoint(*pointID); err != nil {
+				return err
+			} else {
+				point = details
+			}
 
 			if err := sess.addFosterParent(*pointResource, routeID); err != nil {
 				return err

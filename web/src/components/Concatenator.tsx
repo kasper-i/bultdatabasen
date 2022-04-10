@@ -1,4 +1,4 @@
-import React, { Children, FC } from "react";
+import React, { Children, FC, Fragment } from "react";
 
 export const Concatenator: FC<{ className?: string }> = ({
   children,
@@ -8,15 +8,15 @@ export const Concatenator: FC<{ className?: string }> = ({
 
   return (
     <>
-      {Children.map(Children.toArray(children), (child, index) => (
-        <>
+      {Children.map(children, (child, index) => (
+        <Fragment key={index}>
           <span className={className}>{child}</span>
           {count > 1 && index === count - 2
             ? " och "
             : index !== count - 1
             ? ", "
             : ""}
-        </>
+        </Fragment>
       ))}
     </>
   );

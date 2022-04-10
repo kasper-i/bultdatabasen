@@ -2,6 +2,10 @@ import { Resource } from "@/models/resource";
 import { useQuery, useQueryClient } from "react-query";
 import { Api } from "../Api";
 
+export const useRoutes = (resourceId: string) => {
+  return useQuery(["routes", { resourceId }], () => Api.getRoutes(resourceId));
+};
+
 export const useRoute = (routeId: string) => {
   const queryClient = useQueryClient();
 
