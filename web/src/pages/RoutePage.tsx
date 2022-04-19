@@ -16,6 +16,10 @@ const renderRouteType = (routeType: RouteType) => {
       return "Tradled";
     case "partially_bolted":
       return "Mixled";
+    case "top_rope":
+      return "Topprepsled";
+    case "aid":
+      return "Aidled";
   }
 };
 
@@ -34,7 +38,7 @@ const RoutePage = (): ReactElement => {
     return <Fragment />;
   }
 
-  const { routeType, year, length } = route.data;
+  const { routeType, parentId, year, length } = route.data;
 
   return (
     <div className="flex flex-col">
@@ -50,7 +54,11 @@ const RoutePage = (): ReactElement => {
       </div>
 
       <div className="mt-5">
-        <PointEditor routeId={resourceId} points={points.data} />
+        <PointEditor
+          routeId={resourceId}
+          routeParentId={parentId}
+          points={points.data}
+        />
       </div>
     </div>
   );

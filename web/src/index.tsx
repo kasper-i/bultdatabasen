@@ -21,7 +21,13 @@ const refreshAuthLogic = async (failedRequest?: any) => {
 
 createAuthRefreshInterceptor(axios, refreshAuthLogic);
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: !import.meta.env.DEV,
+    },
+  },
+});
 
 const container = document.getElementById("root");
 

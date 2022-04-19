@@ -1,6 +1,11 @@
 import { ResourceBase } from "./resource";
 
-export type RouteType = "sport" | "traditional" | "partially_bolted";
+export type RouteType =
+  | "sport"
+  | "traditional"
+  | "partially_bolted"
+  | "top_rope"
+  | "aid";
 
 export type Route = Omit<ResourceBase, "name"> & {
   name: string;

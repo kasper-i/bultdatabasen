@@ -4,8 +4,8 @@ import { Bolt, BoltPosition, BoltType } from "@/models/bolt";
 import React from "react";
 
 const typeOptions: Option<BoltType>[] = [
-  { value: "expansion", label: "Expander" },
-  { value: "glue", label: "Limbult" },
+  { key: "expansion", value: "expansion", label: "Expander" },
+  { key: "glue", value: "glue", label: "Limbult" },
 ];
 
 const positionToLabel = (position?: BoltPosition) => {

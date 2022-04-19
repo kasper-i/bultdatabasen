@@ -257,6 +257,16 @@ export class Api {
     return result.data as Route;
   };
 
+  static getRoutes = async (resourceId: string): Promise<Route[]> => {
+    const endpoint = `/resources/${resourceId}/routes`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Route[];
+  };
+
   static searchResources = async (
     searchTerm?: string
   ): Promise<SearchResult[]> => {

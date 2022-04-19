@@ -51,6 +51,7 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 
 	resource := Resource{
 		ResourceBase: route.ResourceBase,
+		Name:         &route.Name,
 		Type:         "route",
 		ParentID:     &parentResourceID,
 	}

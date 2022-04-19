@@ -97,7 +97,7 @@ function Search() {
                   value={resource}
                   className={({ active }) =>
                     clsx(
-                      `cursor-default select-none relative py-2 pl-4 pr-4`,
+                      `cursor-default select-none relative py-2 px-4`,
                       active ? "bg-primary-500 text-white" : "text-black",
                       index !== results.length - 1 && "border-b border-gray-300"
                     )
