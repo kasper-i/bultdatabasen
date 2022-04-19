@@ -21,6 +21,7 @@ export const PointNavigator: FC<{
   contentPointId: string | null;
   position?: "before" | "after";
   hideLabels?: boolean;
+  children: ReactNode;
 }> = ({
   children,
   expandable,

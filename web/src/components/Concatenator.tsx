@@ -1,9 +1,9 @@
-import React, { Children, FC, Fragment } from "react";
+import React, { Children, FC, Fragment, ReactNode } from "react";
 
-export const Concatenator: FC<{ className?: string }> = ({
-  children,
-  className,
-}) => {
+export const Concatenator: FC<{
+  children: ReactNode[];
+  className?: string;
+}> = ({ children, className }) => {
   const count = Children.count(children);
 
   return (
