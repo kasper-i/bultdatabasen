@@ -1,10 +1,12 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { FC, Fragment } from "react";
+import { ReactNode } from "react";
 
 const Modal: FC<{
   onClose: () => void;
   title: string;
   description: string;
+  children: ReactNode;
 }> = ({ children, onClose, title, description }) => {
   return (
     <Transition appear show as={Fragment}>

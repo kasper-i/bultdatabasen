@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "react-query";
 import { Api } from "../Api";
 
 export const useAreas = (areaId?: string) =>
-  useQuery(areaId != null ? ["areas", { areaId }] : "areas", () =>
+  useQuery(areaId !== undefined ? ["areas", { areaId }] : ["areas"], () =>
     Api.getAreas(areaId)
   );
 

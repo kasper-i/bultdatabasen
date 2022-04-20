@@ -1,5 +1,4 @@
-import { useId } from "@react-aria/utils";
-import React from "react";
+import React, { useId } from "react";
 
 export interface Option<T> {
   value: T;

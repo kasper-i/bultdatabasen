@@ -26,7 +26,7 @@ const App = () => {
   const onFocus = () => {
     if (Api.isExpired()) {
       Api.refreshTokens();
-      queryClient.refetchQueries({ active: true });
+      queryClient.refetchQueries({ type: "active" });
     }
   };
 

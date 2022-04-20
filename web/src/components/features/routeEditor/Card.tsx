@@ -1,7 +1,10 @@
 import clsx from "clsx";
-import React, { FC, useEffect, useRef } from "react";
+import React, { FC, ReactNode, useEffect, useRef } from "react";
 
-export const Card: FC<{ dashed?: boolean }> = ({ children, dashed }) => {
+export const Card: FC<{ dashed?: boolean; children: ReactNode }> = ({
+  children,
+  dashed,
+}) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

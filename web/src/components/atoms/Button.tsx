@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import React, { FC } from "react";
+import React, { FC, ReactNode } from "react";
 import { Dots } from "react-activity";
 import "react-activity/dist/Dots.css";
 import Icon from "./Icon";
@@ -15,6 +15,7 @@ export interface ButtonProps {
   disabled?: boolean;
   full?: boolean;
   outlined?: boolean;
+  children: ReactNode;
 }
 
 const Button: FC<ButtonProps> = ({

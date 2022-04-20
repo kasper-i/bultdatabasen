@@ -15,7 +15,7 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
   const queryClient = useQueryClient();
 
   const onDrop = useCallback(
-    async (acceptedFiles) => {
+    async (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 1) {
         try {
           await Api.uploadImage(pointId, acceptedFiles[0], setProgress);
