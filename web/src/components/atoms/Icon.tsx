@@ -13,6 +13,7 @@ import {
   UploadIcon,
   XCircleIcon,
   XIcon,
+  PlusCircleIcon,
 } from "@heroicons/react/outline";
 import { HomeIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
@@ -46,6 +47,8 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return ClipboardIcon;
       case "plus":
         return PlusIcon;
+      case "add":
+        return PlusCircleIcon;
       case "external":
         return ExternalLinkIcon;
       case "copy":

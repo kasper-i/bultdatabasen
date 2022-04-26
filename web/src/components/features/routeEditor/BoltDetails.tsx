@@ -15,7 +15,7 @@ const positionToLabel = (position?: BoltPosition) => {
     case "right":
       return "Höger";
     default:
-      return "Ledbult";
+      return "Bultinfo";
   }
 };
 

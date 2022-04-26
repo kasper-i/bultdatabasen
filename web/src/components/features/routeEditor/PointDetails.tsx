@@ -19,9 +19,10 @@ interface Props {
   point: Point;
   routeId: string;
   label: PointLabel;
+  onClose: () => void;
 }
 
-function PointDetails({ point, routeId, label }: Props): ReactElement {
+function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   const deletePoint = useDetachPoint(routeId, point.id);
   const images = useImages(point.id);
   const bolts = useBolts(point.id);
@@ -34,7 +35,7 @@ function PointDetails({ point, routeId, label }: Props): ReactElement {
     <div>
       <div className="flex justify-between">
         <div>
-          <span className="text-2xl">
+          <span className="text-2xl cursor-pointer" onClick={onClose}>
             <span>
               {label.name} <span className="font-bold">#{label.no}</span>
             </span>
