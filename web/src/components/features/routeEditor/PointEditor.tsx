@@ -1,14 +1,15 @@
 import { InsertPosition } from "@/Api";
+import Icon from "@/components/atoms/Icon";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
-import React, { ReactElement, useEffect, useState } from "react";
+import clsx from "clsx";
+import React, { FC, ReactElement, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import IconButton from "../../atoms/IconButton";
 import { Card } from "./Card";
 import { usePointLabeler } from "./hooks";
 import PointDetails from "./PointDetails";
-import { Entry, PointNavigator } from "./PointNavigator";
 import PointWizard from "./PointWizard";
 
 interface Props {
@@ -107,79 +108,114 @@ const PointEditor = ({
     );
   }
 
-  const hideLabels = selectedPointId !== null || insertPosition !== undefined;
-
   const selectedPoint = points.find((point) => point.id === selectedPointId);
+  const editable = role === "owner";
 
-  const entries = points
-    .slice()
-    .reverse()
-    .map<Entry>((point) => {
-      const selected = point.id === selectedPointId;
-
-      const { name, no } = pointLabeler(point.id);
-
-      return {
-        pointId: point.id,
-        label: (
-          <p>
-            {name}
-            <span className="font-medium text-primary-600 ml-1">#{no}</span>
-          </p>
-        ),
-        selected,
-        onClick: () => changePoint(point.id),
-      };
-    });
-
-  const renderCard = () => {
-    if (insertPosition) {
-      return (
-        <Card dashed>
-          <PointWizard
-            mutation={createPoint}
-            position={insertPosition}
-            onCancel={() => setInsertPosition(undefined)}
-            routeId={routeId}
-            routeParentId={routeParentId}
-            illegalPoints={points.map((point) => point.id)}
-          />
-        </Card>
-      );
-    }
-
-    if (selectedPoint) {
-      return (
-        <Card>
-          <PointDetails
-            point={selectedPoint}
-            label={pointLabeler(selectedPoint.id)}
-            routeId={routeId}
-          />
-        </Card>
-      );
-    }
-
-    return null;
+  const AddPointButton: FC<{ insertPosition: InsertPosition }> = ({
+    insertPosition,
+  }) => {
+    return (
+      <div className="relative h-0 w-full my-0.5">
+        <div className="absolute z-10 w-full h-5 -top-2.5 flex justify-center items-center">
+          <button
+            onClick={() => {
+              deselectPoint();
+              setInsertPosition(insertPosition);
+            }}
+            className="flex justify-center items-center h-5 w-5 bg-primary-500 hover:bg-primary-600 focus:ring-primary-400 shadow-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-gray-100"
+          >
+            <Icon name="plus" className="h-4 w-4 text-white"></Icon>
+          </button>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <PointNavigator
-      expandable={role === "owner"}
-      onExpand={(pointId, order) => {
-        deselectPoint();
-        setInsertPosition({
-          pointId,
-          order,
-        });
-      }}
-      entries={entries}
-      contentPointId={insertPosition ? insertPosition.pointId : selectedPointId}
-      position={insertPosition?.order}
-      hideLabels={hideLabels}
-    >
-      {renderCard()}
-    </PointNavigator>
+    <div className={clsx("flex flex-col", !editable && "gap-1")}>
+      {points
+        .slice()
+        .reverse()
+        .flatMap((point, index, array) => {
+          const selected = point.id === selectedPointId;
+          const showWizard = insertPosition?.pointId === point.id;
+          const wizardAbove =
+            insertPosition?.order === "after" ||
+            (index > 0 &&
+              insertPosition?.order === "before" &&
+              insertPosition.pointId === array[index - 1].id);
+
+          const { name, no } = pointLabeler(point.id);
+
+          const cards = [];
+
+          if (editable && index === 0) {
+            cards.push(
+              <AddPointButton
+                key={`add-after-${point.id}`}
+                insertPosition={{ pointId: point.id, order: "after" }}
+              />
+            );
+          }
+
+          cards.push(
+            <Card
+              key={point.id}
+              lowerCutout={editable && !showWizard}
+              upperCutout={editable && !wizardAbove}
+            >
+              {selected && selectedPoint !== undefined ? (
+                <PointDetails
+                  point={selectedPoint}
+                  label={pointLabeler(selectedPoint.id)}
+                  routeId={routeId}
+                  onClose={deselectPoint}
+                />
+              ) : (
+                <p
+                  className="cursor-pointer"
+                  onClick={() => changePoint(point.id)}
+                >
+                  {name}
+                  <span className="font-medium text-primary-600 ml-1">
+                    #{no}
+                  </span>
+                </p>
+              )}
+            </Card>
+          );
+
+          if (editable) {
+            cards.push(
+              <AddPointButton
+                key={`add-before-${point.id}`}
+                insertPosition={{ pointId: point.id, order: "before" }}
+              />
+            );
+          }
+
+          if (showWizard) {
+            cards.splice(
+              insertPosition.order === "after" ? 0 : cards.length - 1,
+              1,
+              <div key="new" className="my-1">
+                <Card dashed>
+                  <PointWizard
+                    mutation={createPoint}
+                    position={insertPosition}
+                    onCancel={() => setInsertPosition(undefined)}
+                    routeId={routeId}
+                    routeParentId={routeParentId}
+                    illegalPoints={points.map((point) => point.id)}
+                  />
+                </Card>
+              </div>
+            );
+          }
+
+          return cards;
+        })}
+    </div>
   );
 };
 

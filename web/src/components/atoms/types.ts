@@ -12,6 +12,7 @@ export type IconType =
   | "lock"
   | "paste"
   | "plus"
+  | "add"
   | "redo"
   | "copy"
   | "home"
