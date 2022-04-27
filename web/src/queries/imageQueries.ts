@@ -3,7 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Api } from "../Api";
 
 export const useImages = (resourceId: string) =>
-  useQuery(["images", { resourceId }], () => Api.getImages(resourceId));
+  useQuery(["images", { resourceId }], () => Api.getImages(resourceId), {
+    suspense: true,
+  });
 
 export const useDeleteImage = (parentResourceId: string, imageId: string) => {
   const queryClient = useQueryClient();

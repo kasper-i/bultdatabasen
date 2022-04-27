@@ -1,10 +1,11 @@
 import { InsertPosition } from "@/Api";
 import Icon from "@/components/atoms/Icon";
+import Loader from "@/components/atoms/Loader";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
 import clsx from "clsx";
-import React, { FC, ReactElement, useEffect, useState } from "react";
+import React, { FC, ReactElement, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import IconButton from "../../atoms/IconButton";
 import { Card } from "./Card";
@@ -165,12 +166,14 @@ const PointEditor = ({
               upperCutout={editable && !wizardAbove}
             >
               {selected && selectedPoint !== undefined ? (
-                <PointDetails
-                  point={selectedPoint}
-                  label={pointLabeler(selectedPoint.id)}
-                  routeId={routeId}
-                  onClose={deselectPoint}
-                />
+                <Suspense fallback={<Loader active />}>
+                  <PointDetails
+                    point={selectedPoint}
+                    label={pointLabeler(selectedPoint.id)}
+                    routeId={routeId}
+                    onClose={deselectPoint}
+                  />
+                </Suspense>
               ) : (
                 <p
                   className="cursor-pointer"
