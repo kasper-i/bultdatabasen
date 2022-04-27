@@ -3,9 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Api } from "../Api";
 
 export const useBolts = (resourceId: string) =>
-  useQuery(["bolts", { resourceId }], () => Api.getBolts(resourceId), {
-    suspense: true,
-  });
+  useQuery(["bolts", { resourceId }], () => Api.getBolts(resourceId));
 
 export const useCreateBolt = (routeId: string, pointId: string) => {
   const queryClient = useQueryClient();

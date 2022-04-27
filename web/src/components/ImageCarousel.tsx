@@ -12,7 +12,7 @@ import React, {
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import usePrevious from "react-use/lib/usePrevious";
 import IconButton from "./atoms/IconButton";
-import Loader from "./atoms/Loader";
+import Spinner from "./atoms/Spinner";
 
 interface FullSizeImageProps {
   image: Image;
@@ -147,7 +147,7 @@ export const FullSizeImage = ({
         icon="close"
       />
 
-      <Loader active={loading} />
+      <Spinner active={loading} />
       <img
         ref={imgRef}
         onLoad={onLoad}

@@ -2,7 +2,7 @@ import configData from "@/config.json";
 import { Image, ImageVersion } from "@/models/image";
 import clsx from "clsx";
 import React, { CSSProperties, ReactNode, useReducer, useRef } from "react";
-import Loader from "./atoms/Loader";
+import Spinner from "./atoms/Spinner";
 
 interface Props {
   image: Image;
@@ -95,7 +95,7 @@ export const ImageView = ({
       }}
     >
       <div className="absolute inset-0 flex justify-center items-center">
-        <Loader active={loading} />
+        <Spinner active={loading} />
       </div>
       <div className="absolute" style={innerStyle}>
         <img

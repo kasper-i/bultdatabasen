@@ -25,6 +25,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: !import.meta.env.DEV,
+      suspense: true,
     },
   },
 });
