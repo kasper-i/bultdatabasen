@@ -1,10 +1,11 @@
 import SigninPage from "@/pages/SigninPage";
-import React, { useEffect, useState } from "react";
-import { Digital } from "react-activity";
+import React, { Suspense, useEffect, useState } from "react";
 import "react-activity/dist/Digital.css";
 import { useQueryClient } from "react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Api } from "./Api";
+import Loader from "./components/atoms/Loader";
+import Spinner from "./components/atoms/Spinner";
 import Main from "./layouts/Main";
 import Page from "./layouts/Page";
 import AreaPage from "./pages/AreaPage";
@@ -55,8 +56,8 @@ const App = () => {
 
   if (!initialized) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center bg-gray-900 text-gray-400">
-        <Digital size={32} />
+      <div className="w-screen h-screen bg-gray-900 text-gray-400">
+        <Loader />
       </div>
     );
   }
@@ -69,19 +70,47 @@ const App = () => {
           <Route path="/signout" element={<SignoutPage />} />
           <Route path="/" element={<RootPage />} />
 
-          <Route path="area/:resourceId" element={<Page />}>
+          <Route
+            path="area/:resourceId"
+            element={
+              <Suspense fallback={<Loader />}>
+                <Page />
+              </Suspense>
+            }
+          >
             <Route index element={<AreaPage />} />
             <Route path="tasks" element={<TasksPage />} />
           </Route>
-          <Route path="crag/:resourceId" element={<Page />}>
+          <Route
+            path="crag/:resourceId"
+            element={
+              <Suspense fallback={<Loader />}>
+                <Page />
+              </Suspense>
+            }
+          >
             <Route index element={<CragPage />} />
             <Route path="tasks" element={<TasksPage />} />
           </Route>
-          <Route path="sector/:resourceId" element={<Page />}>
+          <Route
+            path="sector/:resourceId"
+            element={
+              <Suspense fallback={<Loader />}>
+                <Page />
+              </Suspense>
+            }
+          >
             <Route index element={<SectorPage />} />
             <Route path="tasks" element={<TasksPage />} />
           </Route>
-          <Route path="route/:resourceId" element={<Page />}>
+          <Route
+            path="route/:resourceId"
+            element={
+              <Suspense fallback={<Loader />}>
+                <Page />
+              </Suspense>
+            }
+          >
             <Route index element={<RoutePage />} />
             <Route path="tasks" element={<TasksPage />} />
           </Route>

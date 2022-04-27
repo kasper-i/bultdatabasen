@@ -9,8 +9,8 @@ const Main = () => {
         <div>Allt innehåll på sidan består av testdata!</div>
       </div>
       <NavigationBar />
-      <div className="relative flex-grow">
-        <div className="mx-auto p-5" style={{ maxWidth: 768 }}>
+      <div className="relative flex flex-grow">
+        <div className="flex-grow mx-auto p-5" style={{ maxWidth: 768 }}>
           <Outlet />
         </div>
       </div>
