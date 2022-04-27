@@ -21,10 +21,7 @@ export const Card: FC<{
     <div ref={ref} className="relative">
       {upperCutout && (
         <div className="absolute top-0 w-full overflow-hidden h-3">
-          <div
-            className="mx-auto -mt-4 w-7 h-7 border border-gray-300 bg-gray-100"
-            style={{ borderRadius: "360px" }}
-          />
+          <div className="mx-auto -mt-4 w-7 h-7 border border-gray-300 bg-gray-100 rounded-full" />
         </div>
       )}
       <div
@@ -39,10 +36,7 @@ export const Card: FC<{
       </div>
       {lowerCutout && (
         <div className="absolute bottom-0 w-full overflow-hidden h-3">
-          <div
-            className="mx-auto w-7 h-7 border border-gray-300 bg-gray-100 "
-            style={{ borderRadius: "360px" }}
-          />
+          <div className="mx-auto w-7 h-7 border border-gray-300 bg-gray-100 rounded-full" />
         </div>
       )}
     </div>
