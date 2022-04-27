@@ -1,6 +1,6 @@
 import { InsertPosition } from "@/Api";
+import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
-import Loader from "@/components/atoms/Loader";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
@@ -166,7 +166,7 @@ const PointEditor = ({
               upperCutout={editable && !wizardAbove}
             >
               {selected && selectedPoint !== undefined ? (
-                <Suspense fallback={<Loader active />}>
+                <Suspense fallback={<Dots />}>
                   <PointDetails
                     point={selectedPoint}
                     label={pointLabeler(selectedPoint.id)}
