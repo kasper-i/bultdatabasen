@@ -122,7 +122,7 @@ const PointEditor = ({
               deselectPoint();
               setInsertPosition(insertPosition);
             }}
-            className="flex justify-center items-center h-5 w-5 bg-primary-500 shadow-sm rounded-full"
+            className="flex justify-center items-center h-5 w-5 bg-primary-500 hover:bg-primary-600 focus:ring-primary-400 shadow-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-gray-100"
           >
             <Icon name="plus" className="h-4 w-4 text-white"></Icon>
           </button>
@@ -131,16 +131,19 @@ const PointEditor = ({
     );
   };
 
-  let previousPointWasInsert = false;
-
   return (
     <div className={clsx("flex flex-col", !editable && "gap-1")}>
       {points
         .slice()
         .reverse()
-        .flatMap((point, index) => {
+        .flatMap((point, index, array) => {
           const selected = point.id === selectedPointId;
           const showWizard = insertPosition?.pointId === point.id;
+          const wizardAbove =
+            insertPosition?.order === "after" ||
+            (index > 0 &&
+              insertPosition?.order === "before" &&
+              insertPosition.pointId === array[index - 1].id);
 
           const { name, no } = pointLabeler(point.id);
 
@@ -149,6 +152,7 @@ const PointEditor = ({
           if (editable && index === 0) {
             cards.push(
               <AddPointButton
+                key={`add-after-${point.id}`}
                 insertPosition={{ pointId: point.id, order: "after" }}
               />
             );
@@ -158,48 +162,43 @@ const PointEditor = ({
             <Card
               key={point.id}
               lowerCutout={editable && !showWizard}
-              upperCutout={
-                editable &&
-                !previousPointWasInsert &&
-                !(showWizard && insertPosition.order === "after")
-              }
+              upperCutout={editable && !wizardAbove}
             >
-              <div>
-                {selectedPoint !== undefined && selected ? (
-                  <PointDetails
-                    point={selectedPoint}
-                    label={pointLabeler(selectedPoint.id)}
-                    routeId={routeId}
-                    onClose={deselectPoint}
-                  />
-                ) : (
-                  <p
-                    className="cursor-pointer"
-                    onClick={() => changePoint(point.id)}
-                  >
-                    {name}
-                    <span className="font-medium text-primary-600 ml-1">
-                      #{no}
-                    </span>
-                  </p>
-                )}
-              </div>
+              {selected && selectedPoint !== undefined ? (
+                <PointDetails
+                  point={selectedPoint}
+                  label={pointLabeler(selectedPoint.id)}
+                  routeId={routeId}
+                  onClose={deselectPoint}
+                />
+              ) : (
+                <p
+                  className="cursor-pointer"
+                  onClick={() => changePoint(point.id)}
+                >
+                  {name}
+                  <span className="font-medium text-primary-600 ml-1">
+                    #{no}
+                  </span>
+                </p>
+              )}
             </Card>
           );
 
-          cards.push(
-            editable && (
+          if (editable) {
+            cards.push(
               <AddPointButton
+                key={`add-before-${point.id}`}
                 insertPosition={{ pointId: point.id, order: "before" }}
               />
-            )
-          );
+            );
+          }
 
           if (showWizard) {
             cards.splice(
               insertPosition.order === "after" ? 0 : cards.length - 1,
               1,
-              <div className="my-1">
+              <div key="new" className="my-1">
                 <Card dashed>
                   <PointWizard
                     mutation={createPoint}
@@ -213,9 +212,6 @@ const PointEditor = ({
               </div>
             );
           }
-
-          previousPointWasInsert =
-            showWizard && insertPosition?.order === "before" ? true : false;
 
           return cards;
         })}
