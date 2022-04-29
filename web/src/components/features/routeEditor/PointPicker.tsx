@@ -1,5 +1,5 @@
 import { Api } from "@/Api";
-import { Combobox } from "@/components/atoms/Combobox";
+import { Select } from "@/components/atoms/Select";
 import { Point } from "@/models/point";
 import { Route } from "@/models/route";
 import { useRoutes } from "@/queries/routeQueries";
@@ -27,7 +27,7 @@ const PointPicker = ({
   const { data: points } = useQuery<Point[]>(
     ["points", { resourceId: selectedRoute?.id }],
     () => Api.getPoints(`${selectedRoute?.id}`),
-    { enabled: selectedRoute !== undefined }
+    { enabled: selectedRoute !== undefined, suspense: false }
   );
 
   const pointLabeler = usePointLabeler(points ?? []);
@@ -35,7 +35,7 @@ const PointPicker = ({
   return (
     <div>
       <div className="flex flex-col gap-2">
-        <Combobox<Route>
+        <Select<Route>
           label="Närliggande led"
           value={selectedRoute}
           options={
@@ -54,7 +54,7 @@ const PointPicker = ({
           noOptionsText="Inga närliggande leder"
         />
 
-        <Combobox<Point>
+        <Select<Point>
           key={selectedRoute?.id}
           label="Ledbult eller ankare"
           value={points?.find((point) => point.id === value)}

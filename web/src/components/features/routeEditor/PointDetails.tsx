@@ -44,29 +44,33 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
             </p>
           </div>
 
-          {sharedParents.length > 0 && (
-            <div className="fle flex-wrap space-x-1 text-xs">
-              <span className="whitespace-nowrap">Delas med</span>
-              <span>
-                <Concatenator>
-                  {sharedParents.map((parent) => (
-                    <Link
-                      key={point.id}
-                      to={{
-                        pathname: `/route/${parent.id}`,
-                        search: `?p=${point.id}`,
-                      }}
-                    >
-                      <span className="underline text-primary-500">
-                        {parent.name}
-                      </span>
-                    </Link>
-                  ))}
-                </Concatenator>
-                .
-              </span>
-            </div>
-          )}
+          <div className="fle flex-wrap space-x-1 text-xs">
+            {sharedParents.length === 0
+              ? "Delas ej med annan led."
+              : sharedParents.length > 0 && (
+                  <>
+                    <span className="whitespace-nowrap">Delas med</span>
+                    <span>
+                      <Concatenator>
+                        {sharedParents.map((parent) => (
+                          <Link
+                            key={point.id}
+                            to={{
+                              pathname: `/route/${parent.id}`,
+                              search: `?p=${point.id}`,
+                            }}
+                          >
+                            <span className="underline text-primary-500">
+                              {parent.name}
+                            </span>
+                          </Link>
+                        ))}
+                      </Concatenator>
+                      .
+                    </span>
+                  </>
+                )}
+          </div>
         </div>
         <Restricted>
           <ConfirmedDeleteButton
