@@ -1,10 +1,11 @@
 import { CreatePointRequest, InsertPosition } from "@/Api";
 import Button from "@/components/atoms/Button";
+import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
 import { Switch } from "@/components/atoms/Switch";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, Suspense, useState } from "react";
 import { UseMutationResult } from "react-query";
 import BoltDetails from "./BoltDetails";
 import PointPicker from "./PointPicker";
@@ -106,13 +107,15 @@ function PointWizard({
       )}
 
       {mergeMode ? (
-        <PointPicker
-          targetRouteId={routeId}
-          targetRouteParentId={routeParentId}
-          illegalPoints={illegalPoints}
-          value={selectedPointId}
-          onSelect={setSelectedPointId}
-        />
+        <Suspense fallback={<Dots />}>
+          <PointPicker
+            targetRouteId={routeId}
+            targetRouteParentId={routeParentId}
+            illegalPoints={illegalPoints}
+            value={selectedPointId}
+            onSelect={setSelectedPointId}
+          />
+        </Suspense>
       ) : (
         <>
           <Switch enabled={isAnchor} onChange={toggleAnchor} label="Ankare" />

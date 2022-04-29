@@ -1,7 +1,7 @@
-import { Combobox as HeadlessCombobox, Transition } from "@headlessui/react";
+import { Listbox, Transition } from "@headlessui/react";
 import { SelectorIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
-import React, { FC, Fragment, ReactNode, useState } from "react";
+import React, { FC, Fragment, ReactNode } from "react";
 import Icon from "./Icon";
 import { Option } from "./RadioGroup";
 
@@ -23,7 +23,7 @@ const EmptyState: FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-export function Combobox<T>({
+export function Select<T>({
   label,
   value,
   options,
@@ -32,37 +32,22 @@ export function Combobox<T>({
   disabled,
   noOptionsText,
 }: Props<T>) {
-  const [query, setQuery] = useState("");
-
-  const filteredOptions =
-    query === ""
-      ? options
-      : options.filter((option) =>
-          option.label
-            .toLowerCase()
-            .replace(/\s+/g, "")
-            .includes(query.toLowerCase().replace(/\s+/g, ""))
-        );
-
   const renderOptions = () => {
     if (options.length === 0) {
       return <EmptyState>{noOptionsText}</EmptyState>;
-    } else if (filteredOptions.length === 0) {
-      return <EmptyState>Inga träffar</EmptyState>;
     } else {
-      return filteredOptions.map((option, index) => (
-        <HeadlessCombobox.Option
+      return options.map((option, index) => (
+        <Listbox.Option
           key={option.key}
           value={option.value}
           className={({ active, disabled }) =>
             clsx(
               "select-none relative py-2 pl-8 pr-4",
               active ? "bg-primary-500 text-white" : "text-black",
-              index !== filteredOptions.length - 1 &&
-                "border-b border-gray-300",
+              index !== options.length - 1 && "border-b border-gray-300",
               disabled ? "text-gray-300 cursor-default" : "cursor-pointer",
               index === 0 && "rounded-t-md",
-              index === filteredOptions.length - 1 && "rounded-b-md"
+              index === options.length - 1 && "rounded-b-md"
             )
           }
           disabled={option.disabled}
@@ -92,44 +77,41 @@ export function Combobox<T>({
               )}
             </>
           )}
-        </HeadlessCombobox.Option>
+        </Listbox.Option>
       ));
     }
   };
 
   return (
-    <HeadlessCombobox value={value} onChange={onSelect} disabled={disabled}>
-      <HeadlessCombobox.Label className="block text-sm font-medium text-gray-700">
+    <Listbox value={value} onChange={onSelect} disabled={disabled}>
+      <Listbox.Label className="block text-sm font-medium text-gray-700">
         {label}
-      </HeadlessCombobox.Label>
+      </Listbox.Label>
       <div className="relative">
-        <HeadlessCombobox.Button className="w-full">
-          <HeadlessCombobox.Input
-            displayValue={displayValue}
-            onChange={(event) => setQuery(event.target.value)}
-            className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[34px]"
-          />
+        <Listbox.Button className="focus:outline-none bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[34px]">
+          <span className="block truncate text-left ml-3">
+            {value ? displayValue(value) : ""}
+          </span>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2">
             <SelectorIcon
               className="w-5 h-5 text-gray-400"
               aria-hidden="true"
             />
           </div>
-        </HeadlessCombobox.Button>
+        </Listbox.Button>
         <Transition
           as={Fragment}
           leave="transition ease-in duration-100"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
-          afterLeave={() => setQuery("")}
         >
           <div className="absolute z-50 w-full">
-            <HeadlessCombobox.Options className="w-full mt-2 mb-4 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
+            <Listbox.Options className="w-full mt-2 mb-4 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
               {renderOptions()}
-            </HeadlessCombobox.Options>
+            </Listbox.Options>
           </div>
         </Transition>
       </div>
-    </HeadlessCombobox>
+    </Listbox>
   );
 }
