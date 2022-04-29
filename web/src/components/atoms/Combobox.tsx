@@ -58,10 +58,11 @@ export function Combobox<T>({
             clsx(
               "select-none relative py-2 pl-8 pr-4",
               active ? "bg-primary-500 text-white" : "text-black",
-              index !== options.length - 1 && "border-b border-gray-300",
+              index !== filteredOptions.length - 1 &&
+                "border-b border-gray-300",
               disabled ? "text-gray-300 cursor-default" : "cursor-pointer",
               index === 0 && "rounded-t-md",
-              index === options.length - 1 && "rounded-b-md"
+              index === filteredOptions.length - 1 && "rounded-b-md"
             )
           }
           disabled={option.disabled}
