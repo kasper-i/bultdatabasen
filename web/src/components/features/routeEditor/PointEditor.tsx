@@ -175,15 +175,17 @@ const PointEditor = ({
                   />
                 </Suspense>
               ) : (
-                <p
-                  className="cursor-pointer"
-                  onClick={() => changePoint(point.id)}
-                >
-                  {name}
-                  <span className="font-medium text-primary-600 ml-1">
-                    #{no}
-                  </span>
-                </p>
+                <div className="h-6">
+                  <p
+                    className="cursor-pointer"
+                    onClick={() => changePoint(point.id)}
+                  >
+                    {name}
+                    <span className="font-medium text-primary-600 ml-1">
+                      #{no}
+                    </span>
+                  </p>
+                </div>
               )}
             </Card>
           );

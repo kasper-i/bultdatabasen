@@ -35,15 +35,18 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
     <div>
       <div className="flex justify-between">
         <div>
-          <span className="text-2xl cursor-pointer" onClick={onClose}>
-            <span>
-              {label.name} <span className="font-bold">#{label.no}</span>
-            </span>
-          </span>
+          <div className="h-6">
+            <p className="cursor-pointer" onClick={onClose}>
+              {label.name}
+              <span className="font-medium text-primary-600 ml-1">
+                #{label.no}
+              </span>
+            </p>
+          </div>
 
           {sharedParents.length > 0 && (
-            <div className="fle flex-wrap space-x-1">
-              <span className="whitespace-nowrap">Delad med</span>
+            <div className="fle flex-wrap space-x-1 text-xs">
+              <span className="whitespace-nowrap">Delas med</span>
               <span>
                 <Concatenator>
                   {sharedParents.map((parent) => (
