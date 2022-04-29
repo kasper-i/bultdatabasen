@@ -44,7 +44,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
             </p>
           </div>
 
-          <div className="fle flex-wrap space-x-1 text-xs">
+          <div className="space-x-1 text-xs">
             {sharedParents.length === 0
               ? "Delas ej med annan led."
               : sharedParents.length > 0 && (
