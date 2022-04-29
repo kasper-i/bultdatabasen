@@ -114,7 +114,7 @@ const PointEditor = ({
 
   const selectedPoint = points.find((point) => point.id === selectedPointId);
   const editable = role === "owner";
-  const navigatable = insertPosition === undefined;
+  const navigable = insertPosition === undefined;
 
   const AddPointButton: FC<{ insertPosition: InsertPosition }> = ({
     insertPosition,
@@ -181,9 +181,9 @@ const PointEditor = ({
               ) : (
                 <div className="h-6">
                   <p
-                    className={clsx(navigatable && "cursor-pointer")}
+                    className={clsx(navigable && "cursor-pointer")}
                     onClick={
-                      navigatable ? () => changePoint(point.id) : undefined
+                      navigable ? () => changePoint(point.id) : undefined
                     }
                   >
                     {name}
