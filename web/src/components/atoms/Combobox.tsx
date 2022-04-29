@@ -50,7 +50,7 @@ export function Combobox<T>({
     } else if (filteredOptions.length === 0) {
       return <EmptyState>Inga träffar</EmptyState>;
     } else {
-      return options.map((option, index) => (
+      return filteredOptions.map((option, index) => (
         <HeadlessCombobox.Option
           key={option.key}
           value={option.value}
