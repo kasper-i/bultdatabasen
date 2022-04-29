@@ -1,6 +1,7 @@
 import { InsertPosition } from "@/Api";
 import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
+import Restricted from "@/components/Restricted";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
@@ -84,24 +85,26 @@ const PointEditor = ({
           />
         ) : (
           <div className="flex flex-col items-center justify-center">
-            <IconButton
-              onClick={() => createFirst()}
-              icon="plus"
-              className="mb-2.5"
-            />
+            <Restricted>
+              <IconButton
+                onClick={() => createFirst()}
+                icon="plus"
+                className="mb-2.5"
+              />
+            </Restricted>
             <div className="text-sm text-gray-600 text-center">
-              <p className="mb-2">
-                På den här leden finns ännu inga dokumenterade bultar.
-              </p>
-              <p className="font-medium">
-                <span
-                  onClick={() => createFirst()}
-                  className="text-primary-500 hover:text-primary-400 pr-1 cursor-pointer"
-                >
-                  Lägg till
-                </span>
-                en första ledbult eller ankare.
-              </p>
+              <p>På den här leden finns ännu inga dokumenterade bultar.</p>
+              <Restricted>
+                <p className="font-medium mt-2">
+                  <span
+                    onClick={() => createFirst()}
+                    className="text-primary-500 hover:text-primary-400 pr-1 cursor-pointer"
+                  >
+                    Lägg till
+                  </span>
+                  en första ledbult eller ankare.
+                </p>
+              </Restricted>
             </div>
           </div>
         )}

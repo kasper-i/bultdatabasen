@@ -113,7 +113,9 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           </div>
         )
       )}
-      <ImageDropzone key="new" pointId={point.id} />
+      <Restricted>
+        <ImageDropzone key="new" pointId={point.id} />
+      </Restricted>
     </div>
   );
 }
