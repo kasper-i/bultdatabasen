@@ -14,6 +14,7 @@ import {
   XCircleIcon,
   XIcon,
   PlusCircleIcon,
+  CameraIcon,
 } from "@heroicons/react/outline";
 import { HomeIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
@@ -57,6 +58,8 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return HomeIcon;
       case "image":
         return PhotographIcon;
+      case "camera":
+        return CameraIcon;
       case "redo":
       case "wrench":
       default:

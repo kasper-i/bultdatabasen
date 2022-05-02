@@ -28,7 +28,7 @@ const IconButton: FC<IconButtonProps> = ({
 }) => {
   const regularStyle = () => {
     return [
-      "relative flex justify-center items-center py-2 px-2 border border-transparent text-sm shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
+      "flex h-4 w-4 justify-center items-center p-2 border border-transparent text-sm shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
       disabled
         ? "bg-gray-400"
         : color === "danger"
@@ -40,7 +40,7 @@ const IconButton: FC<IconButtonProps> = ({
 
   const tinyStyle = () => {
     return [
-      "relative flex justify-center items-center focus:outline-none",
+      "flex justify-center items-center focus:outline-none",
       disabled
         ? "text-gray-400"
         : color === "danger"
@@ -52,7 +52,11 @@ const IconButton: FC<IconButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={clsx(tiny ? tinyStyle() : regularStyle(), className)}
+      className={clsx(
+        "box-content",
+        tiny ? tinyStyle() : regularStyle(),
+        className
+      )}
       disabled={disabled}
     >
       <Icon name={icon} className={clsx(loading && "invisible")} />

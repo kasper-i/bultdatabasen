@@ -2,14 +2,14 @@ import { Api } from "@/Api";
 import React, { ReactElement, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useQueryClient } from "react-query";
-import Icon from "./atoms/Icon";
+import IconButton from "./atoms/IconButton";
 import Progress from "./atoms/Progress";
 
 interface Props {
   pointId: string;
 }
 
-const ImageDropzone = ({ pointId }: Props): ReactElement => {
+const ImageUploadButton = ({ pointId }: Props): ReactElement => {
   const [progress, setProgress] = useState<number>();
   const [_error, setError] = useState(false);
   const queryClient = useQueryClient();
@@ -40,27 +40,13 @@ const ImageDropzone = ({ pointId }: Props): ReactElement => {
       {progress ? (
         <Progress percent={progress} />
       ) : (
-        <div
-          {...getRootProps()}
-          className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md"
-        >
+        <div {...getRootProps()}>
           <input {...getInputProps()} />
-          <div className="space-y-1 text-center">
-            <Icon name="upload" className="text-gray-500" />
-            <div className="flex text-sm text-gray-600">
-              <p className="cursor-pointer font-medium">
-                <span className="text-primary-500 hover:text-primary-400">
-                  Ladda upp fil
-                </span>
-                <span className="pl-1">eller dra och släpp</span>
-              </p>
-            </div>
-            <p className="text-xs text-gray-500">JPG upp till 10MB</p>
-          </div>
+          <IconButton icon="camera" />
         </div>
       )}
     </div>
   );
 };
 
-export default ImageDropzone;
+export default ImageUploadButton;
