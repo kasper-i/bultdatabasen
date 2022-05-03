@@ -35,6 +35,7 @@ func main() {
 
 	router.HandleFunc("/health", checkHandler)
 
+	router.HandleFunc("/users/names", api.GetUserNames).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/myself", api.GetMyself).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/{userID}", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/myself", api.UpdateMyself).Methods(http.MethodPut, http.MethodOptions)

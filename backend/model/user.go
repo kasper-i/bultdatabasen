@@ -33,3 +33,14 @@ func (sess Session) UpdateUser(user *User) error {
 func (sess Session) CreateUser(user *User) error {
 	return sess.DB.Create(&user).Error
 }
+
+func (sess Session) GetUserNames() ([]User, error) {
+	var names []User = make([]User, 0)
+
+	if err := sess.DB.Raw(`SELECT id, first_name, last_name FROM user`).
+		Scan(&names).Error; err != nil {
+		return names, err
+	}
+
+	return names, nil
+}

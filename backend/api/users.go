@@ -12,6 +12,17 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetUserNames(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
+	
+	if user, err := sess.GetUserNames(); err != nil {
+		utils.WriteError(w, err)
+	} else {
+		utils.WriteResponse(w, http.StatusOK, user)
+	}
+
+}
+
 func GetMyself(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	userID := r.Context().Value("user_id").(string)
