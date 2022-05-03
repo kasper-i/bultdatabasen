@@ -36,7 +36,7 @@ type Image struct {
 	Size        int       `json:"size"`
 	Width       int       `json:"width"`
 	Height      int       `json:"height"`
-	UploadedBy  string    `gorm:"column:first_name" json:"uploadedBy"`
+	UserID      string    `gorm:"column:buser_id" json:"userId"`
 }
 
 type ImagePatch struct {

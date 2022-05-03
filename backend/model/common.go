@@ -41,9 +41,8 @@ func getDescendantsQuery(resourceType string) string {
 		INNER JOIN resource child ON child.id = f.id
 		WHERE cte.type = "route"
 	)
-	SELECT %s.*, cte.name, cte.parent_id, user.first_name FROM cte
+	SELECT %s.*, cte.name, cte.parent_id, cte.buser_id FROM cte
 	INNER JOIN %s ON cte.id = %s.id
-	INNER JOIN user ON cte.buser_id = user.id
 	WHERE cte.first <> TRUE`, GetResourceDepth(resourceType), resourceType, resourceType, resourceType)
 }
 

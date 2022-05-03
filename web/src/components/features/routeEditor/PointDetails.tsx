@@ -112,7 +112,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
                 key: index,
                 header: (
                   <p className="text-xs">
-                    <span className="text-primary-500">{image.uploadedBy}</span>
+                    <span className="text-primary-500">{image.userId}</span>
                     <br />
                     <span>
                       Laddade upp foto{" "}
