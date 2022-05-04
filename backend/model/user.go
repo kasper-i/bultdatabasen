@@ -9,7 +9,7 @@ type User struct {
 	Email     *string   `json:"email,omitempty"`
 	FirstName *string   `json:"firstName,omitempty"`
 	LastName  *string   `json:"lastName,omitempty"`
-	FirstSeen time.Time `json:"firstSeen"`
+	FirstSeen time.Time `json:"firstSeen,omitempty"`
 }
 
 func (User) TableName() string {

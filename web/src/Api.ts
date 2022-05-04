@@ -132,6 +132,16 @@ export class Api {
     return Promise.resolve();
   };
 
+  static getUserNames = async (): Promise<
+    Pick<User, "id" | "firstName" | "lastName">[]
+  > => {
+    const result = await axios.get(`${Api.baseUrl}/users/names`, {
+      headers: { Authorization: `Bearer ${Api.accessToken}` },
+    });
+
+    return result.data as Pick<User, "id" | "firstName" | "lastName">[];
+  };
+
   static getMyself = async (): Promise<User> => {
     const result = await axios.get(`${Api.baseUrl}/users/myself`, {
       headers: { Authorization: `Bearer ${Api.accessToken}` },

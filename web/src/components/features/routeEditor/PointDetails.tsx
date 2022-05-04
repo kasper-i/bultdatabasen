@@ -12,6 +12,7 @@ import { Point } from "@/models/point";
 import { useBolts } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
+import { useUserNames } from "@/queries/userQueries";
 import { compareDesc } from "date-fns";
 import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
@@ -25,6 +26,7 @@ interface Props {
 }
 
 function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
+  const { data: userNames } = useUserNames();
   const deletePoint = useDetachPoint(routeId, point.id);
   const { data: images } = useImages(point.id);
   const bolts = useBolts(point.id);
@@ -108,28 +110,34 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
               .sort((i1, i2) =>
                 compareDesc(new Date(i1.timestamp), new Date(i2.timestamp))
               )
-              .map((image, index) => ({
-                key: index,
-                header: (
-                  <p className="text-xs">
-                    <span className="text-primary-500">{image.userId}</span>
-                    <br />
-                    <span>
-                      Laddade upp foto{" "}
-                      <span className="font-bold">
-                        {new Date(image.timestamp).getFullYear()}
+              .map((image, index) => {
+                const userInfo = userNames?.get(image.userId);
+
+                return {
+                  key: index,
+                  header: (
+                    <p className="text-xs">
+                      <span className="text-primary-500">
+                        {`${userInfo?.firstName} ${userInfo?.lastName?.[0]}`}
                       </span>
-                    </span>
-                  </p>
-                ),
-                value: (
-                  <ImageThumbnail
-                    image={image}
-                    key={image.id}
-                    onClick={() => setCurrImg(image.id)}
-                  />
-                ),
-              }))}
+                      <br />
+                      <span>
+                        Laddade upp foto{" "}
+                        <span className="font-bold">
+                          {new Date(image.timestamp).getFullYear()}
+                        </span>
+                      </span>
+                    </p>
+                  ),
+                  value: (
+                    <ImageThumbnail
+                      image={image}
+                      key={image.id}
+                      onClick={() => setCurrImg(image.id)}
+                    />
+                  ),
+                };
+              })}
           />
           {currImg !== undefined && (
             <ImageCarousel
