@@ -127,9 +127,9 @@ const PointEditor = ({
               deselectPoint();
               setInsertPosition(insertPosition);
             }}
-            className="flex justify-center items-center h-5 w-5 bg-primary-500 hover:bg-primary-600 focus:ring-primary-400 shadow-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-gray-100"
+            className="flex justify-center items-center h-5 w-5 bg-gray-100 border-primary-500 border-2 shadow-sm rounded-full focus:outline-none"
           >
-            <Icon name="plus" className="h-4 w-4 text-white"></Icon>
+            <Icon name="plus" className="h-4 w-4 text-primary-500"></Icon>
           </button>
         </div>
       </div>

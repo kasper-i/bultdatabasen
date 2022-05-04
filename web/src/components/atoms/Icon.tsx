@@ -8,7 +8,7 @@ import {
   LockClosedIcon,
   LockOpenIcon,
   PhotographIcon,
-  PlusIcon,
+  PlusSmIcon,
   TrashIcon,
   UploadIcon,
   XCircleIcon,
@@ -47,7 +47,7 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
       case "paste":
         return ClipboardIcon;
       case "plus":
-        return PlusIcon;
+        return PlusSmIcon;
       case "add":
         return PlusCircleIcon;
       case "external":
