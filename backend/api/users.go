@@ -15,10 +15,10 @@ import (
 func GetUserNames(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	
-	if user, err := sess.GetUserNames(); err != nil {
+	if names, err := sess.GetUserNames(); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, user)
+		utils.WriteResponse(w, http.StatusOK, names)
 	}
 
 }
