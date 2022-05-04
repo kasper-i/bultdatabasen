@@ -16,6 +16,7 @@ export type IconType =
   | "redo"
   | "copy"
   | "home"
-  | "image";
+  | "image"
+  | "camera";
 
 export type ColorType = "primary" | "danger";

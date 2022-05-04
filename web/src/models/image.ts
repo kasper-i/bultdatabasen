@@ -12,4 +12,5 @@ export type Image = ResourceBase & {
   size: number;
   width: number;
   height: number;
+  userId: string;
 };

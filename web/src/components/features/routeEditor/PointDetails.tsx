@@ -1,9 +1,10 @@
-import IconButton from "@/components/atoms/IconButton";
 import Loader from "@/components/atoms/Loader";
 import { Concatenator } from "@/components/Concatenator";
 import BoltDetails from "@/components/features/routeEditor/BoltDetails";
-import ImageDropzone from "@/components/ImageDropzone";
-import ImageGallery from "@/components/ImageGallery";
+import Feed from "@/components/Feed";
+import { ImageCarousel } from "@/components/ImageCarousel";
+import ImageThumbnail from "@/components/ImageThumbnail";
+import ImageUploadButton from "@/components/ImageUploadButton";
 import ConfirmedDeleteButton from "@/components/molecules/ConfirmedDeleteButton";
 import Restricted from "@/components/Restricted";
 import { Bolt } from "@/models/bolt";
@@ -11,6 +12,8 @@ import { Point } from "@/models/point";
 import { useBolts } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
+import { useUserNames } from "@/queries/userQueries";
+import { compareDesc } from "date-fns";
 import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 import { PointLabel } from "./hooks";
@@ -23,11 +26,11 @@ interface Props {
 }
 
 function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
+  const { data: userNames } = useUserNames();
   const deletePoint = useDetachPoint(routeId, point.id);
-  const images = useImages(point.id);
+  const { data: images } = useImages(point.id);
   const bolts = useBolts(point.id);
-
-  const [imagesLocked, setImagesLocked] = useState(false);
+  const [currImg, setCurrImg] = useState<string>();
 
   const sharedParents = point.parents.filter((parent) => parent.id !== routeId);
 
@@ -72,15 +75,19 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
                 )}
           </div>
         </div>
-        <Restricted>
-          <ConfirmedDeleteButton
-            mutation={deletePoint}
-            target={`${label.name} #${label.no}`}
-          />
-        </Restricted>
+
+        <div className="flex gap-2">
+          <Restricted>
+            <ImageUploadButton pointId={point.id} />
+            <ConfirmedDeleteButton
+              mutation={deletePoint}
+              target={`${label.name} #${label.no}`}
+            />
+          </Restricted>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 py-5">
+      <div className="flex flex-wrap gap-4 py-4">
         {bolts.data
           ?.slice()
           ?.sort((b1: Bolt) => (b1.position === "left" ? -1 : 1))
@@ -93,33 +100,54 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           ))}
       </div>
 
-      <div className="flex items-center w-full py-2.5 gap-2">
-        <h5 className="font-bold text-2xl">Bilder</h5>
-        <Restricted>
-          <IconButton
-            tiny
-            onClick={() => setImagesLocked((checked) => !checked)}
-            icon={imagesLocked ? "unlock" : "lock"}
-          />
-        </Restricted>
-      </div>
-      {images.isLoading ? (
+      {!images ? (
         <Loader />
       ) : (
-        images.data && (
-          <div className="w-full">
-            <ImageGallery
-              className="mb-4"
-              images={images.data}
-              locked={imagesLocked}
-              pointId={point.id}
+        <>
+          <Feed
+            items={images
+              .slice()
+              .sort((i1, i2) =>
+                compareDesc(new Date(i1.timestamp), new Date(i2.timestamp))
+              )
+              .map((image, index) => {
+                const userInfo = userNames?.get(image.userId);
+
+                return {
+                  key: index,
+                  header: (
+                    <p className="text-xs">
+                      <span className="text-primary-500">
+                        {`${userInfo?.firstName} ${userInfo?.lastName?.[0]}`}
+                      </span>
+                      <br />
+                      <span>
+                        Laddade upp foto{" "}
+                        <span className="font-bold">
+                          {new Date(image.timestamp).getFullYear()}
+                        </span>
+                      </span>
+                    </p>
+                  ),
+                  value: (
+                    <ImageThumbnail
+                      image={image}
+                      key={image.id}
+                      onClick={() => setCurrImg(image.id)}
+                    />
+                  ),
+                };
+              })}
+          />
+          {currImg !== undefined && (
+            <ImageCarousel
+              selectedImageId={currImg}
+              images={images ?? []}
+              onClose={() => setCurrImg(undefined)}
             />
-          </div>
-        )
+          )}
+        </>
       )}
-      <Restricted>
-        <ImageDropzone key="new" pointId={point.id} />
-      </Restricted>
     </div>
   );
 }
