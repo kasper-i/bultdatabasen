@@ -1,5 +1,6 @@
 import configData from "@/config.json";
 import { Image, ImageVersion } from "@/models/image";
+import { Dialog, Transition } from "@headlessui/react";
 import React, {
   CSSProperties,
   Fragment,
@@ -11,12 +12,11 @@ import React, {
 } from "react";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import usePrevious from "react-use/lib/usePrevious";
-import IconButton from "./atoms/IconButton";
 import Spinner from "./atoms/Spinner";
 
 interface FullSizeImageProps {
   image: Image;
-  onClose?: () => void;
+  onClose: () => void;
   onSwipe?: (direction: "left" | "right") => void;
   version: ImageVersion;
 }
@@ -140,27 +140,50 @@ export const FullSizeImage = ({
   }
 
   return (
-    <div>
-      <IconButton
-        className="fixed top-5 right-5 text-white cursor-pointer"
-        onClick={onClose}
-        icon="close"
-      />
+    <Transition appear show as={Fragment}>
+      <Dialog className="fixed inset-0 z-10 overflow-y-auto" onClose={onClose}>
+        <div className="min-h-screen flex justify-center items-center">
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            entered="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <Dialog.Overlay className="fixed inset-0 bg-gray-800" />
+          </Transition.Child>
 
-      <Spinner active={loading} />
-      <img
-        ref={imgRef}
-        onLoad={onLoad}
-        style={{
-          display: loading || hidden ? "none" : "block",
-          imageOrientation: "none",
-          ...dimensionClasses,
-          ...rotatorClasses,
-        }}
-        src={`${configData.API_URL}/images/${image.id}/${version}`}
-        alt=""
-      />
-    </div>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="scale-95"
+            enterTo="scale-100"
+            leave="ease-in duration-200"
+            leaveFrom="scale-100"
+            leaveTo="scale-95"
+          >
+            <div className="relative">
+              <Spinner active={loading} />
+              <img
+                ref={imgRef}
+                onLoad={onLoad}
+                style={{
+                  display: loading || hidden ? "none" : "block",
+                  imageOrientation: "none",
+                  ...dimensionClasses,
+                  ...rotatorClasses,
+                }}
+                src={`${configData.API_URL}/images/${image.id}/${version}`}
+                alt=""
+              />
+            </div>
+          </Transition.Child>
+        </div>
+      </Dialog>
+    </Transition>
   );
 };
 
@@ -199,16 +222,11 @@ export const ImageCarousel = ({
   }
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black opacity-80"></div>
-      <div className="fixed z-50 inset-0 flex justify-center items-center">
-        <FullSizeImage
-          image={images[index]}
-          version="xl"
-          onClose={onClose}
-          onSwipe={onSwipe}
-        />
-      </div>
-    </>
+    <FullSizeImage
+      image={images[index]}
+      version="xl"
+      onClose={onClose}
+      onSwipe={onSwipe}
+    />
   );
 };
