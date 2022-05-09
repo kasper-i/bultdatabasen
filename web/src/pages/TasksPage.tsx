@@ -37,7 +37,7 @@ const TasksPage = (): ReactElement => {
     <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-5">
       <BackLink resource={resource} />
       <h1 className="text-3xl font-bold pb-1 flex items-start">
-        Uppdrag{" "}
+        Uppdrag
         <Pill className="ml-2">
           {
             tasks?.filter(
