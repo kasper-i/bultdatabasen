@@ -15,10 +15,7 @@ export const useCreateTask = (parentId: string) => {
     (task: Pick<Task, "description">) => Api.createTask(parentId, task),
     {
       onSuccess: async (data) => {
-        queryClient.setQueryData<Task>(
-          ["task", { taskId: data.id }],
-          () => data
-        );
+        queryClient.refetchQueries(["task", { taskId: data.id }]);
         queryClient.setQueryData<Task[]>(["tasks", { parentId }], (tasks) => [
           ...(tasks ?? []),
           data,

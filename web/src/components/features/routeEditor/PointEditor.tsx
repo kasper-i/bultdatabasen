@@ -45,7 +45,10 @@ const PointEditor = ({
   }, [createPoint.isSuccess]);
 
   useEffect(() => {
-    if (!points.some((point) => point.id === selectedPointId)) {
+    if (
+      selectedPointId &&
+      !points.some((point) => point.id === selectedPointId)
+    ) {
       deselectPoint();
     }
   }, [points]);

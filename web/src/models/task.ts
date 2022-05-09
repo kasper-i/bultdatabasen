@@ -8,4 +8,7 @@ export type Task = ResourceBase & {
   assignee?: string;
   comment?: string;
   parentId: string;
+  createdAt: string;
+  userId: string;
+  closedAt?: string;
 };

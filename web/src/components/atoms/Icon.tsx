@@ -1,7 +1,7 @@
 import {
   ArrowSmLeftIcon,
   BeakerIcon,
-  CheckIcon,
+  BadgeCheckIcon,
   ClipboardIcon,
   DuplicateIcon,
   ExternalLinkIcon,
@@ -37,7 +37,7 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
       case "upload":
         return UploadIcon;
       case "check":
-        return CheckIcon;
+        return BadgeCheckIcon;
       case "arrow left":
         return ArrowSmLeftIcon;
       case "unlock":
