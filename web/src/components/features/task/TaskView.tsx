@@ -2,6 +2,7 @@ import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
 import IconButton from "@/components/atoms/IconButton";
 import { Time } from "@/components/atoms/Time";
+import ConfirmedDeleteButton from "@/components/molecules/ConfirmedDeleteButton";
 import UserName from "@/components/UserName";
 import { TaskStatus } from "@/models/task";
 import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
@@ -49,12 +50,11 @@ const TaskView: FC<{
         </Link>
         <Restricted>
           <div className="absolute inset-y-0 right-0 flex items-center">
-            <IconButton
+            <ConfirmedDeleteButton
+              disabled={isComplete}
               tiny
-              color="danger"
-              loading={deleteTask.isLoading}
-              onClick={() => deleteTask.mutate()}
-              icon="trash"
+              mutation={deleteTask}
+              target="uppdraget"
             />
           </div>
         </Restricted>
