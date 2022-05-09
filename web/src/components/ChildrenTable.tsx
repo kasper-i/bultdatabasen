@@ -18,7 +18,7 @@ const ChildrenTable = ({ resourceId, filters }: Props): ReactElement => {
 
   return (
     <div>
-      <ul>
+      <ul className="divide-y">
         {children.data
           .filter(
             (resource) =>
@@ -29,15 +29,19 @@ const ChildrenTable = ({ resourceId, filters }: Props): ReactElement => {
             const label = getResourceLabel(resource.type);
             const url = getResourceRoute(resource.type, resource.id);
             return (
-              <li key={resource.id}>
+              <li
+                key={resource.id}
+                className="flex justify-between items-center py-1.5"
+              >
                 <Link to={url}>
-                  <div className="flex justify-start items-center my-1.5 gap-2.5">
-                    <span className="text-xl">{resource.name}</span>
-                    <span className="bg-primary-400 rounded-full py-1 px-2 text-xs text-white">
-                      {label}
-                    </span>
+                  <div className="w-[16rem] sm:w-[32rem] text-md truncate">
+                    {resource.name}
                   </div>
                 </Link>
+
+                <span className="bg-primary-400 rounded-full py-1 px-2 text-xs text-white">
+                  {label}
+                </span>
               </li>
             );
           })}
