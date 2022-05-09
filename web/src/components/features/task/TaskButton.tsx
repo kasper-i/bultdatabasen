@@ -10,17 +10,16 @@ interface Props {
 function TaskButton({ resourceId }: Props): ReactElement {
   const { data: tasks } = useTasks(resourceId);
 
+  const taskCount =
+    tasks?.filter(
+      (task) => task.status === "open" || task.status === "assigned"
+    )?.length ?? 0;
+
   return (
     <div className="w-min relative cursor-pointer">
       <IconButton circular icon="wrench" />
-      {tasks && tasks.length > 0 && (
-        <Pill className="absolute -top-2.5 -right-2">
-          {
-            tasks.filter(
-              (task) => task.status === "open" || task.status === "assigned"
-            ).length
-          }
-        </Pill>
+      {taskCount > 0 && (
+        <Pill className="absolute -top-2.5 -right-2">{taskCount}</Pill>
       )}
     </div>
   );
