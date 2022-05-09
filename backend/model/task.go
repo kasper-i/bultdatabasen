@@ -1,17 +1,22 @@
 package model
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Task struct {
 	ResourceBase
-	Status      string  `json:"status"`
-	Description string  `json:"description"`
-	Assignee    *string `gorm:"->" json:"assignee,omitempty"`
-	Comment     *string `json:"comment,omitempty"`
-	ParentID    string  `gorm:"->" json:"parentId"`
+	Status      string     `json:"status"`
+	Description string     `json:"description"`
+	Assignee    *string    `gorm:"->" json:"assignee,omitempty"`
+	Comment     *string    `json:"comment,omitempty"`
+	ParentID    string     `gorm:"->" json:"parentId"`
+	BirthTime   time.Time  `gorm:"->;column:btime" json:"createdAt"`
+	UserID      string     `gorm:"->;column:buser_id" json:"userId"`
+	ClosedAt    *time.Time `json:"closedAt,omitempty"`
 }
 
 func (Task) TableName() string {
@@ -53,6 +58,8 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 		task.Status = "open"
 	}
 
+	task.ClosedAt = nil
+
 	resource := Resource{
 		ResourceBase: task.ResourceBase,
 		Type:         "task",
@@ -84,6 +91,11 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 
 	if original.Assignee != nil && task.Assignee == nil {
 		task.Status = "open"
+	}
+
+	if task.Status == "closed" {
+		now := time.Now()
+		task.ClosedAt = &now
 	}
 
 	return sess.Transaction(func(sess Session) error {

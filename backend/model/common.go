@@ -25,23 +25,23 @@ func (sess Session) Transaction(fn func(sess Session) error) error {
 }
 
 func getDescendantsQuery(resourceType string) string {
-	return fmt.Sprintf(`WITH RECURSIVE cte (id, name, type, parent_id, buser_id, first) AS (
-		SELECT id, name, type, parent_id, buser_id, TRUE
+	return fmt.Sprintf(`WITH RECURSIVE cte (id, name, type, parent_id, btime, mtime, buser_id, muser_id, first) AS (
+		SELECT id, name, type, parent_id, btime, mtime, buser_id, muser_id, TRUE
 		FROM resource
 		WHERE id = ?
 	UNION
-		SELECT child.id, child.name, child.type, child.parent_id, child.buser_id, FALSE
+		SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
 		FROM resource child
 		INNER JOIN cte ON child.parent_id = cte.id
 		WHERE depth <= %d
 	UNION
-		SELECT child.id, child.name, child.type, child.parent_id, child.buser_id, FALSE
+		SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
 		FROM foster_care f
 		INNER JOIN cte ON f.foster_parent_id = cte.id
 		INNER JOIN resource child ON child.id = f.id
 		WHERE cte.type = "route"
 	)
-	SELECT %s.*, cte.name, cte.parent_id, cte.buser_id FROM cte
+	SELECT %s.*, cte.name, cte.parent_id, cte.btime, cte.mtime, cte.buser_id, cte.muser_id FROM cte
 	INNER JOIN %s ON cte.id = %s.id
 	WHERE cte.first <> TRUE`, GetResourceDepth(resourceType), resourceType, resourceType, resourceType)
 }

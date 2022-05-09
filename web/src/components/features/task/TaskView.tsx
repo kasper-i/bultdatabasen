@@ -1,78 +1,95 @@
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
 import IconButton from "@/components/atoms/IconButton";
-import { Task, TaskStatus } from "@/models/task";
-import { useDeleteTask, useUpdateTask } from "@/queries/taskQueries";
-import React, { ReactElement, useState } from "react";
+import { Time } from "@/components/atoms/Time";
+import UserName from "@/components/UserName";
+import { TaskStatus } from "@/models/task";
+import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
+import { getResourceRoute } from "@/utils/resourceUtils";
+import React, { FC, ReactElement } from "react";
 import { Link } from "react-router-dom";
 import Restricted from "../../Restricted";
 
-interface Props {
-  task: Task;
-  resourceId: string;
-}
-
 const finalStatuses: TaskStatus[] = ["closed", "rejected"];
 
-const TaskView = ({ resourceId, ...rest }: Props): ReactElement => {
-  const [task, setTask] = useState(rest.task);
+const TaskView: FC<{
+  taskId: string;
+  parentId: string;
+}> = ({ parentId, taskId }): ReactElement => {
+  const { data: task } = useTask(taskId);
 
-  const ancestors = task.ancestors;
-  const deleteTask = useDeleteTask(resourceId, task.id);
-  const updateTask = useUpdateTask(resourceId, task.id);
+  const ancestors = task?.ancestors;
+  const deleteTask = useDeleteTask(parentId, taskId);
+  const updateTask = useUpdateTask(parentId, taskId);
+
+  const parent = ancestors?.filter((ancestor) =>
+    ["area", "crag", "sector", "route"].includes(ancestor.type)
+  )?.[0];
+
+  if (!task || !parent) {
+    return <></>;
+  }
 
   const changeStatus = (status: TaskStatus) => {
-    setTask((task) => {
-      const updatedTask = { ...task, status };
-      updateTask.mutate(updatedTask);
-      return updatedTask;
-    });
+    const updatedTask = { ...task, status };
+    updateTask.mutate(updatedTask);
+    return updatedTask;
   };
 
-  const routeName =
-    ancestors?.find((ancestor) => ancestor.type === "route")?.name ?? "";
-
-  const isComplete = finalStatuses.includes(task.status);
+  const isComplete = finalStatuses.some((status) => status === task.status);
 
   return (
-    <div
-      className="sm:w-96 flex flex-col space-y-2 bg-gray-200 p-5 rounded"
-      key={task.id}
-    >
-      <div className="flex justify-between items-center">
-        <Link to={`/route/${task.parentId}`}>
-          <div className="flex flex-col">
-            <div className="flex items-center">
-              {task.status === "closed" && (
-                <Icon className="text-green-600" name="check" />
-              )}
-              {task.description}
-            </div>
-            <div className="text-sm text-gray-500">{routeName}</div>
-          </div>
+    <div className="w-full sm:w-96 flex flex-col space-y-2.5 bg-white shadow-sm p-5 rounded border border-gray-300">
+      <div className="relative flex justify-between items-center">
+        <Link
+          to={getResourceRoute(parent.type, parent.id)}
+          className="w-full pr-5"
+        >
+          <div className="text-sm text-gray-500 truncate">{parent?.name}</div>
         </Link>
         <Restricted>
-          <IconButton
-            color="danger"
-            loading={deleteTask.isLoading}
-            onClick={() => deleteTask.mutate()}
-            icon="trash"
-          />
+          <div className="absolute inset-y-0 right-0 flex items-center">
+            <IconButton
+              tiny
+              color="danger"
+              loading={deleteTask.isLoading}
+              onClick={() => deleteTask.mutate()}
+              icon="trash"
+            />
+          </div>
         </Restricted>
       </div>
 
-      <Restricted>
-        <div className="flex space-x-2">
+      <div className="text-xs">
+        Rapporterat{" "}
+        <span className="font-medium">
+          <Time time={task.createdAt} />
+        </span>{" "}
+        av <UserName userId={task.userId} />
+      </div>
+
+      <p className="text-sm">{task.description}</p>
+
+      {task.status === "closed" ? (
+        <div className="text-green-600 flex items-center">
+          <Icon className="text-green-600" name="check" />
+          <p>
+            <span className="ml-1 font-bold">Åtgärdat</span>{" "}
+            {task.closedAt && <Time time={task.closedAt} />}
+          </p>
+        </div>
+      ) : (
+        <Restricted>
           <Button
             disabled={isComplete}
             onClick={() => changeStatus("closed")}
             icon="check"
             full
           >
-            Utfört
+            Markera åtgärdad
           </Button>
-        </div>
-      </Restricted>
+        </Restricted>
+      )}
     </div>
   );
 };
