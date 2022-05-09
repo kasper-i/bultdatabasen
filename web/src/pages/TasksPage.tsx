@@ -27,7 +27,7 @@ const locationDescription = (
 const TasksPage = (): ReactElement => {
   const { resourceId } = useUnsafeParams<"resourceId">();
   const { data: resource } = useResource(resourceId);
-  const tasks = useTasks(resourceId);
+  const { data: tasks } = useTasks(resourceId);
 
   if (!resource) {
     return <Fragment />;
@@ -37,7 +37,14 @@ const TasksPage = (): ReactElement => {
     <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-5">
       <BackLink resource={resource} />
       <h1 className="text-3xl font-bold pb-1 flex items-start">
-        Uppdrag <Pill className="ml-2">{tasks.data?.length}</Pill>
+        Uppdrag{" "}
+        <Pill className="ml-2">
+          {
+            tasks?.filter(
+              (task) => task.status === "open" || task.status === "assigned"
+            )?.length
+          }
+        </Pill>
       </h1>
       {resource.name !== undefined &&
         locationDescription(resource.name, resource.type)}
