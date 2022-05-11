@@ -27,13 +27,23 @@ function LoginToolbar(): ReactElement {
 
   if (isAuthenticated) {
     return (
-      <Button onClick={gotoCognitoSignout} className="ring-offset-gray-900">
+      <Button
+        outlined
+        color="contrast"
+        onClick={gotoCognitoSignout}
+        className="ring-offset-gray-900"
+      >
         Logga Ut
       </Button>
     );
   } else {
     return (
-      <Button onClick={gotoCognitoSignin} className="ring-offset-gray-900">
+      <Button
+        outlined
+        color="contrast"
+        onClick={gotoCognitoSignin}
+        className="ring-offset-gray-900"
+      >
         Logga In
       </Button>
     );

@@ -19,4 +19,4 @@ export type IconType =
   | "image"
   | "camera";
 
-export type ColorType = "primary" | "danger";
+export type ColorType = "primary" | "danger" | "contrast";

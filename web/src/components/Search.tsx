@@ -69,7 +69,7 @@ function Search() {
   };
 
   return (
-    <div className="w-full max-w-xs">
+    <div className="w-full">
       <Combobox
         value={value}
         onChange={(value) => {

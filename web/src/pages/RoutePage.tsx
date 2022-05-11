@@ -45,7 +45,7 @@ const RoutePage = (): ReactElement => {
       <PageHeader resourceId={resourceId} ancestors={route.data.ancestors} />
 
       <div className="flex items-center gap-2">
-        <p className="text-lg">
+        <p className="text-md">
           <Underlined>{renderRouteType(routeType)}</Underlined> från{" "}
           <Underlined>{year}</Underlined> som är{" "}
           <Underlined>{length}m</Underlined> lång och består av{" "}

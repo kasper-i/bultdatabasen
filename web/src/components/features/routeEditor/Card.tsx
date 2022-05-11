@@ -20,23 +20,23 @@ export const Card: FC<{
   return (
     <div ref={ref} className="relative">
       {upperCutout && (
-        <div className="absolute top-0 w-full overflow-hidden h-3">
-          <div className="mx-auto -mt-4 w-7 h-7 border border-gray-300 bg-gray-100 rounded-full" />
+        <div className="absolute top-0 w-full overflow-hidden h-2.5">
+          <div className="mx-auto -mt-3.5 w-6 h-6 border border-gray-300 bg-neutral-50 rounded-full" />
         </div>
       )}
       <div
         className={clsx(
           "rounded-md w-full p-4",
           dashed
-            ? "border-2 border-gray-300 border-dashed bg-gray-100"
+            ? "border-2 border-gray-300 border-dashed bg-neutral-50"
             : "border border-gray-300 bg-white"
         )}
       >
         {children}
       </div>
       {lowerCutout && (
-        <div className="absolute bottom-0 w-full overflow-hidden h-3">
-          <div className="mx-auto w-7 h-7 border border-gray-300 bg-gray-100 rounded-full" />
+        <div className="absolute bottom-0 w-full overflow-hidden h-2.5">
+          <div className="mx-auto w-6 h-6 border border-gray-300 bg-neutral-50 rounded-full" />
         </div>
       )}
     </div>

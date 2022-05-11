@@ -28,7 +28,7 @@ const PageHeader = ({
   return (
     <div className="flex flex-col gap-2.5">
       {parent && <BackLink resource={parent} />}
-      <h1 className="text-3xl font-bold">{resource.name}</h1>
+      <h1 className="text-2xl font-bold">{resource.name}</h1>
       {counts.data != null && showCounts && (
         <p className="text-lg">
           {getResourceLabel(resource.type)} med{" "}

@@ -23,7 +23,7 @@ const Button: FC<ButtonProps> = ({
   icon,
   onClick,
   className,
-  color,
+  color = "primary",
   loading,
   disabled,
   full,
@@ -45,7 +45,9 @@ const Button: FC<ButtonProps> = ({
       ? "border-2 border-gray-400"
       : color === "danger"
       ? "text-red-500 border-2 border-red-500 hover:border-red-600 hover:text-red-600 focus:ring-red-400"
-      : "text-primary-500 border-2 border-primary-500 hover:border-primary-600 hover:text-primary-600 focus:ring-primary-400";
+      : color === "primary"
+      ? "text-primary-500 border-2 border-primary-500 hover:border-primary-600 hover:text-primary-600 focus:ring-primary-400"
+      : "text-white border-2 border-white focus:ring-white";
   };
 
   return (
@@ -67,7 +69,11 @@ const Button: FC<ButtonProps> = ({
         <div className="absolute inset-0 flex items-center justify-center">
           <Dots
             className={clsx(
-              color === "danger" ? "text-danger-100" : "text-primary-100",
+              color === "danger"
+                ? "text-danger-100"
+                : color === "primary"
+                ? "text-primary-100"
+                : "text-white",
               "flex items-center"
             )}
           />
