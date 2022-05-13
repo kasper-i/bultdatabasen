@@ -2,6 +2,7 @@ import configData from "@/config.json";
 import { Image, ImageRotation, ImageVersion } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import { Dialog, Transition } from "@headlessui/react";
+import clsx from "clsx";
 import React, {
   CSSProperties,
   FC,
@@ -109,9 +110,15 @@ export const FullSizeImage: FC<{
             <Dialog.Overlay className="fixed inset-0 bg-neutral-50" />
           </Transition.Child>
 
+          {loading && (
+            <div className="fixed flex items-center justify-center -mt-16">
+              <Spinner active={loading} />
+            </div>
+          )}
+
           <div className="-mt-16" tabIndex={1}>
-            <Spinner active={loading} />
             <img
+              className={clsx(loading && "invisible")}
               ref={imgRef}
               onLoad={onLoad}
               style={{
