@@ -84,7 +84,7 @@ function Search() {
           <Combobox.Input
             displayValue={(value: SearchResult) => value.name}
             onChange={handleSearchChange}
-            className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-3xl h-[34px]"
+            className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-3xl h-[2.125rem]"
           />
           <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
             <SearchIcon className="w-5 h-5 text-gray-400" aria-hidden="true" />
