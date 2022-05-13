@@ -54,7 +54,7 @@ const Button: FC<ButtonProps> = ({
     <button
       onClick={onClick}
       className={clsx(
-        "relative h-[34px] flex justify-center items-center py-1.5 px-3 gap-1.5 text-sm shadow-sm rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
+        "relative h-[2.125rem] flex justify-center items-center py-1.5 px-3 gap-1.5 text-sm shadow-sm rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
         outlined ? outlinedStyle() : solidStyle(),
         full && "w-full",
         className

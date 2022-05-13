@@ -88,7 +88,7 @@ export function Select<T>({
         {label}
       </Listbox.Label>
       <div className="relative">
-        <Listbox.Button className="focus:outline-none bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[34px]">
+        <Listbox.Button className="focus:outline-none bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[2.125rem]">
           <span className="block truncate text-left ml-3">
             {value ? displayValue(value) : ""}
           </span>

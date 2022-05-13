@@ -107,7 +107,7 @@ export function Combobox<T>({
           <HeadlessCombobox.Input
             displayValue={displayValue}
             onChange={(event) => setQuery(event.target.value)}
-            className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[34px]"
+            className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[2.125rem]"
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-2">
             <SelectorIcon
