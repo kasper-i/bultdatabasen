@@ -13,10 +13,11 @@ export type IconType =
   | "paste"
   | "plus"
   | "add"
-  | "redo"
+  | "reply"
   | "copy"
   | "home"
   | "image"
-  | "camera";
+  | "camera"
+  | "download";
 
 export type ColorType = "primary" | "danger" | "contrast";

@@ -136,6 +136,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           />
           {currImg !== undefined && (
             <ImageCarousel
+              pointId={point.id}
               selectedImageId={currImg}
               images={images ?? []}
               onClose={() => setCurrImg(undefined)}
