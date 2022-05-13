@@ -17,6 +17,7 @@ import Button from "./atoms/Button";
 import IconButton from "./atoms/IconButton";
 import Spinner from "./atoms/Spinner";
 import ConfirmedDeleteButton from "./molecules/ConfirmedDeleteButton";
+import Restricted from "./Restricted";
 
 type Orientation = "portrait" | "landscape";
 
@@ -134,20 +135,23 @@ export const FullSizeImage: FC<{
           <div className="fixed h-16 w-full bottom-0 inset-x-0 flex justify-between px-5 bg-neutral-100 border-t">
             <IconButton tiny onClick={onClose} icon="close" />
             <div className="flex items-center gap-2.5">
-              <Button
-                loading={updateImage.isLoading}
-                onClick={() =>
-                  updateImage.mutate({
-                    rotation: image.rotation
-                      ? (((image.rotation + 90) % 360) as ImageRotation)
-                      : 90,
-                  })
-                }
-                icon="refresh"
-                className="ring-offset-neutral-100"
-              >
-                Rotera
-              </Button>
+              <Restricted>
+                <Button
+                  loading={updateImage.isLoading}
+                  onClick={() =>
+                    updateImage.mutate({
+                      rotation: image.rotation
+                        ? (((image.rotation + 90) % 360) as ImageRotation)
+                        : 90,
+                    })
+                  }
+                  icon="refresh"
+                  className="ring-offset-neutral-100"
+                >
+                  Rotera
+                </Button>
+              </Restricted>
+
               <Button
                 loading={updateImage.isLoading}
                 onClick={() =>
@@ -158,7 +162,9 @@ export const FullSizeImage: FC<{
               >
                 Original
               </Button>
-              <ConfirmedDeleteButton target="bilden" mutation={deleteImage} />
+              <Restricted>
+                <ConfirmedDeleteButton target="bilden" mutation={deleteImage} />
+              </Restricted>
             </div>
           </div>
         </div>
