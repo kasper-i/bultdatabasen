@@ -136,7 +136,7 @@ export const FullSizeImage: FC<{
                       : 90,
                   })
                 }
-                icon="reply"
+                icon="refresh"
                 className="ring-offset-neutral-100"
               >
                 Rotera

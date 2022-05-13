@@ -13,7 +13,7 @@ export type IconType =
   | "paste"
   | "plus"
   | "add"
-  | "reply"
+  | "refresh"
   | "copy"
   | "home"
   | "image"

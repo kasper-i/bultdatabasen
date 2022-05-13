@@ -62,7 +62,7 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return PhotographIcon;
       case "camera":
         return CameraIcon;
-      case "reply":
+      case "refresh":
         return RefreshIcon;
       case "download":
         return DownloadIcon;
