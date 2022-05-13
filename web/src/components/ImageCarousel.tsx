@@ -124,7 +124,7 @@ export const FullSizeImage: FC<{
             />
           </div>
 
-          <div className="fixed h-16 w-full bottom-0 inset-x-0 flex  justify-between px-5 bg-neutral-100 border-t">
+          <div className="fixed h-16 w-full bottom-0 inset-x-0 flex justify-between px-5 bg-neutral-100 border-t">
             <IconButton tiny onClick={onClose} icon="close" />
             <div className="flex items-center gap-2.5">
               <Button
@@ -137,7 +137,7 @@ export const FullSizeImage: FC<{
                   })
                 }
                 icon="reply"
-                className="ring-offset-gray-100"
+                className="ring-offset-neutral-100"
               >
                 Rotera
               </Button>
@@ -147,7 +147,7 @@ export const FullSizeImage: FC<{
                   (window.location.href = `${configData.API_URL}/images/${image.id}/original`)
                 }
                 icon="download"
-                className="ring-offset-gray-100"
+                className="ring-offset-neutral-100"
               >
                 Original
               </Button>
