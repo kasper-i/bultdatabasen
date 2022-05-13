@@ -53,7 +53,7 @@ const IconButton: FC<IconButtonProps> = ({
     <button
       onClick={onClick}
       className={clsx(
-        "box-content",
+        "relative box-content",
         tiny ? tinyStyle() : regularStyle(),
         className
       )}

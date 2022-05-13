@@ -1,93 +1,43 @@
 import configData from "@/config.json";
-import { Image, ImageVersion } from "@/models/image";
+import { Image, ImageRotation, ImageVersion } from "@/models/image";
+import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import { Dialog, Transition } from "@headlessui/react";
 import React, {
   CSSProperties,
+  FC,
   Fragment,
-  useCallback,
   useEffect,
   useReducer,
   useRef,
   useState,
 } from "react";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
-import usePrevious from "react-use/lib/usePrevious";
+import Button from "./atoms/Button";
+import IconButton from "./atoms/IconButton";
 import Spinner from "./atoms/Spinner";
-
-interface FullSizeImageProps {
-  image: Image;
-  onClose: () => void;
-  onSwipe?: (direction: "left" | "right") => void;
-  version: ImageVersion;
-}
+import ConfirmedDeleteButton from "./molecules/ConfirmedDeleteButton";
 
 type Orientation = "portrait" | "landscape";
 
-interface Coordinate {
-  x: number;
-  y: number;
-}
+export const FullSizeImage: FC<{
+  image: Image;
+  pointId: string;
+  onClose: () => void;
+  version: ImageVersion;
+}> = ({ image, pointId, onClose, version }) => {
+  const updateImage = useUpdateImage(pointId, image.id);
+  const deleteImage = useDeleteImage(pointId, image.id);
 
-export const FullSizeImage = ({
-  image,
-  onClose,
-  onSwipe,
-  version,
-}: FullSizeImageProps) => {
   const imgRef = useRef<HTMLImageElement>(null);
-  const touchRef = useRef<Coordinate>({ x: 0, y: 0 });
   const loading = !(imgRef.current?.complete ?? false);
 
-  const prevImage = usePrevious(image);
-  const [, forceRender] = useReducer((s) => s + 1, 0);
-
-  const hidden = image !== prevImage;
-
-  useKeyPressEvent("Escape", onClose);
-
-  const onTouchStart = useCallback((e: TouchEvent): void => {
-    touchRef.current.x = e.changedTouches[0].screenX;
-    touchRef.current.y = e.changedTouches[0].screenY;
-  }, []);
-
-  const onTouchEnd = useCallback(
-    (e: TouchEvent) => {
-      const start = touchRef.current;
-      const end: Coordinate = {
-        x: e.changedTouches[0].screenX,
-        y: e.changedTouches[0].screenY,
-      };
-
-      if (Math.abs(end.x - start.x) < 50) {
-        return;
-      }
-
-      if (Math.abs(end.y - start.y) > 50) {
-        return;
-      }
-
-      onSwipe?.(end.x < start.x ? "left" : "right");
-    },
-    [onSwipe]
-  );
-
   useEffect(() => {
-    const body = document.body;
-    body?.classList.add("no-scroll");
+    if (deleteImage.isSuccess) {
+      onClose();
+    }
+  }, [deleteImage.isSuccess]);
 
-    const imgElement = imgRef.current;
-
-    imgElement?.addEventListener("touchstart", onTouchStart);
-    imgElement?.addEventListener("touchend", onTouchEnd);
-
-    return () => {
-      const body = document.body;
-      body?.classList.remove("no-scroll");
-
-      imgElement?.removeEventListener("touchstart", onTouchStart);
-      imgElement?.removeEventListener("touchend", onTouchEnd);
-    };
-  });
+  const [, forceRender] = useReducer((s) => s + 1, 0);
 
   let rotatorClasses: CSSProperties = {};
 
@@ -102,6 +52,9 @@ export const FullSizeImage = ({
 
   switch (image.rotation) {
     case 0:
+      rotatorClasses = {
+        transform: "rotate(0deg) ",
+      };
       break;
     case 90:
       rotatorClasses = {
@@ -125,8 +78,8 @@ export const FullSizeImage = ({
   };
 
   let dimensionClasses: CSSProperties = {
-    maxHeight: "calc(100vh - 140px)",
-    maxWidth: "calc(100vw - 40px)",
+    maxHeight: "calc(100vh - 4rem)",
+    maxWidth: "calc(100vw)",
   };
 
   if (targetOrientation !== originalOrientation) {
@@ -142,7 +95,7 @@ export const FullSizeImage = ({
   return (
     <Transition appear show as={Fragment}>
       <Dialog className="fixed inset-0 z-10 overflow-y-auto" onClose={onClose}>
-        <div className="min-h-screen flex justify-center items-center">
+        <div className="min-h-screen flex flex-col justify-center items-center overflow-hidden">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -153,51 +106,66 @@ export const FullSizeImage = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 bg-gray-800" />
+            <Dialog.Overlay className="fixed inset-0 bg-neutral-50" />
           </Transition.Child>
 
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="scale-95"
-            enterTo="scale-100"
-            leave="ease-in duration-200"
-            leaveFrom="scale-100"
-            leaveTo="scale-95"
-          >
-            <div className="relative">
-              <Spinner active={loading} />
-              <img
-                ref={imgRef}
-                onLoad={onLoad}
-                style={{
-                  display: loading || hidden ? "none" : "block",
-                  imageOrientation: "none",
-                  ...dimensionClasses,
-                  ...rotatorClasses,
-                }}
-                src={`${configData.API_URL}/images/${image.id}/${version}`}
-                alt=""
-              />
+          <div className="-mt-16" tabIndex={1}>
+            <Spinner active={loading} />
+            <img
+              ref={imgRef}
+              onLoad={onLoad}
+              style={{
+                imageOrientation: "none",
+                ...dimensionClasses,
+                ...rotatorClasses,
+              }}
+              src={`${configData.API_URL}/images/${image.id}/${version}`}
+              alt=""
+            />
+          </div>
+
+          <div className="fixed h-16 w-full bottom-0 inset-x-0 flex justify-between px-5 bg-neutral-100 border-t">
+            <IconButton tiny onClick={onClose} icon="close" />
+            <div className="flex items-center gap-2.5">
+              <Button
+                loading={updateImage.isLoading}
+                onClick={() =>
+                  updateImage.mutate({
+                    rotation: image.rotation
+                      ? (((image.rotation + 90) % 360) as ImageRotation)
+                      : 90,
+                  })
+                }
+                icon="refresh"
+                className="ring-offset-neutral-100"
+              >
+                Rotera
+              </Button>
+              <Button
+                loading={updateImage.isLoading}
+                onClick={() =>
+                  (window.location.href = `${configData.API_URL}/images/${image.id}/original`)
+                }
+                icon="download"
+                className="ring-offset-neutral-100"
+              >
+                Original
+              </Button>
+              <ConfirmedDeleteButton target="bilden" mutation={deleteImage} />
             </div>
-          </Transition.Child>
+          </div>
         </div>
       </Dialog>
     </Transition>
   );
 };
 
-interface ImageCarouselProps {
+export const ImageCarousel: FC<{
+  pointId: string;
   images: Image[];
   selectedImageId: string;
   onClose: () => void;
-}
-
-export const ImageCarousel = ({
-  images,
-  selectedImageId,
-  onClose,
-}: ImageCarouselProps) => {
+}> = ({ pointId, images, selectedImageId, onClose }) => {
   const [index, setIndex] = useState(
     images.findIndex((image) => image.id === selectedImageId)
   );
@@ -209,24 +177,16 @@ export const ImageCarousel = ({
   useKeyPressEvent("ArrowLeft", prev, undefined);
   useKeyPressEvent("ArrowRight", next, undefined);
 
-  const onSwipe = (direction: "left" | "right") => {
-    if (direction === "left") {
-      prev();
-    } else {
-      next();
-    }
-  };
-
-  if (index === undefined) {
+  if (index === undefined || images[index] === undefined) {
     return <Fragment />;
   }
 
   return (
     <FullSizeImage
+      pointId={pointId}
       image={images[index]}
       version="xl"
       onClose={onClose}
-      onSwipe={onSwipe}
     />
   );
 };

@@ -140,7 +140,7 @@ const PointEditor = ({
   };
 
   return (
-    <div className={clsx("flex flex-col", !editable && "gap-1")}>
+    <div className={clsx("flex flex-col w-full sm:w-96", !editable && "gap-1")}>
       {points
         .slice()
         .reverse()

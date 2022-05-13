@@ -1,20 +1,22 @@
 import {
   ArrowSmLeftIcon,
-  BeakerIcon,
   BadgeCheckIcon,
+  BeakerIcon,
+  CameraIcon,
   ClipboardIcon,
   DuplicateIcon,
   ExternalLinkIcon,
   LockClosedIcon,
   LockOpenIcon,
   PhotographIcon,
+  PlusCircleIcon,
   PlusSmIcon,
+  RefreshIcon,
   TrashIcon,
   UploadIcon,
   XCircleIcon,
   XIcon,
-  PlusCircleIcon,
-  CameraIcon,
+  DownloadIcon,
 } from "@heroicons/react/outline";
 import { HomeIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
@@ -60,7 +62,10 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return PhotographIcon;
       case "camera":
         return CameraIcon;
-      case "redo":
+      case "refresh":
+        return RefreshIcon;
+      case "download":
+        return DownloadIcon;
       case "wrench":
       default:
         return BeakerIcon;
