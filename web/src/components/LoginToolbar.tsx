@@ -31,7 +31,7 @@ function LoginToolbar(): ReactElement {
         outlined
         color="contrast"
         onClick={gotoCognitoSignout}
-        className="ring-offset-gray-900"
+        className="ring-offset-primary-300"
       >
         Logga Ut
       </Button>
@@ -42,7 +42,7 @@ function LoginToolbar(): ReactElement {
         outlined
         color="contrast"
         onClick={gotoCognitoSignin}
-        className="ring-offset-gray-900"
+        className="ring-offset-primary-300"
       >
         Logga In
       </Button>
