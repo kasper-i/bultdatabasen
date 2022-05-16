@@ -7,7 +7,7 @@ import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
 import React, { ReactElement, Suspense, useState } from "react";
 import { UseMutationResult } from "react-query";
-import BoltDetails from "./BoltDetails";
+import BoltEditor from "./BoltEditor";
 import PointPicker from "./PointPicker";
 
 interface Props {
@@ -124,7 +124,7 @@ function PointWizard({
 
           <div className="flex flex-wrap gap-4">
             {bolts.map(([index, bolt]) => (
-              <BoltDetails
+              <BoltEditor
                 key={index}
                 bolt={bolt}
                 onRemove={

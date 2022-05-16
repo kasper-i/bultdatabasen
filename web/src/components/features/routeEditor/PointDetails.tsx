@@ -1,6 +1,5 @@
 import Loader from "@/components/atoms/Loader";
 import { Concatenator } from "@/components/Concatenator";
-import BoltDetails from "@/components/features/routeEditor/BoltDetails";
 import Feed from "@/components/Feed";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import ImageThumbnail from "@/components/ImageThumbnail";
@@ -16,6 +15,7 @@ import { useDetachPoint } from "@/queries/pointQueries";
 import { compareDesc } from "date-fns";
 import React, { ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
+import BoltDetails from "./BoltDetails";
 import { PointLabel } from "./hooks";
 
 interface Props {
@@ -86,7 +86,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 py-4">
+      <div className="flex flex-wrap gap-2.5 py-4">
         {bolts.data
           ?.slice()
           ?.sort((b1: Bolt) => (b1.position === "left" ? -1 : 1))
