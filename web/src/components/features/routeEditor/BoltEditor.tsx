@@ -1,23 +1,13 @@
 import IconButton from "@/components/atoms/IconButton";
 import RadioGroup, { Option } from "@/components/atoms/RadioGroup";
-import { Bolt, BoltPosition, BoltType } from "@/models/bolt";
+import { Bolt, BoltType } from "@/models/bolt";
+import { positionToLabel } from "@/utils/boltUtils";
 import React from "react";
 
 const typeOptions: Option<BoltType>[] = [
   { key: "expansion", value: "expansion", label: "Expander" },
   { key: "glue", value: "glue", label: "Limbult" },
 ];
-
-const positionToLabel = (position?: BoltPosition) => {
-  switch (position) {
-    case "left":
-      return "Vänster";
-    case "right":
-      return "Höger";
-    default:
-      return "Bultinfo";
-  }
-};
 
 interface Props {
   bolt: Pick<Bolt, "type" | "position">;

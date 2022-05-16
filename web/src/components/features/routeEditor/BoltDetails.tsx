@@ -1,16 +1,6 @@
-import { Bolt, BoltPosition } from "@/models/bolt";
+import { Bolt } from "@/models/bolt";
+import { positionToLabel } from "@/utils/boltUtils";
 import React, { FC } from "react";
-
-const positionToLabel = (position?: BoltPosition) => {
-  switch (position) {
-    case "left":
-      return "Vänster";
-    case "right":
-      return "Höger";
-    default:
-      return "Bultinfo";
-  }
-};
 
 const LabelAndValue: FC<{ label: string; value?: string }> = ({
   label,
@@ -20,11 +10,7 @@ const LabelAndValue: FC<{ label: string; value?: string }> = ({
     <>
       <div className="text-xs text-gray-600 text-left">{label}</div>
       <div className="text-sm">
-        {value ? (
-          <span className="">{value}</span>
-        ) : (
-          <span className="text-gray-300">-</span>
-        )}
+        {value ? value : <span className="text-gray-300">-</span>}
       </div>
     </>
   );

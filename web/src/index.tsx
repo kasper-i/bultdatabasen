@@ -3,6 +3,7 @@ import createAuthRefreshInterceptor from "axios-auth-refresh";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import { Provider } from "react-redux";
 import { Api } from "./Api";
 import App from "./App";
@@ -38,7 +39,7 @@ root.render(
   <QueryClientProvider client={queryClient}>
     <Provider store={store}>
       <App />
-      {/*<ReactQueryDevtools initialIsOpen={false} position="bottom-left" />*/}
+      <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
     </Provider>
   </QueryClientProvider>
 );
