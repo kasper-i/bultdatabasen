@@ -33,7 +33,7 @@ jobs:
       - name: Upload archive
         uses: actions/upload-artifact@v3
         with:
-          path: "bultdatabasen_${GITHUB_RUN_ID}_amd64.deb"
+          path: bultdatabasen_*_amd64.deb
 
 on:
   push:
