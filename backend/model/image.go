@@ -228,7 +228,7 @@ func ResizeImage(imageID string, version string) error {
 		canvas = image.NewRGBA(image.Rect(0, 0, int((float32(size)/height)*width), size))
 	}
 
-	draw.CatmullRom.Scale(canvas, canvas.Rect, decodedImage, decodedImage.Bounds(), draw.Over, nil)
+	draw.BiLinear.Scale(canvas, canvas.Rect, decodedImage, decodedImage.Bounds(), draw.Over, nil)
 
 	if err := jpeg.Encode(output, canvas, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
 		return err
