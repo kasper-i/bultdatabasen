@@ -13,7 +13,7 @@ import { useBolts } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
 import { compareDesc } from "date-fns";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import BoltDetails from "./BoltDetails";
 import { PointLabel } from "./hooks";
@@ -32,6 +32,14 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   const [currImg, setCurrImg] = useState<string>();
 
   const sharedParents = point.parents.filter((parent) => parent.id !== routeId);
+
+  const sortedImages = useMemo(() => {
+    return images
+      ?.slice()
+      .sort((i1, i2) =>
+        compareDesc(new Date(i1.timestamp), new Date(i2.timestamp))
+      );
+  }, [images]);
 
   return (
     <div>
@@ -99,46 +107,41 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           ))}
       </div>
 
-      {!images ? (
+      {!sortedImages ? (
         <Loader />
       ) : (
         <>
           <Feed
-            items={images
-              .slice()
-              .sort((i1, i2) =>
-                compareDesc(new Date(i1.timestamp), new Date(i2.timestamp))
-              )
-              .map((image, index) => {
-                return {
-                  key: index,
-                  header: (
-                    <p className="text-xs">
-                      <UserName userId={image.userId} />
-                      <br />
-                      <span>
-                        Laddade upp foto{" "}
-                        <span className="font-bold">
-                          {new Date(image.timestamp).getFullYear()}
-                        </span>
+            items={sortedImages.map((image, index) => {
+              return {
+                key: index,
+                header: (
+                  <p className="text-xs">
+                    <UserName userId={image.userId} />
+                    <br />
+                    <span>
+                      Laddade upp foto{" "}
+                      <span className="font-bold">
+                        {new Date(image.timestamp).getFullYear()}
                       </span>
-                    </p>
-                  ),
-                  value: (
-                    <ImageThumbnail
-                      image={image}
-                      key={image.id}
-                      onClick={() => setCurrImg(image.id)}
-                    />
-                  ),
-                };
-              })}
+                    </span>
+                  </p>
+                ),
+                value: (
+                  <ImageThumbnail
+                    image={image}
+                    key={image.id}
+                    onClick={() => setCurrImg(image.id)}
+                  />
+                ),
+              };
+            })}
           />
           {currImg !== undefined && (
             <ImageCarousel
               pointId={point.id}
               selectedImageId={currImg}
-              images={images ?? []}
+              images={sortedImages ?? []}
               onClose={() => setCurrImg(undefined)}
             />
           )}

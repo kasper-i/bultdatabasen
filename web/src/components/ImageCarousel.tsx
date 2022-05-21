@@ -12,7 +12,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import Button from "./atoms/Button";
 import IconButton from "./atoms/IconButton";
 import Spinner from "./atoms/Spinner";
@@ -187,8 +186,21 @@ export const ImageCarousel: FC<{
     setIndex((index) => (index === 0 ? images.length - 1 : index - 1));
   const next = () => setIndex((index) => (index + 1) % images.length);
 
-  useKeyPressEvent("ArrowLeft", prev, undefined);
-  useKeyPressEvent("ArrowRight", next, undefined);
+  useEffect(() => {
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        prev();
+      } else if (event.key === "ArrowRight") {
+        next();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyUp);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyUp);
+    };
+  }, []);
 
   if (index === undefined || images[index] === undefined) {
     return <Fragment />;
