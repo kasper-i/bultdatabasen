@@ -187,7 +187,7 @@ export const ImageCarousel: FC<{
   const next = () => setIndex((index) => (index + 1) % images.length);
 
   useEffect(() => {
-    const handleKeyUp = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft") {
         prev();
       } else if (event.key === "ArrowRight") {
@@ -195,10 +195,10 @@ export const ImageCarousel: FC<{
       }
     };
 
-    document.addEventListener("keydown", handleKeyUp);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener("keydown", handleKeyUp);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
