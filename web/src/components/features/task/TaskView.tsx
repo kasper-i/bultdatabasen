@@ -1,6 +1,5 @@
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
-import IconButton from "@/components/atoms/IconButton";
 import { Time } from "@/components/atoms/Time";
 import ConfirmedDeleteButton from "@/components/molecules/ConfirmedDeleteButton";
 import UserName from "@/components/UserName";

@@ -64,7 +64,7 @@ function PointWizard({
             pointId: undefined,
             position,
             anchor: isAnchor,
-            bolts: bolts.map(([_, bolt]) => bolt),
+            bolts: bolts.map(([, bolt]) => bolt),
           }
     );
   };
