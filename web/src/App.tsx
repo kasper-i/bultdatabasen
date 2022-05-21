@@ -5,7 +5,6 @@ import { useQueryClient } from "react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Api } from "./Api";
 import Loader from "./components/atoms/Loader";
-import Spinner from "./components/atoms/Spinner";
 import Main from "./layouts/Main";
 import Page from "./layouts/Page";
 import AreaPage from "./pages/AreaPage";
