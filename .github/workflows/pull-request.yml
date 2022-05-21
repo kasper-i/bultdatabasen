@@ -1,6 +1,6 @@
 jobs:
-  build:
-    name: Pull Request
+  app:
+    name: Build app
     runs-on: ubuntu-latest
 
     steps:
@@ -8,10 +8,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - uses: actions/setup-go@v2
-        with:
-          go-version: "1.18"
-          check-latest: true
       - name: Install dependencies
         run: |
           npm install
@@ -24,6 +20,17 @@ jobs:
         run: |
           npm run build
         working-directory: web
+
+  backend:
+    name: Build backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "1.18"
+          check-latest: true
       - name: Lint backend
         uses: golangci/golangci-lint-action@v3
         with:
