@@ -31,22 +31,18 @@ const Button: FC<ButtonProps> = ({
 }) => {
   const solidStyle = () => {
     return [
-      disabled
-        ? "bg-gray-400"
-        : color === "danger"
-        ? "bg-red-500 hover:bg-red-600 focus:ring-red-400"
-        : "bg-primary-500 hover:bg-primary-600 focus:ring-primary-400",
+      color === "danger"
+        ? "bg-red-500 !disabled:hover:bg-red-600 focus:ring-red-400"
+        : "bg-primary-500 !disabled:hover:bg-primary-600 focus:ring-primary-400",
       "text-white",
     ];
   };
 
   const outlinedStyle = () => {
-    return disabled
-      ? "border-2 border-gray-400"
-      : color === "danger"
-      ? "text-red-500 border-2 border-red-500 hover:border-red-600 hover:text-red-600 focus:ring-red-400"
+    return color === "danger"
+      ? "text-red-500 border-2 border-red-500 !disabled:hover:border-red-600 !disabled:hover:text-red-600 focus:ring-red-400"
       : color === "primary"
-      ? "text-primary-500 border-2 border-primary-500 hover:border-primary-600 hover:text-primary-600 focus:ring-primary-400"
+      ? "text-primary-500 border-2 border-primary-500 !disabled:hover:border-primary-600 !disabled:hover:text-primary-600 focus:ring-primary-400"
       : "text-white border-2 border-white focus:ring-white";
   };
 
@@ -56,6 +52,7 @@ const Button: FC<ButtonProps> = ({
       className={clsx(
         "relative h-[2.125rem] flex justify-center items-center py-1.5 px-3 gap-1.5 text-sm shadow-sm rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
         outlined ? outlinedStyle() : solidStyle(),
+        "disabled:opacity-40",
         full && "w-full",
         className
       )}
