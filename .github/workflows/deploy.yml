@@ -38,4 +38,6 @@ jobs:
 on:
   push:
     branches:
-      - 115-deploy-releases-without-packagecloud
+      - develop
+  release:
+    types: [published]
