@@ -1,6 +1,6 @@
 import { Api } from "@/Api";
 import { SearchResult } from "@/models/resource";
-import { getResourceRoute } from "@/utils/resourceUtils";
+import { getResourceLabel, getResourceRoute } from "@/utils/resourceUtils";
 import { Combobox } from "@headlessui/react";
 import { SearchIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
@@ -107,6 +107,9 @@ function Search() {
                     <>
                       <p className="truncate font-bold text-sm">
                         {resource.name}
+                      </p>
+                      <p className="text-xs">
+                        {getResourceLabel(resource.type)}
                       </p>
                       <p
                         className={clsx(
