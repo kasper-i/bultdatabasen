@@ -2,9 +2,9 @@ import React, { FC } from "react";
 
 const Progress: FC<{ percent: number }> = ({ percent }) => {
   return (
-    <div className="relative h-5 w-full bg-neutral-50 rounded-3xl shadow-sm">
+    <div className="h-full w-full bg-neutral-50 rounded-md shadow-sm overflow-hidden">
       <div
-        className="absolute inset-0 bg-primary-500 rounded-3xl"
+        className="h-full w-0 bg-primary-500"
         style={{ width: `${percent}%` }}
       />
     </div>

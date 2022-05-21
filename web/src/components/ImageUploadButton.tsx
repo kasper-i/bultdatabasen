@@ -11,7 +11,7 @@ interface Props {
 
 const ImageUploadButton = ({ pointId }: Props): ReactElement => {
   const [progress, setProgress] = useState<number>();
-  const [_error, setError] = useState(false);
+  const [, setError] = useState(false);
   const queryClient = useQueryClient();
 
   const onDrop = useCallback(
@@ -35,16 +35,14 @@ const ImageUploadButton = ({ pointId }: Props): ReactElement => {
     maxFiles: 1,
   });
 
-  return (
-    <div className="flex flex-col w-full">
-      {progress ? (
-        <Progress percent={progress} />
-      ) : (
-        <div {...getRootProps()}>
-          <input {...getInputProps()} />
-          <IconButton icon="camera" />
-        </div>
-      )}
+  return progress ? (
+    <div className="h-[2.125rem] w-[2.125rem]">
+      <Progress percent={progress} />
+    </div>
+  ) : (
+    <div {...getRootProps()}>
+      <input {...getInputProps()} />
+      <IconButton icon="camera" />
     </div>
   );
 };
