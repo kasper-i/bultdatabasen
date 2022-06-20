@@ -29,7 +29,7 @@ function LoginToolbar(): ReactElement {
     return (
       <Button
         outlined
-        color="contrast"
+        color="white"
         onClick={gotoCognitoSignout}
         className="ring-offset-primary-300"
       >
@@ -40,7 +40,7 @@ function LoginToolbar(): ReactElement {
     return (
       <Button
         outlined
-        color="contrast"
+        color="white"
         onClick={gotoCognitoSignin}
         className="ring-offset-primary-300"
       >

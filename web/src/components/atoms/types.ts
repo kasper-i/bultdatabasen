@@ -23,4 +23,4 @@ export type IconType =
   | "edit"
   | "check badge";
 
-export type ColorType = "primary" | "danger";
+export type ColorType = "primary" | "danger" | "white";
