@@ -17,8 +17,10 @@ import {
   XCircleIcon,
   XIcon,
   DownloadIcon,
+  DotsVerticalIcon,
+  CheckIcon,
 } from "@heroicons/react/outline";
-import { HomeIcon } from "@heroicons/react/solid";
+import { HomeIcon, PencilIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
 import React, { FC } from "react";
 import { IconType } from "./types";
@@ -39,6 +41,8 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
       case "upload":
         return UploadIcon;
       case "check":
+        return CheckIcon;
+      case "check badge":
         return BadgeCheckIcon;
       case "arrow left":
         return ArrowSmLeftIcon;
@@ -62,10 +66,14 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return PhotographIcon;
       case "camera":
         return CameraIcon;
+      case "dots":
+        return DotsVerticalIcon;
       case "refresh":
         return RefreshIcon;
       case "download":
         return DownloadIcon;
+      case "edit":
+        return PencilIcon;
       case "wrench":
       default:
         return BeakerIcon;

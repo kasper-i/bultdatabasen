@@ -30,20 +30,29 @@ const Button: FC<ButtonProps> = ({
   outlined,
 }) => {
   const solidStyle = () => {
-    return [
-      color === "danger"
-        ? "bg-red-500 !disabled:hover:bg-red-600 focus:ring-red-400"
-        : "bg-primary-500 !disabled:hover:bg-primary-600 focus:ring-primary-400",
-      "text-white",
-    ];
+    if (color === "white") {
+      return false;
+    }
+
+    const colors: Record<Exclude<ColorType, "white">, string> = {
+      danger: "bg-red-500 !disabled:hover:bg-red-600 focus:ring-red-400",
+      primary:
+        "bg-primary-500 !disabled:hover:bg-primary-600 focus:ring-primary-400",
+    };
+
+    return [colors[color], "text-white"];
   };
 
   const outlinedStyle = () => {
-    return color === "danger"
-      ? "text-red-500 border-2 border-red-500 !disabled:hover:border-red-600 !disabled:hover:text-red-600 focus:ring-red-400"
-      : color === "primary"
-      ? "text-primary-500 border-2 border-primary-500 !disabled:hover:border-primary-600 !disabled:hover:text-primary-600 focus:ring-primary-400"
-      : "text-white border-2 border-white focus:ring-white";
+    const colors: Record<ColorType, string> = {
+      danger:
+        "text-red-500 border-2 border-red-500 !disabled:hover:border-red-600 !disabled:hover:text-red-600 focus:ring-red-400",
+      primary:
+        "text-primary-500 border-2 border-primary-500 !disabled:hover:border-primary-600 !disabled:hover:text-primary-600 focus:ring-primary-400",
+      white: "text-white border-2 border-white focus:ring-white",
+    };
+
+    return colors[color];
   };
 
   return (

@@ -1,12 +1,13 @@
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
 import { Time } from "@/components/atoms/Time";
-import ConfirmedDeleteButton from "@/components/molecules/ConfirmedDeleteButton";
+import DeleteDialog from "@/components/molecules/DeleteDialog";
+import { Menu } from "@/components/molecules/Menu";
 import UserName from "@/components/UserName";
 import { TaskStatus } from "@/models/task";
 import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { getResourceRoute } from "@/utils/resourceUtils";
-import React, { FC, ReactElement } from "react";
+import React, { FC, ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 import Restricted from "../../Restricted";
 
@@ -21,6 +22,8 @@ const TaskView: FC<{
   const ancestors = task?.ancestors;
   const deleteTask = useDeleteTask(parentId, taskId);
   const updateTask = useUpdateTask(parentId, taskId);
+
+  const [action, setAction] = useState<"delete">();
 
   const parent = ancestors?.filter((ancestor) =>
     ["area", "crag", "sector", "route"].includes(ancestor.type)
@@ -49,11 +52,21 @@ const TaskView: FC<{
         </Link>
         <Restricted>
           <div className="absolute inset-y-0 right-0 flex items-center">
-            <ConfirmedDeleteButton
-              disabled={isComplete}
-              tiny
-              mutation={deleteTask}
-              target="uppdraget"
+            <Menu
+              items={[
+                {
+                  label: "Återöppna",
+                  icon: "refresh",
+                  disabled: !isComplete,
+                  onClick: () => changeStatus("open"),
+                },
+                {
+                  label: "Radera",
+                  icon: "trash",
+                  className: "text-red-500",
+                  onClick: () => setAction("delete"),
+                },
+              ]}
             />
           </div>
         </Restricted>
@@ -82,12 +95,20 @@ const TaskView: FC<{
           <Button
             disabled={isComplete}
             onClick={() => changeStatus("closed")}
-            icon="check"
+            icon="check badge"
             full
+            loading={updateTask.isLoading}
           >
             Markera åtgärdad
           </Button>
         </Restricted>
+      )}
+      {action === "delete" && (
+        <DeleteDialog
+          mutation={deleteTask}
+          target="uppdraget"
+          onClose={() => setAction(undefined)}
+        />
       )}
     </div>
   );
