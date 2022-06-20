@@ -4,7 +4,8 @@ import Feed from "@/components/Feed";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import ImageThumbnail from "@/components/ImageThumbnail";
 import ImageUploadButton from "@/components/ImageUploadButton";
-import ConfirmedDeleteButton from "@/components/molecules/ConfirmedDeleteButton";
+import DeleteDialog from "@/components/molecules/DeleteDialog";
+import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
 import UserName from "@/components/UserName";
 import { Bolt } from "@/models/bolt";
@@ -30,6 +31,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   const { data: images } = useImages(point.id);
   const bolts = useBolts(point.id);
   const [currImg, setCurrImg] = useState<string>();
+  const [action, setAction] = useState<"delete">();
 
   const sharedParents = point.parents.filter((parent) => parent.id !== routeId);
 
@@ -86,10 +88,23 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         <div className="flex gap-2">
           <Restricted>
             <ImageUploadButton pointId={point.id} />
-            <ConfirmedDeleteButton
-              mutation={deletePoint}
-              target={`${label.name} #${label.no}`}
+            <Menu
+              items={[
+                {
+                  label: "Radera",
+                  icon: "trash",
+                  className: "text-red-500",
+                  onClick: () => setAction("delete"),
+                },
+              ]}
             />
+            {action === "delete" && (
+              <DeleteDialog
+                mutation={deletePoint}
+                target={`${label.name} #${label.no}`}
+                onClose={() => setAction(undefined)}
+              />
+            )}
           </Restricted>
         </div>
       </div>

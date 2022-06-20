@@ -13,11 +13,14 @@ export type IconType =
   | "paste"
   | "plus"
   | "add"
-  | "refresh"
   | "copy"
   | "home"
   | "image"
   | "camera"
-  | "download";
+  | "dots"
+  | "refresh"
+  | "download"
+  | "edit"
+  | "check badge";
 
-export type ColorType = "primary" | "danger" | "contrast";
+export type ColorType = "primary" | "danger";

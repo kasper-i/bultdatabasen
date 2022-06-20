@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { UseMutationResult } from "react-query";
-import Button from "../atoms/Button";
 import IconButton, { IconButtonProps } from "../atoms/IconButton";
-import Modal from "../atoms/Modal";
+import DeleteDialog from "./DeleteDialog";
 
 type Props = Omit<IconButtonProps, "icon" | "color" | "loading" | "onClick"> & {
   mutation: UseMutationResult<void, unknown, void, unknown>;
@@ -10,19 +9,14 @@ type Props = Omit<IconButtonProps, "icon" | "color" | "loading" | "onClick"> & {
 };
 
 const ConfirmedDeleteButton = ({ mutation, target, ...buttonProps }: Props) => {
-  const [deleteRequested, setDeleteRequested] = useState(false);
-
-  const confirmDelete = () => {
-    mutation.mutate();
-    setDeleteRequested(false);
-  };
+  const [open, setOpen] = useState(false);
 
   const requestDelete = () => {
-    setDeleteRequested(true);
+    setOpen(true);
   };
 
-  const abortDelete = () => {
-    setDeleteRequested(false);
+  const closeDialog = () => {
+    setOpen(false);
   };
 
   return (
@@ -34,21 +28,12 @@ const ConfirmedDeleteButton = ({ mutation, target, ...buttonProps }: Props) => {
         loading={mutation.isLoading}
         onClick={requestDelete}
       />
-      {deleteRequested && (
-        <Modal
-          onClose={abortDelete}
-          title={`Bekräfta borttagning`}
-          description={`Vill du flytta ${target.toLocaleLowerCase()} till papperskorgen?`}
-        >
-          <div className="flex gap-2">
-            <Button icon="cancel" onClick={abortDelete}>
-              Avbryt
-            </Button>
-            <Button color="danger" onClick={confirmDelete} icon="trash">
-              Ta bort
-            </Button>
-          </div>
-        </Modal>
+      {open && (
+        <DeleteDialog
+          mutation={mutation}
+          target={target}
+          onClose={closeDialog}
+        />
       )}
     </div>
   );
