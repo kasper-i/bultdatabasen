@@ -2,7 +2,7 @@ import { Resource } from "@/models/resource";
 import { useCounts, useResource } from "@/queries/resourceQueries";
 import { getResourceLabel } from "@/utils/resourceUtils";
 import React, { ReactElement } from "react";
-import BackLink from "./BackLink";
+import Breadcrumbs from "./Breadcrumbs";
 import { Underlined } from "./Underlined";
 
 interface Props {
@@ -23,11 +23,16 @@ const PageHeader = ({
     return <></>;
   }
 
-  const parent = ancestors?.[0];
+  const crumbs = ancestors?.slice().reverse();
+  const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (
     <div className="flex flex-col gap-2.5">
-      {parent && <BackLink resource={parent} />}
+      {crumbs && !onlyRoot && (
+        <div className="mr-14">
+          <Breadcrumbs resources={crumbs} />
+        </div>
+      )}
       <h1 className="text-2xl font-bold">{resource.name}</h1>
       {counts.data != null && showCounts && (
         <p className="text-lg">

@@ -1,30 +1,80 @@
 import { Resource } from "@/models/resource";
-import React, { Fragment, ReactElement, ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { ChevronRightIcon } from "@heroicons/react/solid";
-import Icon from "./atoms/Icon";
 import { getResourceRoute } from "@/utils/resourceUtils";
-
-interface Props {
-  resourceId: string;
-  resourceName: string;
-  ancestors?: Resource[];
-}
+import { ChevronRightIcon } from "@heroicons/react/solid";
+import clsx from "clsx";
+import React, {
+  FC,
+  Fragment,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { Link } from "react-router-dom";
+import Icon from "./atoms/Icon";
 
 interface Crumb {
   key: string;
   content: ReactNode;
 }
 
-const Breadcrumbs = ({
-  resourceId,
-  resourceName,
-  ancestors,
-}: Props): ReactElement => {
-  const crumbs: Crumb[] = (ancestors ?? []).map((ancestor) => {
+const Breadcrumbs: FC<{
+  resources?: Resource[];
+}> = ({ resources }): ReactElement => {
+  const rulerRef = useRef<HTMLDivElement>(null);
+  const breadcrumbsRef = useRef<HTMLDivElement>(null);
+
+  const [expanded, setExpanded] = useState(true);
+  const [observer] = useState(
+    new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target === rulerRef.current) {
+          setRulerWidth(entry.contentRect.width);
+        }
+      }
+    })
+  );
+
+  const [rulerWidth, setRulerWidth] = useState<number>();
+  const [expandedWidth, setExpandedWidth] = useState<number>();
+
+  useEffect(() => {
+    setExpandedWidth(breadcrumbsRef.current?.getBoundingClientRect()?.width);
+  }, [setExpandedWidth]);
+
+  useEffect(() => {
+    const target = rulerRef.current;
+
+    if (!target) {
+      return;
+    }
+
+    observer.observe(target);
+
+    return () => {
+      observer.unobserve(target);
+    };
+  }, [rulerRef.current]);
+
+  useEffect(() => {
+    if (!rulerWidth || !expandedWidth) {
+      return;
+    }
+
+    if (!expanded && expandedWidth < rulerWidth) {
+      setExpanded(true);
+    }
+
+    if (expanded && expandedWidth > rulerWidth) {
+      setExpanded(false);
+    }
+  }, [rulerWidth]);
+
+  const crumbs: Crumb[] = (resources ?? []).map((resource) => {
     let to = "";
 
-    switch (ancestor.type) {
+    switch (resource.type) {
       case "root":
         to = "/";
         break;
@@ -32,41 +82,57 @@ const Breadcrumbs = ({
       case "crag":
       case "sector":
       case "route":
-        to = getResourceRoute(ancestor.type, ancestor.id);
+        to = getResourceRoute(resource.type, resource.id);
         break;
     }
 
     return {
-      key: ancestor.id,
+      key: resource.id,
       content: (
-        <Link to={to} className="flex items-center">
-          {ancestor.type === "root" ? (
-            <Icon className="text-gray-800 h-4" name="home" />
+        <Link
+          to={to}
+          className="flex items-center text-primary-500 whitespace-nowrap text-xs"
+        >
+          {resource.type === "root" ? (
+            <Icon className="h-3 text-primary-500" name="home" />
           ) : (
-            ancestor.name
+            resource.name
           )}
         </Link>
       ),
     };
   });
 
-  crumbs.reverse();
-
-  crumbs.push({
-    key: resourceId,
-    content: resourceName,
-  });
+  if (crumbs.length >= 2 && !expanded) {
+    crumbs.splice(1, crumbs.length - 2, {
+      key: "ellipsis",
+      content: (
+        <div className="cursor-pointer" onClick={() => setExpanded(true)}>
+          ...
+        </div>
+      ),
+    });
+  }
 
   return (
-    <div className="h-5 flex items-center">
-      {crumbs.map(({ key, content }, index) => (
-        <Fragment key={key}>
-          {content}
-          {index !== crumbs.length - 1 && (
-            <ChevronRightIcon className="mx-0.5 h-4 text-gray-400" />
-          )}
-        </Fragment>
-      ))}
+    <div className="relative h-5">
+      <div ref={rulerRef} className="w-full" />
+      <div
+        ref={breadcrumbsRef}
+        className={clsx(
+          "absolute flex h-5 items-center",
+          expandedWidth === undefined && "invisible"
+        )}
+      >
+        {crumbs.map(({ key, content }, index) => (
+          <Fragment key={key}>
+            {content}
+            {index !== crumbs.length - 1 && (
+              <ChevronRightIcon className="mx-0.5 h-4 text-gray-400" />
+            )}
+          </Fragment>
+        ))}
+      </div>
     </div>
   );
 };
