@@ -10,6 +10,12 @@ export const getResourceLabel = (type: string): string | undefined => {
       return "Sektor";
     case "route":
       return "Led";
+    case "image":
+      return "Bild";
+    case "bolt":
+      return "Bult";
+    case "task":
+      return "Uppdrag";
     default:
       return undefined;
   }

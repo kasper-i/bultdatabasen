@@ -1,7 +1,7 @@
 import { Menu as HeadlessMenu, Transition } from "@headlessui/react";
 import { DotsVerticalIcon } from "@heroicons/react/outline";
 import clsx from "clsx";
-import React, { FC, Fragment, ReactNode, useState } from "react";
+import React, { FC, Fragment } from "react";
 import Icon from "../atoms/Icon";
 import { IconType } from "../atoms/types";
 
