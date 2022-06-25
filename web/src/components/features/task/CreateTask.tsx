@@ -22,7 +22,6 @@ const CreateTask = ({ resourceId }: Props): ReactElement => {
     <Restricted>
       <div className="sm:w-96 flex items-end space-x-2">
         <Input
-          id="description"
           label="Beskrivning"
           placeholder="Ankare i dåligt skick"
           onChange={(event) => setDescription(event.target.value)}
