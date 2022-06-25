@@ -10,7 +10,7 @@ import { Sector } from "@/models/sector";
 import { Task } from "@/models/task";
 import { User } from "@/models/user";
 import { OAuthTokenResponse } from "@/pages/SigninPage";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestHeaders } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { cognitoClientId, cognitoUrl } from "./constants";
 import { ResourceRole } from "./models/role";
@@ -132,33 +132,30 @@ export class Api {
     return Promise.resolve();
   };
 
-  private static getDefaultConfig = (): AxiosRequestConfig => ({
-    headers: { Authorization: `Bearer ${Api.accessToken}` },
+  private static getDefaultHeaders = (): AxiosRequestHeaders => ({
+    Authorization: `Bearer ${Api.accessToken}`,
   });
 
   static getUserNames = async () => {
     const result = await axios.get<
       Pick<User, "id" | "firstName" | "lastName">[]
-    >(`${Api.baseUrl}/users/names`, Api.getDefaultConfig());
+    >(`${Api.baseUrl}/users/names`, { headers: Api.getDefaultHeaders() });
 
     return result.data;
   };
 
   static getMyself = async () => {
-    const result = await axios.get<User>(
-      `${Api.baseUrl}/users/myself`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<User>(`${Api.baseUrl}/users/myself`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
 
   static updateMyself = async (user: Omit<User, "id" | "firstSeen">) => {
-    await axios.put(
-      `${Api.baseUrl}/users/myself`,
-      user,
-      Api.getDefaultConfig()
-    );
+    await axios.put(`${Api.baseUrl}/users/myself`, user, {
+      headers: Api.getDefaultHeaders(),
+    });
   };
 
   static getUserRoleForResource = async (
@@ -166,10 +163,9 @@ export class Api {
   ): Promise<ResourceRole> => {
     const endpoint = `/resources/${resourceId}/role`;
 
-    const result = await axios.get<ResourceRole>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<ResourceRole>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -182,10 +178,9 @@ export class Api {
       endpoint = "/areas";
     }
 
-    const result = await axios.get<Area[]>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Area[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -193,10 +188,9 @@ export class Api {
   static getArea = async (areaId: string) => {
     const endpoint = `/areas/${areaId}`;
 
-    const result = await axios.get<Area>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Area>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -204,10 +198,9 @@ export class Api {
   static getCrag = async (cragId: string) => {
     const endpoint = `/crags/${cragId}`;
 
-    const result = await axios.get<Crag>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Crag>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -215,10 +208,9 @@ export class Api {
   static getSector = async (sectorId: string) => {
     const endpoint = `/sectors/${sectorId}`;
 
-    const result = await axios.get<Sector>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Sector>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -226,10 +218,9 @@ export class Api {
   static getResource = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}`;
 
-    const result = await axios.get<Resource>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Resource>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -237,10 +228,9 @@ export class Api {
   static getAncestors = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/ancestors`;
 
-    const result = await axios.get<Resource[]>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Resource[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -248,10 +238,9 @@ export class Api {
   static getChildren = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/children`;
 
-    const result = await axios.get<Resource[]>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Resource[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -261,7 +250,7 @@ export class Api {
 
     const result = await axios.get<ResourceCount[]>(
       `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
+      { headers: Api.getDefaultHeaders() }
     );
 
     return result.data;
@@ -270,10 +259,9 @@ export class Api {
   static getRoute = async (routeId: string) => {
     const endpoint = `/routes/${routeId}`;
 
-    const result = await axios.get<Route>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Route>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -281,10 +269,9 @@ export class Api {
   static getRoutes = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/routes`;
 
-    const result = await axios.get<Route[]>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Route[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -295,7 +282,7 @@ export class Api {
     const result = await axios.get<SearchResult[]>(
       `${Api.baseUrl}${endpoint}`,
       {
-        headers: { Authorization: `Bearer ${Api.accessToken}` },
+        headers: Api.getDefaultHeaders(),
         params: { name: searchTerm },
       }
     );
@@ -306,10 +293,9 @@ export class Api {
   static getBolts = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/bolts`;
 
-    const result = await axios.get<Bolt[]>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Bolt[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -317,10 +303,9 @@ export class Api {
   static getPoints = async (routeId: string) => {
     const endpoint = `/routes/${routeId}/points`;
 
-    const result = await axios.get<Point[]>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Point[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -328,11 +313,9 @@ export class Api {
   static createBolt = async (pointId: string, bolt: Pick<Bolt, "type">) => {
     const endpoint = `/resources/${pointId}/bolts`;
 
-    const result = await axios.post<Bolt>(
-      `${Api.baseUrl}${endpoint}`,
-      bolt,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.post<Bolt>(`${Api.baseUrl}${endpoint}`, bolt, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -340,7 +323,9 @@ export class Api {
   static deleteBolt = async (boltId: string) => {
     const endpoint = `/bolts/${boltId}`;
 
-    await axios.delete(`${Api.baseUrl}${endpoint}`, Api.getDefaultConfig());
+    await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
   };
 
   static addPoint = async (routeId: string, request: CreatePointRequest) => {
@@ -349,7 +334,7 @@ export class Api {
     const result = await axios.post<Point>(
       `${Api.baseUrl}${endpoint}`,
       request,
-      Api.getDefaultConfig()
+      { headers: Api.getDefaultHeaders() }
     );
 
     return result.data;
@@ -358,7 +343,9 @@ export class Api {
   static detachPoint = async (routeId: string, pointId: string) => {
     const endpoint = `/routes/${routeId}/points/${pointId}`;
 
-    await axios.delete(`${Api.baseUrl}${endpoint}`, Api.getDefaultConfig());
+    await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
   };
 
   static uploadImage = async (
@@ -372,7 +359,7 @@ export class Api {
     fd.append("image", file);
 
     await axios.post(`${Api.baseUrl}${endpoint}`, fd, {
-      headers: { Authorization: `Bearer ${Api.accessToken}` },
+      headers: Api.getDefaultHeaders(),
       onUploadProgress: (progressEvent) =>
         onProgress?.(
           Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -383,10 +370,9 @@ export class Api {
   static getImages = async (pointId: string) => {
     const endpoint = `/resources/${pointId}/images`;
 
-    const result = await axios.get<Image[]>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Image[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -394,7 +380,9 @@ export class Api {
   static deleteImage = async (imageId: string) => {
     const endpoint = `/images/${imageId}`;
 
-    await axios.delete(`${Api.baseUrl}${endpoint}`, Api.getDefaultConfig());
+    await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
   };
 
   static updateImage = async (
@@ -405,7 +393,7 @@ export class Api {
 
     await axios.patch(`${Api.baseUrl}${endpoint}`, patch, {
       headers: {
-        Authorization: `Bearer ${Api.accessToken}`,
+        ...Api.getDefaultHeaders(),
         "Content-Type": "application/merge-patch+json",
       },
     });
@@ -414,10 +402,9 @@ export class Api {
   static getTasks = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/tasks`;
 
-    const result = await axios.get<Task[]>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Task[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -425,10 +412,9 @@ export class Api {
   static getTask = async (taskId: string) => {
     const endpoint = `/tasks/${taskId}`;
 
-    const result = await axios.get<Task>(
-      `${Api.baseUrl}${endpoint}`,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.get<Task>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -436,17 +422,17 @@ export class Api {
   static deleteTask = async (taskId: string) => {
     const endpoint = `/tasks/${taskId}`;
 
-    await axios.delete(`${Api.baseUrl}${endpoint}`, Api.getDefaultConfig());
+    await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
   };
 
   static updateTask = async (taskId: string, task: Task) => {
     const endpoint = `/tasks/${taskId}`;
 
-    const result = await axios.put<Task>(
-      `${Api.baseUrl}${endpoint}`,
-      task,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.put<Task>(`${Api.baseUrl}${endpoint}`, task, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
@@ -457,11 +443,9 @@ export class Api {
   ) => {
     const endpoint = `/resources/${parentId}/tasks`;
 
-    const result = await axios.post<Task>(
-      `${Api.baseUrl}${endpoint}`,
-      task,
-      Api.getDefaultConfig()
-    );
+    const result = await axios.post<Task>(`${Api.baseUrl}${endpoint}`, task, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
