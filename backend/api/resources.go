@@ -18,6 +18,7 @@ func GetResource(w http.ResponseWriter, r *http.Request) {
 	if resource, err := sess.GetResource(id); err != nil {
 		utils.WriteError(w, err)
 	} else {
+		resource.WithAncestors(r);
 		utils.WriteResponse(w, http.StatusOK, resource)
 	}
 }

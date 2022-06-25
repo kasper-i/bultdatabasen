@@ -1,14 +1,15 @@
-import React, { FC } from "react";
+import React, { FC, useId } from "react";
 
 const Input: FC<{
   label: string;
-  id: string;
   placeholder?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
-}> = ({ label, id, placeholder, onChange, value }) => {
+}> = ({ label, placeholder, onChange, value }) => {
+  const id = useId();
+
   return (
-    <div>
+    <div className="w-full">
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">
         {label}
       </label>

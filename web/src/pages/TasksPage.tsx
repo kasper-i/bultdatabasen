@@ -1,4 +1,4 @@
-import BackLink from "@/components/BackLink";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import CreateTask from "@/components/features/task/CreateTask";
 import TaskList from "@/components/features/task/TaskList";
 import Pill from "@/components/Pill";
@@ -29,13 +29,15 @@ const TasksPage = (): ReactElement => {
   const { data: resource } = useResource(resourceId);
   const { data: tasks } = useTasks(resourceId);
 
+  const ancestors = resource?.ancestors?.slice().reverse();
+
   if (!resource) {
     return <Fragment />;
   }
 
   return (
     <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-5">
-      <BackLink resource={resource} />
+      <Breadcrumbs resources={ancestors} />
       <h1 className="text-3xl font-bold pb-1 flex items-start">
         Uppdrag
         <Pill className="ml-2">
