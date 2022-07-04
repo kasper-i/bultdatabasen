@@ -15,6 +15,16 @@ import jwtDecode, { JwtPayload } from "jwt-decode";
 import { cognitoClientId, cognitoUrl } from "./constants";
 import { ResourceRole } from "./models/role";
 
+export interface Pagination {
+  page: number;
+  itemsPerPage: number;
+}
+
+export interface GetTasksOptions {
+  includeCompleted?: boolean;
+  pagination?: Pagination;
+}
+
 export type CreatePointRequest =
   | {
       pointId: string;
@@ -399,11 +409,17 @@ export class Api {
     });
   };
 
-  static getTasks = async (resourceId: string) => {
+  static getTasks = async (resourceId: string, options: GetTasksOptions) => {
     const endpoint = `/resources/${resourceId}/tasks`;
+
+    const { pagination, ...otherOptions } = options;
 
     const result = await axios.get<Task[]>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
+      params: {
+        ...otherOptions,
+        ...pagination,
+      },
     });
 
     return result.data;

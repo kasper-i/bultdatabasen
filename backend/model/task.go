@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,10 +24,17 @@ func (Task) TableName() string {
 	return "task"
 }
 
-func (sess Session) GetTasks(resourceID string) ([]Task, error) {
+func (sess Session) GetTasks(resourceID string, pagination Pagination, includeCompleted bool) ([]Task, error) {
 	var tasks []Task = make([]Task, 0)
 
-	if err := sess.DB.Raw(getDescendantsQuery("task"), resourceID).Scan(&tasks).Error; err != nil {
+	var where string = "TRUE"
+	if (!includeCompleted) {
+		where = "status IN ('open', 'assigned')"
+	}
+
+	query := fmt.Sprintf("%s AND %s %s", getDescendantsQuery("task"), where, pagination.ToSQL());
+
+	if err := sess.DB.Raw(query, resourceID).Scan(&tasks).Error; err != nil {
 		return nil, err
 	}
 

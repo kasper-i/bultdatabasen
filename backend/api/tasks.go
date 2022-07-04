@@ -14,8 +14,22 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceId := vars["resourceID"]
+	query := r.URL.Query()
 
-	if tasks, err := sess.GetTasks(parentResourceId); err != nil {
+	pagination := model.Pagination{}
+	if err := pagination.ParseQuery(query); err != nil {
+		utils.WriteResponse(w, http.StatusBadRequest, nil)
+		return
+	}
+
+	if !pagination.Valid() {
+		utils.WriteResponse(w, http.StatusBadRequest, nil)
+		return
+	}
+
+	includeCompleted := query.Get("includeCompleted") == "true"
+
+	if tasks, err := sess.GetTasks(parentResourceId, pagination, includeCompleted); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, tasks)

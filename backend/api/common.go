@@ -14,3 +14,4 @@ func createSession(r *http.Request) model.Session {
 
 	return model.NewSession(model.DB, userID)
 }
+

@@ -8,7 +8,9 @@ interface Props {
 }
 
 function TaskButton({ resourceId }: Props): ReactElement {
-  const { data: tasks } = useTasks(resourceId);
+  const { data: tasks } = useTasks(resourceId, {
+    pagination: { page: 1, itemsPerPage: 1000 },
+  });
 
   const taskCount =
     tasks?.filter(

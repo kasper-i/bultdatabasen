@@ -27,29 +27,37 @@ const locationDescription = (
 const TasksPage = (): ReactElement => {
   const { resourceId } = useUnsafeParams<"resourceId">();
   const { data: resource } = useResource(resourceId);
-  const { data: tasks } = useTasks(resourceId);
+  const { data: tasks } = useTasks(resourceId, {
+    pagination: { page: 1, itemsPerPage: 1000 },
+  });
 
   const ancestors = resource?.ancestors?.slice().reverse();
+  const onlyRoot = ancestors?.length === 1;
 
   if (!resource) {
     return <Fragment />;
   }
 
   return (
-    <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-5">
-      <Breadcrumbs resources={ancestors} />
-      <h1 className="text-3xl font-bold pb-1 flex items-start">
-        Uppdrag
-        <Pill className="ml-2">
-          {
-            tasks?.filter(
-              (task) => task.status === "open" || task.status === "assigned"
-            )?.length
-          }
-        </Pill>
-      </h1>
-      {resource.name !== undefined &&
-        locationDescription(resource.name, resource.type)}
+    <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-4">
+      {!onlyRoot && <Breadcrumbs resources={ancestors} />}
+      <div>
+        <h1 className="text-2xl font-bold pb-1 flex items-start leading-none">
+          Uppdrag
+          <Pill className="ml-2">
+            {
+              tasks?.filter(
+                (task) => task.status === "open" || task.status === "assigned"
+              )?.length
+            }
+          </Pill>
+        </h1>
+        {resource.name !== undefined && (
+          <span className="text-sm">
+            {locationDescription(resource.name, resource.type)}
+          </span>
+        )}
+      </div>
       <CreateTask resourceId={resourceId} />
       <TaskList resourceId={resourceId} />
     </div>

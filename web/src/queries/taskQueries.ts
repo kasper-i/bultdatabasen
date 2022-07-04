@@ -1,9 +1,12 @@
 import { Task } from "@/models/task";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { Api } from "../Api";
+import { Api, GetTasksOptions } from "../Api";
 
-export const useTasks = (parentId: string) =>
-  useQuery(["tasks", { parentId }], () => Api.getTasks(parentId));
+export const useTasks = (parentId: string, options: GetTasksOptions) => {
+  return useQuery(["tasks", { parentId, options }], () =>
+    Api.getTasks(parentId, options)
+  );
+};
 
 export const useTask = (taskId: string) =>
   useQuery(["task", { taskId }], () => Api.getTask(taskId));
@@ -16,10 +19,10 @@ export const useCreateTask = (parentId: string) => {
     {
       onSuccess: async (data) => {
         queryClient.refetchQueries(["task", { taskId: data.id }]);
-        queryClient.setQueryData<Task[]>(["tasks", { parentId }], (tasks) => [
-          ...(tasks ?? []),
-          data,
-        ]);
+        queryClient.refetchQueries(["tasks", { parentId }], {
+          stale: true,
+          exact: false,
+        });
       },
     }
   );
