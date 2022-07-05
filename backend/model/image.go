@@ -50,7 +50,7 @@ func (Image) TableName() string {
 func (sess Session) GetImages(resourceID string) ([]Image, error) {
 	var images []Image = make([]Image, 0)
 
-	if err := sess.DB.Raw(getDescendantsQuery("image"), resourceID).Scan(&images).Error; err != nil {
+	if err := sess.DB.Raw(buildDescendantsQuery("image"), resourceID).Scan(&images).Error; err != nil {
 		return nil, err
 	}
 

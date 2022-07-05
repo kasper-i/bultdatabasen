@@ -60,7 +60,7 @@ func (sess Session) getRouteGraph(routeID string) (map[string]*routeGraphVertex,
 	if len(connections) == 0 {
 		var points []*Point = make([]*Point, 0)
 
-		if err := sess.DB.Raw(getDescendantsQuery("point"), routeID).Scan(&points).Error; err != nil {
+		if err := sess.DB.Raw(buildDescendantsQuery("point"), routeID).Scan(&points).Error; err != nil {
 			return nil, err
 		}
 
@@ -171,7 +171,7 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 	var pointsMap map[string]*Point = make(map[string]*Point)
 	var points []*Point = make([]*Point, 0)
 
-	if err := sess.DB.Raw(getDescendantsQuery("point"), resourceID).Scan(&points).Error; err != nil {
+	if err := sess.DB.Raw(buildDescendantsQuery("point"), resourceID).Scan(&points).Error; err != nil {
 		return nil, err
 	}
 

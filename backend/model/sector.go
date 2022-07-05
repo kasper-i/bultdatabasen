@@ -18,7 +18,7 @@ func (Sector) TableName() string {
 func (sess Session) GetSectors(resourceID string) ([]Sector, error) {
 	var sectors []Sector = make([]Sector, 0)
 
-	if err := sess.DB.Raw(getDescendantsQuery("sector"), resourceID).Scan(&sectors).Error; err != nil {
+	if err := sess.DB.Raw(buildDescendantsQuery("sector"), resourceID).Scan(&sectors).Error; err != nil {
 		return nil, err
 	}
 

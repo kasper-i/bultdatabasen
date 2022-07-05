@@ -24,7 +24,7 @@ func (sess Session) Transaction(fn func(sess Session) error) error {
 	})
 }
 
-func getDescendantsQuery(resourceType string) string {
+func buildDescendantsCTE(depth Depth) string {
 	return fmt.Sprintf(`WITH RECURSIVE cte (id, name, type, parent_id, btime, mtime, buser_id, muser_id, first) AS (
 		SELECT id, name, type, parent_id, btime, mtime, buser_id, muser_id, TRUE
 		FROM resource
@@ -40,10 +40,21 @@ func getDescendantsQuery(resourceType string) string {
 		INNER JOIN cte ON f.foster_parent_id = cte.id
 		INNER JOIN resource child ON child.id = f.id
 		WHERE cte.type = "route"
-	)
+	)`, depth)
+}
+
+func buildDescendantsCountQuery(resourceType string) string {
+	return fmt.Sprintf(`%s
+	SELECT COUNT(*) AS totalItems FROM cte
+	INNER JOIN %s ON cte.id = %s.id
+	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType)
+}
+
+func buildDescendantsQuery(resourceType string) string {
+	return fmt.Sprintf(`%s
 	SELECT %s.*, cte.name, cte.parent_id, cte.btime, cte.mtime, cte.buser_id, cte.muser_id FROM cte
 	INNER JOIN %s ON cte.id = %s.id
-	WHERE cte.first <> TRUE`, GetResourceDepth(resourceType), resourceType, resourceType, resourceType)
+	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType, resourceType)
 }
 
 func (sess Session) createResource(resource Resource) error {

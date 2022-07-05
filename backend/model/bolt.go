@@ -19,7 +19,7 @@ func (Bolt) TableName() string {
 func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
 	var bolts []Bolt = make([]Bolt, 0)
 
-	if err := sess.DB.Raw(getDescendantsQuery("bolt"), resourceID).Scan(&bolts).Error; err != nil {
+	if err := sess.DB.Raw(buildDescendantsQuery("bolt"), resourceID).Scan(&bolts).Error; err != nil {
 		return nil, err
 	}
 
