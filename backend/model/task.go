@@ -108,7 +108,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		task.Status = "open"
 	}
 
-	if task.Status == "closed" {
+	if task.Status == "closed" || task.Status == "rejected" {
 		now := time.Now()
 		task.ClosedAt = &now
 	}

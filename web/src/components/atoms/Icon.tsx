@@ -19,6 +19,7 @@ import {
   DownloadIcon,
   DotsVerticalIcon,
   CheckIcon,
+  ChatAltIcon,
 } from "@heroicons/react/outline";
 import { HomeIcon, PencilIcon } from "@heroicons/react/solid";
 import clsx from "clsx";
@@ -74,6 +75,8 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return DownloadIcon;
       case "edit":
         return PencilIcon;
+      case "comment":
+        return ChatAltIcon;
       case "wrench":
       default:
         return BeakerIcon;
