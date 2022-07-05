@@ -3,9 +3,11 @@ import { BoltPosition, BoltType } from "@/models/bolt";
 export const translateBoltType = (boltType?: BoltType) => {
   switch (boltType) {
     case "expansion":
-      return "Expansionsbult";
+      return "Expander";
     case "glue":
       return "Limbult";
+    case "piton":
+      return "Pitong";
     default:
       return "Bult";
   }

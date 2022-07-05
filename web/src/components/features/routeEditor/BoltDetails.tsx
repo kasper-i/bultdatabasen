@@ -1,5 +1,5 @@
 import { Bolt } from "@/models/bolt";
-import { positionToLabel } from "@/utils/boltUtils";
+import { positionToLabel, translateBoltType } from "@/utils/boltUtils";
 import React, { FC } from "react";
 
 const LabelAndValue: FC<{ label: string; value?: string }> = ({
@@ -31,10 +31,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
       <div className="grid grid-cols-2 gap-x-2 items-center">
         <LabelAndValue label="Tillverkare" />
         <LabelAndValue label="Modell" />
-        <LabelAndValue
-          label="Typ"
-          value={bolt.type === "expansion" ? "Expander" : "Limbult"}
-        />
+        <LabelAndValue label="Typ" value={translateBoltType(bolt.type)} />
 
         <LabelAndValue label="Material" />
         <LabelAndValue label="Diameter" />
