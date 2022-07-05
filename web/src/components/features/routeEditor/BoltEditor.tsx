@@ -1,13 +1,16 @@
 import IconButton from "@/components/atoms/IconButton";
 import RadioGroup, { Option } from "@/components/atoms/RadioGroup";
 import { Bolt, BoltType } from "@/models/bolt";
-import { positionToLabel } from "@/utils/boltUtils";
+import { positionToLabel, translateBoltType } from "@/utils/boltUtils";
 import React from "react";
 
-const typeOptions: Option<BoltType>[] = [
-  { key: "expansion", value: "expansion", label: "Expander" },
-  { key: "glue", value: "glue", label: "Limbult" },
-];
+const typeOptions = (["expansion", "glue", "piton"] as const).map<
+  Option<BoltType>
+>((type) => ({
+  key: type,
+  value: type,
+  label: translateBoltType(type),
+}));
 
 interface Props {
   bolt: Pick<Bolt, "type" | "position">;

@@ -1,6 +1,6 @@
 import { ResourceBase } from "./resource";
 
-export type BoltType = "glue" | "expansion";
+export type BoltType = "glue" | "expansion" | "piton";
 
 export type BoltPosition = "left" | "right";
 
