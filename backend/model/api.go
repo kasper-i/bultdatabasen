@@ -36,5 +36,5 @@ func (pagination *Pagination) ToSQL() string {
 }
 
 func (pagination *Pagination) Valid() bool {
-	return pagination.Page > 0 && pagination.ItemsPerPage <= 1000
+	return pagination.Page > 0 && pagination.ItemsPerPage <= 25
 }
