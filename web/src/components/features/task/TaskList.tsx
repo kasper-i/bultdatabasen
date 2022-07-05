@@ -13,12 +13,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
   const [page, setPage] = useState(1);
   const [includeCompleted, setIncludeCompleted] = useState(false);
 
-  const allTasks = useTasks(resourceId, {
-    includeCompleted,
-    pagination: { page: 1, itemsPerPage: 1000 },
-  });
-
-  const tasks = useTasks(resourceId, {
+  const { data: tasks } = useTasks(resourceId, {
     includeCompleted,
     pagination: { page, itemsPerPage: 10 },
   });
@@ -34,7 +29,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
 
       <div className="flex flex-col w-full">
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-5 items-start">
-          {tasks.data?.map((task) => (
+          {tasks?.data?.map((task) => (
             <TaskView key={task.id} parentId={resourceId} taskId={task.id} />
           ))}
         </div>
@@ -42,7 +37,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
           <Pagination
             page={page}
             itemsPerPage={10}
-            totalItems={allTasks.data?.length ?? 0}
+            totalItems={tasks?.meta.totalItems ?? 0}
             onPageSelect={setPage}
           />
         </div>

@@ -20,6 +20,10 @@ export interface Pagination {
   itemsPerPage: number;
 }
 
+export interface Meta {
+  totalItems: number;
+}
+
 export interface GetTasksOptions {
   includeCompleted?: boolean;
   pagination?: Pagination;
@@ -414,13 +418,16 @@ export class Api {
 
     const { pagination, ...otherOptions } = options;
 
-    const result = await axios.get<Task[]>(`${Api.baseUrl}${endpoint}`, {
-      headers: Api.getDefaultHeaders(),
-      params: {
-        ...otherOptions,
-        ...pagination,
-      },
-    });
+    const result = await axios.get<{ data: Task[]; meta: Meta }>(
+      `${Api.baseUrl}${endpoint}`,
+      {
+        headers: Api.getDefaultHeaders(),
+        params: {
+          ...otherOptions,
+          ...pagination,
+        },
+      }
+    );
 
     return result.data;
   };

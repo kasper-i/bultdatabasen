@@ -18,7 +18,7 @@ func (Crag) TableName() string {
 func (sess Session) GetCrags(resourceID string) ([]Crag, error) {
 	var crags []Crag = make([]Crag, 0)
 
-	if err := sess.DB.Raw(getDescendantsQuery("crag"), resourceID).Scan(&crags).Error; err != nil {
+	if err := sess.DB.Raw(buildDescendantsQuery("crag"), resourceID).Scan(&crags).Error; err != nil {
 		return nil, err
 	}
 

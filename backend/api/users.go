@@ -14,7 +14,7 @@ import (
 
 func GetUserNames(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
-	
+
 	if names, err := sess.GetUserNames(); err != nil {
 		utils.WriteError(w, err)
 	} else {

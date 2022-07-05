@@ -9,13 +9,10 @@ interface Props {
 
 function TaskButton({ resourceId }: Props): ReactElement {
   const { data: tasks } = useTasks(resourceId, {
-    pagination: { page: 1, itemsPerPage: 1000 },
+    pagination: { page: 1, itemsPerPage: 1 },
   });
 
-  const taskCount =
-    tasks?.filter(
-      (task) => task.status === "open" || task.status === "assigned"
-    )?.length ?? 0;
+  const taskCount = tasks?.meta?.totalItems ?? 0;
 
   return (
     <div className="w-min relative cursor-pointer">

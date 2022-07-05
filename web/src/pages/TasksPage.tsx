@@ -28,7 +28,7 @@ const TasksPage = (): ReactElement => {
   const { resourceId } = useUnsafeParams<"resourceId">();
   const { data: resource } = useResource(resourceId);
   const { data: tasks } = useTasks(resourceId, {
-    pagination: { page: 1, itemsPerPage: 1000 },
+    pagination: { page: 1, itemsPerPage: 1 },
   });
 
   const ancestors = resource?.ancestors?.slice().reverse();
@@ -44,13 +44,7 @@ const TasksPage = (): ReactElement => {
       <div>
         <h1 className="text-2xl font-bold pb-1 flex items-start leading-none">
           Uppdrag
-          <Pill className="ml-2">
-            {
-              tasks?.filter(
-                (task) => task.status === "open" || task.status === "assigned"
-              )?.length
-            }
-          </Pill>
+          <Pill className="ml-2">{tasks?.meta?.totalItems}</Pill>
         </h1>
         {resource.name !== undefined && (
           <span className="text-sm">

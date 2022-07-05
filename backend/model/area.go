@@ -18,7 +18,7 @@ func (Area) TableName() string {
 func (sess Session) GetAreas(resourceID string) ([]Area, error) {
 	var areas []Area = make([]Area, 0)
 
-	if err := sess.DB.Raw(getDescendantsQuery("area"), resourceID).Scan(&areas).Error; err != nil {
+	if err := sess.DB.Raw(buildDescendantsQuery("area"), resourceID).Scan(&areas).Error; err != nil {
 		return nil, err
 	}
 

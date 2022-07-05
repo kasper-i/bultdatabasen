@@ -23,7 +23,7 @@ func (Route) TableName() string {
 func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
 	var routes []Route = make([]Route, 0)
 
-	if err := sess.DB.Raw(getDescendantsQuery("route"), resourceID).Scan(&routes).Error; err != nil {
+	if err := sess.DB.Raw(buildDescendantsQuery("route"), resourceID).Scan(&routes).Error; err != nil {
 		return nil, err
 	}
 

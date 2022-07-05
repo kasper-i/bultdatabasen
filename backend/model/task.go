@@ -24,21 +24,28 @@ func (Task) TableName() string {
 	return "task"
 }
 
-func (sess Session) GetTasks(resourceID string, pagination Pagination, includeCompleted bool) ([]Task, error) {
+func (sess Session) GetTasks(resourceID string, pagination Pagination, includeCompleted bool) ([]Task, Meta, error) {
 	var tasks []Task = make([]Task, 0)
+	var meta Meta = Meta{}
 
 	var where string = "TRUE"
-	if (!includeCompleted) {
+	if !includeCompleted {
 		where = "status IN ('open', 'assigned')"
 	}
 
-	query := fmt.Sprintf("%s AND %s %s", getDescendantsQuery("task"), where, pagination.ToSQL());
+	countQuery := fmt.Sprintf("%s AND %s", buildDescendantsCountQuery("task"), where)
 
-	if err := sess.DB.Raw(query, resourceID).Scan(&tasks).Error; err != nil {
-		return nil, err
+	dataQuery := fmt.Sprintf("%s AND %s ORDER BY btime DESC %s", buildDescendantsQuery("task"), where, pagination.ToSQL())
+
+	if err := sess.DB.Raw(dataQuery, resourceID).Scan(&tasks).Error; err != nil {
+		return nil, meta, err
 	}
 
-	return tasks, nil
+	if err := sess.DB.Raw(countQuery, resourceID).Scan(&meta).Error; err != nil {
+		return nil, meta, err
+	}
+
+	return tasks, meta, nil
 }
 
 func (sess Session) GetTask(resourceID string) (*Task, error) {
