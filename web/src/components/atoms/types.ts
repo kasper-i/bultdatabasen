@@ -21,6 +21,7 @@ export type IconType =
   | "refresh"
   | "download"
   | "edit"
-  | "check badge";
+  | "check badge"
+  | "comment";
 
 export type ColorType = "primary" | "danger" | "white";

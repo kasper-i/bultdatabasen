@@ -7,6 +7,7 @@ import UserName from "@/components/UserName";
 import { TaskStatus } from "@/models/task";
 import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { getResourceRoute } from "@/utils/resourceUtils";
+import clsx from "clsx";
 import React, { FC, ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 import Restricted from "../../Restricted";
@@ -97,18 +98,38 @@ const TaskView: FC<{
         <>
           <p className="text-sm">{task.description}</p>
 
-          {task.status === "closed" ? (
-            <div className="text-green-600 flex items-center">
-              <Icon className="text-green-600" name="check" />
-              <p>
-                <span className="ml-1 font-bold">Åtgärdat</span>{" "}
-                {task.closedAt && <Time time={task.closedAt} />}
-              </p>
+          <hr className="-mx-5 pb-2.5" />
+
+          {isComplete ? (
+            <div className="flex flex-col">
+              <div className="flex items-center">
+                <Icon
+                  className={clsx(
+                    task.status === "closed" ? "text-green-600" : "text-red-500"
+                  )}
+                  name="check"
+                />
+                <p
+                  className={clsx(
+                    task.status === "closed" ? "text-green-600" : "text-red-500"
+                  )}
+                >
+                  <span className="ml-1 font-bold">
+                    {task.status === "closed" ? "Åtgärdat" : "Stängd"}
+                  </span>{" "}
+                  {task.closedAt && <Time time={task.closedAt} />}
+                </p>
+              </div>
+              {task.comment && (
+                <p className="text-sm text-gray-700">
+                  <Icon name="comment" className="mr-1" />
+                  {task.comment}
+                </p>
+              )}
             </div>
           ) : (
             <Restricted>
               <Button
-                disabled={isComplete}
                 onClick={() => changeStatus("closed")}
                 icon="check badge"
                 full
