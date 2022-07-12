@@ -4,6 +4,7 @@ import (
 	"bultdatabasen/spaces"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"image"
 	_ "image/jpeg"
 	"io"
@@ -225,7 +226,11 @@ func ResizeImage(imageID string, versions []string) error {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-Require-Whisk-Auth", "Ax6z5hn2JtsDAHN")
 
-	_, err = http.DefaultClient.Do(req)
+	if resp, err := http.DefaultClient.Do(req); err != nil {
+		return err
+	} else if resp.StatusCode != 204 {
+		return fmt.Errorf("images/resize: %s", resp.Status)
+	}	
 
 	return err
 }

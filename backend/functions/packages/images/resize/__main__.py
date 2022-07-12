@@ -51,6 +51,8 @@ def main(args):
                                     'ACL': 'public-read',
                                     'ContentType': 'image/jpeg'
                         })
+      except Exception as e:
+            raise e
       finally:
             if os.path.exists(ORIG_FILE):
                   os.remove(ORIG_FILE)
@@ -58,4 +60,3 @@ def main(args):
                   os.remove(TEMP_FILE)
 
       return dict(body=None)
-  
