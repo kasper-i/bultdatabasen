@@ -16,9 +16,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/google/uuid"
 	"github.com/rwcarlsen/goexif/exif"
+	"gopkg.in/ini.v1"
 	"gorm.io/gorm"
 )
 
+var functionSecret string
 var ImageSizes map[string]int
 
 func init() {
@@ -30,6 +32,14 @@ func init() {
 	ImageSizes["lg"] = 1000
 	ImageSizes["xl"] = 1500
 	ImageSizes["2xl"] = 2500
+
+	cfg, err := ini.Load("/etc/bultdatabasen.ini")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+
+	functionSecret = cfg.Section("functions").Key("secret").String()
 }
 
 type Image struct {
@@ -224,7 +234,7 @@ func ResizeImage(imageID string, versions []string) error {
 		bytes.NewReader(json_data))
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Require-Whisk-Auth", "Ax6z5hn2JtsDAHN")
+	req.Header.Add("X-Require-Whisk-Auth", functionSecret)
 
 	if resp, err := http.DefaultClient.Do(req); err != nil {
 		return err
