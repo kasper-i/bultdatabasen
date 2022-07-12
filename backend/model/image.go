@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -20,7 +21,9 @@ import (
 	"gorm.io/gorm"
 )
 
+var functionUrl string
 var functionSecret string
+
 var ImageSizes map[string]int
 
 func init() {
@@ -39,7 +42,8 @@ func init() {
 		os.Exit(1)
 	}
 
-	functionSecret = cfg.Section("functions").Key("secret").String()
+	f := strings.Split(cfg.Section("functions").Key("images/resize").String(), " ")
+	functionUrl, functionSecret = f[0], f[1]
 }
 
 type Image struct {
@@ -230,7 +234,7 @@ func ResizeImage(imageID string, versions []string) error {
 
 	req, _ := http.NewRequest(
 		"POST",
-		"https://faas-ams3-2a2df116.doserverless.co/api/v1/web/fn-4a68506f-5753-426e-94e1-890c577ca0ca/images/resize",
+		functionUrl,
 		bytes.NewReader(json_data))
 
 	req.Header.Add("Content-Type", "application/json")
