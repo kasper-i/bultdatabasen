@@ -368,7 +368,7 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 		return gorm.ErrRecordNotFound
 	}
 
-	vertex, _ := routeGraph[pointID]
+	vertex := routeGraph[pointID]
 
 	return sess.Transaction(func(sess Session) error {
 		if vertex != nil {
