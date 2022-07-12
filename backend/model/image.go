@@ -1,14 +1,18 @@
 package model
 
 import (
+	"bultdatabasen/spaces"
+	"bytes"
+	"encoding/json"
 	"image"
-	"image/jpeg"
+	_ "image/jpeg"
 	"io"
+	"net/http"
 	"os"
 	"time"
 
-	"golang.org/x/image/draw"
-
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/google/uuid"
 	"github.com/rwcarlsen/goexif/exif"
 	"gorm.io/gorm"
@@ -72,14 +76,14 @@ func (sess Session) GetImage(imageID string) (*Image, error) {
 	return &image, nil
 }
 
-func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType string) (*Image, error) {
+func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mimeType string) (*Image, error) {
 	img := Image{
 		ResourceBase: ResourceBase{
 			ID: uuid.Must(uuid.NewRandom()).String(),
 		},
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
-		Size:      len(bytes)}
+		Size:      len(imageBytes)}
 
 	resource := Resource{
 		ResourceBase: img.ResourceBase,
@@ -87,15 +91,14 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 		ParentID:     &parentResourceID,
 	}
 
-	fileName := GetOriginalImageFilePath(img.ID)
-	tempFileName := GetOriginalImageFilePath("." + img.ID)
+	tempFileName := GetOriginalImageKey("." + img.ID)
 
 	f, err := os.Create(tempFileName)
 	if err != nil {
 		return nil, err
 	}
 
-	if _, err = f.Write(bytes); err != nil {
+	if _, err = f.Write(imageBytes); err != nil {
 		return nil, err
 	}
 
@@ -123,6 +126,18 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 		img.Rotation = rotation
 	}
 
+	object := s3.PutObjectInput{
+		Bucket:      aws.String("bultdatabasen"),
+		Key:         aws.String("images/" + img.ID),
+		Body:        bytes.NewReader(imageBytes),
+		ACL:         aws.String("public-read"),
+		ContentType: &mimeType,
+	}
+
+	if _, err := spaces.S3Client().PutObject(&object); err != nil {
+		return nil, err
+	}
+
 	err = sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
 			return err
@@ -132,16 +147,15 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 			return err
 		}
 
-		if err := os.Rename(tempFileName, fileName); err != nil {
-			return err
-		}
-
 		return nil
 	})
 
 	if err != nil {
-		os.Remove(fileName)
 		os.Remove(tempFileName)
+		return nil, err
+	}
+
+	if err = ResizeImage(img.ID, []string{"sm", "xl"}); err != nil {
 		return nil, err
 	}
 
@@ -152,10 +166,6 @@ func (sess Session) DeleteImage(imageID string) error {
 	err := sess.Transaction(func(sess Session) error {
 		if err := sess.deleteResource(imageID); err != nil {
 			return err
-		}
-
-		for version := range ImageSizes {
-			os.Remove(GetResizedImageFilePath(imageID, version))
 		}
 
 		return nil
@@ -187,54 +197,32 @@ func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
 	})
 }
 
-func GetOriginalImageFilePath(imageID string) string {
-	return cfgImagesPath + "/" + imageID
+func GetOriginalImageKey(imageID string) string {
+	return "images/" + imageID
 }
 
-func GetResizedImageFilePath(imageID string, version string) string {
-	return cfgImagesPath + "/" + imageID + "." + version
+func GetResizedImageKey(imageID string, version string) string {
+	return "images/" + imageID + "." + version
 }
 
-func ResizeImage(imageID string, version string) error {
-	dstPath := GetResizedImageFilePath(imageID, version)
-	tmpDstPath := GetResizedImageFilePath("."+imageID, version)
-	size := ImageSizes[version]
-
-	reader, err := os.Open(GetOriginalImageFilePath(imageID))
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-
-	decodedImage, _, err := image.Decode(reader)
+func ResizeImage(imageID string, versions []string) error {
+	values := map[string]interface{}{"imageId": imageID, "sizes": versions}
+	json_data, err := json.Marshal(values)
 	if err != nil {
 		return err
 	}
 
-	var canvas *image.RGBA
-	output, err := os.Create(tmpDstPath)
-	if err != nil {
-		return err
-	}
-	defer output.Close()
-	defer os.Remove(tmpDstPath)
+	req, _ := http.NewRequest(
+		"POST",
+		"https://faas-ams3-2a2df116.doserverless.co/api/v1/web/fn-4a68506f-5753-426e-94e1-890c577ca0ca/images/resize",
+		bytes.NewReader(json_data))
 
-	width := float32(decodedImage.Bounds().Dx())
-	height := float32(decodedImage.Bounds().Dy())
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Require-Whisk-Auth", "Ax6z5hn2JtsDAHN")
 
-	if width >= height {
-		canvas = image.NewRGBA(image.Rect(0, 0, size, int((float32(size)/width)*height)))
-	} else {
-		canvas = image.NewRGBA(image.Rect(0, 0, int((float32(size)/height)*width), size))
-	}
+	_, err = http.DefaultClient.Do(req)
 
-	draw.BiLinear.Scale(canvas, canvas.Rect, decodedImage, decodedImage.Bounds(), draw.Over, nil)
-
-	if err := jpeg.Encode(output, canvas, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
-		return err
-	}
-
-	return os.Rename(tmpDstPath, dstPath)
+	return err
 }
 
 func getRotation(exifData *exif.Exif) (int, error) {

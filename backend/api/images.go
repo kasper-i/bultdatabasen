@@ -2,12 +2,15 @@ package api
 
 import (
 	"bultdatabasen/model"
+	"bultdatabasen/spaces"
 	"bultdatabasen/utils"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gorilla/mux"
 )
 
@@ -24,7 +27,6 @@ func GetImages(w http.ResponseWriter, r *http.Request) {
 }
 
 func DownloadImage(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	imageID := vars["resourceID"]
 	version := vars["version"]
@@ -34,27 +36,32 @@ func DownloadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if image, err := sess.GetImage(imageID); err != nil {
+	var imageKey string
+
+	if version == "original" {
+		imageKey = model.GetOriginalImageKey(imageID)
+	} else {
+		imageKey = model.GetResizedImageKey(imageID, version)
+	}
+
+	input := &s3.ListObjectsInput{
+		Bucket: aws.String("bultdatabasen"),
+		Prefix: aws.String(imageKey),
+	}
+
+	if objects, err := spaces.S3Client().ListObjects(input); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		w.Header().Set("Content-Type", image.MimeType)
-
-		if version == "original" {
-			http.ServeFile(w, r, model.GetOriginalImageFilePath(image.ID))
-			return
-		}
-
-		path := model.GetResizedImageFilePath(image.ID, version)
-
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			if err := model.ResizeImage(image.ID, version); err != nil {
-				utils.WriteError(w, err)
+		for _, object := range objects.Contents {
+			if *object.Key == imageKey {
+				w.Header().Set("Location", fmt.Sprintf("https://bultdatabasen.ams3.digitaloceanspaces.com/%s", imageKey))
+				utils.WriteResponse(w, http.StatusTemporaryRedirect, nil)
 				return
 			}
 		}
-
-		http.ServeFile(w, r, path)
 	}
+
+	utils.WriteResponse(w, http.StatusNotFound, nil)
 }
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
@@ -84,10 +91,11 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			utils.WriteError(w, err)
-		} else {
-			image.WithAncestors(r)
-			utils.WriteResponse(w, http.StatusCreated, image)
+			return
 		}
+
+		image.WithAncestors(r)
+		utils.WriteResponse(w, http.StatusCreated, image)
 	default:
 		utils.WriteResponse(w, http.StatusBadRequest, nil)
 		return

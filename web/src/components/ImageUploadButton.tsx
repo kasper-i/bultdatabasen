@@ -35,14 +35,14 @@ const ImageUploadButton = ({ pointId }: Props): ReactElement => {
     maxFiles: 1,
   });
 
-  return progress ? (
+  return progress && progress < 100 ? (
     <div className="h-[2.125rem] w-[2.125rem]">
       <Progress percent={progress} />
     </div>
   ) : (
     <div {...getRootProps()}>
       <input {...getInputProps()} />
-      <IconButton icon="camera" />
+      <IconButton loading={!!progress} icon="camera" />
     </div>
   );
 };
