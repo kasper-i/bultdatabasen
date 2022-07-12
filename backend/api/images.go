@@ -51,6 +51,7 @@ func DownloadImage(w http.ResponseWriter, r *http.Request) {
 
 	if objects, err := spaces.S3Client().ListObjects(input); err != nil {
 		utils.WriteError(w, err)
+		return
 	} else {
 		for _, object := range objects.Contents {
 			if *object.Key == imageKey {
@@ -69,7 +70,12 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
-	r.ParseMultipartForm(10 << 20)
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
+	
 	file, _, err := r.FormFile("image")
 	if err != nil {
 		utils.WriteError(w, err)

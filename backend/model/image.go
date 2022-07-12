@@ -91,7 +91,7 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 		ParentID:     &parentResourceID,
 	}
 
-	tempFileName := GetOriginalImageKey("." + img.ID)
+	tempFileName := "/tmp/." + img.ID
 
 	f, err := os.Create(tempFileName)
 	if err != nil {
@@ -102,7 +102,10 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 		return nil, err
 	}
 
-	f.Seek(0, io.SeekStart)
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
+		return nil, err
+	}
+
 	decodedImage, _, err := image.Decode(f)
 	if err != nil {
 		return nil, err
@@ -111,7 +114,9 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	img.Width = decodedImage.Bounds().Dx()
 	img.Height = decodedImage.Bounds().Dy()
 
-	f.Seek(0, io.SeekStart)
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
+		return nil, err
+	}
 
 	exifData, err := exif.Decode(f)
 	if err != nil {
@@ -138,6 +143,10 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 		return nil, err
 	}
 
+	if err = ResizeImage(img.ID, []string{"sm", "xl"}); err != nil {
+		return nil, err
+	}
+
 	err = sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
 			return err
@@ -152,10 +161,6 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 
 	if err != nil {
 		os.Remove(tempFileName)
-		return nil, err
-	}
-
-	if err = ResizeImage(img.ID, []string{"sm", "xl"}); err != nil {
 		return nil, err
 	}
 

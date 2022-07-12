@@ -1,10 +1,8 @@
-from email.headerregistry import ContentTypeHeader
-import urllib.request
-import os, sys
-from PIL import Image
-import uuid
 import os
+import urllib.request
+
 import boto3
+from PIL import Image
 
 ORIG_FILE = "in"
 TEMP_FILE = "out.jpg"
