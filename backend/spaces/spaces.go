@@ -31,7 +31,12 @@ func init() {
 		Region:      aws.String("us-east-1"),
 	}
 
-	newSession := session.New(s3Config)
+	newSession, err := session.NewSession(s3Config)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+
 	s3Client = s3.New(newSession)
 }
 

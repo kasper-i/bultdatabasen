@@ -43,7 +43,10 @@ func init() {
 	}
 
 	f := strings.Split(cfg.Section("functions").Key("images/resize").String(), " ")
-	functionUrl, functionSecret = f[0], f[1]
+	functionUrl = f[0]
+	if len(f) == 2 {
+		functionSecret = f[1]
+	}
 }
 
 type Image struct {
@@ -113,6 +116,8 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 		return nil, err
 	}
 
+	defer os.Remove(tempFileName)
+
 	if _, err = f.Write(imageBytes); err != nil {
 		return nil, err
 	}
@@ -159,6 +164,7 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	}
 
 	if err = ResizeImage(img.ID, []string{"sm", "xl"}); err != nil {
+		rollbackObjectCreations(img.ID)
 		return nil, err
 	}
 
@@ -175,11 +181,31 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	})
 
 	if err != nil {
-		os.Remove(tempFileName)
+		rollbackObjectCreations(img.ID)	
 		return nil, err
 	}
 
 	return &img, nil
+}
+
+func rollbackObjectCreations(imageID string) {
+	listInput := &s3.ListObjectsInput{
+		Bucket: aws.String("bultdatabasen"),
+		Prefix: aws.String("images/" + imageID),
+	}
+
+	if objects, err := spaces.S3Client().ListObjects(listInput); err != nil {
+		return
+	} else {
+		for _, object := range objects.Contents {
+			deleteInput := s3.DeleteObjectInput{
+				Bucket:      aws.String("bultdatabasen"),
+				Key:         aws.String(*object.Key),
+			}
+	
+			spaces.S3Client().DeleteObject(&deleteInput)
+		}
+	}
 }
 
 func (sess Session) DeleteImage(imageID string) error {
