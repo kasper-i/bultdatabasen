@@ -18,7 +18,7 @@ func checkHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
-	io.WriteString(w, `{"alive": true}`)
+	_, _ = io.WriteString(w, `{"alive": true}`)
 }
 
 func main() {

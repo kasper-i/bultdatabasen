@@ -138,5 +138,5 @@ func writeForbidden(w http.ResponseWriter, resourceID string) {
 
 	w.WriteHeader(http.StatusForbidden)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(err)
+	_ = json.NewEncoder(w).Encode(err)
 }

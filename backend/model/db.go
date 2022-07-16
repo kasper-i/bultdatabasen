@@ -11,14 +11,13 @@ import (
 )
 
 var DB *gorm.DB
-var cfgImagesPath string
 
 func init() {
 	var err error
 
 	cfg, err := ini.Load("/etc/bultdatabasen.ini")
 	if err != nil {
-		fmt.Printf("Fail to read file: %v", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 
@@ -33,7 +32,6 @@ func init() {
 	port = cfg.Section("database").Key("port").String()
 	username = cfg.Section("database").Key("username").String()
 	password = cfg.Section("database").Key("password").String()
-	cfgImagesPath = cfg.Section("images").Key("path").String()
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, host, port, database)
 

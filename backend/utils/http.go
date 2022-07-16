@@ -20,7 +20,7 @@ func WriteResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
 	w.WriteHeader(statusCode)
 
 	if payload != nil {
-		json.NewEncoder(w).Encode(payload)
+		_ = json.NewEncoder(w).Encode(payload)
 	}
 }
 
@@ -55,5 +55,5 @@ func WriteError(w http.ResponseWriter, err error) {
 
 	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(error)
+	_ = json.NewEncoder(w).Encode(error)
 }

@@ -1,18 +1,28 @@
 package model
 
 import (
+	"bultdatabasen/spaces"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"image"
-	"image/jpeg"
+	_ "image/jpeg"
 	"io"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
-	"golang.org/x/image/draw"
-
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/google/uuid"
 	"github.com/rwcarlsen/goexif/exif"
+	"gopkg.in/ini.v1"
 	"gorm.io/gorm"
 )
+
+var functionUrl string
+var functionSecret string
 
 var ImageSizes map[string]int
 
@@ -25,6 +35,18 @@ func init() {
 	ImageSizes["lg"] = 1000
 	ImageSizes["xl"] = 1500
 	ImageSizes["2xl"] = 2500
+
+	cfg, err := ini.Load("/etc/bultdatabasen.ini")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+
+	f := strings.Split(cfg.Section("functions").Key("images/resize").String(), " ")
+	functionUrl = f[0]
+	if len(f) == 2 {
+		functionSecret = f[1]
+	}
 }
 
 type Image struct {
@@ -72,14 +94,14 @@ func (sess Session) GetImage(imageID string) (*Image, error) {
 	return &image, nil
 }
 
-func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType string) (*Image, error) {
+func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mimeType string) (*Image, error) {
 	img := Image{
 		ResourceBase: ResourceBase{
 			ID: uuid.Must(uuid.NewRandom()).String(),
 		},
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
-		Size:      len(bytes)}
+		Size:      len(imageBytes)}
 
 	resource := Resource{
 		ResourceBase: img.ResourceBase,
@@ -87,19 +109,23 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 		ParentID:     &parentResourceID,
 	}
 
-	fileName := GetOriginalImageFilePath(img.ID)
-	tempFileName := GetOriginalImageFilePath("." + img.ID)
+	tempFileName := "/tmp/." + img.ID
 
 	f, err := os.Create(tempFileName)
 	if err != nil {
 		return nil, err
 	}
 
-	if _, err = f.Write(bytes); err != nil {
+	defer os.Remove(tempFileName)
+
+	if _, err = f.Write(imageBytes); err != nil {
 		return nil, err
 	}
 
-	f.Seek(0, io.SeekStart)
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
+		return nil, err
+	}
+
 	decodedImage, _, err := image.Decode(f)
 	if err != nil {
 		return nil, err
@@ -108,7 +134,9 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 	img.Width = decodedImage.Bounds().Dx()
 	img.Height = decodedImage.Bounds().Dy()
 
-	f.Seek(0, io.SeekStart)
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
+		return nil, err
+	}
 
 	exifData, err := exif.Decode(f)
 	if err != nil {
@@ -123,6 +151,23 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 		img.Rotation = rotation
 	}
 
+	object := s3.PutObjectInput{
+		Bucket:      aws.String("bultdatabasen"),
+		Key:         aws.String("images/" + img.ID),
+		Body:        bytes.NewReader(imageBytes),
+		ACL:         aws.String("public-read"),
+		ContentType: &mimeType,
+	}
+
+	if _, err := spaces.S3Client().PutObject(&object); err != nil {
+		return nil, err
+	}
+
+	if err = ResizeImage(img.ID, []string{"sm", "xl"}); err != nil {
+		rollbackObjectCreations(img.ID)
+		return nil, err
+	}
+
 	err = sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
 			return err
@@ -132,30 +177,41 @@ func (sess Session) UploadImage(parentResourceID string, bytes []byte, mimeType 
 			return err
 		}
 
-		if err := os.Rename(tempFileName, fileName); err != nil {
-			return err
-		}
-
 		return nil
 	})
 
 	if err != nil {
-		os.Remove(fileName)
-		os.Remove(tempFileName)
+		rollbackObjectCreations(img.ID)	
 		return nil, err
 	}
 
 	return &img, nil
 }
 
+func rollbackObjectCreations(imageID string) {
+	listInput := &s3.ListObjectsInput{
+		Bucket: aws.String("bultdatabasen"),
+		Prefix: aws.String("images/" + imageID),
+	}
+
+	if objects, err := spaces.S3Client().ListObjects(listInput); err != nil {
+		return
+	} else {
+		for _, object := range objects.Contents {
+			deleteInput := s3.DeleteObjectInput{
+				Bucket:      aws.String("bultdatabasen"),
+				Key:         aws.String(*object.Key),
+			}
+	
+			spaces.S3Client().DeleteObject(&deleteInput)
+		}
+	}
+}
+
 func (sess Session) DeleteImage(imageID string) error {
 	err := sess.Transaction(func(sess Session) error {
 		if err := sess.deleteResource(imageID); err != nil {
 			return err
-		}
-
-		for version := range ImageSizes {
-			os.Remove(GetResizedImageFilePath(imageID, version))
 		}
 
 		return nil
@@ -187,54 +243,36 @@ func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
 	})
 }
 
-func GetOriginalImageFilePath(imageID string) string {
-	return cfgImagesPath + "/" + imageID
+func GetOriginalImageKey(imageID string) string {
+	return "images/" + imageID
 }
 
-func GetResizedImageFilePath(imageID string, version string) string {
-	return cfgImagesPath + "/" + imageID + "." + version
+func GetResizedImageKey(imageID string, version string) string {
+	return "images/" + imageID + "." + version
 }
 
-func ResizeImage(imageID string, version string) error {
-	dstPath := GetResizedImageFilePath(imageID, version)
-	tmpDstPath := GetResizedImageFilePath("."+imageID, version)
-	size := ImageSizes[version]
-
-	reader, err := os.Open(GetOriginalImageFilePath(imageID))
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-
-	decodedImage, _, err := image.Decode(reader)
+func ResizeImage(imageID string, versions []string) error {
+	values := map[string]interface{}{"imageId": imageID, "sizes": versions}
+	json_data, err := json.Marshal(values)
 	if err != nil {
 		return err
 	}
 
-	var canvas *image.RGBA
-	output, err := os.Create(tmpDstPath)
-	if err != nil {
+	req, _ := http.NewRequest(
+		"POST",
+		functionUrl,
+		bytes.NewReader(json_data))
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Require-Whisk-Auth", functionSecret)
+
+	if resp, err := http.DefaultClient.Do(req); err != nil {
 		return err
-	}
-	defer output.Close()
-	defer os.Remove(tmpDstPath)
+	} else if resp.StatusCode != 204 {
+		return fmt.Errorf("images/resize: %s", resp.Status)
+	}	
 
-	width := float32(decodedImage.Bounds().Dx())
-	height := float32(decodedImage.Bounds().Dy())
-
-	if width >= height {
-		canvas = image.NewRGBA(image.Rect(0, 0, size, int((float32(size)/width)*height)))
-	} else {
-		canvas = image.NewRGBA(image.Rect(0, 0, int((float32(size)/height)*width), size))
-	}
-
-	draw.BiLinear.Scale(canvas, canvas.Rect, decodedImage, decodedImage.Bounds(), draw.Over, nil)
-
-	if err := jpeg.Encode(output, canvas, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
-		return err
-	}
-
-	return os.Rename(tmpDstPath, dstPath)
+	return err
 }
 
 func getRotation(exifData *exif.Exif) (int, error) {

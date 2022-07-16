@@ -65,5 +65,5 @@ func writeNotFound(w http.ResponseWriter, resourceID string) {
 
 	w.WriteHeader(http.StatusNotFound)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(err)
+	_ = json.NewEncoder(w).Encode(err)
 }

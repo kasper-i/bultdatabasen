@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -67,10 +68,16 @@ func init() {
 	j2 := []byte(`{"alg":"RS256","e":"AQAB","kid":"gfmWfYBUTrl2CsA+5TzTr1bCO1lQIcYBsDYRviUvKvc=","kty":"RSA","n":"whA_cKNimWDjUK6eElfabWALj0gVcoUjNwsa_VZkZzvzQJlcIXR_E4qZgPDHVaCgDrPZ1ViViUbrrZpIwUI1scZvUH6ZCJTZYuO0dfyvAIUQavvxak5v-ZzUNrm3sIwyxzs44OZaRxGg6NCthxHtks47YSmfcLniY9iNdkl32zU1HvEd-W6UJrPlrOTDlX564ZnTmdWPX2RFlRouCSBQl66LprzUKX71mE6dca4S7jsnuELK5CLjWkUaZWfmGgSJH38zzZ9eSWttIpTBAYEF81n6PaGBarv2tZgo3SeuwlI3TwXgn_ylRVaiLezLPBTh4H_WqkEeDE30NqeOMBMM1Q","use":"sig"}`)
 
 	k1 := jose.JSONWebKey{}
-	k1.UnmarshalJSON(j1)
+	if err := k1.UnmarshalJSON(j1); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
 
 	k2 := jose.JSONWebKey{}
-	k2.UnmarshalJSON(j2)
+	if err := k2.UnmarshalJSON(j2); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
 
 	keys.Keys = append(keys.Keys, k1)
 	keys.Keys = append(keys.Keys, k2)
@@ -152,5 +159,5 @@ func writeUnauthorized(w http.ResponseWriter) {
 
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(err)
+	_ = json.NewEncoder(w).Encode(err)
 }

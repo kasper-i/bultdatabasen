@@ -11,17 +11,20 @@ interface Props {
 
 const ImageUploadButton = ({ pointId }: Props): ReactElement => {
   const [progress, setProgress] = useState<number>();
-  const [, setError] = useState(false);
+  const [error, setError] = useState(false);
   const queryClient = useQueryClient();
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
+      setError(false);
+
       if (acceptedFiles.length === 1) {
         try {
           await Api.uploadImage(pointId, acceptedFiles[0], setProgress);
           queryClient.refetchQueries(["images", { resourceId: pointId }]);
           setProgress(undefined);
         } catch (error) {
+          setProgress(undefined);
           setError(true);
         }
       }
@@ -35,14 +38,18 @@ const ImageUploadButton = ({ pointId }: Props): ReactElement => {
     maxFiles: 1,
   });
 
-  return progress ? (
+  return progress && progress < 100 ? (
     <div className="h-[2.125rem] w-[2.125rem]">
       <Progress percent={progress} />
     </div>
   ) : (
     <div {...getRootProps()}>
       <input {...getInputProps()} />
-      <IconButton icon="camera" />
+      <IconButton
+        loading={!!progress}
+        icon="camera"
+        color={error ? "danger" : "primary"}
+      />
     </div>
   );
 };

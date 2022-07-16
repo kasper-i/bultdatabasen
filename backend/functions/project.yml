@@ -1,0 +1,21 @@
+environment:
+  SPACES_KEY: "${SPACES_KEY}"
+  SPACES_SECRET: "${SPACES_SECRET}"
+parameters: {}
+packages:
+  - name: images
+    environment: {}
+    parameters: {}
+    annotations: {}
+    functions:
+      - name: resize
+        binary: false
+        main: ""
+        runtime: "python:default"
+        web: true
+        parameters: {}
+        environment: {}
+        annotations: {}
+        limits:
+          timeout: 3000
+          memory: 512
