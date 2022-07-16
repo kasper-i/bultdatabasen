@@ -50,10 +50,21 @@ const RoutePage = (): ReactElement => {
 
       <div className="flex items-center gap-2">
         <p className="text-md">
-          <Underlined>{renderRouteType(routeType)}</Underlined> från{" "}
-          <Underlined>{year}</Underlined> som är{" "}
-          <Underlined>{length}m</Underlined> lång och består av{" "}
-          <Underlined>{numPresentBolts}</Underlined> bult
+          <Underlined>{renderRouteType(routeType)}</Underlined>
+          {year && (
+            <>
+              {" "}
+              från <Underlined>{year}</Underlined>
+            </>
+          )}
+          {" som "}
+          {length && (
+            <>
+              {" "}
+              är <Underlined>{length}m</Underlined> lång och{" "}
+            </>
+          )}
+          består av <Underlined>{numPresentBolts}</Underlined> bult
           {numPresentBolts !== 1 && "ar"}.
         </p>
       </div>
