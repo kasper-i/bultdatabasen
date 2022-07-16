@@ -38,6 +38,10 @@ const RoutePage = (): ReactElement => {
     return <Fragment />;
   }
 
+  const numPresentBolts = bolts.data.filter(
+    (bolt) => bolt.dismantled === undefined
+  ).length;
+
   const { routeType, parentId, year, length } = route.data;
 
   return (
@@ -49,7 +53,8 @@ const RoutePage = (): ReactElement => {
           <Underlined>{renderRouteType(routeType)}</Underlined> från{" "}
           <Underlined>{year}</Underlined> som är{" "}
           <Underlined>{length}m</Underlined> lång och består av{" "}
-          <Underlined>{bolts.data.length}</Underlined> bultar.
+          <Underlined>{numPresentBolts}</Underlined> bult
+          {numPresentBolts !== 1 && "ar"}.
         </p>
       </div>
 
