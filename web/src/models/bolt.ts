@@ -8,4 +8,5 @@ export type Bolt = ResourceBase & {
   type: BoltType;
   parentId: string;
   position?: BoltPosition;
+  dismantled?: string;
 };

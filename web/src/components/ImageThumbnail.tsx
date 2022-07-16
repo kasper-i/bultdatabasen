@@ -17,7 +17,7 @@ const ImageThumbnail = ({ image, onClick }: Props): ReactElement => {
       className="rounded-sm cursor-pointer ring-2 ring-gray-200 hover:ring-2 hover:ring-primary-500 ring-offset-2"
       onClick={() => onClick?.(image.id)}
       version="sm"
-    ></ImageView>
+    />
   );
 };
 

@@ -1,8 +1,10 @@
+import { Time } from "@/components/atoms/Time";
 import { Bolt } from "@/models/bolt";
 import { positionToLabel, translateBoltType } from "@/utils/boltUtils";
-import React, { FC } from "react";
+import clsx from "clsx";
+import React, { FC, ReactNode } from "react";
 
-const LabelAndValue: FC<{ label: string; value?: string }> = ({
+const LabelAndValue: FC<{ label: string; value?: ReactNode }> = ({
   label,
   value,
 }) => {
@@ -17,14 +19,24 @@ const LabelAndValue: FC<{ label: string; value?: string }> = ({
 };
 
 interface Props {
-  bolt: Pick<Bolt, "type" | "position">;
+  bolt: Bolt;
   totalNumberOfBolts: number;
 }
 
 const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
   return (
-    <div className="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
-      <p className="text-left font-medium">
+    <div
+      className={clsx(
+        "w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md",
+        bolt.dismantled && "opacity-50"
+      )}
+    >
+      <p
+        className={clsx(
+          "text-left font-medium",
+          bolt.dismantled && "line-through"
+        )}
+      >
         {positionToLabel(totalNumberOfBolts === 1 ? undefined : bolt.position)}
       </p>
 
@@ -36,7 +48,10 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
         <LabelAndValue label="Material" />
         <LabelAndValue label="Diameter" />
         <LabelAndValue label="År" />
-        <LabelAndValue label="Demonterad" value="Nej" />
+        <LabelAndValue
+          label="Demonterad"
+          value={bolt.dismantled ? <Time time={bolt.dismantled} /> : "Nej"}
+        />
       </div>
     </div>
   );
