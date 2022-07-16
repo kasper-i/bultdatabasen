@@ -1,15 +1,18 @@
 package model
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Bolt struct {
 	ResourceBase
-	Type     *string `json:"type,omitempty"`
-	ParentID string  `gorm:"->" json:"parentId"`
-	Position *string `json:"position,omitempty"`
+	Type       *string    `json:"type,omitempty"`
+	ParentID   string     `gorm:"->" json:"parentId"`
+	Position   *string    `json:"position,omitempty"`
+	Dismantled *time.Time `json:"dismantled,omitempty"`
 }
 
 func (Bolt) TableName() string {
