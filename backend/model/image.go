@@ -99,7 +99,7 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 		ResourceBase: ResourceBase{
 			ID: uuid.Must(uuid.NewRandom()).String(),
 		},
-		Timestamp: time.Now(),
+		Timestamp: time.Unix(0, 0),
 		MimeType:  mimeType,
 		Size:      len(imageBytes)}
 
@@ -139,16 +139,14 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	}
 
 	exifData, err := exif.Decode(f)
-	if err != nil {
-		return nil, err
-	}
-
-	if timestamp, err := exifData.DateTime(); err == nil {
-		img.Timestamp = timestamp
-	}
-
-	if rotation, err := getRotation(exifData); err == nil {
-		img.Rotation = rotation
+	if err == nil {
+		if timestamp, err := exifData.DateTime(); err == nil {
+			img.Timestamp = timestamp
+		}
+	
+		if rotation, err := getRotation(exifData); err == nil {
+			img.Rotation = rotation
+		}
 	}
 
 	object := s3.PutObjectInput{
