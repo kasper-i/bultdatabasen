@@ -1,20 +1,31 @@
+import Button from "@/components/atoms/Button";
 import { Time } from "@/components/atoms/Time";
+import { Menu } from "@/components/molecules/Menu";
 import { Bolt } from "@/models/bolt";
-import { positionToLabel, translateBoltType } from "@/utils/boltUtils";
+import { useUpdateBolt } from "@/queries/boltQueries";
+import {
+  diameterToFraction,
+  positionToLabel,
+  translateBoltType,
+} from "@/utils/boltUtils";
 import clsx from "clsx";
-import React, { FC, ReactNode } from "react";
+import React, { FC, Fragment, ReactNode, useEffect, useState } from "react";
+import AdvancedBoltEditor from "./AdvancedBoltEditor";
 
-const LabelAndValue: FC<{ label: string; value?: ReactNode }> = ({
-  label,
-  value,
-}) => {
+const LabelAndValue: FC<{
+  label: string;
+  value?: ReactNode;
+  className?: string;
+}> = ({ label, value, className }) => {
+  if (value === undefined) {
+    return <Fragment />;
+  }
+
   return (
-    <>
-      <div className="text-xs text-gray-600 text-left">{label}</div>
-      <div className="text-sm">
-        {value ? value : <span className="text-gray-300">-</span>}
-      </div>
-    </>
+    <div className={clsx("flex items-center justify-between", className)}>
+      <div className="text-xs text-gray-600">{label}</div>
+      <div className={clsx("text-sm", className)}>{value}</div>
+    </div>
   );
 };
 
@@ -24,35 +35,114 @@ interface Props {
 }
 
 const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
+  const [action, setAction] = useState<"edit">();
+  const [editedBolt, setEditedBolt] = useState(bolt);
+
+  const updateBolt = useUpdateBolt(bolt.id);
+
+  useEffect(() => {
+    if (updateBolt.isSuccess) {
+      setAction(undefined);
+    }
+  }, [updateBolt.isSuccess]);
+
+  const textStyle = bolt.dismantled ? "line-through opacity-50" : undefined;
+
   return (
     <div
       className={clsx(
-        "w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md",
-        bolt.dismantled && "opacity-50"
+        "w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md"
       )}
     >
-      <p
-        className={clsx(
-          "text-left font-medium",
-          bolt.dismantled && "line-through"
-        )}
-      >
-        {positionToLabel(totalNumberOfBolts === 1 ? undefined : bolt.position)}
-      </p>
+      <div className="flex justify-between">
+        <p className="text-left font-medium">
+          {bolt.dismantled && <span className="mr-1">🪦</span>}
+          <span className={clsx(bolt.dismantled && "line-through")}>
+            {positionToLabel(
+              totalNumberOfBolts === 1 ? undefined : bolt.position
+            )}
+          </span>
+        </p>
 
-      <div className="grid grid-cols-2 gap-x-2 items-center">
-        <LabelAndValue label="Tillverkare" />
-        <LabelAndValue label="Modell" />
-        <LabelAndValue label="Typ" value={translateBoltType(bolt.type)} />
-
-        <LabelAndValue label="Material" />
-        <LabelAndValue label="Diameter" />
-        <LabelAndValue label="År" />
-        <LabelAndValue
-          label="Demonterad"
-          value={bolt.dismantled ? <Time time={bolt.dismantled} /> : "Nej"}
+        <Menu
+          items={[
+            {
+              label: "Redigera",
+              icon: "edit",
+              onClick: () => setAction("edit"),
+              disabled: !!bolt.dismantled,
+            },
+          ]}
         />
       </div>
+
+      {action === "edit" ? (
+        <div className="flex flex-col items-start pt-2">
+          <AdvancedBoltEditor bolt={editedBolt} onChange={setEditedBolt} />
+          <div className="flex gap-x-2.5 py-2 mt-2">
+            <Button onClick={() => setAction(undefined)} outlined>
+              Avbryt
+            </Button>
+
+            <Button onClick={() => updateBolt.mutate(editedBolt)}>Spara</Button>
+          </div>
+        </div>
+      ) : (
+        <div
+          className={clsx(
+            "relative grid items-center text-left grid-cols-2 gap-x-2.5"
+          )}
+        >
+          <LabelAndValue
+            label="Tillverkare"
+            value={bolt.manufacturer}
+            className={textStyle}
+          />
+          <LabelAndValue
+            label="Modell"
+            value={bolt.model}
+            className={textStyle}
+          />
+          <LabelAndValue
+            label="Typ"
+            value={translateBoltType(bolt.type)}
+            className={textStyle}
+          />
+
+          <LabelAndValue
+            label="Material"
+            value={bolt.material}
+            className={textStyle}
+          />
+          <LabelAndValue
+            label="Diameter"
+            value={
+              bolt.diameter
+                ? `${diameterToFraction(bolt.diameter)}${
+                    bolt.diameterUnit === "inch" ? '"' : "mm"
+                  }`
+                : undefined
+            }
+            className={textStyle}
+          />
+          <LabelAndValue
+            label="Installerad"
+            value={
+              bolt.installed ? (
+                <Time time={bolt.installed} datetimeFormat="yyyy" />
+              ) : undefined
+            }
+            className={textStyle}
+          />
+          {bolt.dismantled && (
+            <LabelAndValue
+              label="Demonterad"
+              value={<Time time={bolt.dismantled} />}
+              className="col-span-2"
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

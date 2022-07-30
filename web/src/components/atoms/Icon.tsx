@@ -77,6 +77,8 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return PencilIcon;
       case "comment":
         return ChatAltIcon;
+      case "x":
+        return XIcon;
       case "wrench":
       default:
         return BeakerIcon;

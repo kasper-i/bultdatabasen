@@ -143,7 +143,7 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 		if timestamp, err := exifData.DateTime(); err == nil {
 			img.Timestamp = timestamp
 		}
-	
+
 		if rotation, err := getRotation(exifData); err == nil {
 			img.Rotation = rotation
 		}
@@ -179,7 +179,7 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	})
 
 	if err != nil {
-		rollbackObjectCreations(img.ID)	
+		rollbackObjectCreations(img.ID)
 		return nil, err
 	}
 
@@ -197,10 +197,10 @@ func rollbackObjectCreations(imageID string) {
 	} else {
 		for _, object := range objects.Contents {
 			deleteInput := s3.DeleteObjectInput{
-				Bucket:      aws.String("bultdatabasen"),
-				Key:         aws.String(*object.Key),
+				Bucket: aws.String("bultdatabasen"),
+				Key:    aws.String(*object.Key),
 			}
-	
+
 			spaces.S3Client().DeleteObject(&deleteInput)
 		}
 	}
@@ -268,7 +268,7 @@ func ResizeImage(imageID string, versions []string) error {
 		return err
 	} else if resp.StatusCode != 204 {
 		return fmt.Errorf("images/resize: %s", resp.Status)
-	}	
+	}
 
 	return err
 }

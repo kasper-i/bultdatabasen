@@ -31,12 +31,13 @@ const TasksPage = (): ReactElement => {
     pagination: { page: 1, itemsPerPage: 1 },
   });
 
-  const ancestors = resource?.ancestors?.slice().reverse();
-  const onlyRoot = ancestors?.length === 1;
-
   if (!resource) {
     return <Fragment />;
   }
+
+  const ancestors = resource?.ancestors?.slice().reverse();
+  ancestors?.push(resource);
+  const onlyRoot = ancestors?.length === 1;
 
   return (
     <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-4">

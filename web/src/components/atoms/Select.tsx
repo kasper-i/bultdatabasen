@@ -10,7 +10,7 @@ interface Props<T> {
   value?: T;
   options: Option<T>[];
   onSelect: (value: T) => void;
-  displayValue: (value: T) => string;
+  displayValue?: (value: T) => string;
   disabled?: boolean;
   noOptionsText?: string;
 }
@@ -83,35 +83,40 @@ export function Select<T>({
   };
 
   return (
-    <Listbox value={value} onChange={onSelect} disabled={disabled}>
-      <Listbox.Label className="block text-sm font-medium text-gray-700">
-        {label}
-      </Listbox.Label>
-      <div className="relative">
-        <Listbox.Button className="focus:outline-none bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[2.125rem]">
-          <span className="block truncate text-left ml-3">
-            {value ? displayValue(value) : ""}
-          </span>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-            <SelectorIcon
-              className="w-5 h-5 text-gray-400"
-              aria-hidden="true"
-            />
-          </div>
-        </Listbox.Button>
-        <Transition
-          as={Fragment}
-          leave="transition ease-in duration-100"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="absolute z-50 w-full">
-            <Listbox.Options className="w-full mt-2 mb-4 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
-              {renderOptions()}
-            </Listbox.Options>
-          </div>
-        </Transition>
-      </div>
-    </Listbox>
+    <div>
+      <Listbox value={value} onChange={onSelect} disabled={disabled}>
+        <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
+          {label}
+        </Listbox.Label>
+        <div className="relative">
+          <Listbox.Button className="focus:outline-none bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[2.125rem]">
+            <span className="block truncate text-left ml-3">
+              {value
+                ? displayValue?.(value) ??
+                  options.find((option) => option.value === value)?.label
+                : ""}
+            </span>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+              <SelectorIcon
+                className="w-5 h-5 text-gray-400"
+                aria-hidden="true"
+              />
+            </div>
+          </Listbox.Button>
+          <Transition
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="absolute z-50 w-full">
+              <Listbox.Options className="w-full mt-2 mb-4 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
+                {renderOptions()}
+              </Listbox.Options>
+            </div>
+          </Transition>
+        </div>
+      </Listbox>
+    </div>
   );
 }
