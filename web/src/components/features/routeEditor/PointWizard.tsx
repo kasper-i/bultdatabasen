@@ -6,7 +6,7 @@ import { Switch } from "@/components/atoms/Switch";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
 import React, { ReactElement, Suspense, useState } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import BasicBoltEditor from "./BasicBoltEditor";
 import PointPicker from "./PointPicker";
 

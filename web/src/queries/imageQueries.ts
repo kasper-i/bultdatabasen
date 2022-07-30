@@ -1,5 +1,5 @@
 import { Image } from "@/models/image";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Api } from "../Api";
 
 export const useImages = (resourceId: string) =>

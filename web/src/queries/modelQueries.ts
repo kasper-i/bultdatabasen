@@ -1,6 +1,6 @@
 import { Api } from "@/Api";
 import { Model } from "@/models/model";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const useModels = (manufacturerId?: string) =>
   useQuery<Model[]>(

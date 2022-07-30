@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import IconButton, { IconButtonProps } from "../atoms/IconButton";
 import DeleteDialog from "./DeleteDialog";
 

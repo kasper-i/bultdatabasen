@@ -1,7 +1,7 @@
 import { Api } from "@/Api";
 import React, { ReactElement, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import IconButton from "./atoms/IconButton";
 import Progress from "./atoms/Progress";
 

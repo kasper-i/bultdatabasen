@@ -41,6 +41,10 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
   const updateBolt = useUpdateBolt(bolt.id);
 
   useEffect(() => {
+    setEditedBolt(bolt);
+  }, [bolt]);
+
+  useEffect(() => {
     if (updateBolt.isSuccess) {
       setAction(undefined);
     }

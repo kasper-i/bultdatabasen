@@ -1,6 +1,6 @@
 import { Api } from "@/Api";
 import { Manufacturer } from "@/models/manufacturer";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const useManufacturers = () =>
   useQuery<Manufacturer[]>(["manufacturers"], () => Api.getManufacturers(), {
