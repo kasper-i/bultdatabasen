@@ -18,8 +18,6 @@ import { Material } from "./models/material";
 import { Model } from "./models/model";
 import { ResourceRole } from "./models/role";
 
-type Nullable<T> = { [K in keyof T]: T[K] | null };
-
 export interface Pagination {
   page: number;
   itemsPerPage: number;
