@@ -13,6 +13,9 @@ import { OAuthTokenResponse } from "@/pages/SigninPage";
 import axios, { AxiosRequestHeaders } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { cognitoClientId, cognitoUrl } from "./constants";
+import { Manufacturer } from "./models/manufacturer";
+import { Material } from "./models/material";
+import { Model } from "./models/model";
 import { ResourceRole } from "./models/role";
 
 export interface Pagination {
@@ -334,6 +337,16 @@ export class Api {
     return result.data;
   };
 
+  static updateBolt = async (boltId: string, updates: Partial<Bolt>) => {
+    const endpoint = `/bolts/${boltId}`;
+
+    const result = await axios.put<Bolt>(`${Api.baseUrl}${endpoint}`, updates, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return result.data;
+  };
+
   static deleteBolt = async (boltId: string) => {
     const endpoint = `/bolts/${boltId}`;
 
@@ -467,6 +480,39 @@ export class Api {
     const endpoint = `/resources/${parentId}/tasks`;
 
     const result = await axios.post<Task>(`${Api.baseUrl}${endpoint}`, task, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return result.data;
+  };
+
+  static getMaterials = async () => {
+    const endpoint = `/materials`;
+
+    const result = await axios.get<Material[]>(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return result.data;
+  };
+
+  static getManufacturers = async () => {
+    const endpoint = `/manufacturers`;
+
+    const result = await axios.get<Manufacturer[]>(
+      `${Api.baseUrl}${endpoint}`,
+      {
+        headers: Api.getDefaultHeaders(),
+      }
+    );
+
+    return result.data;
+  };
+
+  static getModels = async (manufacturerId: string) => {
+    const endpoint = `/manufacturers/${manufacturerId}/models`;
+
+    const result = await axios.get<Model[]>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 

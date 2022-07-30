@@ -98,7 +98,7 @@ func main() {
 	router.HandleFunc("/resources/{resourceID}/bolts", api.GetBolts).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/bolts", api.CreateBolt).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/bolts/{resourceID}", api.GetBolt).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/bolts/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/bolts/{resourceID}", api.UpdateBolt).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/bolts/{resourceID}", api.DeleteBolt).Methods(http.MethodDelete, http.MethodOptions)
 
 	router.HandleFunc("/resources/{resourceID}/tasks", api.GetTasks).Methods(http.MethodGet, http.MethodOptions)
@@ -106,6 +106,10 @@ func main() {
 	router.HandleFunc("/tasks/{resourceID}", api.GetTask).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/tasks/{resourceID}", api.UpdateTask).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/tasks/{resourceID}", api.DeleteTask).Methods(http.MethodDelete, http.MethodOptions)
+
+	router.HandleFunc("/materials", api.GetMaterials).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/manufacturers", api.GetManufacturers).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/manufacturers/{manufacturerID}/models", api.GetModels).Methods(http.MethodGet, http.MethodOptions)
 
 	router.HandleFunc("/trash", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/trash/{resourceID}/restore", nil).Methods(http.MethodPost, http.MethodOptions)

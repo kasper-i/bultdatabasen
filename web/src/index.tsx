@@ -12,6 +12,7 @@ import { store } from "./store";
 
 Api.restoreTokens();
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const refreshAuthLogic = async (failedRequest?: any) => {
   await Api.refreshTokens();
 

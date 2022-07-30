@@ -19,7 +19,7 @@ interface Props {
   totalNumberOfBolts: number;
 }
 
-const BoltEditor = ({
+const BasicBoltEditor = ({
   bolt,
   onRemove,
   onChange,
@@ -51,4 +51,4 @@ const BoltEditor = ({
   );
 };
 
-export default BoltEditor;
+export default BasicBoltEditor;

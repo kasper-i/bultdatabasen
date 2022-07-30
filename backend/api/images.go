@@ -75,7 +75,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, err)
 		return
 	}
-	
+
 	file, _, err := r.FormFile("image")
 	if err != nil {
 		utils.WriteError(w, err)

@@ -68,3 +68,25 @@ func DeleteBolt(w http.ResponseWriter, r *http.Request) {
 		utils.WriteResponse(w, http.StatusNoContent, nil)
 	}
 }
+
+func UpdateBolt(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
+	vars := mux.Vars(r)
+	boltID := vars["resourceID"]
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var bolt model.Bolt
+
+	if err := json.Unmarshal(reqBody, &bolt); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
+
+	updatedBolt, err := sess.UpdateBolt(boltID, bolt)
+
+	if err != nil {
+		utils.WriteError(w, err)
+	} else {
+		utils.WriteResponse(w, http.StatusOK, updatedBolt)
+	}
+}

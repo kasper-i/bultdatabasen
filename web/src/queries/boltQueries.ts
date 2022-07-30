@@ -26,6 +26,25 @@ export const useCreateBolt = (routeId: string, pointId: string) => {
   );
 };
 
+export const useUpdateBolt = (boltId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (updates: Partial<Bolt>) => Api.updateBolt(boltId, updates),
+    {
+      onSuccess: (data) => {
+        queryClient.setQueriesData<Bolt[]>(["bolts"], (old) =>
+          old === undefined
+            ? []
+            : old.map((existingBolt) =>
+                existingBolt.id === boltId ? data : existingBolt
+              )
+        );
+      },
+    }
+  );
+};
+
 export const useDeleteBolt = (
   routeId: string,
   pointId: string,

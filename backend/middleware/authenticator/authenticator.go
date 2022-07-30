@@ -48,6 +48,10 @@ func IsPublic(r *http.Request) bool {
 			return true
 		case strings.HasPrefix(r.URL.Path, "/tasks"):
 			return true
+		case strings.HasPrefix(r.URL.Path, "/materials"):
+			return true
+		case strings.HasPrefix(r.URL.Path, "/manufacturers"):
+			return true
 		case r.URL.Path == "/users/names":
 			return true
 		}

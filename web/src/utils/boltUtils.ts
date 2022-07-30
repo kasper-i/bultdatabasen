@@ -23,3 +23,14 @@ export const positionToLabel = (position?: BoltPosition) => {
       return "Bultinfo";
   }
 };
+
+export const diameterToFraction = (diameter: number) => {
+  switch (diameter) {
+    case 0.5:
+      return "1/2";
+    case 0.375:
+      return "3/8";
+    default:
+      return diameter.toString();
+  }
+};
