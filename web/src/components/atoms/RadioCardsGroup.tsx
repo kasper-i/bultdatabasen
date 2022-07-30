@@ -1,14 +1,7 @@
 import clsx from "clsx";
 import { isEqual } from "lodash";
 import React, { useId } from "react";
-
-export interface Option<T> {
-  value: T;
-  label: string;
-  sublabel?: string;
-  key: React.Key;
-  disabled?: boolean;
-}
+import { Option } from "./RadioGroup";
 
 interface Props<T> {
   value?: T;
@@ -17,7 +10,7 @@ interface Props<T> {
   label?: string;
 }
 
-const RadioGroupCards = <T,>({ value, options, onChange, label }: Props<T>) => {
+const RadioCardsGroup = <T,>({ value, options, onChange, label }: Props<T>) => {
   const groupId = useId();
 
   return (
@@ -35,12 +28,12 @@ const RadioGroupCards = <T,>({ value, options, onChange, label }: Props<T>) => {
           const selected = isEqual(optionValue, value);
 
           return (
-            <div key={key} className="">
+            <div key={key}>
               <input
                 id={optionId}
                 type="radio"
                 className="pointer-events-none opacity-0 fixed"
-                checked={optionValue === value}
+                checked={selected}
                 onChange={() => onChange(selected ? undefined : optionValue)}
               />
               <label
@@ -62,4 +55,4 @@ const RadioGroupCards = <T,>({ value, options, onChange, label }: Props<T>) => {
   );
 };
 
-export default RadioGroupCards;
+export default RadioCardsGroup;

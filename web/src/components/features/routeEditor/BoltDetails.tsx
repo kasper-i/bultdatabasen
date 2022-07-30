@@ -134,13 +134,13 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
             }
             className={textStyle}
           />
-          {bolt.dismantled && (
-            <LabelAndValue
-              label="Demonterad"
-              value={<Time time={bolt.dismantled} />}
-              className="col-span-2"
-            />
-          )}
+          <LabelAndValue
+            label="Demonterad"
+            value={
+              bolt.dismantled ? <Time time={bolt.dismantled} /> : undefined
+            }
+            className="col-span-2"
+          />
         </div>
       )}
     </div>

@@ -1,9 +1,5 @@
 package model
 
-import (
-	"fmt"
-)
-
 type Material struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -16,7 +12,7 @@ func (Material) TableName() string {
 func (sess Session) GetMaterials() ([]Material, error) {
 	var materials []Material = make([]Material, 0)
 
-	query := fmt.Sprintf("SELECT * FROM material ORDER BY name ASC")
+	query := "SELECT * FROM material ORDER BY name ASC"
 
 	if err := sess.DB.Raw(query).Scan(&materials).Error; err != nil {
 		return nil, err

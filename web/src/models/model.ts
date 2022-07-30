@@ -1,4 +1,4 @@
-import { BoltType } from "./bolt";
+import { BoltType, DiameterUnit } from "./bolt";
 
 export interface Model {
   id: string;
@@ -7,4 +7,5 @@ export interface Model {
   type?: BoltType;
   materialId?: string;
   diameter?: number;
+  diameterUnit?: DiameterUnit;
 }

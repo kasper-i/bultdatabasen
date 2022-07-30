@@ -9,7 +9,7 @@ import { translateBoltType } from "@/utils/boltUtils";
 import clsx from "clsx";
 import { FC, useMemo } from "react";
 import React from "react";
-import RadioGroupCards from "@/components/atoms/RadioGroupCards";
+import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 
 const typeOptions = (["expansion", "glue", "piton"] as const).map<
   Option<BoltType>
@@ -137,8 +137,8 @@ const AdvancedBoltEditor: FC<{
         onSelect={(modelId) => {
           const model = models?.find((model) => model.id === modelId);
           if (model) {
-            const { materialId, type, diameter } = model;
-            updateBolt({ modelId, materialId, type, diameter });
+            const { materialId, type, diameter, diameterUnit } = model;
+            updateBolt({ modelId, materialId, type, diameter, diameterUnit });
           }
         }}
         label="Modell"
@@ -147,7 +147,7 @@ const AdvancedBoltEditor: FC<{
 
       <ClearButton onClick={() => updateBolt({ modelId: undefined })} />
 
-      <RadioGroupCards<BoltType>
+      <RadioCardsGroup<BoltType>
         value={bolt.type}
         options={typeOptions}
         onChange={(type) => updateBolt({ type })}
@@ -166,17 +166,16 @@ const AdvancedBoltEditor: FC<{
 
       <ClearButton onClick={() => updateBolt({ materialId: undefined })} />
 
-      <RadioGroupCards<DiameterAndUnit>
+      <RadioCardsGroup<DiameterAndUnit>
         value={
           bolt.diameter && bolt.diameterUnit
             ? { diameter: bolt.diameter, unit: bolt.diameterUnit }
             : undefined
         }
         onChange={(value) => {
-          console.log(value);
           if (value) {
-            const { diameter, unit } = value;
-            updateBolt({ diameter, diameterUnit: unit });
+            const { diameter, unit: diameterUnit } = value;
+            updateBolt({ diameter, diameterUnit });
           } else {
             updateBolt({ diameter: undefined, diameterUnit: undefined });
           }
