@@ -33,8 +33,8 @@ const RadioCardsGroup = <T,>({ value, options, onChange, label }: Props<T>) => {
                 id={optionId}
                 type="radio"
                 className="pointer-events-none opacity-0 fixed"
-                checked={selected}
-                onChange={() => onChange(selected ? undefined : optionValue)}
+                defaultChecked={selected}
+                onClick={() => onChange(selected ? undefined : optionValue)}
               />
               <label
                 htmlFor={optionId}
