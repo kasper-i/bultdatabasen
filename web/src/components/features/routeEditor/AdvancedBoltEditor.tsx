@@ -44,6 +44,11 @@ const diameterOptions: Option<DiameterAndUnit>[] = [
     value: { diameter: 12, unit: "mm" },
   },
   {
+    key: "14mm",
+    label: "14mm",
+    value: { diameter: 14, unit: "mm" },
+  },
+  {
     key: "1_2in",
     label: '1/2"',
     value: { diameter: 0.5, unit: "inch" },
