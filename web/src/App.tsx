@@ -1,7 +1,7 @@
 import SigninPage from "@/pages/SigninPage";
 import React, { Suspense, useEffect, useState } from "react";
 import "react-activity/dist/Digital.css";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Api } from "./Api";
 import Loader from "./components/atoms/Loader";

@@ -1,5 +1,5 @@
 import { Resource } from "@/models/resource";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Api } from "../Api";
 
 export const useAreas = (areaId?: string) =>

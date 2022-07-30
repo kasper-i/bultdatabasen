@@ -1,6 +1,6 @@
 import { Api } from "@/Api";
 import { ResourceCount, ResourceType } from "@/models/resource";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const useResource = (resourceId: string) =>
   useQuery(["resource", { resourceId }], () => Api.getResource(resourceId));

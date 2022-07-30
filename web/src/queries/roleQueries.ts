@@ -2,7 +2,7 @@ import { Api } from "@/Api";
 import { selectAuthenticated } from "@/slices/authSlice";
 import { useAppSelector } from "@/store";
 import { AxiosError } from "axios";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const useRole = (resourceId: string) => {
   const isAuthenticated = useAppSelector(selectAuthenticated);

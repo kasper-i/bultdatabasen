@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import Button from "../atoms/Button";
 import Modal from "../atoms/Modal";
 

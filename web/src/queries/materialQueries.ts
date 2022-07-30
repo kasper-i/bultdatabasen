@@ -1,6 +1,6 @@
 import { Api } from "@/Api";
 import { Material } from "@/models/material";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const useMaterials = () =>
   useQuery<Material[]>(["materials"], () => Api.getMaterials(), {

@@ -1,7 +1,7 @@
 import { logout } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import React, { Fragment, ReactElement, useEffect } from "react";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Api } from "../Api";
 
