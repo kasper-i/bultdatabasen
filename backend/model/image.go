@@ -201,7 +201,7 @@ func rollbackObjectCreations(imageID string) {
 				Key:    aws.String(*object.Key),
 			}
 
-			spaces.S3Client().DeleteObject(&deleteInput)
+			_, _ = spaces.S3Client().DeleteObject(&deleteInput)
 		}
 	}
 }
