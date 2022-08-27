@@ -48,6 +48,12 @@ func run() {
 }
 
 func handler(msg UpdateCounterMsg) error {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Fprintf(os.Stderr, "Panic occurred in async runner: %v\n", err)
+		}	
+	}()
+
 	sess := createSession()
 	var newCount int
 
