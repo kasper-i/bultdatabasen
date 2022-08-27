@@ -3,6 +3,7 @@ import { useChildren } from "@/queries/resourceQueries";
 import { getResourceLabel, getResourceRoute } from "@/utils/resourceUtils";
 import React, { Fragment, ReactElement } from "react";
 import { Link } from "react-router-dom";
+import Pill from "./Pill";
 import SimpleTable from "./SimpleTable";
 
 interface Props {
@@ -33,8 +34,11 @@ const ChildrenTable = ({ resourceId, filters }: Props): ReactElement => {
             key: resource.id,
             row: (
               <Link to={url}>
-                <div className="w-[16rem] sm:w-[32rem] text-md truncate">
+                <div className="w-[16rem] sm:w-[32rem] text-md truncate flex items-center">
                   {resource.name}
+                  {(resource.counters?.openTasks ?? 0) > 0 && (
+                    <Pill className="ml-2">{resource.counters?.openTasks}</Pill>
+                  )}
                 </div>
               </Link>
             ),

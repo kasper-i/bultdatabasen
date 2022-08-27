@@ -28,30 +28,45 @@ export const useCreateTask = (parentId: string) => {
   );
 };
 
-export const useUpdateTask = (parentId: string, taskId: string) => {
+export const useUpdateTask = (taskId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation((task: Task) => Api.updateTask(taskId, task), {
     onSuccess: async (data) => {
-      queryClient.setQueryData<Task>(["task", { taskId: data.id }], () => data);
-      queryClient.setQueryData<Task[]>(["tasks", { parentId }], (tasks) =>
-        tasks?.find((task) => task.id === taskId)
-          ? tasks?.map((task) => (task.id === taskId ? data : task)) ?? []
-          : [...(tasks ?? []), data]
+      queryClient.setQueryData<Task>(["task", { taskId }], data);
+
+      queryClient.setQueriesData<{
+        data: Task[];
+      }>({ queryKey: ["tasks"], exact: false }, (value) =>
+        value?.data?.find((task) => task.id === taskId)
+          ? {
+              ...value,
+              data: value.data.map((cachedTask) =>
+                cachedTask.id === taskId ? data : cachedTask
+              ),
+            }
+          : value
       );
     },
   });
 };
 
-export const useDeleteTask = (parentId: string, taskId: string) => {
+export const useDeleteTask = (taskId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation(() => Api.deleteTask(taskId), {
     onSuccess: async () => {
       queryClient.removeQueries(["task", { taskId }]);
-      queryClient.setQueryData<Task[]>(
-        ["tasks", { parentId }],
-        (tasks) => tasks?.filter((task) => task.id !== taskId) ?? []
+
+      queryClient.setQueriesData<{
+        data: Task[];
+      }>({ queryKey: ["tasks"], exact: false }, (value) =>
+        value !== undefined
+          ? {
+              ...value,
+              data: value.data.filter((cachedTask) => cachedTask.id !== taskId),
+            }
+          : undefined
       );
     },
   });

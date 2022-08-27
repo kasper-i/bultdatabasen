@@ -6,7 +6,7 @@ export const useSector = (sectorId: string) => {
   const queryClient = useQueryClient();
 
   return useQuery(["sector", { sectorId }], () => Api.getSector(sectorId), {
-    onSuccess: ({ id, name, parentId, ancestors }) => {
+    onSuccess: ({ id, name, parentId, ancestors, counters }) => {
       queryClient.setQueryData<Resource>(
         ["resource", { resourceId: sectorId }],
         {
@@ -15,6 +15,7 @@ export const useSector = (sectorId: string) => {
           type: "sector",
           parentId,
           ancestors,
+          counters,
         }
       );
     },

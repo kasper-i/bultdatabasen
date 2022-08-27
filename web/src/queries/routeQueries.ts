@@ -10,7 +10,7 @@ export const useRoute = (routeId: string) => {
   const queryClient = useQueryClient();
 
   return useQuery(["route", { routeId }], () => Api.getRoute(routeId), {
-    onSuccess: ({ id, name, parentId, ancestors }) => {
+    onSuccess: ({ id, name, parentId, ancestors, counters }) => {
       queryClient.setQueryData<Resource>(
         ["resource", { resourceId: routeId }],
         {
@@ -19,6 +19,7 @@ export const useRoute = (routeId: string) => {
           type: "route",
           parentId,
           ancestors,
+          counters,
         }
       );
     },

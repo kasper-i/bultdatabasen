@@ -1,6 +1,8 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +13,7 @@ const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 type ResourceBase struct {
 	ID        string      `gorm:"primaryKey" json:"id"`
 	Ancestors *[]Resource `gorm:"-" json:"ancestors,omitempty"`
+	Counters  Counters    `gorm:"->" json:"counters"`
 }
 
 type Resource struct {
@@ -23,6 +26,31 @@ type Resource struct {
 	ModifiedTime    time.Time `gorm:"column:mtime" json:"-"`
 	CreatorID       string    `gorm:"column:buser_id" json:"-"`
 	LastUpdatedByID string    `gorm:"column:muser_id" json:"-"`
+}
+
+func (counters *Counters) Scan(value interface{}) error {
+	bytes := value.([]byte)
+	err := json.Unmarshal(bytes, counters)
+	return err
+}
+
+func (counters Counters) Value() (driver.Value, error) {
+	return json.Marshal(counters)
+}
+
+func (counters Counters) GetCount(counterType CounterType) int {
+	var match *int
+
+	switch counterType {
+	case OpenTasks:
+		match = counters.OpenTasks
+	}
+
+	if match != nil {
+		return *match
+	}
+
+	return 0
 }
 
 type Trash struct {
@@ -136,11 +164,34 @@ func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	return ancestors, nil
 }
 
+func (sess Session) GetAncestorsWithCounters(resourceID string) ([]Resource, error) {
+	var ancestors []Resource
+
+	err := sess.DB.Raw(`WITH RECURSIVE cte (id, name, type, parent_id, counters) AS (
+		SELECT id, name, type, parent_id, counters
+		FROM resource
+		WHERE id = ?
+	UNION DISTINCT
+		SELECT parent.id, parent.name, parent.type, parent.parent_id, parent.counters
+		FROM resource parent
+		INNER JOIN cte ON parent.id=cte.parent_id
+	)
+	SELECT * FROM cte
+	WHERE id != ?`, resourceID, resourceID).Scan(&ancestors).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ancestors, nil
+}
+
 func (sess Session) GetChildren(resourceID string) ([]Resource, error) {
 	var children []Resource = make([]Resource, 0)
 
 	err := sess.DB.Raw(`SELECT * FROM resource
-	WHERE parent_id = ?`, resourceID).Scan(&children).Error
+	WHERE parent_id = ?
+	ORDER BY JSON_EXTRACT(counters, '$.openTasks') DESC`, resourceID).Scan(&children).Error
 
 	if err != nil {
 		return nil, err
@@ -231,4 +282,42 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	}
 
 	return resources, nil
+}
+
+func (sess Session) CountOpenTasks(resourceID string) (int, error) {
+	var count struct {
+		TotalItems int `gorm:"column:totalItems" json:"totalItems"`
+	}
+
+	countQuery := fmt.Sprintf("%s AND %s", buildDescendantsCountQuery("task"), "task.status IN ('open', 'assigned')")
+
+	if err := sess.DB.Raw(countQuery, resourceID).Scan(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count.TotalItems, nil
+}
+
+func (sess Session) CountInstalledBolts(resourceID string) (int, error) {
+	var count struct {
+		TotalItems int `gorm:"column:totalItems" json:"totalItems"`
+	}
+
+	countQuery := fmt.Sprintf("%s AND %s", buildDescendantsCountQuery("bolt"), "dismantled IS NULL")
+
+	if err := sess.DB.Raw(countQuery, resourceID).Scan(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count.TotalItems, nil
+}
+
+func (sess Session) UpdateCount(resourceID string, counterType CounterType, count int) error {
+	query := "UPDATE resource SET counters = JSON_SET(counters, ?, ?) WHERE id = ?"
+
+	if err := sess.DB.Exec(query, fmt.Sprintf("$.%s", counterType), count, resourceID).Error; err != nil {
+		return err
+	}
+
+	return nil
 }

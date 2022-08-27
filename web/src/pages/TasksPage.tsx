@@ -5,7 +5,6 @@ import Pill from "@/components/Pill";
 import { useUnsafeParams } from "@/hooks/common";
 import { ResourceType } from "@/models/resource";
 import { useResource } from "@/queries/resourceQueries";
-import { useTasks } from "@/queries/taskQueries";
 import React, { Fragment, ReactElement } from "react";
 
 const locationDescription = (
@@ -27,9 +26,6 @@ const locationDescription = (
 const TasksPage = (): ReactElement => {
   const { resourceId } = useUnsafeParams<"resourceId">();
   const { data: resource } = useResource(resourceId);
-  const { data: tasks } = useTasks(resourceId, {
-    pagination: { page: 1, itemsPerPage: 1 },
-  });
 
   if (!resource) {
     return <Fragment />;
@@ -45,7 +41,7 @@ const TasksPage = (): ReactElement => {
       <div>
         <h1 className="text-2xl font-bold pb-1 flex items-start leading-none">
           Uppdrag
-          <Pill className="ml-2">{tasks?.meta?.totalItems}</Pill>
+          <Pill className="ml-2">{resource.counters?.openTasks}</Pill>
         </h1>
         {resource.name !== undefined && (
           <span className="text-sm">

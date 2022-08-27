@@ -92,7 +92,16 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 		return nil
 	})
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	UpdateCounter(UpdateCounterMsg{
+		ResourceID:  parentResourceID,
+		CounterType: OpenTasks,
+	})
+
+	return nil
 }
 
 func (sess Session) UpdateTask(task *Task, taskID string) error {
@@ -113,7 +122,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		task.ClosedAt = &now
 	}
 
-	return sess.Transaction(func(sess Session) error {
+	err = sess.Transaction(func(sess Session) error {
 		if err := sess.touchResource(taskID); err != nil {
 			return err
 		}
@@ -124,6 +133,17 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 
 		return nil
 	})
+
+	if err != nil {
+		return err
+	}
+
+	UpdateCounter(UpdateCounterMsg{
+		ResourceID:  task.ParentID,
+		CounterType: OpenTasks,
+	})
+
+	return nil
 }
 
 func (sess Session) DeleteTask(resourceID string) error {

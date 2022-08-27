@@ -10,10 +10,15 @@ export type ResourceType =
   | "image"
   | "task";
 
+export interface Counters {
+  openTasks?: number;
+}
+
 export interface ResourceBase {
   id: string;
   name?: string;
   ancestors?: Omit<Resource, "ancestors">[];
+  counters?: Counters;
 }
 
 export type Resource = ResourceBase & {

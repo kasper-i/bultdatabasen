@@ -91,7 +91,7 @@ func (sess Session) touchResource(resourceID string) error {
 }
 
 func (sess Session) deleteResource(resourceID string) error {
-	return sess.Transaction(func(sess Session) error {
+	err := sess.Transaction(func(sess Session) error {
 		resource, err := sess.GetResource(resourceID)
 		if err != nil {
 			return err
@@ -112,6 +112,19 @@ func (sess Session) deleteResource(resourceID string) error {
 
 		return sess.DB.Create(&trash).Error
 	})
+
+	if err != nil {
+		return err
+	}
+
+	for _, counterType := range AllCounterTypes {
+		UpdateCounter(UpdateCounterMsg{
+			ResourceID:  resourceID,
+			CounterType: counterType,
+		})
+	}
+
+	return nil
 }
 
 func (sess Session) checkParentAllowed(resource Resource, parentID string) bool {

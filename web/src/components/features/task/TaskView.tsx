@@ -17,13 +17,12 @@ const finalStatuses: TaskStatus[] = ["closed", "rejected"];
 
 const TaskView: FC<{
   taskId: string;
-  parentId: string;
-}> = ({ parentId, taskId }): ReactElement => {
+}> = ({ taskId }): ReactElement => {
   const { data: task } = useTask(taskId);
 
   const ancestors = task?.ancestors;
-  const deleteTask = useDeleteTask(parentId, taskId);
-  const updateTask = useUpdateTask(parentId, taskId);
+  const deleteTask = useDeleteTask(taskId);
+  const updateTask = useUpdateTask(taskId);
 
   const [action, setAction] = useState<"delete" | "edit">();
 
@@ -89,11 +88,7 @@ const TaskView: FC<{
       </div>
 
       {action === "edit" ? (
-        <TaskEdit
-          parentId={parentId}
-          task={task}
-          onDone={() => setAction(undefined)}
-        />
+        <TaskEdit task={task} onDone={() => setAction(undefined)} />
       ) : (
         <>
           <p className="text-sm">{task.description}</p>
