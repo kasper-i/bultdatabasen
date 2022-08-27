@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `mtime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `buser_id` VARCHAR(36) NOT NULL,
   `muser_id` VARCHAR(36) NOT NULL,
-  `counters` JSON NOT NULL DEFAULT '(JSON_OBJECT())',
+  `counters` JSON NOT NULL DEFAULT (JSON_OBJECT()),
   PRIMARY KEY (`id`),
   INDEX `fk_resource_1_idx` (`parent_id` ASC),
   INDEX `fk_resource_2_idx` (`type` ASC, `depth` ASC),
