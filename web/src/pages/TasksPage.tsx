@@ -41,7 +41,9 @@ const TasksPage = (): ReactElement => {
       <div>
         <h1 className="text-2xl font-bold pb-1 flex items-start leading-none">
           Uppdrag
-          <Pill className="ml-2">{resource.counters?.openTasks}</Pill>
+          {(resource.counters?.openTasks ?? 0) > 0 && (
+            <Pill className="ml-2">{resource.counters?.openTasks}</Pill>
+          )}
         </h1>
         {resource.name !== undefined && (
           <span className="text-sm">
