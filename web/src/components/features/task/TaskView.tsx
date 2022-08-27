@@ -93,45 +93,55 @@ const TaskView: FC<{
         <>
           <p className="text-sm">{task.description}</p>
 
-          <hr className="-mx-5 pb-2.5" />
-
           {isComplete ? (
-            <div className="flex flex-col">
-              <div className="flex items-center">
-                <Icon
-                  className={clsx(
-                    task.status === "closed" ? "text-green-600" : "text-red-500"
-                  )}
-                  name="check"
-                />
-                <p
-                  className={clsx(
-                    task.status === "closed" ? "text-green-600" : "text-red-500"
-                  )}
-                >
-                  <span className="ml-1 font-bold">
-                    {task.status === "closed" ? "Åtgärdat" : "Stängd"}
-                  </span>{" "}
-                  {task.closedAt && <Time time={task.closedAt} />}
-                </p>
+            <>
+              <hr className="-mx-5 pb-2" />
+
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <Icon
+                    className={clsx(
+                      task.status === "closed"
+                        ? "text-green-600"
+                        : "text-red-500"
+                    )}
+                    name="check"
+                  />
+                  <p
+                    className={clsx(
+                      task.status === "closed"
+                        ? "text-green-600"
+                        : "text-red-500"
+                    )}
+                  >
+                    <span className="ml-1 font-bold">
+                      {task.status === "closed" ? "Åtgärdat" : "Stängd"}
+                    </span>{" "}
+                    {task.closedAt && <Time time={task.closedAt} />}
+                  </p>
+                </div>
+                {task.comment && (
+                  <p className="text-sm text-gray-700">
+                    <Icon name="comment" className="mr-1" />
+                    {task.comment}
+                  </p>
+                )}
               </div>
-              {task.comment && (
-                <p className="text-sm text-gray-700">
-                  <Icon name="comment" className="mr-1" />
-                  {task.comment}
-                </p>
-              )}
-            </div>
+            </>
           ) : (
             <Restricted>
-              <Button
-                onClick={() => changeStatus("closed")}
-                icon="check badge"
-                full
-                loading={updateTask.isLoading}
-              >
-                Markera åtgärdad
-              </Button>
+              <>
+                <hr className="-mx-5 pb-2" />
+
+                <Button
+                  onClick={() => changeStatus("closed")}
+                  icon="check badge"
+                  full
+                  loading={updateTask.isLoading}
+                >
+                  Markera åtgärdad
+                </Button>
+              </>
             </Restricted>
           )}
         </>
