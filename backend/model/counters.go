@@ -11,10 +11,6 @@ const (
 	OpenTasks CounterType = "openTasks"
 )
 
-var AllCounterTypes []CounterType = []CounterType{
-	OpenTasks,
-}
-
 type Counters struct {
 	OpenTasks *int `json:"openTasks"`
 }
@@ -37,12 +33,11 @@ func init() {
 
 func run() {
 	for {
-		select {
-		case msg := <-channel:
-			err := handler(msg)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-			}
+		msg := <-channel
+
+		err := handler(msg)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
 	}
 }
@@ -50,7 +45,7 @@ func run() {
 func handler(msg UpdateCounterMsg) error {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Fprintf(os.Stderr, "Panic occurred in async runner: %v\n", err)
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}	
 	}()
 
@@ -62,7 +57,7 @@ func handler(msg UpdateCounterMsg) error {
 		return err
 	}
 
-	ancestors, err := sess.GetAncestorsWithCounters(msg.ResourceID)
+	ancestors, err := sess.GetAllAncestorsWithCounters(msg.ResourceID)
 	if err != nil {
 		return err
 	}

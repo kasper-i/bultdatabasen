@@ -164,7 +164,7 @@ func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	return ancestors, nil
 }
 
-func (sess Session) GetAncestorsWithCounters(resourceID string) ([]Resource, error) {
+func (sess Session) GetAllAncestorsWithCounters(resourceID string) ([]Resource, error) {
 	var ancestors []Resource
 
 	err := sess.DB.Raw(`WITH RECURSIVE cte (id, name, type, parent_id, counters) AS (
@@ -175,6 +175,11 @@ func (sess Session) GetAncestorsWithCounters(resourceID string) ([]Resource, err
 		SELECT parent.id, parent.name, parent.type, parent.parent_id, parent.counters
 		FROM resource parent
 		INNER JOIN cte ON parent.id=cte.parent_id
+	UNION DISTINCT
+		SELECT foster_parent.id, foster_parent.name, foster_parent.type, foster_parent.parent_id, foster_parent.counters
+		FROM foster_care fc
+		INNER JOIN cte ON fc.id=cte.id
+		INNER JOIN resource foster_parent ON fc.foster_parent_id=foster_parent.id
 	)
 	SELECT * FROM cte
 	WHERE id != ?`, resourceID, resourceID).Scan(&ancestors).Error
