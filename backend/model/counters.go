@@ -50,7 +50,7 @@ func handler(msg UpdateCounterMsg) error {
 	}()
 
 	sess := createSession()
-	var newCount int
+	newCount := 0
 
 	resource, err := sess.GetResource(msg.ResourceID)
 	if err != nil {
@@ -64,13 +64,19 @@ func handler(msg UpdateCounterMsg) error {
 
 	switch msg.CounterType {
 	case OpenTasks:
-		newCount, err = sess.CountOpenTasks(msg.ResourceID)
-		if err != nil {
+		if isOpen, err := sess.IsTaskOpen(msg.ResourceID); err != nil {
 			return err
+		} else if isOpen {
+			newCount = 1
 		}
 	}
 
 	difference := newCount - resource.Counters.GetCount(msg.CounterType)
+
+	if difference == 0 {
+		return nil
+	}
+
 
 	err = sess.Transaction(func(sess Session) error {
 		if err := sess.UpdateCount(msg.ResourceID, msg.CounterType, newCount); err != nil {

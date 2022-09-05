@@ -97,7 +97,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	}
 
 	UpdateCounter(UpdateCounterMsg{
-		ResourceID:  parentResourceID,
+		ResourceID:  task.ID,
 		CounterType: OpenTasks,
 	})
 
@@ -139,7 +139,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 	}
 
 	UpdateCounter(UpdateCounterMsg{
-		ResourceID:  task.ParentID,
+		ResourceID:  task.ID,
 		CounterType: OpenTasks,
 	})
 

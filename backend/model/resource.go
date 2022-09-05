@@ -289,32 +289,18 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	return resources, nil
 }
 
-func (sess Session) CountOpenTasks(resourceID string) (int, error) {
-	var count struct {
-		TotalItems int `gorm:"column:totalItems" json:"totalItems"`
+func (sess Session) IsTaskOpen(taskID string) (bool, error) {
+	var task Task
+	isOpen := false
+	query := fmt.Sprintf("SELECT id FROM task WHERE id = ? AND status IN ('open', 'assigned')")
+
+	if err := sess.DB.Raw(query, taskID).Scan(&task).Error; err != nil {
+		return false, err
+	} else if task.ID != "" {
+		isOpen = true
 	}
 
-	countQuery := fmt.Sprintf("%s AND %s", buildDescendantsCountQuery("task"), "task.status IN ('open', 'assigned')")
-
-	if err := sess.DB.Raw(countQuery, resourceID).Scan(&count).Error; err != nil {
-		return 0, err
-	}
-
-	return count.TotalItems, nil
-}
-
-func (sess Session) CountInstalledBolts(resourceID string) (int, error) {
-	var count struct {
-		TotalItems int `gorm:"column:totalItems" json:"totalItems"`
-	}
-
-	countQuery := fmt.Sprintf("%s AND %s", buildDescendantsCountQuery("bolt"), "dismantled IS NULL")
-
-	if err := sess.DB.Raw(countQuery, resourceID).Scan(&count).Error; err != nil {
-		return 0, err
-	}
-
-	return count.TotalItems, nil
+	return isOpen, nil
 }
 
 func (sess Session) UpdateCount(resourceID string, counterType CounterType, count int) error {
