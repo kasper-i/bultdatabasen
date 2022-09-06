@@ -1,8 +1,6 @@
 package model
 
 import (
-	"database/sql/driver"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -26,31 +24,6 @@ type Resource struct {
 	ModifiedTime    time.Time `gorm:"column:mtime" json:"-"`
 	CreatorID       string    `gorm:"column:buser_id" json:"-"`
 	LastUpdatedByID string    `gorm:"column:muser_id" json:"-"`
-}
-
-func (counters *Counters) Scan(value interface{}) error {
-	bytes := value.([]byte)
-	err := json.Unmarshal(bytes, counters)
-	return err
-}
-
-func (counters Counters) Value() (driver.Value, error) {
-	return json.Marshal(counters)
-}
-
-func (counters Counters) GetCount(counterType CounterType) int {
-	var match *int
-
-	switch counterType {
-	case OpenTasks:
-		match = counters.OpenTasks
-	}
-
-	if match != nil {
-		return *match
-	}
-
-	return 0
 }
 
 type Trash struct {
@@ -303,12 +276,6 @@ func (sess Session) IsTaskOpen(taskID string) (bool, error) {
 	return isOpen, nil
 }
 
-func (sess Session) UpdateCount(resourceID string, counterType CounterType, count int) error {
-	query := "UPDATE resource SET counters = JSON_SET(counters, ?, ?) WHERE id = ?"
-
-	if err := sess.DB.Exec(query, fmt.Sprintf("$.%s", counterType), count, resourceID).Error; err != nil {
-		return err
-	}
-
-	return nil
+func (sess Session) UpdateCount(resource Resource, counters Counters) error {
+	return sess.DB.Exec(`UPDATE resource SET counters = ? WHERE id = ?`, counters, resource.ID).Error
 }

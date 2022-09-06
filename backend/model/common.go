@@ -117,10 +117,7 @@ func (sess Session) deleteResource(resourceID string) error {
 		return err
 	}
 
-	UpdateCounter(UpdateCounterMsg{
-		ResourceID:  resourceID,
-		CounterType: OpenTasks,
-	})
+	RemoveAllCounters(resourceID)
 
 	return nil
 }

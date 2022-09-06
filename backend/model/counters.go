@@ -1,23 +1,62 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"os"
 )
 
 type CounterType string
+type TriggerEvent string
 
 const (
 	OpenTasks CounterType = "openTasks"
 )
 
 type Counters struct {
-	OpenTasks *int `json:"openTasks"`
+	OpenTasks int `json:"openTasks,omitEmpty"`
 }
+
+func (lhs Counters) Substract(rhs Counters) Counters {
+	copy := lhs
+
+	copy.OpenTasks -= rhs.OpenTasks
+
+	return copy
+}
+
+func (lhs Counters) Add(rhs Counters) Counters {
+	copy := lhs
+
+	copy.OpenTasks += rhs.OpenTasks
+
+	return copy
+}
+
+func (counters *Counters) IsZero() bool {
+	return counters.OpenTasks == 0
+}
+
+func (counters *Counters) Scan(value interface{}) error {
+	bytes := value.([]byte)
+	err := json.Unmarshal(bytes, counters)
+	return err
+}
+
+func (counters Counters) Value() (driver.Value, error) {
+	return json.Marshal(counters)
+}
+
+const (
+	UpdateResource TriggerEvent = "UPDATE"
+	DeleteResource TriggerEvent = "DELETE"
+)
 
 type UpdateCounterMsg struct {
 	ResourceID  string
-	CounterType CounterType
+	TriggerEvent TriggerEvent
+	CounterType *CounterType
 }
 
 var channel chan UpdateCounterMsg
@@ -50,7 +89,6 @@ func handler(msg UpdateCounterMsg) error {
 	}()
 
 	sess := createSession()
-	newCount := 0
 
 	resource, err := sess.GetResource(msg.ResourceID)
 	if err != nil {
@@ -62,41 +100,75 @@ func handler(msg UpdateCounterMsg) error {
 		return err
 	}
 
-	switch msg.CounterType {
-	case OpenTasks:
-		if isOpen, err := sess.IsTaskOpen(msg.ResourceID); err != nil {
-			return err
-		} else if isOpen {
-			newCount = 1
-		}
+	switch msg.TriggerEvent {
+	case DeleteResource:
+		return deleteCounters(sess, resource.Counters, ancestors)
+	case UpdateResource:
+		return updateCounters(sess, *resource, ancestors, *msg.CounterType)
 	}
 
-	difference := newCount - resource.Counters.GetCount(msg.CounterType)
+	return nil
+}
 
-	if difference == 0 {
-		return nil
-	}
-
-
-	err = sess.Transaction(func(sess Session) error {
-		if err := sess.UpdateCount(msg.ResourceID, msg.CounterType, newCount); err != nil {
-			return err
-		}
-
+func deleteCounters(sess Session, counters Counters, ancestors []Resource) error {
+	return sess.Transaction(func(sess Session) error {
 		for _, ancestor := range ancestors {
-			newAncestorCount := ancestor.Counters.GetCount(msg.CounterType) + difference
-
-			if err := sess.UpdateCount(ancestor.ID, msg.CounterType, newAncestorCount); err != nil {
+			if err := sess.UpdateCount(ancestor, ancestor.Counters.Substract(counters)); err != nil {
 				return err
 			}
 		}
 
 		return nil
 	})
-
-	return nil
 }
 
-func UpdateCounter(message UpdateCounterMsg) {
-	channel <- message
+func updateCounters(sess Session, resource Resource, ancestors []Resource, counterType CounterType) error {
+	difference := Counters{}
+
+	switch counterType {
+	case OpenTasks:
+		if isOpen, err := sess.IsTaskOpen(resource.ID); err != nil {
+			return err
+		} else {
+			count := 0
+			if isOpen {
+				count = 1
+			}
+
+			difference.OpenTasks = count - resource.Counters.OpenTasks
+		}
+	}
+
+	if difference.IsZero() {
+		return nil
+	}
+
+	return sess.Transaction(func(sess Session) error {
+		if err := sess.UpdateCount(resource, resource.Counters.Add(difference)); err != nil {
+			return err
+		}
+
+		for _, ancestor := range ancestors {
+			if err := sess.UpdateCount(ancestor, ancestor.Counters.Add(difference)); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
+func UpdateCounter(resourceID string, counterType CounterType) {
+	channel <- UpdateCounterMsg{
+		ResourceID: resourceID,
+		TriggerEvent: UpdateResource,
+		CounterType: &counterType,
+	}
+}
+
+func RemoveAllCounters(resourceID string) {
+	channel <- UpdateCounterMsg{
+		ResourceID: resourceID,
+		TriggerEvent: DeleteResource,
+	}
 }
