@@ -1,4 +1,10 @@
 import {
+  ArrowUturnLeftIcon,
+  HomeIcon,
+  PencilIcon,
+  XMarkIcon,
+} from "@heroicons/react/20/solid";
+import {
   ArrowDownTrayIcon,
   ArrowLeftIcon,
   ArrowPathIcon,
@@ -21,16 +27,9 @@ import {
   WrenchScrewdriverIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import {
-  ArrowUturnLeftIcon,
-  HomeIcon,
-  PencilIcon,
-  XMarkIcon,
-} from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { FC } from "react";
 import { IconType } from "./types";
-import React from "react";
 
 const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
   name,
