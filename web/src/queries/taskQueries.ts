@@ -11,18 +11,21 @@ export const useTasks = (parentId: string, options: GetTasksOptions) => {
 export const useTask = (taskId: string) =>
   useQuery(["task", { taskId }], () => Api.getTask(taskId));
 
-export const useCreateTask = (parentId: string) => {
+export const useCreateTask = (routeId: string, parentId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation(
     (task: Pick<Task, "description">) => Api.createTask(parentId, task),
     {
       onSuccess: async (data) => {
-        queryClient.refetchQueries(["task", { taskId: data.id }]);
-        queryClient.refetchQueries(["tasks", { parentId }], {
-          stale: true,
-          exact: false,
-        });
+        queryClient.setQueryData(["task", { taskId: data.id }], data);
+
+        queryClient.setQueriesData<{
+          data: Task[];
+        }>(["tasks", { parentId: routeId }], (value) => ({
+          ...value,
+          data: [...(value?.data ?? []), data],
+        }));
       },
     }
   );

@@ -4,7 +4,7 @@ import { Select } from "@/components/atoms/Select";
 import { Point } from "@/models/point";
 import { usePoints } from "@/queries/pointQueries";
 import { useCreateTask } from "@/queries/taskQueries";
-import React, { ReactElement, useState } from "react";
+import { ReactElement, useState } from "react";
 import Restricted from "../../Restricted";
 import { usePointLabeler } from "../routeEditor/hooks";
 
@@ -20,7 +20,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
   const [description, setDescription] = useState("");
   const [selectedPointId, setSelectedPointId] = useState<string>();
 
-  const createTask = useCreateTask(selectedPointId ?? routeId);
+  const createTask = useCreateTask(routeId, selectedPointId ?? routeId);
 
   const handleCreateTask = () => {
     createTask.mutate({ description });

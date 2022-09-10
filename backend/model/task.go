@@ -78,7 +78,7 @@ func (sess Session) GetTask(resourceID string) (*Task, error) {
 	return &task, nil
 }
 
-func (sess Session) getTaskWithResourceLock(resourceID string) (*Task, error) {
+func (sess Session) getTaskWithLock(resourceID string) (*Task, error) {
 	var task Task
 
 	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ? FOR UPDATE`, resourceID).
@@ -149,7 +149,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 	}
 
 	err = sess.Transaction(func(sess Session) error {
-		original, err := sess.getTaskWithResourceLock(taskID)
+		original, err := sess.getTaskWithLock(taskID)
 		if err != nil {
 			return err
 		}

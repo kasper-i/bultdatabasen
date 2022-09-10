@@ -91,8 +91,13 @@ func (sess Session) touchResource(resourceID string) error {
 }
 
 func (sess Session) deleteResource(resourceID string) error {
-	err := sess.Transaction(func(sess Session) error {
-		resource, err := sess.GetResource(resourceID)
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
+	if err != nil {
+		return err
+	}
+
+	err = sess.Transaction(func(sess Session) error {
+		resource, err := sess.getResourceWithLock(resourceID)
 		if err != nil {
 			return err
 		}
@@ -107,6 +112,14 @@ func (sess Session) deleteResource(resourceID string) error {
 		resource.ParentID = nil
 
 		if err := sess.DB.Select("ParentID").Updates(resource).Error; err != nil {
+			return err
+		}
+
+		countersDifference := Counters{}.Substract(resource.Counters)
+
+		if err := sess.UpdateCounters(
+			utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }),
+			countersDifference.AsMap()); err != nil {
 			return err
 		}
 

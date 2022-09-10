@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
@@ -111,6 +113,21 @@ func (sess Session) GetResource(resourceID string) (*Resource, error) {
 
 	if err := sess.DB.First(&resource, "id = ?", resourceID).Error; err != nil {
 		return nil, err
+	}
+
+	return &resource, nil
+}
+
+func (sess Session) getResourceWithLock(resourceID string) (*Resource, error) {
+	var resource Resource
+
+	if err := sess.DB.Raw(`SELECT * resource WHERE id = ? FOR UPDATE`, resourceID).
+		Scan(&resource).Error; err != nil {
+		return nil, err
+	}
+
+	if resource.ID == "" {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &resource, nil
