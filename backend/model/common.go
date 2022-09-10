@@ -119,7 +119,7 @@ func (sess Session) deleteResource(resourceID string) error {
 
 		if err := sess.UpdateCounters(
 			utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }),
-			countersDifference.AsMap()); err != nil {
+			countersDifference); err != nil {
 			return err
 		}
 

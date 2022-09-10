@@ -128,7 +128,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 
 		if err := sess.UpdateCounters(
 			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), parentResourceID, task.ID),
-			task.Counters.AsMap()); err != nil {
+			task.Counters); err != nil {
 			return err
 		}
 
@@ -180,7 +180,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 
 		if err := sess.UpdateCounters(
 			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), taskID),
-			countersDifference.AsMap()); err != nil {
+			countersDifference); err != nil {
 			return err
 		}
 

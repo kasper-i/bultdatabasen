@@ -256,7 +256,9 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 				return err
 			}
 
-			sess.UpdateCounters([]string{ routeID }, point.Counters.AsMap())
+			if err := sess.UpdateCounters([]string{ routeID }, point.Counters); err != nil {
+				return err
+			}
 		} else {
 			point.ID = uuid.Must(uuid.NewRandom()).String()
 			point.Anchor = anchor
@@ -341,38 +343,43 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 }
 
 func (sess Session) DetachPoint(routeID string, pointID string) error {
-	var err error
-	var routeGraph map[string]*routeGraphVertex
-	var parents []Parent
+	return sess.Transaction(func(sess Session) error {
+		var err error
+		var routeGraph map[string]*routeGraphVertex
+		var parents []Parent
 
-	if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
-		return err
-	}
-
-	if parents, err = sess.getParents([]string{pointID}); err != nil {
-		return err
-	}
-
-	var belongsToRoute bool = false
-	var inFosterCare bool = false
-
-	for _, parent := range parents {
-		if parent.ID == routeID {
-			belongsToRoute = true
-
-			if parent.FosterParent {
-				inFosterCare = true
+		var point *Point
+		if point, err = sess.getPointWithLock(pointID); err != nil {
+			return err
+		}		
+	
+		if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
+			return err
+		}
+	
+		if parents, err = sess.getParents([]string{pointID}); err != nil {
+			return err
+		}
+	
+		var belongsToRoute bool = false
+		var inFosterCare bool = false
+	
+		for _, parent := range parents {
+			if parent.ID == routeID {
+				belongsToRoute = true
+	
+				if parent.FosterParent {
+					inFosterCare = true
+				}
 			}
 		}
-	}
+	
+		if !belongsToRoute {
+			return gorm.ErrRecordNotFound
+		}
+	
+		vertex := routeGraph[pointID]
 
-	if !belongsToRoute {
-		return gorm.ErrRecordNotFound
-	}
-
-	vertex := routeGraph[pointID]
-
-	return sess.Transaction(func(sess Session) error {
 		if vertex != nil {
 
 			nextPoint := vertex.OutgoingPointID
@@ -403,6 +410,11 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 			if err := sess.leaveFosterCare(pointID, routeID); err != nil {
 				return err
 			}
+
+			countersDifference := Counters{}.Substract(point.Counters)
+			if err := sess.UpdateCounters([]string{ routeID }, countersDifference); err != nil {
+				return err
+			}
 		} else {
 			var newOwnerID string
 
@@ -410,7 +422,13 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 			for _, parent := range parents {
 				if parent.ID != routeID {
 					newOwnerID = parent.ID
+					break
 				}
+			}
+
+			countersDifference := Counters{}.Substract(point.Counters)
+			if err := sess.UpdateCounters([]string{ routeID }, countersDifference); err != nil {
+				return err
 			}
 
 			if err := sess.leaveFosterCare(pointID, newOwnerID); err != nil {

@@ -121,7 +121,7 @@ func (sess Session) GetResource(resourceID string) (*Resource, error) {
 func (sess Session) getResourceWithLock(resourceID string) (*Resource, error) {
 	var resource Resource
 
-	if err := sess.DB.Raw(`SELECT * resource WHERE id = ? FOR UPDATE`, resourceID).
+	if err := sess.DB.Raw(`SELECT * FROM resource WHERE id = ? FOR UPDATE`, resourceID).
 		Scan(&resource).Error; err != nil {
 		return nil, err
 	}
@@ -280,7 +280,9 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	return resources, nil
 }
 
-func (sess Session) UpdateCounters(resourceIDs []string, difference map[CounterType]int) error {
+func (sess Session) UpdateCounters(resourceIDs []string, delta Counters) error {
+	difference := delta.AsMap()
+
 	if len(difference) == 0 {
 		return nil
 	}
