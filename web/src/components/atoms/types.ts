@@ -22,6 +22,7 @@ export type IconType =
   | "edit"
   | "check badge"
   | "comment"
-  | "x";
+  | "x"
+  | "back";
 
 export type ColorType = "primary" | "danger" | "white";

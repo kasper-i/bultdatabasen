@@ -21,7 +21,12 @@ import {
   WrenchScrewdriverIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import { HomeIcon, PencilIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowUturnLeftIcon,
+  HomeIcon,
+  PencilIcon,
+  XMarkIcon,
+} from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { FC } from "react";
 import { IconType } from "./types";
@@ -80,6 +85,8 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return WrenchScrewdriverIcon;
       case "x":
         return XMarkIcon;
+      case "back":
+        return ArrowUturnLeftIcon;
       default:
         return BeakerIcon;
     }

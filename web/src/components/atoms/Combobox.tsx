@@ -1,5 +1,5 @@
 import { Combobox as HeadlessCombobox, Transition } from "@headlessui/react";
-import { SelectorIcon } from "@heroicons/react/solid";
+import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import React, { FC, Fragment, ReactNode, useState } from "react";
 import Icon from "./Icon";
@@ -110,7 +110,7 @@ export function Combobox<T>({
             className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[2.125rem]"
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-            <SelectorIcon
+            <ChevronUpDownIcon
               className="w-5 h-5 text-gray-400"
               aria-hidden="true"
             />
