@@ -1,6 +1,6 @@
 import { Resource } from "@/models/resource";
 import { getResourceRoute } from "@/utils/resourceUtils";
-import { ChevronRightIcon } from "@heroicons/react/solid";
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import React, {
   FC,

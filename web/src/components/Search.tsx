@@ -2,7 +2,7 @@ import { Api } from "@/Api";
 import { SearchResult } from "@/models/resource";
 import { getResourceLabel, getResourceRoute } from "@/utils/resourceUtils";
 import { Combobox } from "@headlessui/react";
-import { SearchIcon } from "@heroicons/react/solid";
+import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import React, { Reducer, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
@@ -87,7 +87,10 @@ function Search() {
             className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-3xl h-[2.125rem]"
           />
           <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-            <SearchIcon className="w-5 h-5 text-gray-400" aria-hidden="true" />
+            <MagnifyingGlassIcon
+              className="w-5 h-5 text-gray-400"
+              aria-hidden="true"
+            />
           </Combobox.Button>
           {results.length > 0 && (
             <Combobox.Options className="absolute z-50 w-full py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">

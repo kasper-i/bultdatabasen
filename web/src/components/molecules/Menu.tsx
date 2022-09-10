@@ -1,5 +1,5 @@
 import { Menu as HeadlessMenu, Transition } from "@headlessui/react";
-import { DotsVerticalIcon } from "@heroicons/react/outline";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import React, { FC, Fragment } from "react";
 import Icon from "../atoms/Icon";
@@ -19,7 +19,7 @@ export const Menu: FC<{ items: MenuItem[] }> = ({ items }) => {
       <HeadlessMenu as="div" className="relative inline-block text-left">
         <div>
           <HeadlessMenu.Button>
-            <DotsVerticalIcon className="h-4 w-4" />
+            <EllipsisVerticalIcon className="h-4 w-4" />
           </HeadlessMenu.Button>
         </div>
         <Transition

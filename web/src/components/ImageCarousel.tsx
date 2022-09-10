@@ -132,7 +132,7 @@ export const FullSizeImage: FC<{
           </div>
 
           <div className="fixed h-16 w-full bottom-0 inset-x-0 flex justify-between px-5 bg-neutral-100">
-            <IconButton tiny onClick={onClose} icon="close" />
+            <IconButton tiny onClick={onClose} icon="back" />
             <div className="flex items-center gap-2.5">
               <Restricted>
                 <Button
