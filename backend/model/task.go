@@ -78,7 +78,7 @@ func (sess Session) GetTask(resourceID string) (*Task, error) {
 	return &task, nil
 }
 
-func (sess Session) getTaskForUpdate(resourceID string) (*Task, error) {
+func (sess Session) getTaskWithResourceLock(resourceID string) (*Task, error) {
 	var task Task
 
 	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ? FOR UPDATE`, resourceID).
@@ -127,8 +127,8 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 		}
 
 		if err := sess.UpdateCounters(
-			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), parentResourceID),
-			task.Counters.AsDiff()); err != nil {
+			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), parentResourceID, task.ID),
+			task.Counters.AsMap()); err != nil {
 			return err
 		}
 
@@ -143,7 +143,12 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 }
 
 func (sess Session) UpdateTask(task *Task, taskID string) error {
-	original, err := sess.getTaskForUpdate(taskID)
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(taskID)
+	if err != nil {
+		return err
+	}
+
+	original, err := sess.getTaskWithResourceLock(taskID)
 	if err != nil {
 		return err
 	}
@@ -160,12 +165,22 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		task.ClosedAt = &now
 	}
 
+	task.Counters = task.CalculateCounters()
+
+	countersDifference := task.Counters.Substract(original.Counters)
+
 	err = sess.Transaction(func(sess Session) error {
 		if err := sess.touchResource(taskID); err != nil {
 			return err
 		}
 
 		if err := sess.DB.Updates(task).Error; err != nil {
+			return err
+		}
+
+		if err := sess.UpdateCounters(
+			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), taskID),
+			countersDifference.AsMap()); err != nil {
 			return err
 		}
 

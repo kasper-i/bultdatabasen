@@ -45,7 +45,7 @@ func (counters Counters) Value() (driver.Value, error) {
 	return json.Marshal(counters)
 }
 
-func (counters *Counters) AsDiff() map[CounterType]int {
+func (counters *Counters) AsMap() map[CounterType]int {
 	var dict map[CounterType]int = make(map[CounterType]int, 0)
 
 	if counters.OpenTasks != 0 {
