@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -137,19 +138,19 @@ func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	return ancestors, nil
 }
 
-func (sess Session) GetAllAncestorsWithCounters(resourceID string) ([]Resource, error) {
+func (sess Session) GetAncestorsIncludingFosterParents(resourceID string) ([]Resource, error) {
 	var ancestors []Resource
 
-	err := sess.DB.Raw(`WITH RECURSIVE cte (id, name, type, parent_id, counters) AS (
-		SELECT id, name, type, parent_id, counters
+	err := sess.DB.Raw(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
+		SELECT id, name, type, parent_id
 		FROM resource
 		WHERE id = ?
 	UNION DISTINCT
-		SELECT parent.id, parent.name, parent.type, parent.parent_id, parent.counters
+		SELECT parent.id, parent.name, parent.type, parent.parent_id
 		FROM resource parent
 		INNER JOIN cte ON parent.id=cte.parent_id
 	UNION DISTINCT
-		SELECT foster_parent.id, foster_parent.name, foster_parent.type, foster_parent.parent_id, foster_parent.counters
+		SELECT foster_parent.id, foster_parent.name, foster_parent.type, foster_parent.parent_id
 		FROM foster_care fc
 		INNER JOIN cte ON fc.id=cte.id
 		INNER JOIN resource foster_parent ON fc.foster_parent_id=foster_parent.id
@@ -262,20 +263,24 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	return resources, nil
 }
 
-func (sess Session) IsTaskOpen(taskID string) (bool, error) {
-	var task Task
-	isOpen := false
-	query := fmt.Sprintf("SELECT id FROM task WHERE id = ? AND status IN ('open', 'assigned')")
-
-	if err := sess.DB.Raw(query, taskID).Scan(&task).Error; err != nil {
-		return false, err
-	} else if task.ID != "" {
-		isOpen = true
+func (sess Session) UpdateCounters(resourceIDs []string, difference map[CounterType]int) error {
+	if len(difference) == 0 {
+		return nil
 	}
 
-	return isOpen, nil
-}
+	var params []string = make([]string, 0)
 
-func (sess Session) UpdateCount(resource Resource, counters Counters) error {
-	return sess.DB.Exec(`UPDATE resource SET counters = ? WHERE id = ?`, counters, resource.ID).Error
+	for counterType, count := range difference {
+		params = append(params, fmt.Sprintf("'$.%s', (COALESCE(JSON_EXTRACT(counters, '$.%s'), 0) + %d) DIV 1", counterType, counterType, count))
+	}
+
+	for _, resourceID := range resourceIDs {
+		query := fmt.Sprintf("UPDATE resource SET counters = JSON_SET(counters, %s) WHERE id = ? AND parent_id IS NOT NULL", strings.Join(params, ", "))
+
+		if err := sess.DB.Exec(query, resourceID).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

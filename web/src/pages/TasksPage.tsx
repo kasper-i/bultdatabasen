@@ -51,7 +51,7 @@ const TasksPage = (): ReactElement => {
           </span>
         )}
       </div>
-      <CreateTask resourceId={resourceId} />
+      {resource.type === "route" && <CreateTask routeId={resourceId} />}
       <TaskList resourceId={resourceId} />
     </div>
   );

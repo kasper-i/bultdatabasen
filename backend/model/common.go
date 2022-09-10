@@ -117,8 +117,6 @@ func (sess Session) deleteResource(resourceID string) error {
 		return err
 	}
 
-	RemoveAllCounters(resourceID)
-
 	return nil
 }
 
@@ -149,7 +147,7 @@ func (sess Session) checkParentAllowed(resource Resource, parentID string) bool 
 	case "comment":
 		return pt == "point"
 	case "task":
-		return pt == "area" || pt == "crag" || pt == "sector" || pt == "route" || pt == "point"
+		return pt == "route" || pt == "point"
 	default:
 		return false
 	}

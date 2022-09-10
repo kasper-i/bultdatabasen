@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bultdatabasen/utils"
 	"fmt"
 	"time"
 
@@ -22,6 +23,20 @@ type Task struct {
 
 func (Task) TableName() string {
 	return "task"
+}
+
+func (task *Task) IsOpen() bool {
+	return task.Status == "open" || task.Status == "assigned";
+}
+
+func (task *Task) CalculateCounters() Counters {
+	counters := Counters{}
+
+	if task.IsOpen() {
+		counters.OpenTasks = 1
+	}
+
+	return counters
 }
 
 func (sess Session) GetTasks(resourceID string, pagination Pagination, includeCompleted bool) ([]Task, Meta, error) {
@@ -63,7 +78,27 @@ func (sess Session) GetTask(resourceID string) (*Task, error) {
 	return &task, nil
 }
 
+func (sess Session) getTaskForUpdate(resourceID string) (*Task, error) {
+	var task Task
+
+	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ? FOR UPDATE`, resourceID).
+		Scan(&task).Error; err != nil {
+		return nil, err
+	}
+
+	if task.ID == "" {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return &task, nil
+}
+
 func (sess Session) CreateTask(task *Task, parentResourceID string) error {
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(parentResourceID)
+	if err != nil {
+		return err
+	}
+
 	task.ID = uuid.Must(uuid.NewRandom()).String()
 	task.ParentID = parentResourceID
 
@@ -74,14 +109,15 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	}
 
 	task.ClosedAt = nil
+	task.Counters = task.CalculateCounters()
 
 	resource := Resource{
 		ResourceBase: task.ResourceBase,
 		Type:         "task",
 		ParentID:     &parentResourceID,
-	}
+	}	
 
-	err := sess.Transaction(func(sess Session) error {
+	err = sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
 			return err
 		}
@@ -89,6 +125,13 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 		if err := sess.DB.Create(&task).Error; err != nil {
 			return err
 		}
+
+		if err := sess.UpdateCounters(
+			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), parentResourceID),
+			task.Counters.AsDiff()); err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -96,13 +139,11 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 		return err
 	}
 
-	UpdateCounter(task.ID, OpenTasks)
-
 	return nil
 }
 
 func (sess Session) UpdateTask(task *Task, taskID string) error {
-	original, err := sess.GetTask(taskID)
+	original, err := sess.getTaskForUpdate(taskID)
 	if err != nil {
 		return err
 	}
@@ -114,7 +155,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		task.Status = "open"
 	}
 
-	if task.Status == "closed" || task.Status == "rejected" {
+	if !task.IsOpen() {
 		now := time.Now()
 		task.ClosedAt = &now
 	}
@@ -134,8 +175,6 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 	if err != nil {
 		return err
 	}
-
-	UpdateCounter(task.ID, OpenTasks)
 
 	return nil
 }
