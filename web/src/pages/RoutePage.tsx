@@ -38,7 +38,7 @@ const RoutePage = (): ReactElement => {
     return <Fragment />;
   }
 
-  const numPresentBolts = bolts.data.filter(
+  const numInstalledBolts = bolts.data.filter(
     (bolt) => bolt.dismantled === undefined
   ).length;
 
@@ -64,8 +64,8 @@ const RoutePage = (): ReactElement => {
               är <Underlined>{length}m</Underlined> lång och{" "}
             </>
           )}
-          består av <Underlined>{numPresentBolts}</Underlined> bult
-          {numPresentBolts !== 1 && "ar"}.
+          består av <Underlined>{numInstalledBolts}</Underlined> bult
+          {numInstalledBolts !== 1 && "ar"}.
         </p>
       </div>
 

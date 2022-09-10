@@ -9,16 +9,19 @@ type CounterType string
 
 const (
 	OpenTasks CounterType = "openTasks"
+	InstalledBolts CounterType = "installedBolts"
 )
 
 type Counters struct {
 	OpenTasks int `json:"openTasks,omitEmpty"`
+	InstalledBolts int `json:"installedBolts,omitEmpty"`
 }
 
 func (lhs Counters) Substract(rhs Counters) Counters {
 	copy := lhs
 
 	copy.OpenTasks -= rhs.OpenTasks
+	copy.InstalledBolts -= rhs.InstalledBolts
 
 	return copy
 }
@@ -27,6 +30,7 @@ func (lhs Counters) Add(rhs Counters) Counters {
 	copy := lhs
 
 	copy.OpenTasks += rhs.OpenTasks
+	copy.InstalledBolts += rhs.InstalledBolts
 
 	return copy
 }
@@ -50,6 +54,10 @@ func (counters *Counters) AsMap() map[CounterType]int {
 
 	if counters.OpenTasks != 0 {
 		dict[OpenTasks] = counters.OpenTasks
+	}
+
+	if counters.InstalledBolts != 0 {
+		dict[InstalledBolts] = counters.InstalledBolts
 	}
 
 	return dict

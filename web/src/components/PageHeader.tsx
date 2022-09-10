@@ -38,7 +38,8 @@ const PageHeader = ({
         <p className="text-lg">
           {getResourceLabel(resource.type)} med{" "}
           <Underlined>{counts.data.route}</Underlined> leder och{" "}
-          <Underlined>{counts.data.bolt}</Underlined> bultar.
+          <Underlined>{resource.counters?.installedBolts ?? 0}</Underlined>{" "}
+          bultar.
         </p>
       )}
     </div>
