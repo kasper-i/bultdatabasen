@@ -148,28 +148,28 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		return err
 	}
 
-	original, err := sess.getTaskWithResourceLock(taskID)
-	if err != nil {
-		return err
-	}
-
-	task.ID = original.ID
-	task.ParentID = original.ParentID
-
-	if original.Assignee != nil && task.Assignee == nil {
-		task.Status = "open"
-	}
-
-	if !task.IsOpen() {
-		now := time.Now()
-		task.ClosedAt = &now
-	}
-
-	task.Counters = task.CalculateCounters()
-
-	countersDifference := task.Counters.Substract(original.Counters)
-
 	err = sess.Transaction(func(sess Session) error {
+		original, err := sess.getTaskWithResourceLock(taskID)
+		if err != nil {
+			return err
+		}
+
+		task.ID = original.ID
+		task.ParentID = original.ParentID
+
+		if original.Assignee != nil && task.Assignee == nil {
+			task.Status = "open"
+		}
+
+		if !task.IsOpen() {
+			now := time.Now()
+			task.ClosedAt = &now
+		}
+
+		task.Counters = task.CalculateCounters()
+
+		countersDifference := task.Counters.Substract(original.Counters)
+	
 		if err := sess.touchResource(taskID); err != nil {
 			return err
 		}
