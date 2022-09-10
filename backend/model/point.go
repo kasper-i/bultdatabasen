@@ -152,10 +152,10 @@ func (sess Session) sortPoints(routeID string, pointsMap map[string]*Point) ([]*
 	return orderedPoints, nil
 }
 
-func (sess Session) getPoint(pointID string) (*Point, error) {
+func (sess Session) getPointWithLock(pointID string) (*Point, error) {
 	var point Point
 
-	if err := sess.DB.Raw(`SELECT * FROM point LEFT JOIN resource ON point.id = resource.id WHERE point.id = ?`, pointID).
+	if err := sess.DB.Raw(`SELECT * FROM point INNER JOIN resource ON point.id = resource.id WHERE point.id = ? FOR UPDATE`, pointID).
 		Scan(&point).Error; err != nil {
 		return nil, err
 	}
@@ -246,7 +246,7 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 
 	err = sess.Transaction(func(sess Session) error {
 		if pointID != nil {
-			if details, err := sess.getPoint(*pointID); err != nil {
+			if details, err := sess.getPointWithLock(*pointID); err != nil {
 				return err
 			} else {
 				point = details
@@ -255,6 +255,8 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 			if err := sess.addFosterParent(*pointResource, routeID); err != nil {
 				return err
 			}
+
+			sess.UpdateCounters([]string{ routeID }, point.Counters.AsMap())
 		} else {
 			point.ID = uuid.Must(uuid.NewRandom()).String()
 			point.Anchor = anchor
