@@ -1,29 +1,34 @@
 import {
-  ArrowSmLeftIcon,
-  BadgeCheckIcon,
+  ArrowUturnLeftIcon,
+  HomeIcon,
+  PencilIcon,
+  XMarkIcon,
+} from "@heroicons/react/20/solid";
+import {
+  ArrowDownTrayIcon,
+  ArrowLeftIcon,
+  ArrowPathIcon,
+  ArrowTopRightOnSquareIcon,
+  ArrowUpTrayIcon,
   BeakerIcon,
   CameraIcon,
+  ChatBubbleBottomCenterIcon,
+  CheckBadgeIcon,
+  CheckIcon,
   ClipboardIcon,
-  DuplicateIcon,
-  ExternalLinkIcon,
+  DocumentDuplicateIcon,
+  EllipsisVerticalIcon,
   LockClosedIcon,
   LockOpenIcon,
-  PhotographIcon,
+  PhotoIcon,
   PlusCircleIcon,
-  PlusSmIcon,
-  RefreshIcon,
+  PlusSmallIcon,
   TrashIcon,
-  UploadIcon,
+  WrenchScrewdriverIcon,
   XCircleIcon,
-  XIcon,
-  DownloadIcon,
-  DotsVerticalIcon,
-  CheckIcon,
-  ChatAltIcon,
-} from "@heroicons/react/outline";
-import { HomeIcon, PencilIcon } from "@heroicons/react/solid";
+} from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import React, { FC } from "react";
+import { FC } from "react";
 import { IconType } from "./types";
 
 const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
@@ -37,16 +42,14 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return XCircleIcon;
       case "trash":
         return TrashIcon;
-      case "close":
-        return XIcon;
       case "upload":
-        return UploadIcon;
+        return ArrowUpTrayIcon;
       case "check":
         return CheckIcon;
       case "check badge":
-        return BadgeCheckIcon;
+        return CheckBadgeIcon;
       case "arrow left":
-        return ArrowSmLeftIcon;
+        return ArrowLeftIcon;
       case "unlock":
         return LockOpenIcon;
       case "lock":
@@ -54,32 +57,35 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
       case "paste":
         return ClipboardIcon;
       case "plus":
-        return PlusSmIcon;
+        return PlusSmallIcon;
       case "add":
         return PlusCircleIcon;
       case "external":
-        return ExternalLinkIcon;
+        return ArrowTopRightOnSquareIcon;
       case "copy":
-        return DuplicateIcon;
+        return DocumentDuplicateIcon;
       case "home":
         return HomeIcon;
       case "image":
-        return PhotographIcon;
+        return PhotoIcon;
       case "camera":
         return CameraIcon;
       case "dots":
-        return DotsVerticalIcon;
+        return EllipsisVerticalIcon;
       case "refresh":
-        return RefreshIcon;
+        return ArrowPathIcon;
       case "download":
-        return DownloadIcon;
+        return ArrowDownTrayIcon;
       case "edit":
         return PencilIcon;
       case "comment":
-        return ChatAltIcon;
-      case "x":
-        return XIcon;
+        return ChatBubbleBottomCenterIcon;
       case "wrench":
+        return WrenchScrewdriverIcon;
+      case "x":
+        return XMarkIcon;
+      case "back":
+        return ArrowUturnLeftIcon;
       default:
         return BeakerIcon;
     }
