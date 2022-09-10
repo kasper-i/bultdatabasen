@@ -20,9 +20,8 @@ import {
   TrashIcon,
   WrenchScrewdriverIcon,
   XCircleIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { HomeIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { HomeIcon, PencilIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { FC } from "react";
 import { IconType } from "./types";
@@ -39,8 +38,6 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return XCircleIcon;
       case "trash":
         return TrashIcon;
-      case "close":
-        return XMarkIcon;
       case "upload":
         return ArrowUpTrayIcon;
       case "check":
@@ -81,6 +78,8 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
         return ChatBubbleBottomCenterIcon;
       case "wrench":
         return WrenchScrewdriverIcon;
+      case "x":
+        return XMarkIcon;
       default:
         return BeakerIcon;
     }

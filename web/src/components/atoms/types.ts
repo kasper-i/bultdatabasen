@@ -2,7 +2,6 @@ export type IconType =
   | "beaker"
   | "cancel"
   | "trash"
-  | "close"
   | "upload"
   | "wrench"
   | "check"
@@ -22,6 +21,7 @@ export type IconType =
   | "download"
   | "edit"
   | "check badge"
-  | "comment";
+  | "comment"
+  | "x";
 
 export type ColorType = "primary" | "danger" | "white";
