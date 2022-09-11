@@ -26,27 +26,20 @@ const renderRouteType = (routeType: RouteType) => {
 const RoutePage = (): ReactElement => {
   const { resourceId } = useUnsafeParams<"resourceId">();
 
-  const route = useRoute(resourceId);
-  const points = usePoints(resourceId);
-  const bolts = useBolts(resourceId);
+  const { data: route } = useRoute(resourceId);
+  const { data: points } = usePoints(resourceId);
 
-  if (
-    route.data === undefined ||
-    points.data === undefined ||
-    bolts.data === undefined
-  ) {
+  if (route === undefined || points === undefined) {
     return <Fragment />;
   }
 
-  const numInstalledBolts = bolts.data.filter(
-    (bolt) => bolt.dismantled === undefined
-  ).length;
+  const { routeType, parentId, year, length } = route;
 
-  const { routeType, parentId, year, length } = route.data;
+  const numInstalledBolts = route?.counters?.installedBolts ?? 0;
 
   return (
     <div className="flex flex-col">
-      <PageHeader resourceId={resourceId} ancestors={route.data.ancestors} />
+      <PageHeader resourceId={resourceId} ancestors={route.ancestors} />
 
       <div className="flex items-center gap-2">
         <p className="text-md">
@@ -73,7 +66,7 @@ const RoutePage = (): ReactElement => {
         <PointEditor
           routeId={resourceId}
           routeParentId={parentId}
-          points={points.data}
+          points={points}
         />
       </div>
     </div>
