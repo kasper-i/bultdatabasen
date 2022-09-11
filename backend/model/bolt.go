@@ -165,21 +165,11 @@ func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 			return err
 		}
 
-		bolt := original
+		updatedBolt.ID = original.ID
+		updatedBolt.ParentID = original.ParentID
+		updatedBolt.Counters = updatedBolt.CalculateCounters()
 
-		bolt.Type = updatedBolt.Type
-		bolt.Position = updatedBolt.Position
-		bolt.Installed = updatedBolt.Installed
-		bolt.Dismantled = updatedBolt.Dismantled
-		bolt.ManufacturerID = updatedBolt.ManufacturerID
-		bolt.ModelID = updatedBolt.ModelID
-		bolt.MaterialID = updatedBolt.MaterialID
-		bolt.Diameter = updatedBolt.Diameter
-		bolt.DiameterUnit = updatedBolt.DiameterUnit
-
-		bolt.Counters = bolt.CalculateCounters()
-
-		countersDifference := bolt.Counters.Substract(original.Counters)
+		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 	
 		if err := sess.touchResource(boltID); err != nil {
 			return err
@@ -194,7 +184,7 @@ func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 			"ModelID",
 			"MaterialID",
 			"Diameter",
-			"DiameterUnit").Updates(bolt).Error; err != nil {
+			"DiameterUnit").Updates(updatedBolt).Error; err != nil {
 			return err
 		}
 
