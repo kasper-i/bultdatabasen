@@ -15,7 +15,7 @@ const (
 
 type Counters struct {
 	OpenTasks      int `json:"openTasks,omitempty"`
-	InstalledBolts int `json:"installedBolts,omitEmpty"`
+	InstalledBolts int `json:"installedBolts,omitempty"`
 	Routes         int `json:"routes,omitEmpty"`
 }
 
