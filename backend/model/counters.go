@@ -16,7 +16,7 @@ const (
 type Counters struct {
 	OpenTasks      int `json:"openTasks,omitempty"`
 	InstalledBolts int `json:"installedBolts,omitempty"`
-	Routes         int `json:"routes,omitEmpty"`
+	Routes         int `json:"routes,omitempty"`
 }
 
 func (lhs Counters) Substract(rhs Counters) Counters {
