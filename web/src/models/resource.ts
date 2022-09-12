@@ -13,6 +13,7 @@ export type ResourceType =
 export interface Counters {
   openTasks?: number;
   installedBolts?: number;
+  routes?: number;
 }
 
 export interface ResourceBase {

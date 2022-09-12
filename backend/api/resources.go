@@ -51,18 +51,6 @@ func GetChildren(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetCounts(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
-	vars := mux.Vars(r)
-	id := vars["resourceID"]
-
-	if counts, err := sess.GetCounts(id); err != nil {
-		utils.WriteError(w, err)
-	} else {
-		utils.WriteResponse(w, http.StatusOK, counts)
-	}
-}
-
 func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["resourceID"]

@@ -256,7 +256,7 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 				return err
 			}
 
-			if err := sess.UpdateCounters([]string{ routeID }, point.Counters); err != nil {
+			if err := sess.UpdateCounters([]string{routeID}, point.Counters); err != nil {
 				return err
 			}
 		} else {
@@ -351,33 +351,33 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 		var point *Point
 		if point, err = sess.getPointWithLock(pointID); err != nil {
 			return err
-		}		
-	
+		}
+
 		if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
 			return err
 		}
-	
+
 		if parents, err = sess.getParents([]string{pointID}); err != nil {
 			return err
 		}
-	
+
 		var belongsToRoute bool = false
 		var inFosterCare bool = false
-	
+
 		for _, parent := range parents {
 			if parent.ID == routeID {
 				belongsToRoute = true
-	
+
 				if parent.FosterParent {
 					inFosterCare = true
 				}
 			}
 		}
-	
+
 		if !belongsToRoute {
 			return gorm.ErrRecordNotFound
 		}
-	
+
 		vertex := routeGraph[pointID]
 
 		if vertex != nil {
@@ -412,7 +412,7 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 			}
 
 			countersDifference := Counters{}.Substract(point.Counters)
-			if err := sess.UpdateCounters([]string{ routeID }, countersDifference); err != nil {
+			if err := sess.UpdateCounters([]string{routeID}, countersDifference); err != nil {
 				return err
 			}
 		} else {
@@ -427,7 +427,7 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 			}
 
 			countersDifference := Counters{}.Substract(point.Counters)
-			if err := sess.UpdateCounters([]string{ routeID }, countersDifference); err != nil {
+			if err := sess.UpdateCounters([]string{routeID}, countersDifference); err != nil {
 				return err
 			}
 

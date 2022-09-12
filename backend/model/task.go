@@ -26,7 +26,7 @@ func (Task) TableName() string {
 }
 
 func (task *Task) IsOpen() bool {
-	return task.Status == "open" || task.Status == "assigned";
+	return task.Status == "open" || task.Status == "assigned"
 }
 
 func (task *Task) CalculateCounters() Counters {
@@ -115,7 +115,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 		ResourceBase: task.ResourceBase,
 		Type:         "task",
 		ParentID:     &parentResourceID,
-	}	
+	}
 
 	err = sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
@@ -169,7 +169,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		task.Counters = task.CalculateCounters()
 
 		countersDifference := task.Counters.Substract(original.Counters)
-	
+
 		if err := sess.touchResource(taskID); err != nil {
 			return err
 		}

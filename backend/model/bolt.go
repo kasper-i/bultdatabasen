@@ -170,7 +170,7 @@ func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 		updatedBolt.Counters = updatedBolt.CalculateCounters()
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
-	
+
 		if err := sess.touchResource(boltID); err != nil {
 			return err
 		}

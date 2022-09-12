@@ -49,11 +49,6 @@ type ResourceWithParents struct {
 	Parents []Parent `json:"parents"`
 }
 
-type ResourceCount struct {
-	Type  string `json:"type"`
-	Count int    `json:"count"`
-}
-
 func (Resource) TableName() string {
 	return "resource"
 }
@@ -194,30 +189,6 @@ func (sess Session) GetChildren(resourceID string) ([]Resource, error) {
 	}
 
 	return children, nil
-}
-
-func (sess Session) GetCounts(resourceID string) ([]ResourceCount, error) {
-	var counts []ResourceCount = make([]ResourceCount, 0)
-
-	err := sess.DB.Raw(`WITH RECURSIVE cte (id, type, parent_id, first) AS (
-		SELECT id, type, parent_id, TRUE
-		FROM resource
-		WHERE id = ?
-	UNION
-		SELECT child.id, child.type, child.parent_id, FALSE
-		FROM resource child
-		INNER JOIN cte ON child.parent_id = cte.id
-		WHERE depth <= ?
-	)
-	SELECT cte.type, COUNT(cte.type) AS count FROM cte
-	WHERE cte.first <> TRUE
-	GROUP BY cte.type`, resourceID, DepthBolt).Scan(&counts).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return counts, nil
 }
 
 func parseString(value interface{}) *string {

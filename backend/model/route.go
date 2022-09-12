@@ -1,6 +1,8 @@
 package model
 
 import (
+	"bultdatabasen/utils"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -18,6 +20,12 @@ type Route struct {
 
 func (Route) TableName() string {
 	return "route"
+}
+
+func (route *Route) CalculateCounters() Counters {
+	return Counters{
+		Routes: 1,
+	}
 }
 
 func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
@@ -45,9 +53,30 @@ func (sess Session) GetRoute(resourceID string) (*Route, error) {
 	return &route, nil
 }
 
+func (sess Session) getRouteWithLock(resourceID string) (*Route, error) {
+	var route Route
+
+	if err := sess.DB.Raw(`SELECT * FROM route INNER JOIN resource ON route.id = resource.id WHERE route.id = ? FOR UPDATE`, resourceID).
+		Scan(&route).Error; err != nil {
+		return nil, err
+	}
+
+	if route.ID == "" {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return &route, nil
+}
+
 func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(parentResourceID)
+	if err != nil {
+		return err
+	}
+
 	route.ID = uuid.Must(uuid.NewRandom()).String()
 	route.ParentID = parentResourceID
+	route.Counters = route.CalculateCounters()
 
 	resource := Resource{
 		ResourceBase: route.ResourceBase,
@@ -56,12 +85,18 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 		ParentID:     &parentResourceID,
 	}
 
-	err := sess.Transaction(func(sess Session) error {
+	err = sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
 			return err
 		}
 
 		if err := sess.DB.Create(&route).Error; err != nil {
+			return err
+		}
+
+		if err := sess.UpdateCounters(
+			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), parentResourceID, route.ID),
+			route.Counters); err != nil {
 			return err
 		}
 
@@ -73,4 +108,47 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 
 func (sess Session) DeleteRoute(resourceID string) error {
 	return sess.deleteResource(resourceID)
+}
+
+func (sess Session) UpdateRoute(routeID string, updatedRoute Route) (*Route, error) {
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(routeID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = sess.Transaction(func(sess Session) error {
+		original, err := sess.getRouteWithLock(routeID)
+		if err != nil {
+			return err
+		}
+
+		updatedRoute.ID = original.ID
+		updatedRoute.ParentID = original.ParentID
+		updatedRoute.Counters = updatedRoute.CalculateCounters()
+
+		countersDifference := updatedRoute.Counters.Substract(original.Counters)
+
+		if err := sess.touchResource(routeID); err != nil {
+			return err
+		}
+
+		if err := sess.DB.Select(
+			"Name").Updates(updatedRoute).Error; err != nil {
+			return err
+		}
+
+		if err := sess.UpdateCounters(
+			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), routeID),
+			countersDifference); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedRoute, nil
 }
