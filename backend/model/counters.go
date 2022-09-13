@@ -39,10 +39,6 @@ func (lhs Counters) Add(rhs Counters) Counters {
 	return copy
 }
 
-func (counters *Counters) IsZero() bool {
-	return counters.OpenTasks == 0
-}
-
 func (counters *Counters) Scan(value interface{}) error {
 	bytes := value.([]byte)
 	err := json.Unmarshal(bytes, counters)
