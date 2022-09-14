@@ -1,7 +1,6 @@
 package model
 
 import (
-	"bultdatabasen/utils"
 	"fmt"
 	"time"
 
@@ -30,14 +29,12 @@ func (Bolt) TableName() string {
 	return "bolt"
 }
 
-func (bolt *Bolt) CalculateCounters() Counters {
-	counters := Counters{}
-
+func (bolt *Bolt) UpdateCounters() {
 	if bolt.Dismantled == nil {
-		counters.InstalledBolts = 1
+		bolt.Counters.InstalledBolts = 1
+	} else {
+		bolt.Counters.InstalledBolts = 0
 	}
-
-	return counters
 }
 
 func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
@@ -111,14 +108,9 @@ func (sess Session) getBoltWithLock(resourceID string) (*Bolt, error) {
 }
 
 func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(parentResourceID)
-	if err != nil {
-		return err
-	}
-
 	bolt.ID = uuid.Must(uuid.NewRandom()).String()
 	bolt.ParentID = parentResourceID
-	bolt.Counters = bolt.CalculateCounters()
+	bolt.UpdateCounters()
 
 	resource := Resource{
 		ResourceBase: bolt.ResourceBase,
@@ -126,7 +118,7 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 		ParentID:     &parentResourceID,
 	}
 
-	err = sess.Transaction(func(sess Session) error {
+	err := sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
 			return err
 		}
@@ -135,9 +127,7 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 			return err
 		}
 
-		if err := sess.UpdateCounters(
-			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), parentResourceID, bolt.ID),
-			bolt.Counters); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(bolt.ID, bolt.Counters); err != nil {
 			return err
 		}
 
@@ -154,12 +144,7 @@ func (sess Session) DeleteBolt(resourceID string) error {
 func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 	var refreshedBolt *Bolt
 
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(boltID)
-	if err != nil {
-		return nil, err
-	}
-
-	err = sess.Transaction(func(sess Session) error {
+	err := sess.Transaction(func(sess Session) error {
 		original, err := sess.getBoltWithLock(boltID)
 		if err != nil {
 			return err
@@ -167,7 +152,8 @@ func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 
 		updatedBolt.ID = original.ID
 		updatedBolt.ParentID = original.ParentID
-		updatedBolt.Counters = updatedBolt.CalculateCounters()
+		updatedBolt.Counters = original.Counters
+		updatedBolt.UpdateCounters()
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 
@@ -187,10 +173,8 @@ func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 			"DiameterUnit").Updates(updatedBolt).Error; err != nil {
 			return err
 		}
-
-		if err := sess.UpdateCounters(
-			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), boltID),
-			countersDifference); err != nil {
+		
+		if err := sess.updateCountersForResourceAndAncestors(boltID, countersDifference); err != nil {
 			return err
 		}
 

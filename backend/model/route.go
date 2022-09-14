@@ -1,8 +1,6 @@
 package model
 
 import (
-	"bultdatabasen/utils"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -22,10 +20,8 @@ func (Route) TableName() string {
 	return "route"
 }
 
-func (route *Route) CalculateCounters() Counters {
-	return Counters{
-		Routes: 1,
-	}
+func (route *Route) UpdateCounters() {
+	route.Counters.Routes = 1
 }
 
 func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
@@ -69,14 +65,9 @@ func (sess Session) getRouteWithLock(resourceID string) (*Route, error) {
 }
 
 func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(parentResourceID)
-	if err != nil {
-		return err
-	}
-
 	route.ID = uuid.Must(uuid.NewRandom()).String()
 	route.ParentID = parentResourceID
-	route.Counters = route.CalculateCounters()
+	route.UpdateCounters()
 
 	resource := Resource{
 		ResourceBase: route.ResourceBase,
@@ -85,7 +76,7 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 		ParentID:     &parentResourceID,
 	}
 
-	err = sess.Transaction(func(sess Session) error {
+	err := sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
 			return err
 		}
@@ -94,9 +85,7 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 			return err
 		}
 
-		if err := sess.UpdateCounters(
-			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), parentResourceID, route.ID),
-			route.Counters); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(route.ID, route.Counters); err != nil {
 			return err
 		}
 
@@ -111,12 +100,7 @@ func (sess Session) DeleteRoute(resourceID string) error {
 }
 
 func (sess Session) UpdateRoute(routeID string, updatedRoute Route) (*Route, error) {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(routeID)
-	if err != nil {
-		return nil, err
-	}
-
-	err = sess.Transaction(func(sess Session) error {
+	err := sess.Transaction(func(sess Session) error {
 		original, err := sess.getRouteWithLock(routeID)
 		if err != nil {
 			return err
@@ -124,7 +108,8 @@ func (sess Session) UpdateRoute(routeID string, updatedRoute Route) (*Route, err
 
 		updatedRoute.ID = original.ID
 		updatedRoute.ParentID = original.ParentID
-		updatedRoute.Counters = updatedRoute.CalculateCounters()
+		updatedRoute.Counters = original.Counters
+		updatedRoute.UpdateCounters()
 
 		countersDifference := updatedRoute.Counters.Substract(original.Counters)
 
@@ -137,9 +122,7 @@ func (sess Session) UpdateRoute(routeID string, updatedRoute Route) (*Route, err
 			return err
 		}
 
-		if err := sess.UpdateCounters(
-			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), routeID),
-			countersDifference); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(routeID, countersDifference); err != nil {
 			return err
 		}
 

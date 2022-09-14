@@ -91,7 +91,7 @@ func (sess Session) touchResource(resourceID string) error {
 }
 
 func (sess Session) deleteResource(resourceID string) error {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
+	ancestors, err := sess.GetAncestors(resourceID)
 	if err != nil {
 		return err
 	}
@@ -117,11 +117,11 @@ func (sess Session) deleteResource(resourceID string) error {
 
 		countersDifference := Counters{}.Substract(resource.Counters)
 
-		if err := sess.UpdateCounters(
-			utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }),
-			countersDifference); err != nil {
-			return err
-		}
+		for _, ancestor := range ancestors {
+			if err := sess.updateCountersForResource(ancestor.ID, countersDifference); err != nil {
+				return err
+			}
+		}		
 
 		return sess.DB.Create(&trash).Error
 	})

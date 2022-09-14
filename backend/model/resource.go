@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bultdatabasen/utils"
 	"fmt"
 	"net/http"
 	"strings"
@@ -251,7 +252,25 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	return resources, nil
 }
 
-func (sess Session) UpdateCounters(resourceIDs []string, delta Counters) error {
+
+func (sess Session) updateCountersForResourceAndAncestors(resourceID string, delta Counters) error {
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
+	if err != nil {
+		return err
+	}
+
+	resourceIDs := append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), resourceID)
+
+	for _, resourceID := range resourceIDs {
+		if err := sess.updateCountersForResource(resourceID, delta); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (sess Session) updateCountersForResource(resourceID string, delta Counters) error {
 	difference := delta.AsMap()
 
 	if len(difference) == 0 {
@@ -264,13 +283,7 @@ func (sess Session) UpdateCounters(resourceIDs []string, delta Counters) error {
 		params = append(params, fmt.Sprintf("'$.%s', (COALESCE(JSON_EXTRACT(counters, '$.%s'), 0) + %d) DIV 1", counterType, counterType, count))
 	}
 
-	for _, resourceID := range resourceIDs {
-		query := fmt.Sprintf("UPDATE resource SET counters = JSON_SET(counters, %s) WHERE id = ? AND parent_id IS NOT NULL", strings.Join(params, ", "))
+	query := fmt.Sprintf("UPDATE resource SET counters = JSON_SET(counters, %s) WHERE id = ? AND parent_id IS NOT NULL", strings.Join(params, ", "))
 
-		if err := sess.DB.Exec(query, resourceID).Error; err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return sess.DB.Exec(query, resourceID).Error
 }

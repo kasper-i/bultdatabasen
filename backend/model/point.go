@@ -256,7 +256,7 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 				return err
 			}
 
-			if err := sess.UpdateCounters([]string{routeID}, point.Counters); err != nil {
+			if err := sess.updateCountersForResource(routeID, point.Counters); err != nil {
 				return err
 			}
 		} else {
@@ -412,7 +412,7 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 			}
 
 			countersDifference := Counters{}.Substract(point.Counters)
-			if err := sess.UpdateCounters([]string{routeID}, countersDifference); err != nil {
+			if err := sess.updateCountersForResource(routeID, countersDifference); err != nil {
 				return err
 			}
 		} else {
@@ -427,7 +427,7 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 			}
 
 			countersDifference := Counters{}.Substract(point.Counters)
-			if err := sess.UpdateCounters([]string{routeID}, countersDifference); err != nil {
+			if err := sess.updateCountersForResource(routeID, countersDifference); err != nil {
 				return err
 			}
 

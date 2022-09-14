@@ -1,7 +1,6 @@
 package model
 
 import (
-	"bultdatabasen/utils"
 	"fmt"
 	"time"
 
@@ -29,14 +28,12 @@ func (task *Task) IsOpen() bool {
 	return task.Status == "open" || task.Status == "assigned"
 }
 
-func (task *Task) CalculateCounters() Counters {
-	counters := Counters{}
-
+func (task *Task) UpdateCounters() {
 	if task.IsOpen() {
-		counters.OpenTasks = 1
+		task.Counters.OpenTasks = 1
+	} else {
+		task.Counters.OpenTasks = 0
 	}
-
-	return counters
 }
 
 func (sess Session) GetTasks(resourceID string, pagination Pagination, includeCompleted bool) ([]Task, Meta, error) {
@@ -94,11 +91,6 @@ func (sess Session) getTaskWithLock(resourceID string) (*Task, error) {
 }
 
 func (sess Session) CreateTask(task *Task, parentResourceID string) error {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(parentResourceID)
-	if err != nil {
-		return err
-	}
-
 	task.ID = uuid.Must(uuid.NewRandom()).String()
 	task.ParentID = parentResourceID
 
@@ -109,7 +101,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	}
 
 	task.ClosedAt = nil
-	task.Counters = task.CalculateCounters()
+	task.UpdateCounters()
 
 	resource := Resource{
 		ResourceBase: task.ResourceBase,
@@ -117,7 +109,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 		ParentID:     &parentResourceID,
 	}
 
-	err = sess.Transaction(func(sess Session) error {
+	err := sess.Transaction(func(sess Session) error {
 		if err := sess.createResource(resource); err != nil {
 			return err
 		}
@@ -126,9 +118,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 			return err
 		}
 
-		if err := sess.UpdateCounters(
-			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), parentResourceID, task.ID),
-			task.Counters); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(task.ID, task.Counters); err != nil {
 			return err
 		}
 
@@ -143,12 +133,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 }
 
 func (sess Session) UpdateTask(task *Task, taskID string) error {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(taskID)
-	if err != nil {
-		return err
-	}
-
-	err = sess.Transaction(func(sess Session) error {
+	err := sess.Transaction(func(sess Session) error {
 		original, err := sess.getTaskWithLock(taskID)
 		if err != nil {
 			return err
@@ -166,7 +151,8 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 			task.ClosedAt = &now
 		}
 
-		task.Counters = task.CalculateCounters()
+		task.Counters = original.Counters
+		task.UpdateCounters()
 
 		countersDifference := task.Counters.Substract(original.Counters)
 
@@ -178,9 +164,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 			return err
 		}
 
-		if err := sess.UpdateCounters(
-			append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), taskID),
-			countersDifference); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(taskID, countersDifference); err != nil {
 			return err
 		}
 
