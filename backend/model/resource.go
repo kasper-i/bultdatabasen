@@ -183,7 +183,7 @@ func (sess Session) GetChildren(resourceID string) ([]Resource, error) {
 
 	err := sess.DB.Raw(`SELECT * FROM resource
 	WHERE parent_id = ?
-	ORDER BY JSON_EXTRACT(counters, '$.openTasks') DESC`, resourceID).Scan(&children).Error
+	ORDER BY name`, resourceID).Scan(&children).Error
 
 	if err != nil {
 		return nil, err
