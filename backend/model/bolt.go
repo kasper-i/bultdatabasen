@@ -45,12 +45,14 @@ func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
 	query := fmt.Sprintf(`%s
 	SELECT
 		%s.*,
-		cte.parent_id,
+		resource.parent_id,
+		resource.counters,
 		mf.name AS manufacturer,
 		mo.name AS model,
 		ma.name AS material
 	FROM cte
 	INNER JOIN %s ON cte.id = %s.id
+	INNER JOIN resource ON bolt.id = resource.id
 	LEFT JOIN manufacturer mf ON bolt.manufacturer_id = mf.id
 	LEFT JOIN model mo ON bolt.model_id = mo.id
 	LEFT JOIN material ma ON bolt.material_id = ma.id
@@ -69,11 +71,12 @@ func (sess Session) GetBolt(resourceID string) (*Bolt, error) {
 	if err := sess.DB.Raw(`SELECT
 			bolt.*,
 			resource.parent_id,
+			resource.counters,
 			mf.name AS manufacturer,
 			mo.name AS model,
 			ma.name AS material
 		FROM bolt
-		LEFT JOIN resource ON bolt.id = resource.id
+		INNER JOIN resource ON bolt.id = resource.id
 		LEFT JOIN manufacturer mf ON bolt.manufacturer_id = mf.id
 		LEFT JOIN model mo ON bolt.model_id = mo.id
 		LEFT JOIN material ma ON bolt.material_id = ma.id
