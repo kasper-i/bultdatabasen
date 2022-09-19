@@ -91,7 +91,7 @@ func (sess Session) touchResource(resourceID string) error {
 }
 
 func (sess Session) deleteResource(resourceID string) error {
-	ancestors, err := sess.GetAncestors(resourceID)
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
 	if err != nil {
 		return err
 	}
