@@ -1,6 +1,7 @@
 import Button from "@/components/atoms/Button";
 import { Time } from "@/components/atoms/Time";
 import { Menu } from "@/components/molecules/Menu";
+import Restricted from "@/components/Restricted";
 import { Bolt } from "@/models/bolt";
 import { useUpdateBolt } from "@/queries/boltQueries";
 import {
@@ -68,16 +69,18 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
           </span>
         </p>
 
-        <Menu
-          items={[
-            {
-              label: "Redigera",
-              icon: "edit",
-              onClick: () => setAction("edit"),
-              disabled: !!bolt.dismantled,
-            },
-          ]}
-        />
+        <Restricted>
+          <Menu
+            items={[
+              {
+                label: "Redigera",
+                icon: "edit",
+                onClick: () => setAction("edit"),
+                disabled: !!bolt.dismantled,
+              },
+            ]}
+          />
+        </Restricted>
       </div>
 
       {action === "edit" ? (
