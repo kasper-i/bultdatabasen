@@ -1,7 +1,7 @@
 import { Listbox, Transition } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import React, { FC, Fragment, ReactNode } from "react";
+import { FC, Fragment, ReactNode } from "react";
 import Icon from "./Icon";
 import { Option } from "./RadioGroup";
 

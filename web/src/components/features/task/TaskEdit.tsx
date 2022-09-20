@@ -4,14 +4,10 @@ import { Task } from "@/models/task";
 import { useUpdateTask } from "@/queries/taskQueries";
 import React, { FC, useEffect, useState } from "react";
 
-const TaskEdit: FC<{ parentId: string; task: Task; onDone: () => void }> = ({
-  parentId,
-  task,
-  onDone,
-}) => {
+const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
   const [editedTask, setEditedTask] = useState(task);
 
-  const updateTask = useUpdateTask(parentId, task.id);
+  const updateTask = useUpdateTask(task.id);
 
   useEffect(() => {
     updateTask.isSuccess && onDone();

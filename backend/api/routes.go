@@ -68,3 +68,25 @@ func DeleteRoute(w http.ResponseWriter, r *http.Request) {
 		utils.WriteResponse(w, http.StatusNoContent, nil)
 	}
 }
+
+func UpdateRoute(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
+	vars := mux.Vars(r)
+	routeID := vars["resourceID"]
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var route model.Route
+
+	if err := json.Unmarshal(reqBody, &route); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
+
+	updatedRoute, err := sess.UpdateRoute(routeID, route)
+
+	if err != nil {
+		utils.WriteError(w, err)
+	} else {
+		utils.WriteResponse(w, http.StatusOK, updatedRoute)
+	}
+}

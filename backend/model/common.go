@@ -91,8 +91,13 @@ func (sess Session) touchResource(resourceID string) error {
 }
 
 func (sess Session) deleteResource(resourceID string) error {
-	return sess.Transaction(func(sess Session) error {
-		resource, err := sess.GetResource(resourceID)
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
+	if err != nil {
+		return err
+	}
+
+	err = sess.Transaction(func(sess Session) error {
+		resource, err := sess.getResourceWithLock(resourceID)
 		if err != nil {
 			return err
 		}
@@ -110,8 +115,22 @@ func (sess Session) deleteResource(resourceID string) error {
 			return err
 		}
 
+		countersDifference := Counters{}.Substract(resource.Counters)
+
+		for _, ancestor := range ancestors {
+			if err := sess.updateCountersForResource(ancestor.ID, countersDifference); err != nil {
+				return err
+			}
+		}		
+
 		return sess.DB.Create(&trash).Error
 	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (sess Session) checkParentAllowed(resource Resource, parentID string) bool {
@@ -141,7 +160,7 @@ func (sess Session) checkParentAllowed(resource Resource, parentID string) bool 
 	case "comment":
 		return pt == "point"
 	case "task":
-		return pt == "area" || pt == "crag" || pt == "sector" || pt == "route" || pt == "point"
+		return pt == "route" || pt == "point"
 	default:
 		return false
 	}

@@ -17,13 +17,12 @@ const finalStatuses: TaskStatus[] = ["closed", "rejected"];
 
 const TaskView: FC<{
   taskId: string;
-  parentId: string;
-}> = ({ parentId, taskId }): ReactElement => {
+}> = ({ taskId }): ReactElement => {
   const { data: task } = useTask(taskId);
 
   const ancestors = task?.ancestors;
-  const deleteTask = useDeleteTask(parentId, taskId);
-  const updateTask = useUpdateTask(parentId, taskId);
+  const deleteTask = useDeleteTask(taskId);
+  const updateTask = useUpdateTask(taskId);
 
   const [action, setAction] = useState<"delete" | "edit">();
 
@@ -89,54 +88,60 @@ const TaskView: FC<{
       </div>
 
       {action === "edit" ? (
-        <TaskEdit
-          parentId={parentId}
-          task={task}
-          onDone={() => setAction(undefined)}
-        />
+        <TaskEdit task={task} onDone={() => setAction(undefined)} />
       ) : (
         <>
           <p className="text-sm">{task.description}</p>
 
-          <hr className="-mx-5 pb-2.5" />
-
           {isComplete ? (
-            <div className="flex flex-col">
-              <div className="flex items-center">
-                <Icon
-                  className={clsx(
-                    task.status === "closed" ? "text-green-600" : "text-red-500"
-                  )}
-                  name="check"
-                />
-                <p
-                  className={clsx(
-                    task.status === "closed" ? "text-green-600" : "text-red-500"
-                  )}
-                >
-                  <span className="ml-1 font-bold">
-                    {task.status === "closed" ? "Åtgärdat" : "Stängd"}
-                  </span>{" "}
-                  {task.closedAt && <Time time={task.closedAt} />}
-                </p>
+            <>
+              <hr className="-mx-5 pb-2" />
+
+              <div className="flex flex-col">
+                <div className="flex items-center">
+                  <Icon
+                    className={clsx(
+                      task.status === "closed"
+                        ? "text-green-600"
+                        : "text-red-500"
+                    )}
+                    name="check"
+                  />
+                  <p
+                    className={clsx(
+                      task.status === "closed"
+                        ? "text-green-600"
+                        : "text-red-500"
+                    )}
+                  >
+                    <span className="ml-1 font-bold">
+                      {task.status === "closed" ? "Åtgärdat" : "Stängd"}
+                    </span>{" "}
+                    {task.closedAt && <Time time={task.closedAt} />}
+                  </p>
+                </div>
+                {task.comment && (
+                  <p className="text-sm text-gray-700">
+                    <Icon name="comment" className="mr-1" />
+                    {task.comment}
+                  </p>
+                )}
               </div>
-              {task.comment && (
-                <p className="text-sm text-gray-700">
-                  <Icon name="comment" className="mr-1" />
-                  {task.comment}
-                </p>
-              )}
-            </div>
+            </>
           ) : (
             <Restricted>
-              <Button
-                onClick={() => changeStatus("closed")}
-                icon="check badge"
-                full
-                loading={updateTask.isLoading}
-              >
-                Markera åtgärdad
-              </Button>
+              <>
+                <hr className="-mx-5 pb-2" />
+
+                <Button
+                  onClick={() => changeStatus("closed")}
+                  icon="check badge"
+                  full
+                  loading={updateTask.isLoading}
+                >
+                  Markera åtgärdad
+                </Button>
+              </>
             </Restricted>
           )}
         </>

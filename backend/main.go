@@ -55,7 +55,6 @@ func main() {
 	router.HandleFunc("/resources/{resourceID}", api.GetResource).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/ancestors", api.GetAncestors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/children", api.GetChildren).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/resources/{resourceID}/counts", api.GetCounts).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/role", api.GetUserRoleForResource).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources", api.Search).Methods(http.MethodGet, http.MethodOptions)
 
@@ -82,7 +81,7 @@ func main() {
 	router.HandleFunc("/resources/{resourceID}/routes", api.GetRoutes).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/routes", api.CreateRoute).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}", api.GetRoute).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/routes/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}", api.UpdateRoute).Methods(http.MethodPut, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}", api.DeleteRoute).Methods(http.MethodDelete, http.MethodOptions)
 
 	router.HandleFunc("/routes/{resourceID}/points", api.GetPoints).Methods(http.MethodGet, http.MethodOptions)

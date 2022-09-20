@@ -24,6 +24,18 @@ func (Task) TableName() string {
 	return "task"
 }
 
+func (task *Task) IsOpen() bool {
+	return task.Status == "open" || task.Status == "assigned"
+}
+
+func (task *Task) UpdateCounters() {
+	if task.IsOpen() {
+		task.Counters.OpenTasks = 1
+	} else {
+		task.Counters.OpenTasks = 0
+	}
+}
+
 func (sess Session) GetTasks(resourceID string, pagination Pagination, includeCompleted bool) ([]Task, Meta, error) {
 	var tasks []Task = make([]Task, 0)
 	var meta Meta = Meta{}
@@ -63,6 +75,21 @@ func (sess Session) GetTask(resourceID string) (*Task, error) {
 	return &task, nil
 }
 
+func (sess Session) getTaskWithLock(resourceID string) (*Task, error) {
+	var task Task
+
+	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ? FOR UPDATE`, resourceID).
+		Scan(&task).Error; err != nil {
+		return nil, err
+	}
+
+	if task.ID == "" {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return &task, nil
+}
+
 func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	task.ID = uuid.Must(uuid.NewRandom()).String()
 	task.ParentID = parentResourceID
@@ -74,6 +101,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	}
 
 	task.ClosedAt = nil
+	task.UpdateCounters()
 
 	resource := Resource{
 		ResourceBase: task.ResourceBase,
@@ -89,31 +117,45 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 		if err := sess.DB.Create(&task).Error; err != nil {
 			return err
 		}
+
+		if err := sess.updateCountersForResourceAndAncestors(task.ID, task.Counters); err != nil {
+			return err
+		}
+
 		return nil
 	})
 
-	return err
-}
-
-func (sess Session) UpdateTask(task *Task, taskID string) error {
-	original, err := sess.GetTask(taskID)
 	if err != nil {
 		return err
 	}
 
-	task.ID = original.ID
-	task.ParentID = original.ParentID
+	return nil
+}
 
-	if original.Assignee != nil && task.Assignee == nil {
-		task.Status = "open"
-	}
+func (sess Session) UpdateTask(task *Task, taskID string) error {
+	err := sess.Transaction(func(sess Session) error {
+		original, err := sess.getTaskWithLock(taskID)
+		if err != nil {
+			return err
+		}
 
-	if task.Status == "closed" || task.Status == "rejected" {
-		now := time.Now()
-		task.ClosedAt = &now
-	}
+		task.ID = original.ID
+		task.ParentID = original.ParentID
 
-	return sess.Transaction(func(sess Session) error {
+		if original.Assignee != nil && task.Assignee == nil {
+			task.Status = "open"
+		}
+
+		if !task.IsOpen() {
+			now := time.Now()
+			task.ClosedAt = &now
+		}
+
+		task.Counters = original.Counters
+		task.UpdateCounters()
+
+		countersDifference := task.Counters.Substract(original.Counters)
+
 		if err := sess.touchResource(taskID); err != nil {
 			return err
 		}
@@ -122,8 +164,18 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 			return err
 		}
 
+		if err := sess.updateCountersForResourceAndAncestors(taskID, countersDifference); err != nil {
+			return err
+		}
+
 		return nil
 	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (sess Session) DeleteTask(resourceID string) error {

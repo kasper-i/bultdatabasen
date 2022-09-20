@@ -30,7 +30,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
       <div className="flex flex-col w-full">
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-5 items-start">
           {tasks?.data?.map((task) => (
-            <TaskView key={task.id} parentId={resourceId} taskId={task.id} />
+            <TaskView key={task.id} taskId={task.id} />
           ))}
         </div>
         <div className="w-full my-5">

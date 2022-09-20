@@ -1,6 +1,6 @@
 import IconButton from "@/components/atoms/IconButton";
 import Pill from "@/components/Pill";
-import { useTasks } from "@/queries/taskQueries";
+import { useResource } from "@/queries/resourceQueries";
 import React, { ReactElement } from "react";
 
 interface Props {
@@ -8,11 +8,9 @@ interface Props {
 }
 
 function TaskButton({ resourceId }: Props): ReactElement {
-  const { data: tasks } = useTasks(resourceId, {
-    pagination: { page: 1, itemsPerPage: 1 },
-  });
+  const { data: resource } = useResource(resourceId);
 
-  const taskCount = tasks?.meta?.totalItems ?? 0;
+  const taskCount = resource?.counters?.openTasks ?? 0;
 
   return (
     <div className="w-min relative cursor-pointer">

@@ -1,9 +1,13 @@
 package model
 
 import (
+	"bultdatabasen/utils"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
@@ -11,6 +15,7 @@ const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 type ResourceBase struct {
 	ID        string      `gorm:"primaryKey" json:"id"`
 	Ancestors *[]Resource `gorm:"-" json:"ancestors,omitempty"`
+	Counters  Counters    `gorm:"->" json:"counters"`
 }
 
 type Resource struct {
@@ -43,11 +48,6 @@ type Parent struct {
 type ResourceWithParents struct {
 	Resource
 	Parents []Parent `json:"parents"`
-}
-
-type ResourceCount struct {
-	Type  string `json:"type"`
-	Count int    `json:"count"`
 }
 
 func (Resource) TableName() string {
@@ -114,6 +114,21 @@ func (sess Session) GetResource(resourceID string) (*Resource, error) {
 	return &resource, nil
 }
 
+func (sess Session) getResourceWithLock(resourceID string) (*Resource, error) {
+	var resource Resource
+
+	if err := sess.DB.Raw(`SELECT * FROM resource WHERE id = ? FOR UPDATE`, resourceID).
+		Scan(&resource).Error; err != nil {
+		return nil, err
+	}
+
+	if resource.ID == "" {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return &resource, nil
+}
+
 func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	var ancestors []Resource
 
@@ -136,41 +151,45 @@ func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	return ancestors, nil
 }
 
+func (sess Session) GetAncestorsIncludingFosterParents(resourceID string) ([]Resource, error) {
+	var ancestors []Resource
+
+	err := sess.DB.Raw(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
+		SELECT id, name, type, parent_id
+		FROM resource
+		WHERE id = ?
+	UNION DISTINCT
+		SELECT parent.id, parent.name, parent.type, parent.parent_id
+		FROM resource parent
+		INNER JOIN cte ON parent.id=cte.parent_id
+	UNION DISTINCT
+		SELECT foster_parent.id, foster_parent.name, foster_parent.type, foster_parent.parent_id
+		FROM foster_care fc
+		INNER JOIN cte ON fc.id=cte.id
+		INNER JOIN resource foster_parent ON fc.foster_parent_id=foster_parent.id
+	)
+	SELECT * FROM cte
+	WHERE id != ?`, resourceID, resourceID).Scan(&ancestors).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ancestors, nil
+}
+
 func (sess Session) GetChildren(resourceID string) ([]Resource, error) {
 	var children []Resource = make([]Resource, 0)
 
 	err := sess.DB.Raw(`SELECT * FROM resource
-	WHERE parent_id = ?`, resourceID).Scan(&children).Error
+	WHERE parent_id = ?
+	ORDER BY name`, resourceID).Scan(&children).Error
 
 	if err != nil {
 		return nil, err
 	}
 
 	return children, nil
-}
-
-func (sess Session) GetCounts(resourceID string) ([]ResourceCount, error) {
-	var counts []ResourceCount = make([]ResourceCount, 0)
-
-	err := sess.DB.Raw(`WITH RECURSIVE cte (id, type, parent_id, first) AS (
-		SELECT id, type, parent_id, TRUE
-		FROM resource
-		WHERE id = ?
-	UNION
-		SELECT child.id, child.type, child.parent_id, FALSE
-		FROM resource child
-		INNER JOIN cte ON child.parent_id = cte.id
-		WHERE depth <= ?
-	)
-	SELECT cte.type, COUNT(cte.type) AS count FROM cte
-	WHERE cte.first <> TRUE
-	GROUP BY cte.type`, resourceID, DepthBolt).Scan(&counts).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return counts, nil
 }
 
 func parseString(value interface{}) *string {
@@ -231,4 +250,40 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	}
 
 	return resources, nil
+}
+
+
+func (sess Session) updateCountersForResourceAndAncestors(resourceID string, delta Counters) error {
+	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
+	if err != nil {
+		return err
+	}
+
+	resourceIDs := append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), resourceID)
+
+	for _, resourceID := range resourceIDs {
+		if err := sess.updateCountersForResource(resourceID, delta); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (sess Session) updateCountersForResource(resourceID string, delta Counters) error {
+	difference := delta.AsMap()
+
+	if len(difference) == 0 {
+		return nil
+	}
+
+	var params []string = make([]string, 0)
+
+	for counterType, count := range difference {
+		params = append(params, fmt.Sprintf("'$.%s', (COALESCE(JSON_EXTRACT(counters, '$.%s'), 0) + %d) DIV 1", counterType, counterType, count))
+	}
+
+	query := fmt.Sprintf("UPDATE resource SET counters = JSON_SET(counters, %s) WHERE id = ? AND parent_id IS NOT NULL", strings.Join(params, ", "))
+
+	return sess.DB.Exec(query, resourceID).Error
 }

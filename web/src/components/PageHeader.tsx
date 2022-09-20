@@ -1,5 +1,5 @@
 import { Resource } from "@/models/resource";
-import { useCounts, useResource } from "@/queries/resourceQueries";
+import { useResource } from "@/queries/resourceQueries";
 import { getResourceLabel } from "@/utils/resourceUtils";
 import React, { ReactElement } from "react";
 import Breadcrumbs from "./Breadcrumbs";
@@ -17,7 +17,6 @@ const PageHeader = ({
   showCounts = false,
 }: Props): ReactElement => {
   const { data: resource } = useResource(resourceId);
-  const counts = useCounts(resourceId, showCounts);
 
   if (!resource) {
     return <></>;
@@ -34,11 +33,12 @@ const PageHeader = ({
         </div>
       )}
       <h1 className="text-2xl font-bold">{resource.name}</h1>
-      {counts.data != null && showCounts && (
+      {showCounts && (
         <p className="text-lg">
           {getResourceLabel(resource.type)} med{" "}
-          <Underlined>{counts.data.route}</Underlined> leder och{" "}
-          <Underlined>{counts.data.bolt}</Underlined> bultar.
+          <Underlined>{resource.counters?.routes ?? 0}</Underlined> leder och{" "}
+          <Underlined>{resource.counters?.installedBolts ?? 0}</Underlined>{" "}
+          bultar.
         </p>
       )}
     </div>
