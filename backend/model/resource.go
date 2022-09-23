@@ -209,7 +209,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 		r2.id as r2_id, r2.name as r2_name, r2.type as r2_type,
 		r3.id as r3_id, r3.name as r3_name, r3.type as r3_type
 	FROM resource r1
-	LEFT JOIN resource r2 ON r1.parent_id = r2.id
+	INNER JOIN resource r2 ON r1.parent_id = r2.id
 	LEFT JOIN resource r3 ON r2.parent_id = r3.id
 	WHERE r1.name LIKE ?
 	LIMIT 20`, fmt.Sprintf("%%%s%%", name)).Scan(&results).Error
