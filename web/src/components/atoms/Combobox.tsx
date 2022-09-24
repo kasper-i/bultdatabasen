@@ -124,7 +124,7 @@ export function Combobox<T>({
           afterLeave={() => setQuery("")}
         >
           <div className="absolute z-50 w-full">
-            <HeadlessCombobox.Options className="w-full mt-2 mb-4 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
+            <HeadlessCombobox.Options className="w-full max-h-72 overflow-y-auto mt-2 mb-4 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-sm">
               {renderOptions()}
             </HeadlessCombobox.Options>
           </div>
