@@ -93,7 +93,7 @@ function Search() {
             />
           </Combobox.Button>
           {results.length > 0 && (
-            <Combobox.Options className="absolute z-50 w-full py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Combobox.Options className="absolute z-50 w-full max-h-96 overflow-y-auto py-1 mt-2 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {results.map((resource, index) => (
                 <Combobox.Option
                   key={resource.id}
