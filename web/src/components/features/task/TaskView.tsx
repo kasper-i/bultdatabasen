@@ -1,19 +1,50 @@
 import Button from "@/components/atoms/Button";
 import Icon from "@/components/atoms/Icon";
+import Input from "@/components/atoms/Input";
 import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Menu } from "@/components/molecules/Menu";
 import UserName from "@/components/UserName";
-import { TaskStatus } from "@/models/task";
+import { Task, TaskStatus } from "@/models/task";
 import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import clsx from "clsx";
-import React, { FC, ReactElement, useState } from "react";
+import { isEmpty } from "lodash";
+import { FC, ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 import Restricted from "../../Restricted";
 import TaskEdit from "./TaskEdit";
 
 const finalStatuses: TaskStatus[] = ["closed", "rejected"];
+
+const CompleteButton: FC<{
+  onComplete: (comment: string) => void;
+  loading: boolean;
+}> = ({ onComplete, loading }) => {
+  const [phase, setPhase] = useState<number>(1);
+  const [comment, setComment] = useState("");
+
+  return (
+    <>
+      {phase === 2 && (
+        <Input
+          label="Kommentar"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+      )}
+      <Button
+        onClick={() => (phase === 1 ? setPhase(2) : onComplete(comment.trim()))}
+        icon="check badge"
+        full
+        loading={loading}
+        disabled={phase === 2 && isEmpty(comment.trim())}
+      >
+        Markera åtgärdad
+      </Button>
+    </>
+  );
+};
 
 const TaskView: FC<{
   taskId: string;
@@ -36,6 +67,12 @@ const TaskView: FC<{
 
   const changeStatus = (status: TaskStatus) => {
     const updatedTask = { ...task, status };
+    updateTask.mutate(updatedTask);
+    return updatedTask;
+  };
+
+  const complete = (comment: string) => {
+    const updatedTask: Task = { ...task, status: "closed", comment };
     updateTask.mutate(updatedTask);
     return updatedTask;
   };
@@ -133,14 +170,10 @@ const TaskView: FC<{
               <>
                 <hr className="-mx-5 pb-2" />
 
-                <Button
-                  onClick={() => changeStatus("closed")}
-                  icon="check badge"
-                  full
+                <CompleteButton
                   loading={updateTask.isLoading}
-                >
-                  Markera åtgärdad
-                </Button>
+                  onComplete={complete}
+                />
               </>
             </Restricted>
           )}

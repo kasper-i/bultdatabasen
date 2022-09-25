@@ -91,7 +91,12 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
               Avbryt
             </Button>
 
-            <Button onClick={() => updateBolt.mutate(editedBolt)}>Spara</Button>
+            <Button
+              loading={updateBolt.isLoading}
+              onClick={() => updateBolt.mutate(editedBolt)}
+            >
+              Spara
+            </Button>
           </div>
         </div>
       ) : (

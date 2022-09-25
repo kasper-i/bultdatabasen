@@ -149,6 +149,8 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		if !task.IsOpen() {
 			now := time.Now()
 			task.ClosedAt = &now
+		} else {
+			task.Comment = nil
 		}
 
 		task.Counters = original.Counters
@@ -160,7 +162,12 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 			return err
 		}
 
-		if err := sess.DB.Updates(task).Error; err != nil {
+		if err := sess.DB.Select(
+			"Status",
+			"Description",
+			"Comment",
+			"ClosedAt",
+		).Updates(task).Error; err != nil {
 			return err
 		}
 
