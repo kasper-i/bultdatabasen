@@ -32,9 +32,9 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statues := query["status"]
+	statuses := query["status"]
 
-	if tasks, meta, err := sess.GetTasks(parentResourceId, pagination, statues); err != nil {
+	if tasks, meta, err := sess.GetTasks(parentResourceId, pagination, statuses); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		response := GetTasksResponse{}
