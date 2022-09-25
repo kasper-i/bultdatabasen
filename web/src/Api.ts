@@ -12,6 +12,7 @@ import { User } from "@/models/user";
 import { OAuthTokenResponse } from "@/pages/SigninPage";
 import axios, { AxiosRequestHeaders } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
+import { isArray } from "lodash";
 import { cognitoClientId, cognitoUrl } from "./constants";
 import { Manufacturer } from "./models/manufacturer";
 import { Material } from "./models/material";
@@ -28,7 +29,7 @@ export interface Meta {
 }
 
 export interface GetTasksOptions {
-  includeCompleted?: boolean;
+  status?: string[];
   pagination?: Pagination;
 }
 
@@ -429,16 +430,20 @@ export class Api {
   static getTasks = async (resourceId: string, options: GetTasksOptions) => {
     const endpoint = `/resources/${resourceId}/tasks`;
 
-    const { pagination, ...otherOptions } = options;
+    const { pagination, status } = options;
+    const searchParams = new URLSearchParams();
+    status?.forEach((s) => searchParams.append("status", s));
+
+    if (pagination) {
+      searchParams.append("page", pagination.page.toString());
+      searchParams.append("itemsPerPage", pagination.itemsPerPage.toString());
+    }
 
     const result = await axios.get<{ data: Task[]; meta: Meta }>(
       `${Api.baseUrl}${endpoint}`,
       {
         headers: Api.getDefaultHeaders(),
-        params: {
-          ...otherOptions,
-          ...pagination,
-        },
+        params: searchParams,
       }
     );
 

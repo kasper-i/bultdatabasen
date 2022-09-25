@@ -32,9 +32,9 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	includeCompleted := query.Get("includeCompleted") == "true"
+	statues := query["status"]
 
-	if tasks, meta, err := sess.GetTasks(parentResourceId, pagination, includeCompleted); err != nil {
+	if tasks, meta, err := sess.GetTasks(parentResourceId, pagination, statues); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		response := GetTasksResponse{}

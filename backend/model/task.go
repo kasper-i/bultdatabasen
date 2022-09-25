@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,24 +37,34 @@ func (task *Task) UpdateCounters() {
 	}
 }
 
-func (sess Session) GetTasks(resourceID string, pagination Pagination, includeCompleted bool) ([]Task, Meta, error) {
+func (sess Session) GetTasks(resourceID string, pagination Pagination, statuses []string) ([]Task, Meta, error) {
 	var tasks []Task = make([]Task, 0)
 	var meta Meta = Meta{}
 
+	params := make([]interface{}, 1)
+	params[0] = resourceID
+
 	var where string = "TRUE"
-	if !includeCompleted {
-		where = "status IN ('open', 'assigned')"
+	if len(statuses) > 0 {
+		var placeholders []string = make([]string, 0)
+		
+		for _, status := range statuses {
+			placeholders = append(placeholders, "?")
+			params = append(params, status)
+		}
+
+		where = fmt.Sprintf("status IN (%s)", strings.Join(placeholders, ", "))
 	}
 
 	countQuery := fmt.Sprintf("%s AND %s", buildDescendantsCountQuery("task"), where)
 
 	dataQuery := fmt.Sprintf("%s AND %s ORDER BY btime DESC %s", buildDescendantsQuery("task"), where, pagination.ToSQL())
 
-	if err := sess.DB.Raw(dataQuery, resourceID).Scan(&tasks).Error; err != nil {
+	if err := sess.DB.Raw(dataQuery, params...).Scan(&tasks).Error; err != nil {
 		return nil, meta, err
 	}
 
-	if err := sess.DB.Raw(countQuery, resourceID).Scan(&meta).Error; err != nil {
+	if err := sess.DB.Raw(countQuery, params...).Scan(&meta).Error; err != nil {
 		return nil, meta, err
 	}
 
