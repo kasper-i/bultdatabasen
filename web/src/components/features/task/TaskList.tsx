@@ -11,10 +11,10 @@ interface Props {
 
 const TaskList = ({ resourceId }: Props): ReactElement => {
   const [page, setPage] = useState(1);
-  const [includeCompleted, setIncludeCompleted] = useState(false);
+  const [showClosed, setShowClosed] = useState(false);
 
   const { data: tasks } = useTasks(resourceId, {
-    includeCompleted,
+    status: showClosed ? ["closed", "rejected"] : ["open", "assigned"],
     pagination: { page, itemsPerPage: 10 },
   });
 
@@ -23,8 +23,11 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
       <div className="w-full border-b"></div>
       <Switch
         label="Visa åtgärdade"
-        enabled={includeCompleted}
-        onChange={() => setIncludeCompleted((state) => !state)}
+        enabled={showClosed}
+        onChange={() => {
+          setShowClosed((state) => !state);
+          setPage(1);
+        }}
       />
 
       <div className="flex flex-col w-full">
