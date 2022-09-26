@@ -39,7 +39,7 @@ export type CreatePointRequest = { position?: InsertPosition } & (
   | {
       pointId: undefined;
       anchor: Point["anchor"];
-      bolts?: Omit<Bolt, "id" | "parentId">[];
+      bolts: Omit<Bolt, "id" | "parentId">[];
     }
 );
 
