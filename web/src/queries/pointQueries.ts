@@ -71,15 +71,12 @@ export const useDetachPoint = (routeId: string, pointId: string) => {
         }
       );
 
-      queryClient.setQueryData<Bolt[] | undefined>(
-        ["bolts", { resourceId: routeId }],
-        (bolts) => {
-          if (bolts === undefined) {
-            return undefined;
-          }
-
-          return bolts.filter((bolt) => bolt.parentId !== pointId);
-        }
+      queryClient.setQueriesData<Bolt[] | undefined>(
+        { queryKey: ["bolts"], exact: false },
+        (bolts) =>
+          bolts === undefined
+            ? undefined
+            : bolts.filter((bolt) => bolt.parentId !== pointId)
       );
     },
   });
