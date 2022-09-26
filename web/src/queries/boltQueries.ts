@@ -5,7 +5,7 @@ import { Api } from "../Api";
 export const useBolts = (resourceId: string) =>
   useQuery(["bolts", { resourceId }], () => Api.getBolts(resourceId));
 
-export const useCreateBolt = (routeId: string, pointId: string) => {
+export const useCreateBolt = (pointId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation(
@@ -14,11 +14,6 @@ export const useCreateBolt = (routeId: string, pointId: string) => {
       onSuccess: (data) => {
         queryClient.setQueryData<Bolt[]>(
           ["bolts", { resourceId: pointId }],
-          (old) => (old === undefined ? [data] : [...old, data])
-        );
-
-        queryClient.setQueryData<Bolt[]>(
-          ["bolts", { resourceId: routeId }],
           (old) => (old === undefined ? [data] : [...old, data])
         );
       },
