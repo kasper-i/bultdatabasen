@@ -12,7 +12,6 @@ import { User } from "@/models/user";
 import { OAuthTokenResponse } from "@/pages/SigninPage";
 import axios, { AxiosRequestHeaders } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
-import { isArray } from "lodash";
 import { cognitoClientId, cognitoUrl } from "./constants";
 import { Manufacturer } from "./models/manufacturer";
 import { Material } from "./models/material";
@@ -33,16 +32,16 @@ export interface GetTasksOptions {
   pagination?: Pagination;
 }
 
-export type CreatePointRequest =
+export type CreatePointRequest = { position?: InsertPosition } & (
   | {
       pointId: string;
-      position?: InsertPosition;
     }
   | {
-      position?: InsertPosition;
+      pointId: undefined;
       anchor: Point["anchor"];
-      bolts?: Pick<Bolt, "type" | "position">[];
-    };
+      bolts?: Omit<Bolt, "id" | "parentId">[];
+    }
+);
 
 export interface InsertPosition {
   pointId: string;
