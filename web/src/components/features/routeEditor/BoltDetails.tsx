@@ -51,6 +51,10 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
     }
   }, [updateBolt.isSuccess]);
 
+  useEffect(() => {
+    action === "edit" && setEditedBolt(bolt);
+  }, [action]);
+
   const textStyle = bolt.dismantled ? "line-through opacity-50" : undefined;
 
   return (
@@ -61,8 +65,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
     >
       <div className="flex justify-between">
         <p className="text-left font-medium">
-          {bolt.dismantled && <span className="mr-1">🪦</span>}
-          <span className={clsx(bolt.dismantled && "line-through")}>
+          <span>
             {positionToLabel(
               totalNumberOfBolts === 1 ? undefined : bolt.position
             )}
@@ -76,6 +79,15 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
                 label: "Redigera",
                 icon: "edit",
                 onClick: () => setAction("edit"),
+              },
+              {
+                label: "Demontera",
+                icon: "archive",
+                onClick: () =>
+                  updateBolt.mutate({
+                    ...bolt,
+                    dismantled: new Date().toISOString(),
+                  }),
                 disabled: !!bolt.dismantled,
               },
             ]}

@@ -5,6 +5,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import {
+  ArchiveBoxIcon,
   ArrowDownTrayIcon,
   ArrowLeftIcon,
   ArrowPathIcon,
@@ -12,7 +13,7 @@ import {
   ArrowUpTrayIcon,
   BeakerIcon,
   CameraIcon,
-  ChatBubbleBottomCenterIcon,
+  ChatBubbleLeftIcon,
   CheckBadgeIcon,
   CheckIcon,
   ClipboardIcon,
@@ -79,13 +80,15 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
       case "edit":
         return PencilIcon;
       case "comment":
-        return ChatBubbleBottomCenterIcon;
+        return ChatBubbleLeftIcon;
       case "wrench":
         return WrenchScrewdriverIcon;
       case "x":
         return XMarkIcon;
       case "back":
         return ArrowUturnLeftIcon;
+      case "archive":
+        return ArchiveBoxIcon;
       default:
         return BeakerIcon;
     }
