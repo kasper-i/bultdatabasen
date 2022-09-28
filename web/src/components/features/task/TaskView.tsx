@@ -33,15 +33,24 @@ const CompleteButton: FC<{
           onChange={(e) => setComment(e.target.value)}
         />
       )}
-      <Button
-        onClick={() => (phase === 1 ? setPhase(2) : onComplete(comment.trim()))}
-        icon="check badge"
-        full
-        loading={loading}
-        disabled={phase === 2 && isEmpty(comment.trim())}
-      >
-        Markera åtgärdad
-      </Button>
+      <div className="flex justify-end gap-2">
+        {phase === 2 && (
+          <Button onClick={() => setPhase(1)} outlined disabled={loading}>
+            Avbryt
+          </Button>
+        )}
+        <Button
+          onClick={() =>
+            phase === 1 ? setPhase(2) : onComplete(comment.trim())
+          }
+          icon="check badge"
+          loading={loading}
+          disabled={phase === 2 && isEmpty(comment.trim())}
+          full
+        >
+          Markera åtgärdad
+        </Button>
+      </div>
     </>
   );
 };
