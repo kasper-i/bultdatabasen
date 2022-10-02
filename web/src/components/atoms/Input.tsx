@@ -22,6 +22,7 @@ const Input: FC<{
           type="text"
           id={id}
           onChange={onChange}
+          readOnly={!onChange}
           onClick={onClick}
           onFocus={(e) => (onClick ? e.target.blur() : undefined)}
           placeholder={placeholder}

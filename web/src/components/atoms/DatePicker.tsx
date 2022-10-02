@@ -1,5 +1,7 @@
 import {
   CalendarIcon,
+  ChevronDoubleLeftIcon,
+  ChevronDoubleRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
@@ -34,22 +36,33 @@ const Calendar: FC<RenderProps> = ({
 }) => {
   if (calendars.length) {
     return (
-      <div className="border rounded-md p-2 w-64 bg-white shadow-md">
+      <div className="border rounded-md p-3 w-64 bg-white shadow-md">
         {calendars.map((calendar) => (
           <div key={`${calendar.month}${calendar.year}`}>
             <div className="flex justify-between items-center my-2">
-              <button className="mr-4" {...getBackProps({ calendars })}>
+              <button {...getBackProps({ calendars, offset: 12 })}>
+                <ChevronDoubleLeftIcon className="h-5 text-gray-500" />
+              </button>
+              <button {...getBackProps({ calendars })}>
                 <ChevronLeftIcon className="h-5 text-gray-500" />
               </button>
-              <div className="">
+
+              <div className="flex-grow" />
+
+              <p>
                 <span className="font-bold">
                   {monthNamesShort[calendar.month]}
                 </span>{" "}
                 <span className="text-gray-500">{calendar.year}</span>
-              </div>
+              </p>
+
+              <div className="flex-grow" />
 
               <button {...getForwardProps({ calendars })}>
                 <ChevronRightIcon className="h-5 text-gray-500" />
+              </button>
+              <button {...getForwardProps({ calendars, offset: 12 })}>
+                <ChevronDoubleRightIcon className="h-5 text-gray-500" />
               </button>
             </div>
             <div className="grid grid-cols-7">
