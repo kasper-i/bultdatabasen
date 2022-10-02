@@ -5,22 +5,35 @@ const Input: FC<{
   placeholder?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
-}> = ({ label, placeholder, onChange, value }) => {
+  onClick?: () => void;
+  icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
+}> = ({ label, placeholder, onChange, value, onClick, icon }) => {
   const id = useId();
+
+  const Icon = icon;
 
   return (
     <div className="w-full">
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">
         {label}
       </label>
-      <input
-        type="text"
-        id={id}
-        onChange={onChange}
-        placeholder={placeholder}
-        value={value}
-        className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-md h-[2.125rem]"
-      />
+      <div className="relative">
+        <input
+          type="text"
+          id={id}
+          onChange={onChange}
+          onClick={onClick}
+          onFocus={(e) => (onClick ? e.target.blur() : undefined)}
+          placeholder={placeholder}
+          value={value}
+          className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-md h-[2.125rem]"
+        />
+        {Icon && (
+          <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+            <Icon className="w-5 h-5 text-gray-400" aria-hidden="true" />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
