@@ -27,7 +27,7 @@ const CompleteButton: FC<{
   const [closedAt, setClosedAt] = useState(new Date());
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       {phase === 2 && (
         <>
           <Input
@@ -42,7 +42,7 @@ const CompleteButton: FC<{
           />
         </>
       )}
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 mt-2">
         {phase === 2 && (
           <Button onClick={() => setPhase(1)} outlined disabled={loading}>
             Avbryt
@@ -65,7 +65,7 @@ const CompleteButton: FC<{
           Markera åtgärdad
         </Button>
       </div>
-    </>
+    </div>
   );
 };
 
