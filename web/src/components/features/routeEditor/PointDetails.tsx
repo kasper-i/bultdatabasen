@@ -51,7 +51,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
             <p className="cursor-pointer" onClick={onClose}>
               {label.name}
               <span className="font-medium text-primary-600 ml-1">
-                #{label.no}
+                №{label.no}
               </span>
             </p>
           </div>
@@ -101,7 +101,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
             {action === "delete" && (
               <DeleteDialog
                 mutation={deletePoint}
-                target={`${label.name} #${label.no}`}
+                target={`${label.name} №${label.no}`}
                 onClose={() => setAction(undefined)}
               />
             )}

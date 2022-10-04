@@ -157,10 +157,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 			task.Status = "open"
 		}
 
-		if !task.IsOpen() {
-			now := time.Now()
-			task.ClosedAt = &now
-		} else {
+		if task.IsOpen() {
 			task.Comment = nil
 		}
 

@@ -1,4 +1,5 @@
 import Button from "@/components/atoms/Button";
+import { Datepicker } from "@/components/atoms/DatePicker";
 import Icon from "@/components/atoms/Icon";
 import Input from "@/components/atoms/Input";
 import { Time } from "@/components/atoms/Time";
@@ -18,20 +19,28 @@ import TaskEdit from "./TaskEdit";
 const finalStatuses: TaskStatus[] = ["closed", "rejected"];
 
 const CompleteButton: FC<{
-  onComplete: (comment: string) => void;
+  onComplete: (args: Pick<Task, "comment" | "closedAt">) => void;
   loading: boolean;
 }> = ({ onComplete, loading }) => {
   const [phase, setPhase] = useState<number>(1);
   const [comment, setComment] = useState("");
+  const [closedAt, setClosedAt] = useState(new Date());
 
   return (
     <>
       {phase === 2 && (
-        <Input
-          label="Kommentar"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
+        <>
+          <Input
+            label="Kommentar"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
+          <Datepicker
+            label="Datum"
+            value={closedAt}
+            onChange={(date) => setClosedAt(date)}
+          />
+        </>
       )}
       <div className="flex justify-end gap-2">
         {phase === 2 && (
@@ -41,7 +50,12 @@ const CompleteButton: FC<{
         )}
         <Button
           onClick={() =>
-            phase === 1 ? setPhase(2) : onComplete(comment.trim())
+            phase === 1
+              ? setPhase(2)
+              : onComplete({
+                  comment: comment.trim(),
+                  closedAt: closedAt.toISOString(),
+                })
           }
           icon="check badge"
           loading={loading}
@@ -80,8 +94,9 @@ const TaskView: FC<{
     return updatedTask;
   };
 
-  const complete = (comment: string) => {
-    const updatedTask: Task = { ...task, status: "closed", comment };
+  const complete = (args: Pick<Task, "comment" | "closedAt">) => {
+    const { comment, closedAt } = args;
+    const updatedTask: Task = { ...task, status: "closed", comment, closedAt };
     updateTask.mutate(updatedTask);
     return updatedTask;
   };

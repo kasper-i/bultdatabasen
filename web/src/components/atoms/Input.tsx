@@ -1,4 +1,4 @@
-import React, { FC, useId } from "react";
+import React, { FC, LegacyRef, useId } from "react";
 
 const Input: FC<{
   label: string;
@@ -7,7 +7,8 @@ const Input: FC<{
   value: string;
   onClick?: () => void;
   icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
-}> = ({ label, placeholder, onChange, value, onClick, icon }) => {
+  inputRef?: LegacyRef<HTMLInputElement>;
+}> = ({ label, placeholder, onChange, value, onClick, icon, inputRef }) => {
   const id = useId();
 
   const Icon = icon;
@@ -19,6 +20,7 @@ const Input: FC<{
       </label>
       <div className="relative">
         <input
+          ref={inputRef}
           type="text"
           id={id}
           onChange={onChange}

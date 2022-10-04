@@ -34,87 +34,88 @@ const Calendar: FC<RenderProps> = ({
   getForwardProps,
   getDateProps,
 }) => {
-  if (calendars.length) {
-    return (
-      <div className="border rounded-md p-3 w-64 bg-white shadow-md">
-        {calendars.map((calendar) => (
-          <div key={`${calendar.month}${calendar.year}`}>
-            <div className="flex justify-between items-center my-2">
-              <button {...getBackProps({ calendars, offset: 12 })}>
-                <ChevronDoubleLeftIcon className="h-5 text-gray-500" />
-              </button>
-              <button {...getBackProps({ calendars })}>
-                <ChevronLeftIcon className="h-5 text-gray-500" />
-              </button>
-
-              <div className="flex-grow" />
-
-              <p>
-                <span className="font-bold">
-                  {monthNamesShort[calendar.month]}
-                </span>{" "}
-                <span className="text-gray-500">{calendar.year}</span>
-              </p>
-
-              <div className="flex-grow" />
-
-              <button {...getForwardProps({ calendars })}>
-                <ChevronRightIcon className="h-5 text-gray-500" />
-              </button>
-              <button {...getForwardProps({ calendars, offset: 12 })}>
-                <ChevronDoubleRightIcon className="h-5 text-gray-500" />
-              </button>
-            </div>
-            <div className="grid grid-cols-7">
-              {weekdayNamesShort.map((weekday) => (
-                <div
-                  key={`${calendar.month}${calendar.year}${weekday}`}
-                  className="font-semibold text-gray-600 text-xs mx-auto py-2"
-                >
-                  {weekday}
-                </div>
-              ))}
-              {calendar.weeks.map((week, weekIndex) =>
-                week.map((dateObj, index) => {
-                  const key = `${calendar.month}${calendar.year}${weekIndex}${index}`;
-                  if (!dateObj) {
-                    return <div key={key} />;
-                  }
-                  const { date, selected, nextMonth, prevMonth } = dateObj;
-                  return (
-                    <div
-                      key={key}
-                      className="aspect-square flex items-center justify-center"
-                    >
-                      <button
-                        className={clsx(
-                          "font-medium text-sm h-7 w-7 hover:rounded-full hover:bg-primary-500 hover:text-white",
-                          selected
-                            ? "rounded-full bg-gray-500 text-white"
-                            : nextMonth || prevMonth
-                            ? "text-gray-200"
-                            : "text-gray-500"
-                        )}
-                        {...getDateProps({ dateObj })}
-                      >
-                        {date.getDate()}
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+  if (!calendars.length) {
+    return null;
   }
-  return null;
+
+  return (
+    <div className="border rounded-md p-3 w-64 bg-white shadow-md">
+      {calendars.map((calendar) => (
+        <div key={`${calendar.month}${calendar.year}`}>
+          <div className="flex justify-between items-center my-2">
+            <button {...getBackProps({ calendars, offset: 12 })}>
+              <ChevronDoubleLeftIcon className="h-5 text-gray-500" />
+            </button>
+            <button {...getBackProps({ calendars })}>
+              <ChevronLeftIcon className="h-5 text-gray-500" />
+            </button>
+
+            <div className="flex-grow" />
+
+            <p>
+              <span className="font-bold">
+                {monthNamesShort[calendar.month]}
+              </span>{" "}
+              <span className="text-gray-500">{calendar.year}</span>
+            </p>
+
+            <div className="flex-grow" />
+
+            <button {...getForwardProps({ calendars })}>
+              <ChevronRightIcon className="h-5 text-gray-500" />
+            </button>
+            <button {...getForwardProps({ calendars, offset: 12 })}>
+              <ChevronDoubleRightIcon className="h-5 text-gray-500" />
+            </button>
+          </div>
+          <div className="grid grid-cols-7">
+            {weekdayNamesShort.map((weekday) => (
+              <div
+                key={`${calendar.month}${calendar.year}${weekday}`}
+                className="font-semibold text-gray-600 text-xs mx-auto py-2"
+              >
+                {weekday}
+              </div>
+            ))}
+            {calendar.weeks.map((week, weekIndex) =>
+              week.map((dateObj, index) => {
+                const key = `${calendar.month}${calendar.year}${weekIndex}${index}`;
+                if (!dateObj) {
+                  return <div key={key} />;
+                }
+                const { date, selected, nextMonth, prevMonth } = dateObj;
+                return (
+                  <div
+                    key={key}
+                    className="aspect-square flex items-center justify-center"
+                  >
+                    <button
+                      className={clsx(
+                        "font-medium text-sm h-7 w-7 hover:rounded-full hover:bg-primary-500 hover:text-white",
+                        selected
+                          ? "rounded-full bg-gray-500 text-white"
+                          : nextMonth || prevMonth
+                          ? "text-gray-200"
+                          : "text-gray-500"
+                      )}
+                      {...getDateProps({ dateObj })}
+                    >
+                      {date.getDate()}
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export const Datepicker: FC<{
   label: string;
-  value: Date;
+  value?: Date;
   onChange: (date: Date) => void;
 }> = ({ label, value, onChange }) => {
   const [date] = useState(value);
@@ -145,21 +146,21 @@ export const Datepicker: FC<{
   const [popperElement, setPopperElement] = useState<HTMLElement | null>(null);
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
     placement: "bottom-start",
-    modifiers: [{ name: "offset", options: { offset: [0, 0] } }],
+    modifiers: [{ name: "offset", options: { offset: [0, 5] } }],
   });
 
   return (
-    <>
-      <div ref={setReferenceElement}>
-        <Input
-          label={label}
-          value={format(value, "yyyy-MM-dd")}
-          onClick={() => setHidden(false)}
-          icon={CalendarIcon}
-        />
-      </div>
+    <div className="w-full">
+      <Input
+        inputRef={setReferenceElement}
+        label={label}
+        value={value ? format(value, "yyyy-MM-dd") : ""}
+        onClick={() => setHidden(false)}
+        icon={CalendarIcon}
+      />
       {!hidden && (
         <div
+          className="z-50"
           ref={setPopperElement}
           style={styles.popper}
           {...attributes.popper}
@@ -167,6 +168,6 @@ export const Datepicker: FC<{
           <Calendar {...dayzedData} />
         </div>
       )}
-    </>
+    </div>
   );
 };

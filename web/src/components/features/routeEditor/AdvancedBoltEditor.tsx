@@ -207,19 +207,15 @@ const AdvancedBoltEditor: FC<{
 
       <ClearButton onClick={() => updateBolt({ installed: undefined })} />
 
-      {bolt.dismantled && (
-        <>
-          <Datepicker
-            label="Demonterad"
-            value={new Date(bolt.dismantled)}
-            onChange={(value) =>
-              updateBolt({ dismantled: new Date(value).toISOString() })
-            }
-          />
+      <Datepicker
+        label="Demonterad"
+        value={bolt.dismantled ? new Date(bolt.dismantled) : undefined}
+        onChange={(value) =>
+          updateBolt({ dismantled: new Date(value).toISOString() })
+        }
+      />
 
-          <ClearButton onClick={() => updateBolt({ dismantled: undefined })} />
-        </>
-      )}
+      <ClearButton onClick={() => updateBolt({ dismantled: undefined })} />
     </div>
   );
 };
