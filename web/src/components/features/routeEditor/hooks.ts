@@ -12,7 +12,7 @@ export const usePointLabeler = (points: Point[]) => {
 
     for (const point of points) {
       labels.set(point.id, {
-        name: point.anchor ? "Ankare" : "Bultplats",
+        name: point.anchor ? "Ankare" : "Punkt",
         no: point.anchor ? anchors++ : nonAnchors++,
       });
     }
