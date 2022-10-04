@@ -12,6 +12,7 @@ import React from "react";
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import Input from "@/components/atoms/Input";
 import { format, isMatch, parse } from "date-fns";
+import { Datepicker } from "@/components/atoms/DatePicker";
 
 const typeOptions = (["expansion", "glue", "piton"] as const).map<
   Option<BoltType>
@@ -206,26 +207,15 @@ const AdvancedBoltEditor: FC<{
 
       <ClearButton onClick={() => updateBolt({ installed: undefined })} />
 
-      {bolt.dismantled && (
-        <>
-          <Input
-            label="Demonterad"
-            value={format(new Date(bolt.dismantled), "yyyy-MM-dd")}
-            onChange={(e) =>
-              isMatch(e.target.value, "yyyy-MM-dd") &&
-              updateBolt({
-                dismantled: parse(
-                  e.target.value,
-                  "yyyy-MM-dd",
-                  new Date()
-                ).toISOString(),
-              })
-            }
-          />
+      <Datepicker
+        label="Demonterad"
+        value={bolt.dismantled ? new Date(bolt.dismantled) : undefined}
+        onChange={(value) =>
+          updateBolt({ dismantled: new Date(value).toISOString() })
+        }
+      />
 
-          <ClearButton onClick={() => updateBolt({ dismantled: undefined })} />
-        </>
-      )}
+      <ClearButton onClick={() => updateBolt({ dismantled: undefined })} />
     </div>
   );
 };

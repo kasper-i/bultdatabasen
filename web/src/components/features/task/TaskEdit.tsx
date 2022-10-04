@@ -2,7 +2,7 @@ import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import { Task } from "@/models/task";
 import { useUpdateTask } from "@/queries/taskQueries";
-import React, { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
   const [editedTask, setEditedTask] = useState(task);
@@ -25,6 +25,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
           }))
         }
       />
+
       <div className="flex justify-end gap-2.5">
         <Button onClick={() => onDone()} outlined>
           Avbryt

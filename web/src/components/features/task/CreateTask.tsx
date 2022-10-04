@@ -46,7 +46,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
               ?.reverse()
               ?.map((point) => ({
                 label: pointLabeler(point.id).name,
-                sublabel: "#" + pointLabeler(point.id).no,
+                sublabel: "№" + pointLabeler(point.id).no,
                 value: point,
                 key: point.id,
               })) ?? []
@@ -54,7 +54,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
           onSelect={(point) => setSelectedPointId(point.id)}
           displayValue={(point) => {
             const { name, no } = pointLabeler(point.id);
-            return `${name} #${no}`;
+            return `${name} №${no}`;
           }}
           noOptionsText="Leden saknar bultar"
           disabled={points === undefined}

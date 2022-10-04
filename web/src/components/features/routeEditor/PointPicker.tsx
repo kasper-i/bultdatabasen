@@ -64,7 +64,7 @@ const PointPicker = ({
               ?.reverse()
               ?.map((point) => ({
                 label: pointLabeler(point.id).name,
-                sublabel: "#" + pointLabeler(point.id).no,
+                sublabel: "№" + pointLabeler(point.id).no,
                 value: point,
                 key: point.id,
                 disabled: illegalPoints.includes(point.id),
@@ -73,7 +73,7 @@ const PointPicker = ({
           onSelect={(point) => onSelect(point.id)}
           displayValue={(point) => {
             const { name, no } = pointLabeler(point.id);
-            return `${name} #${no}`;
+            return `${name} №${no}`;
           }}
           noOptionsText="Leden saknar bultar"
           disabled={selectedRoute === undefined}
