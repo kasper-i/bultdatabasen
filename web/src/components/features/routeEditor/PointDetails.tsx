@@ -33,6 +33,9 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   const [currImg, setCurrImg] = useState<string>();
   const [action, setAction] = useState<"delete">();
 
+  const numInstalledBolts =
+    bolts.data?.filter((bolt) => !bolt.dismantled)?.length ?? 0;
+
   const sharedParents = point.parents.filter((parent) => parent.id !== routeId);
 
   const sortedImages = useMemo(() => {
@@ -117,7 +120,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
             <BoltDetails
               key={bolt.id}
               bolt={bolt}
-              totalNumberOfBolts={bolts.data.length}
+              totalNumberOfBolts={numInstalledBolts}
             />
           ))}
       </div>
