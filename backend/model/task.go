@@ -13,6 +13,7 @@ type Task struct {
 	ResourceBase
 	Status      string     `json:"status"`
 	Description string     `json:"description"`
+	Priority    int        `json:"priority"`
 	Assignee    *string    `gorm:"->" json:"assignee,omitempty"`
 	Comment     *string    `json:"comment,omitempty"`
 	ParentID    string     `gorm:"->" json:"parentId"`
@@ -58,7 +59,7 @@ func (sess Session) GetTasks(resourceID string, pagination Pagination, statuses 
 
 	countQuery := fmt.Sprintf("%s AND %s", buildDescendantsCountQuery("task"), where)
 
-	dataQuery := fmt.Sprintf("%s AND %s ORDER BY btime DESC %s", buildDescendantsQuery("task"), where, pagination.ToSQL())
+	dataQuery := fmt.Sprintf("%s AND %s ORDER BY priority ASC %s", buildDescendantsQuery("task"), where, pagination.ToSQL())
 
 	if err := sess.DB.Raw(dataQuery, params...).Scan(&tasks).Error; err != nil {
 		return nil, meta, err
@@ -173,6 +174,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		if err := sess.DB.Select(
 			"Status",
 			"Description",
+			"Priority",
 			"Comment",
 			"ClosedAt",
 		).Updates(task).Error; err != nil {

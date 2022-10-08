@@ -9,6 +9,7 @@ import UserName from "@/components/UserName";
 import { Task, TaskStatus } from "@/models/task";
 import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { getResourceRoute } from "@/utils/resourceUtils";
+import { translatePriority } from "@/utils/taskUtils";
 import clsx from "clsx";
 import { isEmpty } from "lodash";
 import { FC, ReactElement, useState } from "react";
@@ -141,6 +142,20 @@ const TaskView: FC<{
       </div>
 
       <div className="text-xs">
+        {translatePriority(task.priority) && (
+          <span
+            className={clsx(
+              "text-white font-medium rounded-md py-0.5 px-1.5 mr-2",
+              task.priority === 1
+                ? "bg-red-500"
+                : task.priority === 3
+                ? "bg-gray-500"
+                : undefined
+            )}
+          >
+            {translatePriority(task.priority)}
+          </span>
+        )}
         Rapporterat{" "}
         <span className="font-medium">
           <Time time={task.createdAt} />

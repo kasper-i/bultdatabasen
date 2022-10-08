@@ -1,5 +1,7 @@
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
+import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
+import { Option } from "@/components/atoms/RadioGroup";
 import { Select } from "@/components/atoms/Select";
 import { Point } from "@/models/point";
 import { usePoints } from "@/queries/pointQueries";
@@ -12,6 +14,24 @@ interface Props {
   routeId: string;
 }
 
+export const priorityOptions: Option<number>[] = [
+  {
+    key: "3",
+    label: "Låg",
+    value: 3,
+  },
+  {
+    key: "2",
+    label: "Normal",
+    value: 2,
+  },
+  {
+    key: "1",
+    label: "Hög",
+    value: 1,
+  },
+];
+
 const CreateTask = ({ routeId }: Props): ReactElement => {
   const { data: points } = usePoints(routeId);
 
@@ -19,11 +39,12 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
 
   const [description, setDescription] = useState("");
   const [selectedPointId, setSelectedPointId] = useState<string>();
+  const [priority, setPriority] = useState(2);
 
   const createTask = useCreateTask(routeId, selectedPointId ?? routeId);
 
   const handleCreateTask = () => {
-    createTask.mutate({ description });
+    createTask.mutate({ description, priority });
     setDescription("");
   };
 
@@ -58,6 +79,14 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
           }}
           noOptionsText="Leden saknar bultar"
           disabled={points === undefined}
+        />
+
+        <RadioCardsGroup<number>
+          value={priority}
+          onChange={(value) => value !== undefined && setPriority(value)}
+          options={priorityOptions}
+          label="Prioritet"
+          mandatory
         />
 
         <Button

@@ -1,8 +1,10 @@
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
+import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Task } from "@/models/task";
 import { useUpdateTask } from "@/queries/taskQueries";
 import { FC, useEffect, useState } from "react";
+import { priorityOptions } from "./CreateTask";
 
 const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
   const [editedTask, setEditedTask] = useState(task);
@@ -14,7 +16,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
   }, [onDone, updateTask.isSuccess]);
 
   return (
-    <div className="flex flex-col gap-2.5 items-end">
+    <div className="flex flex-col gap-2.5 items-start">
       <Input
         label="Beskrivning"
         value={editedTask.description}
@@ -26,7 +28,21 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
         }
       />
 
-      <div className="flex justify-end gap-2.5">
+      <RadioCardsGroup<number>
+        value={editedTask.priority}
+        onChange={(value) =>
+          value !== undefined &&
+          setEditedTask((task) => ({
+            ...task,
+            priority: value,
+          }))
+        }
+        options={priorityOptions}
+        label="Prioritet"
+        mandatory
+      />
+
+      <div className="flex justify-end gap-2.5 w-full">
         <Button onClick={() => onDone()} outlined>
           Avbryt
         </Button>
