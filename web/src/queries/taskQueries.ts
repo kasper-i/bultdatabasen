@@ -15,7 +15,8 @@ export const useCreateTask = (routeId: string, parentId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    (task: Pick<Task, "description">) => Api.createTask(parentId, task),
+    (task: Pick<Task, "description" | "priority">) =>
+      Api.createTask(parentId, task),
     {
       onSuccess: async (data) => {
         queryClient.setQueryData(["task", { taskId: data.id }], data);

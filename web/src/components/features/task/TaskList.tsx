@@ -9,13 +9,15 @@ interface Props {
   resourceId: string;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 const TaskList = ({ resourceId }: Props): ReactElement => {
   const [page, setPage] = useState(1);
   const [showClosed, setShowClosed] = useState(false);
 
   const { data: tasks } = useTasks(resourceId, {
     status: showClosed ? ["closed", "rejected"] : ["open", "assigned"],
-    pagination: { page, itemsPerPage: 10 },
+    pagination: { page, itemsPerPage: ITEMS_PER_PAGE },
   });
 
   return (
@@ -39,7 +41,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
         <div className="w-full my-5">
           <Pagination
             page={page}
-            itemsPerPage={10}
+            itemsPerPage={ITEMS_PER_PAGE}
             totalItems={tasks?.meta.totalItems ?? 0}
             onPageSelect={setPage}
           />

@@ -3,14 +3,21 @@ import { isEqual } from "lodash";
 import React, { useId } from "react";
 import { Option } from "./RadioGroup";
 
-interface Props<T> {
+type Props<T> = {
   value?: T;
   options: Option<T>[];
-  onChange: (value: T | undefined) => void;
   label?: string;
-}
+  mandatory?: boolean;
+  onChange: (value: T | undefined) => void;
+};
 
-const RadioCardsGroup = <T,>({ value, options, onChange, label }: Props<T>) => {
+const RadioCardsGroup = <T,>({
+  value,
+  options,
+  onChange,
+  label,
+  mandatory = false,
+}: Props<T>) => {
   const groupId = useId();
 
   return (
@@ -22,7 +29,10 @@ const RadioCardsGroup = <T,>({ value, options, onChange, label }: Props<T>) => {
         {label}
       </label>
 
-      <div id={groupId} className="flex flex-wrap items-center gap-2">
+      <div
+        id={groupId}
+        className="flex flex-wrap items-center gap-2 select-none"
+      >
         {options.map(({ key, value: optionValue, label }) => {
           const optionId = useId();
           const selected = isEqual(optionValue, value);
@@ -34,7 +44,9 @@ const RadioCardsGroup = <T,>({ value, options, onChange, label }: Props<T>) => {
                 type="radio"
                 className="pointer-events-none opacity-0 fixed"
                 defaultChecked={selected}
-                onClick={() => onChange(selected ? undefined : optionValue)}
+                onClick={() =>
+                  onChange(selected && !mandatory ? undefined : optionValue)
+                }
               />
               <label
                 htmlFor={optionId}
