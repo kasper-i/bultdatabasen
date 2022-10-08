@@ -145,12 +145,12 @@ const TaskView: FC<{
         {translatePriority(task.priority) && (
           <span
             className={clsx(
-              "inline text-white font-medium text-xs rounded-md py-0.5 px-1.5 mr-2",
+              "text-white font-medium rounded-md py-0.5 px-1.5 mr-2",
               task.priority === 1
                 ? "bg-red-500"
-                : task.priority === 2
-                ? "bg-yellow-500"
-                : "bg-gray-500"
+                : task.priority === 3
+                ? "bg-gray-500"
+                : undefined
             )}
           >
             {translatePriority(task.priority)}
