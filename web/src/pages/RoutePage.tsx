@@ -3,10 +3,9 @@ import PageHeader from "@/components/PageHeader";
 import { Underlined } from "@/components/Underlined";
 import { useUnsafeParams } from "@/hooks/common";
 import { RouteType } from "@/models/route";
-import { useBolts } from "@/queries/boltQueries";
 import { usePoints } from "@/queries/pointQueries";
 import { useRoute } from "@/queries/routeQueries";
-import React, { Fragment, ReactElement } from "react";
+import { Fragment, ReactElement } from "react";
 
 const renderRouteType = (routeType: RouteType) => {
   switch (routeType) {
