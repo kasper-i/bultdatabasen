@@ -1,4 +1,6 @@
+import { Datepicker } from "@/components/atoms/DatePicker";
 import IconButton from "@/components/atoms/IconButton";
+import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Option } from "@/components/atoms/RadioGroup";
 import { Select } from "@/components/atoms/Select";
 import { Bolt, BoltType, DiameterUnit } from "@/models/bolt";
@@ -8,11 +10,6 @@ import { useModels } from "@/queries/modelQueries";
 import { translateBoltType } from "@/utils/boltUtils";
 import clsx from "clsx";
 import { FC, useMemo } from "react";
-import React from "react";
-import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
-import Input from "@/components/atoms/Input";
-import { format, isMatch, parse } from "date-fns";
-import { Datepicker } from "@/components/atoms/DatePicker";
 
 const typeOptions = (["expansion", "glue", "piton"] as const).map<
   Option<BoltType>
