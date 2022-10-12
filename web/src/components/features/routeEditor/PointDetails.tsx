@@ -1,3 +1,4 @@
+import Button from "@/components/atoms/Button";
 import Loader from "@/components/atoms/Loader";
 import { Concatenator } from "@/components/Concatenator";
 import Feed from "@/components/Feed";
@@ -10,12 +11,13 @@ import Restricted from "@/components/Restricted";
 import UserName from "@/components/UserName";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
-import { useBolts } from "@/queries/boltQueries";
+import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
 import { compareDesc } from "date-fns";
-import React, { ReactElement, useMemo, useState } from "react";
+import { ReactElement, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import AdvancedBoltEditor from "./AdvancedBoltEditor";
 import BoltDetails from "./BoltDetails";
 import { PointLabel } from "./hooks";
 
@@ -31,7 +33,12 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   const { data: images } = useImages(point.id);
   const bolts = useBolts(point.id);
   const [currImg, setCurrImg] = useState<string>();
-  const [action, setAction] = useState<"delete">();
+  const [action, setAction] = useState<"delete" | "add_bolt">();
+  const [newBolt, setNewBolt] = useState<Omit<Bolt, "id" | "parentId">>({
+    type: "expansion",
+    installed: new Date().toISOString(),
+  });
+  const createBolt = useCreateBolt(point.id);
 
   const numInstalledBolts =
     bolts.data?.filter((bolt) => !bolt.dismantled)?.length ?? 0;
@@ -45,6 +52,10 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         compareDesc(new Date(i1.timestamp), new Date(i2.timestamp))
       );
   }, [images]);
+
+  useEffect(() => {
+    createBolt.isSuccess && setAction(undefined);
+  }, [createBolt.isSuccess]);
 
   return (
     <div>
@@ -99,6 +110,11 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
                   className: "text-red-500",
                   onClick: () => setAction("delete"),
                 },
+                {
+                  label: "Ny bult",
+                  icon: "plus",
+                  onClick: () => setAction("add_bolt"),
+                },
               ]}
             />
             {action === "delete" && (
@@ -113,6 +129,26 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
       </div>
 
       <div className="flex flex-wrap gap-2.5 py-4">
+        {action === "add_bolt" && (
+          <div className="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
+            <AdvancedBoltEditor
+              bolt={newBolt}
+              onChange={setNewBolt}
+              hideDismantled
+            />
+            <div className="flex gap-x-2.5 py-2 mt-2">
+              <Button onClick={() => setAction(undefined)} outlined>
+                Avbryt
+              </Button>
+              <Button
+                loading={createBolt.isLoading}
+                onClick={() => createBolt.mutate(newBolt)}
+              >
+                Skapa
+              </Button>
+            </div>
+          </div>
+        )}
         {bolts.data
           ?.slice()
           ?.sort((b1: Bolt) => (b1.position === "left" ? -1 : 1))
