@@ -58,11 +58,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
   const textStyle = bolt.dismantled ? "line-through opacity-50" : undefined;
 
   return (
-    <div
-      className={clsx(
-        "w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md"
-      )}
-    >
+    <div className="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
       <div className="flex justify-between">
         <p className="text-left font-medium">
           <span>

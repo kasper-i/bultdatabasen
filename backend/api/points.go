@@ -4,7 +4,7 @@ import (
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -42,7 +42,7 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID := vars["resourceID"]
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+	reqBody, _ := io.ReadAll(r.Body)
 	var request CreatePointRequest
 	if err := json.Unmarshal(reqBody, &request); err != nil {
 		utils.WriteError(w, err)

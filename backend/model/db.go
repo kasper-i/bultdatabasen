@@ -43,7 +43,7 @@ func init() {
 		panic("failed to connect database")
 	}
 
-	sqlDB, err := DB.DB()
+	sqlDB, _ := DB.DB()
 
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)

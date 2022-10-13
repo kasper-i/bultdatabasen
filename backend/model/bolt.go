@@ -134,6 +134,13 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 			return err
 		}
 
+
+		if refreshedBolt, err := sess.GetBolt(bolt.ID); err != nil {
+			return err
+		} else {
+			*bolt = *refreshedBolt
+		}
+
 		return nil
 	})
 

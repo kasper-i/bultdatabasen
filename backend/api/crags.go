@@ -4,7 +4,7 @@ import (
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -40,7 +40,7 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+	reqBody, _ := io.ReadAll(r.Body)
 	var crag model.Crag
 	if err := json.Unmarshal(reqBody, &crag); err != nil {
 		utils.WriteError(w, err)

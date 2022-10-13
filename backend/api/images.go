@@ -6,7 +6,7 @@ import (
 	"bultdatabasen/utils"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -83,7 +83,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	fileBytes, err := ioutil.ReadAll(file)
+	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		utils.WriteError(w, err)
 		return
@@ -127,7 +127,7 @@ func PatchImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	imageID := vars["resourceID"]
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+	reqBody, _ := io.ReadAll(r.Body)
 	var patch model.ImagePatch
 	if err := json.Unmarshal(reqBody, &patch); err != nil {
 		utils.WriteError(w, err)

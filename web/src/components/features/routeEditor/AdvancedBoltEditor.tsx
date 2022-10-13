@@ -60,10 +60,17 @@ const diameterOptions: Option<DiameterAndUnit>[] = [
   },
 ];
 
-const AdvancedBoltEditor: FC<{
-  bolt: Bolt;
-  onChange?: (bolt: Bolt) => void;
-}> = ({ bolt, onChange }) => {
+type Props<T> = {
+  bolt: T;
+  onChange?: (bolt: T) => void;
+  hideDismantled?: boolean;
+};
+
+const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
+  bolt,
+  onChange,
+  hideDismantled,
+}: Props<T>) => {
   const updateBolt = (updates: Partial<Bolt>) => {
     onChange?.({ ...bolt, ...updates });
   };
@@ -204,15 +211,19 @@ const AdvancedBoltEditor: FC<{
 
       <ClearButton onClick={() => updateBolt({ installed: undefined })} />
 
-      <Datepicker
-        label="Demonterad"
-        value={bolt.dismantled ? new Date(bolt.dismantled) : undefined}
-        onChange={(value) =>
-          updateBolt({ dismantled: new Date(value).toISOString() })
-        }
-      />
+      {!hideDismantled && (
+        <>
+          <Datepicker
+            label="Demonterad"
+            value={bolt.dismantled ? new Date(bolt.dismantled) : undefined}
+            onChange={(value) =>
+              updateBolt({ dismantled: new Date(value).toISOString() })
+            }
+          />
 
-      <ClearButton onClick={() => updateBolt({ dismantled: undefined })} />
+          <ClearButton onClick={() => updateBolt({ dismantled: undefined })} />
+        </>
+      )}
     </div>
   );
 };
