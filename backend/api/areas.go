@@ -4,7 +4,7 @@ import (
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -48,7 +48,7 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 
 	userId := r.Context().Value("user_id").(string)
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+	reqBody, _ := io.ReadAll(r.Body)
 	var area model.Area
 	if err := json.Unmarshal(reqBody, &area); err != nil {
 		utils.WriteError(w, err)
