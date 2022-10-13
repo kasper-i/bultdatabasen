@@ -5,7 +5,7 @@ import (
 	"bultdatabasen/utils"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -54,7 +54,7 @@ func UpdateMyself(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	userID := r.Context().Value("user_id").(string)
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+	reqBody, _ := io.ReadAll(r.Body)
 	var desiredUser model.User
 	if err := json.Unmarshal(reqBody, &desiredUser); err != nil {
 		utils.WriteError(w, err)

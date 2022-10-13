@@ -4,7 +4,7 @@ import (
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -40,7 +40,7 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+	reqBody, _ := io.ReadAll(r.Body)
 	var route model.Route
 	if err := json.Unmarshal(reqBody, &route); err != nil {
 		utils.WriteError(w, err)
@@ -74,7 +74,7 @@ func UpdateRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID := vars["resourceID"]
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+	reqBody, _ := io.ReadAll(r.Body)
 	var route model.Route
 
 	if err := json.Unmarshal(reqBody, &route); err != nil {
