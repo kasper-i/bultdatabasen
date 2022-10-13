@@ -1,4 +1,6 @@
+import ChildrenTable from "@/components/ChildrenTable";
 import Search from "@/components/Search";
+import { rootNodeId } from "@/constants";
 import React from "react";
 
 const RootPage = () => {
@@ -11,11 +13,12 @@ const RootPage = () => {
         databasen
       </h1>
       <p className="text-md text-center text-gray-700">
-        En databas över borrbultar och ankare på klätterleder i västsverige.
+        En databas över borrbultar och ankare på klätterleder i Västsverige.
       </p>
-      <div className="mt-5 w-full">
+      <div className="mt-5 w-full mb-5">
         <Search />
       </div>
+      <ChildrenTable resourceId={rootNodeId} filters={{ types: ["area"] }} />
     </div>
   );
 };
