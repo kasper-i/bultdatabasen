@@ -11,7 +11,6 @@ export interface ButtonProps {
   className?: string;
   color?: ColorType;
   loading?: boolean;
-  circular?: boolean;
   disabled?: boolean;
   full?: boolean;
   outlined?: boolean;

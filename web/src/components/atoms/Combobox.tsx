@@ -10,7 +10,7 @@ interface Props<T> {
   value?: T;
   options: Option<T>[];
   onSelect: (value: T) => void;
-  displayValue: (value: T) => string;
+  displayValue?: (value: T | undefined) => string;
   disabled?: boolean;
   noOptionsText?: string;
 }
@@ -99,13 +99,17 @@ export function Combobox<T>({
 
   return (
     <HeadlessCombobox value={value} onChange={onSelect} disabled={disabled}>
-      <HeadlessCombobox.Label className="block text-sm font-medium text-gray-700">
+      <HeadlessCombobox.Label className="block text-sm font-medium text-gray-700 mb-1">
         {label}
       </HeadlessCombobox.Label>
       <div className="relative">
         <HeadlessCombobox.Button className="w-full">
-          <HeadlessCombobox.Input
-            displayValue={displayValue}
+          <HeadlessCombobox.Input<"input", T>
+            displayValue={
+              displayValue ??
+              ((value) =>
+                options.find((option) => option.value === value)?.label ?? "")
+            }
             onChange={(event) => setQuery(event.target.value)}
             className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[2.125rem]"
           />

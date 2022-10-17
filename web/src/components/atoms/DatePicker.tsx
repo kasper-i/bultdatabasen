@@ -1,4 +1,5 @@
 import {
+  CalendarDaysIcon,
   CalendarIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
@@ -156,7 +157,7 @@ export const Datepicker: FC<{
         label={label}
         value={value ? format(value, "yyyy-MM-dd") : ""}
         onClick={() => setHidden(false)}
-        icon={CalendarIcon}
+        icon={CalendarDaysIcon}
       />
       {!hidden && (
         <div
