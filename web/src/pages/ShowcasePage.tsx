@@ -1,10 +1,8 @@
 import Button from "@/components/atoms/Button";
 import { Combobox } from "@/components/atoms/Combobox";
 import { Datepicker } from "@/components/atoms/DatePicker";
-import Dots from "@/components/atoms/Dots";
 import IconButton from "@/components/atoms/IconButton";
 import Input from "@/components/atoms/Input";
-import Loader from "@/components/atoms/Loader";
 import Modal from "@/components/atoms/Modal";
 import Pagination from "@/components/atoms/Pagination";
 import Progress from "@/components/atoms/Progress";
@@ -14,7 +12,6 @@ import { Select } from "@/components/atoms/Select";
 import { Switch } from "@/components/atoms/Switch";
 import { Menu } from "@/components/molecules/Menu";
 import Search from "@/components/Search";
-import EllipsisVerticalIcon from "@heroicons/react/24/outline/EllipsisVerticalIcon";
 import { useState } from "react";
 
 type Fruit = "banana" | "apple" | "orange";
@@ -24,7 +21,7 @@ export const ShowcasePage = () => {
   const [fruit, setFruit] = useState<Fruit>("banana");
   const [name, setName] = useState("Anonymous");
   const [enabled, setEnabled] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(5);
   const [showModal, setShowModal] = useState(false);
 
   const fruitOptions: Option<Fruit>[] = [
@@ -106,8 +103,8 @@ export const ShowcasePage = () => {
           onChange={(value) => value && setFruit(value)}
         />
       </div>
-      <div>
-        <Progress percent={30} />
+      <div className="h-4">
+        <Progress percent={100 * (page / 5)} />
       </div>
       <div>
         <Pagination
