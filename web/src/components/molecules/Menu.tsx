@@ -40,7 +40,7 @@ export const Menu: FC<{ items: MenuItem[] }> = ({ items }) => {
                       className={clsx(
                         "relative py-1.5 first:rounded-t-md last:rounded-b-md",
                         active && "bg-neutral-50",
-                        disabled ? "opacity-20" : "cursor-pointer",
+                        disabled ? "cursor-not-allowed" : "cursor-pointer",
                         className
                       )}
                       onClick={onClick}
@@ -50,7 +50,14 @@ export const Menu: FC<{ items: MenuItem[] }> = ({ items }) => {
                           <Icon name={icon} />
                         </div>
                       )}
-                      <p className={clsx("ml-8 mr-1.5")}>{label}</p>
+                      <p
+                        className={clsx(
+                          "ml-8 mr-1.5",
+                          disabled && "opacity-20"
+                        )}
+                      >
+                        {label}
+                      </p>
                     </div>
                   )}
                 </HeadlessMenu.Item>

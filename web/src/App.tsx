@@ -16,6 +16,7 @@ import SignoutPage from "./pages/SignoutPage";
 import TasksPage from "./pages/TasksPage";
 import { login } from "./slices/authSlice";
 import { useAppDispatch } from "./store";
+import { ShowcasePage } from "./pages/ShowcasePage";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -65,6 +66,7 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route element={<Main />}>
+          <Route path="/showcase" element={<ShowcasePage />} />
           <Route path="/signin" element={<SigninPage />} />
           <Route path="/signout" element={<SignoutPage />} />
           <Route path="/" element={<RootPage />} />
