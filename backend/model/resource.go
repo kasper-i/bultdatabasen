@@ -30,6 +30,10 @@ type Resource struct {
 	LastUpdatedByID string    `gorm:"column:muser_id" json:"-"`
 }
 
+type ResourcePatch struct {
+	ParentID *string `json:"parentId"`
+}
+
 type Trash struct {
 	ResourceID   string    `gorm:"primaryKey"`
 	DeletedTime  time.Time `gorm:"column:dtime"`
@@ -112,6 +116,23 @@ func (sess Session) GetResource(resourceID string) (*Resource, error) {
 	}
 
 	return &resource, nil
+}
+
+func (sess Session) MoveResource(resourceID, newParentID string) error {
+	var resource *Resource
+	var err error
+
+	return sess.Transaction(func(sess Session) error {
+		if resource, err = sess.getResourceWithLock(resourceID); err != nil {
+			return err
+		}
+
+		if *resource.ParentID == newParentID {
+			return nil
+		}
+		
+		return sess.moveResource(*resource, newParentID)
+	})
 }
 
 func (sess Session) getResourceWithLock(resourceID string) (*Resource, error) {
@@ -251,7 +272,6 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 
 	return resources, nil
 }
-
 
 func (sess Session) updateCountersForResourceAndAncestors(resourceID string, delta Counters) error {
 	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)

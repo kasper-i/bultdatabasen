@@ -78,6 +78,10 @@ func (sess Session) createResource(resource Resource) error {
 }
 
 func (sess Session) moveResource(resource Resource, newParentID string) error {
+	if newParentID == resource.ID {
+		return utils.ErrHierarchyStructureViolation
+	}
+
 	if !sess.checkParentAllowed(resource, newParentID) {
 		return utils.ErrHierarchyStructureViolation
 	}
@@ -121,7 +125,7 @@ func (sess Session) deleteResource(resourceID string) error {
 			if err := sess.updateCountersForResource(ancestor.ID, countersDifference); err != nil {
 				return err
 			}
-		}		
+		}
 
 		return sess.DB.Create(&trash).Error
 	})

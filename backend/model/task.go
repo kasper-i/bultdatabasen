@@ -48,7 +48,7 @@ func (sess Session) GetTasks(resourceID string, pagination Pagination, statuses 
 	var where string = "TRUE"
 	if len(statuses) > 0 {
 		var placeholders []string = make([]string, 0)
-		
+
 		for _, status := range statuses {
 			placeholders = append(placeholders, "?")
 			params = append(params, status)
