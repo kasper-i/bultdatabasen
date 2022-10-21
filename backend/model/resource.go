@@ -130,7 +130,7 @@ func (sess Session) MoveResource(resourceID, newParentID string) error {
 		if *resource.ParentID == newParentID {
 			return nil
 		}
-		
+
 		return sess.moveResource(*resource, newParentID)
 	})
 }

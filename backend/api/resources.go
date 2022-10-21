@@ -49,7 +49,7 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 
 		if ancestors, err = sess.GetAncestors(*patch.ParentID); err != nil {
 			utils.WriteResponse(w, http.StatusForbidden, nil)
-			return	
+			return
 		}
 
 		role := authorizer.GetMaxRole(*patch.ParentID, ancestors, userID)
