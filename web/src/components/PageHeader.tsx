@@ -38,7 +38,7 @@ const PageHeader = ({
           {getResourceLabel(resource.type)} med{" "}
           <Underlined>{resource.counters?.routes ?? 0}</Underlined> leder och{" "}
           <Underlined>{resource.counters?.installedBolts ?? 0}</Underlined>{" "}
-          bultar.
+          dokumenterade bultar.
         </p>
       )}
     </div>

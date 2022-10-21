@@ -134,7 +134,6 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 			return err
 		}
 
-
 		if refreshedBolt, err := sess.GetBolt(bolt.ID); err != nil {
 			return err
 		} else {
@@ -183,7 +182,7 @@ func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 			"DiameterUnit").Updates(updatedBolt).Error; err != nil {
 			return err
 		}
-		
+
 		if err := sess.updateCountersForResourceAndAncestors(boltID, countersDifference); err != nil {
 			return err
 		}

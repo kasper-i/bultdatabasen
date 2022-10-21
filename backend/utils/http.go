@@ -41,7 +41,7 @@ func WriteError(w http.ResponseWriter, err error) {
 	} else if errors.Is(err, ErrLoopDetected) {
 		status = http.StatusConflict
 		error.Message = err.Error()
-	} else if errors.Is(err, ErrMissingAttachmentPoint) || errors.Is(err, ErrInvalidAttachmentPoint) || errors.Is(err, ErrOrphanedResource) || errors.Is(err, ErrHierarchyStructureViolation) {
+	} else if errors.Is(err, ErrMissingAttachmentPoint) || errors.Is(err, ErrInvalidAttachmentPoint) || errors.Is(err, ErrOrphanedResource) || errors.Is(err, ErrHierarchyStructureViolation) || errors.Is(err, ErrMoveNotPermitted) {
 		status = http.StatusBadRequest
 		error.Message = err.Error()
 	} else if errors.Is(err, ErrCorruptResource) {

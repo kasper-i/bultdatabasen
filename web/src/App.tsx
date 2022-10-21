@@ -69,7 +69,14 @@ const App = () => {
           <Route path="/showcase" element={<ShowcasePage />} />
           <Route path="/signin" element={<SigninPage />} />
           <Route path="/signout" element={<SignoutPage />} />
-          <Route path="/" element={<RootPage />} />
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<Loader />}>
+                <RootPage />
+              </Suspense>
+            }
+          />
 
           <Route
             path="area/:resourceId"

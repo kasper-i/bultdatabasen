@@ -4,6 +4,8 @@ import (
 	"bultdatabasen/middleware/authorizer"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
+	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 
@@ -21,6 +23,60 @@ func GetResource(w http.ResponseWriter, r *http.Request) {
 		resource.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, resource)
 	}
+}
+
+func ownsResource(r *http.Request, sess model.Session, resourceID string) bool {
+	var ancestors []model.Resource
+	var userID string
+	var err error
+
+	if value, ok := r.Context().Value("user_id").(string); ok {
+		userID = value
+	}
+
+	if ancestors, err = sess.GetAncestors(resourceID); err != nil {
+		return false
+	}
+
+	role := authorizer.GetMaxRole(resourceID, ancestors, userID)
+	if role == nil {
+		return false
+	}
+
+	return role.Role == authorizer.RoleOwner
+}
+
+func UpdateResource(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
+	vars := mux.Vars(r)
+	id := vars["resourceID"]
+	var patch model.ResourcePatch
+
+	reqBody, _ := io.ReadAll(r.Body)
+	if err := json.Unmarshal(reqBody, &patch); err != nil {
+		utils.WriteError(w, err)
+		return
+	}
+
+	switch {
+	case patch.ParentID != nil:
+		newParentID := *patch.ParentID
+
+		if newParentID != model.RootID && !ownsResource(r, sess, newParentID) {
+			utils.WriteResponse(w, http.StatusForbidden, nil)
+			return
+		}
+
+		if err := sess.MoveResource(id, newParentID); err != nil {
+			utils.WriteError(w, err)
+		} else {
+			utils.WriteResponse(w, http.StatusNoContent, nil)
+		}
+
+		return
+	}
+
+	utils.WriteResponse(w, http.StatusBadRequest, nil)
 }
 
 func GetAncestors(w http.ResponseWriter, r *http.Request) {
