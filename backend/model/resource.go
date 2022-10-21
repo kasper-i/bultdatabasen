@@ -136,12 +136,12 @@ func (sess Session) MoveResource(resourceID, newParentID string) error {
 
 		oldParentID := *resource.ParentID
 
-		if err := sess.updateCountersForResourceAndAncestors(oldParentID, Counters{}.Substract(resource.Counters)); err != nil {
-			return err
-		}
-
 		if oldParentID == newParentID {
 			return nil
+		}
+
+		if err := sess.updateCountersForResourceAndAncestors(oldParentID, Counters{}.Substract(resource.Counters)); err != nil {
+			return err
 		}
 
 		if err := sess.moveResource(*resource, newParentID); err != nil {
