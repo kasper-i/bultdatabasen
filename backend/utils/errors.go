@@ -11,4 +11,5 @@ var (
 	ErrInvalidAttachmentPoint      = errors.New("Invalid attachment point")
 	ErrLoopDetected                = errors.New("Loop detected")
 	ErrCorruptResource             = errors.New("Corrupt resource")
+	ErrMoveNotPermitted            = errors.New("Not permitted to move resource")
 )

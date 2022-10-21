@@ -127,11 +127,28 @@ func (sess Session) MoveResource(resourceID, newParentID string) error {
 			return err
 		}
 
-		if *resource.ParentID == newParentID {
+		switch resource.Type {
+		case "area", "crag", "sector":
+			break
+		default:
+			return utils.ErrMoveNotPermitted
+		}
+
+		oldParentID := *resource.ParentID
+
+		if err := sess.updateCountersForResourceAndAncestors(oldParentID, Counters{}.Substract(resource.Counters)); err != nil {
+			return err
+		}
+
+		if oldParentID == newParentID {
 			return nil
 		}
 
-		return sess.moveResource(*resource, newParentID)
+		if err := sess.moveResource(*resource, newParentID); err != nil {
+			return err
+		}
+
+		return sess.updateCountersForResourceAndAncestors(newParentID, resource.Counters)
 	})
 }
 

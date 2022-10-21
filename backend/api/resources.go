@@ -25,17 +25,32 @@ func GetResource(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateResource(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
-	vars := mux.Vars(r)
-	id := vars["resourceID"]
+func ownsResource(r *http.Request, sess model.Session, resourceID string) bool {
+	var ancestors []model.Resource
 	var userID string
 	var err error
-	var patch model.ResourcePatch
 
 	if value, ok := r.Context().Value("user_id").(string); ok {
 		userID = value
 	}
+
+	if ancestors, err = sess.GetAncestors(resourceID); err != nil {
+		return false
+	}
+
+	role := authorizer.GetMaxRole(resourceID, ancestors, userID)
+	if role == nil {
+		return false
+	}
+
+	return role.Role == authorizer.RoleOwner
+}
+
+func UpdateResource(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
+	vars := mux.Vars(r)
+	id := vars["resourceID"]
+	var patch model.ResourcePatch
 
 	reqBody, _ := io.ReadAll(r.Body)
 	if err := json.Unmarshal(reqBody, &patch); err != nil {
@@ -45,20 +60,14 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case patch.ParentID != nil:
-		var ancestors []model.Resource
+		newParentID := *patch.ParentID
 
-		if ancestors, err = sess.GetAncestors(*patch.ParentID); err != nil {
+		if newParentID != model.RootID && !ownsResource(r, sess, newParentID) {
 			utils.WriteResponse(w, http.StatusForbidden, nil)
 			return
 		}
 
-		role := authorizer.GetMaxRole(*patch.ParentID, ancestors, userID)
-		if role == nil || role.Role != authorizer.RoleOwner {
-			utils.WriteResponse(w, http.StatusForbidden, nil)
-			return
-		}
-
-		if err := sess.MoveResource(id, *patch.ParentID); err != nil {
+		if err := sess.MoveResource(id, newParentID); err != nil {
 			utils.WriteError(w, err)
 		} else {
 			utils.WriteResponse(w, http.StatusNoContent, nil)
