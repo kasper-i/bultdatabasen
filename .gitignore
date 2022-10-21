@@ -1,1 +1,3 @@
 *.mwb.bak
+.vscode
+__debug_bin
