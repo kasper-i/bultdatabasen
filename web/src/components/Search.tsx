@@ -82,7 +82,7 @@ function Search() {
       >
         <div className="relative">
           <Combobox.Input
-            displayValue={(value: SearchResult) => value.name}
+            displayValue={(value?: SearchResult) => `${value?.name}`}
             onChange={handleSearchChange}
             className="focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-3xl h-[2.125rem]"
           />

@@ -50,8 +50,8 @@ const PointPicker = ({
             onSelect(undefined);
             setSelectedRoute(route);
           }}
-          displayValue={(route) => route.name}
           noOptionsText="Inga närliggande leder"
+          multiple={false}
         />
 
         <Select<Point>
@@ -77,6 +77,7 @@ const PointPicker = ({
           }}
           noOptionsText="Leden saknar bultar"
           disabled={selectedRoute === undefined}
+          multiple={false}
         />
       </div>
     </div>

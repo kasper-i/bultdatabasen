@@ -1,19 +1,32 @@
+import { isDefined } from "@/utils/common";
 import { Listbox, Transition } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import { isArray } from "lodash";
 import { FC, Fragment, ReactNode } from "react";
 import Icon from "./Icon";
+import IconButton from "./IconButton";
 import { Option } from "./RadioGroup";
 
-interface Props<T> {
+type Props<T> = {
   label: string;
-  value?: T;
-  options: Option<T>[];
-  onSelect: (value: T) => void;
-  displayValue?: (value: T) => string;
   disabled?: boolean;
   noOptionsText?: string;
-}
+  options: Option<T>[];
+} & (
+  | {
+      value?: T;
+      onSelect: (value: T) => void;
+      displayValue?: (value: T) => string;
+      multiple: false;
+    }
+  | {
+      value: T[];
+      onSelect: (value: T[]) => void;
+      displayValue?: (value: T[]) => string;
+      multiple: true;
+    }
+);
 
 const EmptyState: FC<{ children: ReactNode }> = ({ children }) => {
   return (
@@ -31,6 +44,7 @@ export function Select<T>({
   displayValue,
   disabled,
   noOptionsText,
+  multiple,
 }: Props<T>) {
   const renderOptions = () => {
     if (options.length === 0) {
@@ -82,19 +96,79 @@ export function Select<T>({
     }
   };
 
+  const lookupOption = (value: T) =>
+    options.find((option) => option.value === value);
+
+  const removeOption = (valueToRemove: T) => {
+    if (multiple) {
+      onSelect(value?.filter((v) => v !== valueToRemove));
+    }
+  };
+
+  const renderLabel = () => {
+    if (!value) {
+      return "";
+    }
+
+    if (displayValue) {
+      return multiple ? displayValue(value) : displayValue(value);
+    }
+
+    if (isArray(value)) {
+      switch (value.length) {
+        case 0:
+          return "";
+        case 1:
+          return lookupOption(value[0])?.label;
+        default:
+          return `${lookupOption(value[0])?.label} (+${value.length - 1})`;
+      }
+    } else {
+      return lookupOption(value)?.label ?? "";
+    }
+  };
+
+  const renderTags = () => (
+    <div className="flex flex-wrap gap-1.5 mb-1.5">
+      {multiple &&
+        value
+          .map(lookupOption)
+          .filter(isDefined)
+          .map(({ key, label, value }) => (
+            <div
+              key={key}
+              className="flex items-center gap-0.5 bg-primary-500 text-white text-xs font-medium py-0.5 px-1.5 rounded-md"
+            >
+              {label}
+              <IconButton
+                className="cursor-pointer"
+                icon="x"
+                tiny
+                color="white"
+                onClick={() => removeOption(value)}
+              />
+            </div>
+          ))}
+    </div>
+  );
+
   return (
     <div>
-      <Listbox value={value} onChange={onSelect} disabled={disabled}>
+      <Listbox
+        value={value}
+        onChange={onSelect}
+        disabled={disabled}
+        multiple={multiple}
+        as="div"
+      >
         <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
           {label}
         </Listbox.Label>
+        {multiple && isArray(value) && value.length > 0 && renderTags()}
         <div className="relative">
           <Listbox.Button className="focus:outline-none bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[2.125rem]">
             <span className="block truncate text-left ml-3">
-              {value
-                ? displayValue?.(value) ??
-                  options.find((option) => option.value === value)?.label
-                : ""}
+              {value && renderLabel()}
             </span>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon

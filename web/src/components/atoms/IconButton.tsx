@@ -45,6 +45,8 @@ const IconButton: FC<IconButtonProps> = ({
         ? "text-gray-400"
         : color === "danger"
         ? "text-red-500"
+        : color === "white"
+        ? "text-white"
         : "text-primary-500",
     ];
   };
