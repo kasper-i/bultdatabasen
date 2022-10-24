@@ -101,11 +101,11 @@ export function Select<T>({
 
   const removeOption = (valueToRemove: T) => {
     if (multiple) {
-      onSelect(value?.filter((v) => v !== valueToRemove));
+      onSelect(value.filter((v) => v !== valueToRemove));
     }
   };
 
-  const renderLabel = () => {
+  const renderLabel = (): string => {
     if (!value) {
       return "";
     }
@@ -119,12 +119,12 @@ export function Select<T>({
         case 0:
           return "";
         case 1:
-          return lookupOption(value[0])?.label;
+          return `${lookupOption(value[0])?.label}`;
         default:
           return `${lookupOption(value[0])?.label} (+${value.length - 1})`;
       }
     } else {
-      return lookupOption(value)?.label ?? "";
+      return `${lookupOption(value)?.label}`;
     }
   };
 
@@ -164,7 +164,7 @@ export function Select<T>({
         <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
           {label}
         </Listbox.Label>
-        {multiple && isArray(value) && value.length > 0 && renderTags()}
+        {multiple && value.length > 0 && renderTags()}
         <div className="relative">
           <Listbox.Button className="focus:outline-none bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border border-gray-300 rounded-md h-[2.125rem]">
             <span className="block truncate text-left ml-3">
