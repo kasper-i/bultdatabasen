@@ -99,7 +99,7 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 		ResourceBase: ResourceBase{
 			ID: uuid.Must(uuid.NewRandom()).String(),
 		},
-		Timestamp: time.Unix(0, 0),
+		Timestamp: time.Now(),
 		MimeType:  mimeType,
 		Size:      len(imageBytes)}
 
