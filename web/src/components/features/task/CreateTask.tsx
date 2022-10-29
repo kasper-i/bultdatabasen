@@ -53,7 +53,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
       <div className="sm:w-96 flex flex-col gap-4">
         <Input
           label="Beskrivning"
-          placeholder="Ankare i dåligt skick"
+          placeholder="Byt nedsliten firningskarbin"
           onChange={(event) => setDescription(event.target.value)}
           value={description}
         />
