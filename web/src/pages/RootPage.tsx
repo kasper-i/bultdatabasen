@@ -19,6 +19,15 @@ const RootPage = () => {
         <Search />
       </div>
       <ChildrenTable resourceId={rootNodeId} filters={{ types: ["area"] }} />
+      {
+        <button
+          onClick={() => {
+            throw Error("Boom!");
+          }}
+        >
+          Break the world
+        </button>
+      }
     </div>
   );
 };

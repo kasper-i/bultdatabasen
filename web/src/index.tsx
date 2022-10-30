@@ -9,6 +9,14 @@ import { Api } from "./Api";
 import App from "./App";
 import "./index.css";
 import { store } from "./store";
+import * as Sentry from "@sentry/react";
+
+if (!import.meta.env.DEV) {
+  Sentry.init({
+    dsn: "https://5e59e1b81cb3444d92f168fdae96f803@o4504061877157888.ingest.sentry.io/4504061898522624",
+    integrations: [],
+  });
+}
 
 Api.restoreTokens();
 
