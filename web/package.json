@@ -13,7 +13,6 @@
     "@popperjs/core": "^2.11.6",
     "@reduxjs/toolkit": "^1.8.1",
     "@sentry/react": "^7.17.2",
-    "@sentry/tracing": "^7.17.2",
     "@tanstack/react-query": "v4.0.10",
     "@tanstack/react-query-devtools": "^4.0.10",
     "axios": "^0.26.1",
