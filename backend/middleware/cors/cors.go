@@ -7,7 +7,14 @@ import (
 
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		switch r.Header.Get("Origin") {
+		case "http://localhost:3000":
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+			break
+		case "https://bultdatabasen.se":
+			w.Header().Set("Access-Control-Allow-Origin", "https://bultdatabasen.se")
+			break
+		}
 		w.Header().Set("Access-Control-Expose-Headers", "Role")
 
 		if r.Method == "OPTIONS" {
