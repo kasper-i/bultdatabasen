@@ -1,7 +1,6 @@
 import ChildrenTable from "@/components/ChildrenTable";
 import Search from "@/components/Search";
 import { rootNodeId } from "@/constants";
-import React from "react";
 
 const RootPage = () => {
   return (
@@ -19,15 +18,6 @@ const RootPage = () => {
         <Search />
       </div>
       <ChildrenTable resourceId={rootNodeId} filters={{ types: ["area"] }} />
-      {
-        <button
-          onClick={() => {
-            throw Error("Boom!");
-          }}
-        >
-          Break the world
-        </button>
-      }
     </div>
   );
 };
