@@ -17,6 +17,7 @@ import TasksPage from "./pages/TasksPage";
 import { login } from "./slices/authSlice";
 import { useAppDispatch } from "./store";
 import { ShowcasePage } from "./pages/ShowcasePage";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -63,68 +64,70 @@ const App = () => {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Main />}>
-          <Route path="/showcase" element={<ShowcasePage />} />
-          <Route path="/signin" element={<SigninPage />} />
-          <Route path="/signout" element={<SignoutPage />} />
-          <Route
-            path="/"
-            element={
-              <Suspense fallback={<Loader />}>
-                <RootPage />
-              </Suspense>
-            }
-          />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Main />}>
+            <Route path="/showcase" element={<ShowcasePage />} />
+            <Route path="/signin" element={<SigninPage />} />
+            <Route path="/signout" element={<SignoutPage />} />
+            <Route
+              path="/"
+              element={
+                <Suspense fallback={<Loader />}>
+                  <RootPage />
+                </Suspense>
+              }
+            />
 
-          <Route
-            path="area/:resourceId"
-            element={
-              <Suspense fallback={<Loader />}>
-                <Page />
-              </Suspense>
-            }
-          >
-            <Route index element={<AreaPage />} />
-            <Route path="tasks" element={<TasksPage />} />
+            <Route
+              path="area/:resourceId"
+              element={
+                <Suspense fallback={<Loader />}>
+                  <Page />
+                </Suspense>
+              }
+            >
+              <Route index element={<AreaPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+            </Route>
+            <Route
+              path="crag/:resourceId"
+              element={
+                <Suspense fallback={<Loader />}>
+                  <Page />
+                </Suspense>
+              }
+            >
+              <Route index element={<CragPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+            </Route>
+            <Route
+              path="sector/:resourceId"
+              element={
+                <Suspense fallback={<Loader />}>
+                  <Page />
+                </Suspense>
+              }
+            >
+              <Route index element={<SectorPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+            </Route>
+            <Route
+              path="route/:resourceId"
+              element={
+                <Suspense fallback={<Loader />}>
+                  <Page />
+                </Suspense>
+              }
+            >
+              <Route index element={<RoutePage />} />
+              <Route path="tasks" element={<TasksPage />} />
+            </Route>
           </Route>
-          <Route
-            path="crag/:resourceId"
-            element={
-              <Suspense fallback={<Loader />}>
-                <Page />
-              </Suspense>
-            }
-          >
-            <Route index element={<CragPage />} />
-            <Route path="tasks" element={<TasksPage />} />
-          </Route>
-          <Route
-            path="sector/:resourceId"
-            element={
-              <Suspense fallback={<Loader />}>
-                <Page />
-              </Suspense>
-            }
-          >
-            <Route index element={<SectorPage />} />
-            <Route path="tasks" element={<TasksPage />} />
-          </Route>
-          <Route
-            path="route/:resourceId"
-            element={
-              <Suspense fallback={<Loader />}>
-                <Page />
-              </Suspense>
-            }
-          >
-            <Route index element={<RoutePage />} />
-            <Route path="tasks" element={<TasksPage />} />
-          </Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 

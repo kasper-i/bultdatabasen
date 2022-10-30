@@ -15,7 +15,6 @@ func CORSMiddleware(next http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Origin", "https://bultdatabasen.se")
 			break
 		}
-		w.Header().Set("Access-Control-Expose-Headers", "Role")
 
 		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
