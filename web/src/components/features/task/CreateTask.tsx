@@ -79,6 +79,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
           }}
           noOptionsText="Leden saknar bultar"
           disabled={points === undefined}
+          multiple={false}
         />
 
         <RadioCardsGroup<number>

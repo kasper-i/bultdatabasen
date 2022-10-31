@@ -14,11 +14,12 @@ import { Menu } from "@/components/molecules/Menu";
 import Search from "@/components/Search";
 import { useState } from "react";
 
-type Fruit = "banana" | "apple" | "orange";
+type Fruit = "banana" | "apple" | "orange" | "pineapple" | "kiwi" | "pear";
 
 export const ShowcasePage = () => {
   const [date, setDate] = useState(new Date());
   const [fruit, setFruit] = useState<Fruit>("banana");
+  const [ingredients, setIngredients] = useState<Fruit[]>(["banana", "apple"]);
   const [name, setName] = useState("Anonymous");
   const [enabled, setEnabled] = useState(false);
   const [page, setPage] = useState(5);
@@ -46,6 +47,28 @@ export const ShowcasePage = () => {
     },
   ];
 
+  const extendedOptions: Option<Fruit>[] = [
+    ...fruitOptions,
+    {
+      key: 4,
+      label: "Pineapple",
+      value: "pineapple",
+      sublabel: "🍍",
+    },
+    {
+      key: 5,
+      label: "Kiwi",
+      value: "kiwi",
+      sublabel: "🥝",
+    },
+    {
+      key: 6,
+      label: "Pear",
+      value: "pear",
+      sublabel: "🍐",
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-5 max-w-xs">
       <div className="flex flex-wrap gap-2">
@@ -64,22 +87,36 @@ export const ShowcasePage = () => {
       <div>
         <Search />
       </div>
+      {
+        <div>
+          <Select<Fruit>
+            label="Fruit"
+            options={fruitOptions}
+            onSelect={setFruit}
+            value={fruit}
+            multiple={false}
+          />
+        </div>
+      }
       <div>
         <Select<Fruit>
-          label="Fruits"
-          options={fruitOptions}
-          onSelect={setFruit}
-          value={fruit}
+          label="Fruit sallad"
+          options={extendedOptions}
+          onSelect={setIngredients}
+          value={ingredients}
+          multiple
         />
       </div>
-      <div>
-        <Combobox<Fruit>
-          label="Fruits"
-          options={fruitOptions}
-          onSelect={setFruit}
-          value={fruit}
-        />
-      </div>
+      {
+        <div>
+          <Combobox<Fruit>
+            label="Fruit"
+            options={fruitOptions}
+            onSelect={setFruit}
+            value={fruit}
+          />
+        </div>
+      }
       <div>
         <Datepicker label="Date" value={date} onChange={setDate} />
       </div>

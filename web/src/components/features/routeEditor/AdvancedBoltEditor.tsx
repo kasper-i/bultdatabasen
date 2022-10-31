@@ -139,6 +139,7 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
         }
         label="Tillverkare"
         noOptionsText="Inga tillverkare hittades"
+        multiple={false}
       />
 
       <ClearButton onClick={() => updateBolt({ manufacturerId: undefined })} />
@@ -155,6 +156,7 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
         }}
         label="Modell"
         noOptionsText="Inga modeller hittades"
+        multiple={false}
       />
 
       <ClearButton onClick={() => updateBolt({ modelId: undefined })} />
@@ -174,6 +176,7 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
         onSelect={(materialId) => updateBolt({ materialId })}
         label="Material"
         noOptionsText="Inga material hittades"
+        multiple={false}
       />
 
       <ClearButton onClick={() => updateBolt({ materialId: undefined })} />
@@ -207,6 +210,7 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
           })
         }
         options={yearOptions}
+        multiple={false}
       />
 
       <ClearButton onClick={() => updateBolt({ installed: undefined })} />
