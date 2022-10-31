@@ -1,20 +1,20 @@
-import axios from "axios";
-import createAuthRefreshInterceptor from "axios-auth-refresh";
-import React from "react";
-import { createRoot } from "react-dom/client";
+import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import axios from "axios";
+import createAuthRefreshInterceptor from "axios-auth-refresh";
+import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { Api } from "./Api";
 import App from "./App";
 import "./index.css";
 import { store } from "./store";
-import * as Sentry from "@sentry/react";
 
 if (!import.meta.env.DEV) {
   Sentry.init({
     dsn: "https://5e59e1b81cb3444d92f168fdae96f803@o4504061877157888.ingest.sentry.io/4504061898522624",
     integrations: [],
+    release: "bultdatabasen@" + __APP_VERSION__,
   });
 }
 

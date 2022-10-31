@@ -1,6 +1,6 @@
 {
-  "name": "web",
-  "version": "0.1.0",
+  "name": "bultdatabasen",
+  "version": "0.0.0",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
