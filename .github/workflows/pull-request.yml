@@ -17,11 +17,14 @@ jobs:
           npm run lint
         working-directory: web
       - name: Build app
-        env:
-          SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
         run: |
           sed -i -E "s/(\"version\": )\".+\"/\1\"${GITHUB_RUN_ID}\"/" package.json
           npm run build
+        working-directory: web
+      - name: Upload sourcemap
+        env:
+          SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
+        run: |
           npm install @sentry/cli --save-dev
           ./node_modules/.bin/sentry-cli login --auth-token "${SENTRY_TOKEN}"
           ./node_modules/.bin/sentry-cli releases new "bultdatabasen@${GITHUB_RUN_ID}" --org bultdatabasen --project javascript-react
