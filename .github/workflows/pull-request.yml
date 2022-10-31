@@ -18,7 +18,6 @@ jobs:
         working-directory: web
       - name: Build app
         run: |
-          sed -i -E "s/(\"version\": )\".+\"/\1\"${GITHUB_RUN_ID}\"/" package.json
           npm run build
         working-directory: web
 
