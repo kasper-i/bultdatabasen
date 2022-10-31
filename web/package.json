@@ -1,10 +1,10 @@
 {
-  "name": "web",
-  "version": "0.1.0",
+  "name": "bultdatabasen",
+  "version": "0.0.0",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
-    "serve": "vite preview",
+    "serve": "vite preview --port 3000",
     "lint": "eslint --ext .ts,.tsx ."
   },
   "dependencies": {
@@ -12,6 +12,7 @@
     "@heroicons/react": "^v2.0.0",
     "@popperjs/core": "^2.11.6",
     "@reduxjs/toolkit": "^1.8.1",
+    "@sentry/react": "^7.17.2",
     "@tanstack/react-query": "v4.0.10",
     "@tanstack/react-query-devtools": "^4.0.10",
     "axios": "^0.26.1",

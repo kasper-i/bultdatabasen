@@ -1,7 +1,6 @@
 import ChildrenTable from "@/components/ChildrenTable";
 import Search from "@/components/Search";
 import { rootNodeId } from "@/constants";
-import React from "react";
 
 const RootPage = () => {
   return (
