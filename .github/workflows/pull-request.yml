@@ -17,6 +17,8 @@ jobs:
           npm run lint
         working-directory: web
       - name: Build app
+        env:
+          SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
         run: |
           sed -i -E "s/(\"version\": )\".+\"/\1\"${GITHUB_RUN_ID}\"/" package.json
           npm run build
