@@ -14,6 +14,7 @@ jobs:
           check-latest: true
       - name: Build app
         run: |
+          sed -i -E "s/(\"version\": )\".+\"/\1\"${GITHUB_RUN_ID}\"/" package.json
           npm install
           npm run build
         working-directory: web
@@ -21,7 +22,6 @@ jobs:
         env:
           SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
         run: |
-          sed -i -E "s/(\"version\": )\".+\"/\1\"${GITHUB_RUN_ID}\"/" package.json
           npm install @sentry/cli --save-dev
           ./node_modules/.bin/sentry-cli login --auth-token "${SENTRY_TOKEN}"
           ./node_modules/.bin/sentry-cli releases new "bultdatabasen@${GITHUB_RUN_ID}" --org bultdatabasen --project bultdatabasen
