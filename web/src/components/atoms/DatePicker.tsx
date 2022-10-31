@@ -1,6 +1,5 @@
 import {
   CalendarDaysIcon,
-  CalendarIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   ChevronLeftIcon,
