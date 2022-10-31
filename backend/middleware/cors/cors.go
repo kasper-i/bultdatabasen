@@ -18,7 +18,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 
 		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
-			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Length, Accept-Encoding, Authorization")
 			utils.WriteResponse(w, http.StatusNoContent, nil)
 		} else {
 			next.ServeHTTP(w, r)
