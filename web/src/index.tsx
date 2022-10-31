@@ -12,7 +12,7 @@ import { store } from "./store";
 
 if (!import.meta.env.DEV) {
   Sentry.init({
-    dsn: "https://5e59e1b81cb3444d92f168fdae96f803@o4504061877157888.ingest.sentry.io/4504061898522624",
+    dsn: "https://04d52d3586ee4b5d97e09ceb7a0b906e@o4504061877157888.ingest.sentry.io/4504079496708096",
     integrations: [],
     release: "bultdatabasen@" + __APP_VERSION__,
   });
