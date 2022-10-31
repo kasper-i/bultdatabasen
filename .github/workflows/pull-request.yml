@@ -27,8 +27,8 @@ jobs:
         run: |
           npm install @sentry/cli --save-dev
           ./node_modules/.bin/sentry-cli login --auth-token "${SENTRY_TOKEN}"
-          ./node_modules/.bin/sentry-cli releases new "bultdatabasen@${GITHUB_RUN_ID}" --org bultdatabasen --project javascript-react
-          ./node_modules/.bin/sentry-cli releases files "bultdatabasen@${GITHUB_RUN_ID}" upload-sourcemaps --ext map dist/assets --org bultdatabasen --project javascript-react
+          ./node_modules/.bin/sentry-cli releases new "bultdatabasen@${GITHUB_RUN_ID}" --org bultdatabasen --project bultdatabasen
+          ./node_modules/.bin/sentry-cli releases files "bultdatabasen@${GITHUB_RUN_ID}" upload-sourcemaps --ext map dist/assets --org bultdatabasen --project bultdatabasen
         working-directory: web
 
   backend:
