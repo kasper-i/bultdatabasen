@@ -191,7 +191,7 @@ const PointEditor = ({
                   >
                     {name}
                     <span className="font-medium text-primary-600 ml-1">
-                      №{no}
+                      {no}
                     </span>
                   </p>
                 </div>
