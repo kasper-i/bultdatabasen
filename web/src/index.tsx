@@ -17,7 +17,7 @@ if (!import.meta.env.DEV) {
     release: "bultdatabasen@" + __APP_VERSION__,
     beforeBreadcrumb(breadcrumb, hint) {
       if (hint && breadcrumb.category === "ui.click") {
-        const { target } = hint.event.target;
+        const { target } = hint.event;
         if (target.ariaLabel) {
           breadcrumb.message = target.ariaLabel;
         }
