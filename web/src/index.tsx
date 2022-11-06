@@ -15,6 +15,15 @@ if (!import.meta.env.DEV) {
     dsn: "https://04d52d3586ee4b5d97e09ceb7a0b906e@o4504061877157888.ingest.sentry.io/4504079496708096",
     integrations: [],
     release: "bultdatabasen@" + __APP_VERSION__,
+    beforeBreadcrumb(breadcrumb, hint) {
+      if (hint && breadcrumb.category === "ui.click") {
+        const { target } = hint.event.target;
+        if (target.ariaLabel) {
+          breadcrumb.message = target.ariaLabel;
+        }
+      }
+      return breadcrumb;
+    },
   });
 }
 
