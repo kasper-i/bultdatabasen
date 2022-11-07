@@ -196,7 +196,7 @@ const PointEditor = ({
                       {no}
                     </span>
                   </span>
-                  <ChevronRightIcon className="inline h-4 text-primary-500 mr-1" />
+                  <ChevronRightIcon className="h-4 text-primary-500" />
                 </div>
               )}
             </Card>
