@@ -14,6 +14,7 @@ import { Point } from "@/models/point";
 import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { compareDesc } from "date-fns";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -62,9 +63,9 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
       <div className="flex justify-between">
         <div>
           <div className="h-6">
-            <p className="cursor-pointer" onClick={onClose}>
+            <p className="cursor-pointer flex items-center" onClick={onClose}>
               {label.name}
-              <span className="font-medium text-primary-600 ml-1">
+              <span className="font-medium text-primary-500 ml-1">
                 {label.no}
               </span>
             </p>

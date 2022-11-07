@@ -5,6 +5,7 @@ import Restricted from "@/components/Restricted";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { useRole } from "@/queries/roleQueries";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import React, { FC, ReactElement, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -182,18 +183,20 @@ const PointEditor = ({
                   />
                 </Suspense>
               ) : (
-                <div className="h-6">
-                  <p
-                    className={clsx(navigable && "cursor-pointer")}
-                    onClick={
-                      navigable ? () => changePoint(point.id) : undefined
-                    }
-                  >
+                <div
+                  className={clsx(
+                    "h-6 w-full cursor-pointer flex items-center justify-between",
+                    navigable && "cursor-pointer"
+                  )}
+                  onClick={navigable ? () => changePoint(point.id) : undefined}
+                >
+                  <span>
                     {name}
-                    <span className="font-medium text-primary-600 ml-1">
+                    <span className="font-medium text-primary-500 ml-1">
                       {no}
                     </span>
-                  </p>
+                  </span>
+                  <ChevronRightIcon className="inline h-4 text-primary-500 mr-1" />
                 </div>
               )}
             </Card>
