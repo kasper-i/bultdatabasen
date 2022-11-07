@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 export type PointLabel = { name: string; no?: string };
 
-export const usePointLabeler = (points: Point[]) => {
+export const usePointLabeler = (points: readonly Point[]) => {
   return useMemo(() => {
     const labels: Map<string, PointLabel> = new Map();
 
