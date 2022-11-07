@@ -20,7 +20,7 @@ export const usePointLabeler = (points: Point[]) => {
 
       labels.set(point.id, {
         name: point.anchor ? "Ankare" : "Punkt",
-        no: no ? `№${no}` : undefined,
+        no: no ? `#${no}` : undefined,
       });
     }
 

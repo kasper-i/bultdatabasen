@@ -56,7 +56,7 @@ const RoutePage = (): ReactElement => {
               är <Underlined>{length}m</Underlined> lång och{" "}
             </>
           )}
-          består av <Underlined>{numInstalledBolts}</Underlined> bult
+          har <Underlined>{numInstalledBolts}</Underlined> dokumenterade bult
           {numInstalledBolts !== 1 && "ar"}.
         </p>
       </div>

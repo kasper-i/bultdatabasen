@@ -77,7 +77,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
             const { name, no } = pointLabeler(point.id);
             return `${name} ${no}`;
           }}
-          noOptionsText="Leden saknar bultar"
+          noOptionsText="Leden saknar dokumenterade bultar."
           disabled={points === undefined}
           multiple={false}
         />
