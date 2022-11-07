@@ -61,10 +61,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
     <div>
       <div className="flex justify-between">
         <div>
-          <div
-            className="h-6 cursor-pointer flex items-center"
-            onClick={onClose}
-          >
+          <div className="h-6 cursor-pointer" onClick={onClose}>
             {label.name}
             <span className="font-medium text-primary-500 ml-1">
               {label.no}
