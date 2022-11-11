@@ -219,7 +219,7 @@ const TaskView: FC<{
                         : "text-red-500"
                     )}
                   >
-                    <span className="ml-1 font-bold">
+                    <span className="text-sm ml-1 font-semibold">
                       {task.status === "closed" ? "Åtgärdat" : "Stängd"}
                     </span>{" "}
                     {task.closedAt && <Time time={task.closedAt} />}
