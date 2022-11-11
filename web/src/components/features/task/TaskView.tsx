@@ -1,3 +1,4 @@
+import { Api } from "@/Api";
 import Button from "@/components/atoms/Button";
 import { Datepicker } from "@/components/atoms/DatePicker";
 import Icon from "@/components/atoms/Icon";
@@ -6,15 +7,19 @@ import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Menu } from "@/components/molecules/Menu";
 import UserName from "@/components/UserName";
+import { Point } from "@/models/point";
 import { Task, TaskStatus } from "@/models/task";
 import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
+import { emptyArray } from "@/utils/constants";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import { translatePriority } from "@/utils/taskUtils";
+import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { isEmpty } from "lodash";
 import { FC, ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 import Restricted from "../../Restricted";
+import { usePointLabeler } from "../routeEditor/hooks";
 import TaskEdit from "./TaskEdit";
 
 const finalStatuses: TaskStatus[] = ["closed", "rejected"];
@@ -85,6 +90,20 @@ const TaskView: FC<{
     ["area", "crag", "sector", "route"].includes(ancestor.type)
   )?.[0];
 
+  const routeId = ancestors?.find(
+    ({ id, type }) => id === task?.parentId && type === "point"
+  )?.parentId;
+
+  const { data: points } = useQuery<Point[]>(
+    ["points", { resourceId: routeId }],
+    () => Api.getPoints(routeId ?? ""),
+    {
+      enabled: !!routeId,
+    }
+  );
+
+  const pointLabeler = usePointLabeler(points ?? emptyArray);
+
   if (!task || !parent) {
     return <></>;
   }
@@ -104,63 +123,73 @@ const TaskView: FC<{
 
   const isComplete = finalStatuses.includes(task.status);
 
+  const { name: pointName, no: pointNo } = pointLabeler(task.parentId);
+
   return (
     <div className="w-full sm:w-96 flex flex-col space-y-2.5 bg-white shadow-sm p-5 rounded border border-gray-300">
-      <div className="relative flex justify-between items-center">
+      <div className="relative flex justify-between items-start">
         <Link
-          to={getResourceRoute(parent.type, parent.id)}
+          to={`${getResourceRoute(parent.type, parent.id)}${
+            points ? `?p=${task.parentId}` : ""
+          }`}
           className="w-full pr-5"
         >
-          <div className="text-sm text-gray-500 truncate">{parent?.name}</div>
+          <div className="text-sm">
+            <span className="inline-flex items-center gap-1">
+              {translatePriority(task.priority) && (
+                <span
+                  className={clsx(
+                    "text-xs font-medium text-white rounded-md py-0.5 px-1.5",
+                    task.priority === 1
+                      ? "bg-red-500"
+                      : task.priority === 3
+                      ? "bg-gray-500"
+                      : undefined
+                  )}
+                >
+                  {translatePriority(task.priority)}
+                </span>
+              )}
+              {parent?.name}
+            </span>
+            {pointNo && (
+              <span className="ml-1 text-gray-500 text-xs">
+                {pointName} {pointNo}
+              </span>
+            )}
+          </div>
+          <div className="text-xs mt-0.5">
+            Rapporterat{" "}
+            <span className="font-medium">
+              <Time time={task.createdAt} />
+            </span>{" "}
+            av <UserName userId={task.userId} />
+          </div>
         </Link>
         <Restricted>
-          <div className="absolute inset-y-0 right-0 flex items-center">
-            <Menu
-              items={[
-                {
-                  label: "Redigera",
-                  icon: "edit",
-                  disabled: isComplete,
-                  onClick: () => setAction("edit"),
-                },
-                {
-                  label: "Återöppna",
-                  icon: "refresh",
-                  disabled: !isComplete,
-                  onClick: () => changeStatus("open"),
-                },
-                {
-                  label: "Radera",
-                  icon: "trash",
-                  className: "text-red-500",
-                  onClick: () => setAction("delete"),
-                },
-              ]}
-            />
-          </div>
+          <Menu
+            items={[
+              {
+                label: "Redigera",
+                icon: "edit",
+                disabled: isComplete,
+                onClick: () => setAction("edit"),
+              },
+              {
+                label: "Återöppna",
+                icon: "refresh",
+                disabled: !isComplete,
+                onClick: () => changeStatus("open"),
+              },
+              {
+                label: "Radera",
+                icon: "trash",
+                className: "text-red-500",
+                onClick: () => setAction("delete"),
+              },
+            ]}
+          />
         </Restricted>
-      </div>
-
-      <div className="text-xs">
-        {translatePriority(task.priority) && (
-          <span
-            className={clsx(
-              "text-white font-medium rounded-md py-0.5 px-1.5 mr-2",
-              task.priority === 1
-                ? "bg-red-500"
-                : task.priority === 3
-                ? "bg-gray-500"
-                : undefined
-            )}
-          >
-            {translatePriority(task.priority)}
-          </span>
-        )}
-        Rapporterat{" "}
-        <span className="font-medium">
-          <Time time={task.createdAt} />
-        </span>{" "}
-        av <UserName userId={task.userId} />
       </div>
 
       {action === "edit" ? (
@@ -190,7 +219,7 @@ const TaskView: FC<{
                         : "text-red-500"
                     )}
                   >
-                    <span className="ml-1 font-bold">
+                    <span className="text-sm ml-1 font-semibold">
                       {task.status === "closed" ? "Åtgärdat" : "Stängd"}
                     </span>{" "}
                     {task.closedAt && <Time time={task.closedAt} />}
