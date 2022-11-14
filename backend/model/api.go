@@ -12,7 +12,7 @@ type Pagination struct {
 }
 
 type Meta struct {
-	TotalItems int `gorm:"column:totalItems" json:"totalItems"`
+	TotalItems int64 `gorm:"column:total_items" json:"totalItems"`
 }
 
 func (pagination *Pagination) ParseQuery(query url.Values) error {

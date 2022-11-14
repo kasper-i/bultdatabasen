@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"gopkg.in/ini.v1"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -23,20 +23,24 @@ func init() {
 	}
 
 	var database string
+	var schema string
 	var host string
 	var port string
 	var username string
 	var password string
 
 	database = cfg.Section("database").Key("database").String()
+	schema = cfg.Section("database").Key("schema").String()
 	host = cfg.Section("database").Key("host").String()
 	port = cfg.Section("database").Key("port").String()
 	username = cfg.Section("database").Key("username").String()
 	password = cfg.Section("database").Key("password").String()
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, password, host, port, database)
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable search_path=%s TimeZone=Europe/Stockholm",
+		host, username, password, database, port, schema)
 
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Warn),
 	})
 	if err != nil {

@@ -30,22 +30,27 @@ func buildDescendantsCTE(depth Depth) string {
 		FROM resource
 		WHERE id = ?
 	UNION
-		SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
-		FROM resource child
-		INNER JOIN cte ON child.parent_id = cte.id
-		WHERE depth <= %d
-	UNION
-		SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
-		FROM foster_care f
-		INNER JOIN cte ON f.foster_parent_id = cte.id
-		INNER JOIN resource child ON child.id = f.id
-		WHERE cte.type = "route"
+		SELECT * FROM (
+			WITH cte_inner AS (
+				SELECT * FROM cte
+			)
+			SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
+				FROM resource child
+				INNER JOIN cte_inner ON child.parent_id = cte_inner.id
+				WHERE depth <= %d
+			UNION
+				SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
+				FROM foster_care f
+				INNER JOIN cte_inner ON f.foster_parent_id = cte_inner.id
+				INNER JOIN resource child ON child.id = f.id
+				WHERE cte_inner.type = 'route'
+		) r 
 	)`, depth)
 }
 
 func buildDescendantsCountQuery(resourceType string) string {
 	return fmt.Sprintf(`%s
-	SELECT COUNT(*) AS totalItems FROM cte
+	SELECT COUNT(*) AS total_items FROM cte
 	INNER JOIN %s ON cte.id = %s.id
 	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType)
 }

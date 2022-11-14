@@ -4,7 +4,6 @@ import (
 	"bultdatabasen/utils"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -196,15 +195,20 @@ func (sess Session) GetAncestorsIncludingFosterParents(resourceID string) ([]Res
 		SELECT id, name, type, parent_id
 		FROM resource
 		WHERE id = ?
-	UNION DISTINCT
-		SELECT parent.id, parent.name, parent.type, parent.parent_id
-		FROM resource parent
-		INNER JOIN cte ON parent.id=cte.parent_id
-	UNION DISTINCT
-		SELECT foster_parent.id, foster_parent.name, foster_parent.type, foster_parent.parent_id
-		FROM foster_care fc
-		INNER JOIN cte ON fc.id=cte.id
-		INNER JOIN resource foster_parent ON fc.foster_parent_id=foster_parent.id
+	UNION
+		SELECT * FROM (
+			WITH cte_inner AS (
+				SELECT * FROM cte
+			)
+			SELECT parent.id, parent.name, parent.type, parent.parent_id
+				FROM resource parent
+				INNER JOIN cte_inner ON parent.id=cte_inner.parent_id
+			UNION DISTINCT
+				SELECT foster_parent.id, foster_parent.name, foster_parent.type, foster_parent.parent_id
+				FROM foster_care fc
+				INNER JOIN cte_inner ON fc.id=cte_inner.id
+				INNER JOIN resource foster_parent ON fc.foster_parent_id=foster_parent.id
+		) r
 	)
 	SELECT * FROM cte
 	WHERE id != ?`, resourceID, resourceID).Scan(&ancestors).Error
@@ -314,13 +318,13 @@ func (sess Session) updateCountersForResource(resourceID string, delta Counters)
 		return nil
 	}
 
-	var params []string = make([]string, 0)
+	var param string = "counters"
 
 	for counterType, count := range difference {
-		params = append(params, fmt.Sprintf("'$.%s', (COALESCE(JSON_EXTRACT(counters, '$.%s'), 0) + %d) DIV 1", counterType, counterType, count))
+		param = fmt.Sprintf("jsonb_set(%s::jsonb, '{%s}', DIV((COALESCE((counters->>'%s')::int, 0) + %d), 1)::text::jsonb, true)", param, counterType, counterType, count)
 	}
 
-	query := fmt.Sprintf("UPDATE resource SET counters = JSON_SET(counters, %s) WHERE id = ? AND parent_id IS NOT NULL", strings.Join(params, ", "))
+	query := fmt.Sprintf("UPDATE resource SET counters = %s WHERE id = ? AND parent_id IS NOT NULL", param)
 
 	return sess.DB.Exec(query, resourceID).Error
 }
