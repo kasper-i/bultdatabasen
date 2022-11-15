@@ -15,7 +15,7 @@ CREATE INDEX path_idx ON tree USING BTREE (path);
 CREATE OR REPLACE FUNCTION
   populate_path(RESOURCE_ID varchar)
 RETURNS
-  ltree
+  void
 AS $$
 DECLARE
     f RECORD;
@@ -45,11 +45,11 @@ BEGIN
             UNION ALL SELECT REPLACE(f.parent_id, '-', '_')
             UNION ALL SELECT REPLACE(f.id, '-', '_')
         ) o;
+        
+        INSERT INTO tree values(f.id, path::ltree);
     END LOOP;
-
-    RETURN path::ltree;
 END $$ LANGUAGE plpgsql;
 
-INSERT INTO tree SELECT id, populate_path(id) AS path FROM resource WHERE type <> 'root' AND depth < 600 AND parent_id IS NOT NULL;
+SELECT populate_path(id) FROM resource WHERE type <> 'root' AND depth < 600 AND parent_id IS NOT NULL;
 
 
