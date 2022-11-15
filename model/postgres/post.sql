@@ -52,4 +52,19 @@ END $$ LANGUAGE plpgsql;
 
 SELECT populate_path(id) FROM resource WHERE type <> 'root' AND depth < 600 AND parent_id IS NOT NULL;
 
+DROP TABLE resource_type;
 
+CREATE TYPE bultdatabasen.resource_type AS ENUM (
+    'area',
+    'bolt',
+    'comment',
+    'crag',
+    'image',
+    'point',
+    'root',
+    'route',
+    'sector',
+    'task'
+);
+
+ALTER TABLE resource ALTER COLUMN type TYPE resource_type USING type::resource_type;
