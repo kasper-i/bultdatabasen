@@ -70,7 +70,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID := vars["resourceID"]
 
-	err := r.ParseMultipartForm(10 << 20)
+	err := r.ParseMultipartForm(32 << 20)
 	if err != nil {
 		utils.WriteError(w, err)
 		return
