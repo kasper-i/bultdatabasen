@@ -24,7 +24,7 @@ server {
 	ssl_certificate /etc/letsencrypt/live/bultdatabasen.se/fullchain.pem;
 	ssl_certificate_key /etc/letsencrypt/live/bultdatabasen.se/privkey.pem;
 
-	add_header Content-Security-Policy "default-src 'none'; script-src-elem 'self'; style-src-elem 'self'; font-src 'self'; connect-src api.bultdatabasen.se *.sentry.io *.amazoncognito.com; img-src 'self' api.bultdatabasen.se bultdatabasen.ams3.digitaloceanspaces.com; object-src 'none'; frame-ancestors 'none'; form-action 'none'; base-uri 'none'";
+	add_header Content-Security-Policy "default-src 'self'; script-src-elem 'self'; style-src-elem 'self'; font-src 'self'; connect-src api.bultdatabasen.se *.sentry.io *.amazoncognito.com; img-src 'self' api.bultdatabasen.se bultdatabasen.ams3.digitaloceanspaces.com; object-src 'none'; frame-ancestors 'none'; form-action 'none'; base-uri 'none'";
 	add_header X-Frame-Options "DENY";
 	add_header X-Content-Type-Options "nosniff";
 	add_header Referrer-Policy "same-origin";
