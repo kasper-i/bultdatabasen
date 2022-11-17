@@ -39,7 +39,7 @@ jobs:
           args: --issues-exit-code=0
       - name: Build backend
         run: |
-          go build
+          go build -ldflags="-X 'main.Version=${GITHUB_RUN_ID}'"
         working-directory: backend
 
 on: pull_request
