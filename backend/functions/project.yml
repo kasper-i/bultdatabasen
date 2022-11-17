@@ -17,5 +17,5 @@ packages:
         environment: {}
         annotations: {}
         limits:
-          timeout: 3000
-          memory: 512
+          timeout: 10000
+          memory: 1024
