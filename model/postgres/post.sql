@@ -9,6 +9,8 @@ CREATE TABLE bultdatabasen.tree (
     path ltree NOT NULL
 );
 
+GRANT ALL PRIVILEGES ON TABLE tree TO bultdatabasen;
+
 CREATE INDEX path_gist_idx ON tree USING GIST (path);
 CREATE INDEX path_idx ON tree USING BTREE (path);
 
@@ -42,7 +44,6 @@ BEGIN
             	SELECT REPLACE(id, '-', '_') AS id FROM cte
                 ORDER BY c DESC
             ) i
-            UNION ALL SELECT REPLACE(f.parent_id, '-', '_')
             UNION ALL SELECT REPLACE(f.id, '-', '_')
         ) o;
         
@@ -52,6 +53,7 @@ END $$ LANGUAGE plpgsql;
 
 SELECT populate_path(id) FROM resource WHERE type <> 'root' AND depth < 600 AND parent_id IS NOT NULL;
 
+ALTER TABLE resource DROP CONSTRAINT fk_resource_2;
 DROP TABLE resource_type;
 
 CREATE TYPE bultdatabasen.resource_type AS ENUM (
@@ -68,3 +70,5 @@ CREATE TYPE bultdatabasen.resource_type AS ENUM (
 );
 
 ALTER TABLE resource ALTER COLUMN type TYPE resource_type USING type::resource_type;
+ALTER TABLE resource DROP COLUMN depth;
+UPDATE resource SET parent_id = NULL WHERE type IN ('area', 'crag', 'point', 'root', 'route', 'sector');
