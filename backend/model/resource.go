@@ -253,8 +253,8 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 		r3.id as r3_id, r3.name as r3_name, r3.type as r3_type
 	FROM resource r1
 	INNER JOIN tree on r1.id = tree.resource_id
-	LEFT JOIN resource r2 ON nlevel(tree.path) >= 3 AND REPLACE(subpath(tree.path, -2, 1)::text, '_', '-') = r2.id
-	LEFT JOIN resource r3 ON nlevel(tree.path) >= 4 AND REPLACE(subpath(tree.path, -3, 1)::text, '_', '-') = r3.id
+	LEFT JOIN resource r2 ON nlevel(tree.path) >= 3 AND REPLACE(subpath(tree.path, -2, 1)::text, '_', '-')::uuid = r2.id
+	LEFT JOIN resource r3 ON nlevel(tree.path) >= 4 AND REPLACE(subpath(tree.path, -3, 1)::text, '_', '-')::uuid = r3.id
 	WHERE r1.type IN ('area', 'crag', 'sector', 'route') AND r1.name ILIKE ? AND subpath(tree.path, 0, 1) = ?
 	LIMIT 20`,
 		fmt.Sprintf("%%%s%%", name),
