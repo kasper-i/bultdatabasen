@@ -194,3 +194,38 @@ ALTER TABLE bolt ADD CONSTRAINT "fk_bolt_2" FOREIGN KEY (model_id, manufacturer_
 -- unused columns
 
 ALTER TABLE route DROP COLUMN external_link;
+
+-- create enum for route type
+
+ALTER TABLE route DROP CONSTRAINT fk_route_2;
+DROP INDEX "idx_22487_fk_route_2_idx";
+
+DROP TABLE route_type;
+
+CREATE TYPE bultdatabasen.route_type AS ENUM (
+    'aid',
+    'dws',
+    'partially_bolted',
+    'sport',
+    'top_rope',
+    'traditional'
+);
+
+ALTER TABLE route ALTER COLUMN route_type TYPE route_type USING route_type::route_type;
+
+-- create enum for role
+
+ALTER TABLE user_role DROP CONSTRAINT fk_user_role_3;
+DROP INDEX "idx_22523_fk_user_role_3_idx";
+
+ALTER TABLE team_role DROP CONSTRAINT fk_team_role_3;
+DROP INDEX "idx_22510_fk_team_role_3_idx";
+
+DROP TABLE role;
+
+CREATE TYPE bultdatabasen.role AS ENUM (
+    'owner'
+);
+
+ALTER TABLE user_role ALTER COLUMN role TYPE role USING role::role;
+ALTER TABLE team_role ALTER COLUMN role TYPE role USING role::role;
