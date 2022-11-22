@@ -170,17 +170,13 @@ func (sess Session) getResourceWithLock(resourceID string) (*Resource, error) {
 func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	var ancestors []Resource
 
-	err := sess.DB.Raw(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
-		SELECT id, name, type, parent_id
-		FROM resource
+	err := sess.DB.Raw(`SELECT DISTINCT ON (resource.id) resource.id, resource.name, resource.type, resource.parent_id FROM (
+		SELECT unnest(string_to_array(CASE WHEN nlevel(t1.path) > nlevel(t2.path) THEN t1.path::text ELSE t2.path::text END, '.')) AS id FROM resource
+		LEFT JOIN tree t1 ON resource.id = t1.resource_id
+		LEFT JOIN tree t2 ON resource.parent_id = t2.resource_id
 		WHERE id = ?
-	UNION DISTINCT
-		SELECT parent.id, parent.name, parent.type, parent.parent_id
-		FROM resource parent
-		INNER JOIN cte ON parent.id=cte.parent_id
-	)
-	SELECT * FROM cte
-	WHERE id != ?`, resourceID, resourceID).Scan(&ancestors).Error
+	) ancestor
+	INNER JOIN resource ON resource.id = REPLACE(ancestor.id, '_', '-')::uuid`, resourceID).Scan(&ancestors).Error
 
 	if err != nil {
 		return nil, err
@@ -192,27 +188,13 @@ func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 func (sess Session) GetAncestorsIncludingFosterParents(resourceID string) ([]Resource, error) {
 	var ancestors []Resource
 
-	err := sess.DB.Raw(`WITH RECURSIVE cte (id, name, type, parent_id) AS (
-		SELECT id, name, type, parent_id
-		FROM resource
+	err := sess.DB.Raw(`SELECT DISTINCT ON (resource.id) resource.id, resource.name, resource.type, resource.parent_id FROM (
+		SELECT unnest(string_to_array(CASE WHEN nlevel(t1.path) > nlevel(t2.path) THEN t1.path::text ELSE t2.path::text END, '.')) AS id FROM resource
+		LEFT JOIN tree t1 ON resource.id = t1.resource_id
+		LEFT JOIN tree t2 ON resource.parent_id = t2.resource_id
 		WHERE id = ?
-	UNION
-		SELECT * FROM (
-			WITH cte_inner AS (
-				SELECT * FROM cte
-			)
-			SELECT parent.id, parent.name, parent.type, parent.parent_id
-				FROM resource parent
-				INNER JOIN cte_inner ON parent.id=cte_inner.parent_id
-			UNION DISTINCT
-				SELECT foster_parent.id, foster_parent.name, foster_parent.type, foster_parent.parent_id
-				FROM foster_care fc
-				INNER JOIN cte_inner ON fc.id=cte_inner.id
-				INNER JOIN resource foster_parent ON fc.foster_parent_id=foster_parent.id
-		) r
-	)
-	SELECT * FROM cte
-	WHERE id != ?`, resourceID, resourceID).Scan(&ancestors).Error
+	) ancestor
+	INNER JOIN resource ON resource.id = REPLACE(ancestor.id, '_', '-')::uuid`, resourceID).Scan(&ancestors).Error
 
 	if err != nil {
 		return nil, err
