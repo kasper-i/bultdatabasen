@@ -40,23 +40,20 @@ func (bolt *Bolt) UpdateCounters() {
 func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
 	var bolts []Bolt = make([]Bolt, 0)
 
-	resourceType := "bolt"
-
-	query := fmt.Sprintf(`%s
-	SELECT
-		%s.*,
+	query := fmt.Sprintf(`%s SELECT
+		bolt.*,
 		resource.parent_id,
 		resource.counters,
 		mf.name AS manufacturer,
 		mo.name AS model,
 		ma.name AS material
-	FROM cte
-	INNER JOIN %s ON cte.id = %s.id
-	INNER JOIN resource ON bolt.id = resource.id
+	FROM tree
+	INNER JOIN resource ON tree.resource_id = resource.parent_id
+	INNER JOIN bolt ON resource.id = bolt.id
 	LEFT JOIN manufacturer mf ON bolt.manufacturer_id = mf.id
 	LEFT JOIN model mo ON bolt.model_id = mo.id
 	LEFT JOIN material ma ON bolt.material_id = ma.id
-	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType, resourceType)
+	WHERE parent_id = ?`, withTreeQuery(resourceID))
 
 	if err := sess.DB.Raw(query, resourceID).Scan(&bolts).Error; err != nil {
 		return nil, err

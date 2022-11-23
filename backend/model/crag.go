@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -18,7 +20,9 @@ func (Crag) TableName() string {
 func (sess Session) GetCrags(resourceID string) ([]Crag, error) {
 	var crags []Crag = make([]Crag, 0)
 
-	if err := sess.DB.Raw(buildDescendantsQuery("crag"), resourceID).Scan(&crags).Error; err != nil {
+	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
+		INNER JOIN crag ON tree.resource_id = crag.id`,
+		withTreeQuery(resourceID))).Scan(&crags).Error; err != nil {
 		return nil, err
 	}
 

@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -18,7 +20,9 @@ func (Sector) TableName() string {
 func (sess Session) GetSectors(resourceID string) ([]Sector, error) {
 	var sectors []Sector = make([]Sector, 0)
 
-	if err := sess.DB.Raw(buildDescendantsQuery("sector"), resourceID).Scan(&sectors).Error; err != nil {
+	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
+		INNER JOIN sector ON tree.resource_id = sector.id`,
+		withTreeQuery(resourceID))).Scan(&sectors).Error; err != nil {
 		return nil, err
 	}
 

@@ -2,6 +2,7 @@ package model
 
 import (
 	"bultdatabasen/utils"
+	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -60,7 +61,9 @@ func (sess Session) getRouteGraph(routeID string) (map[string]*routeGraphVertex,
 	if len(connections) == 0 {
 		var points []*Point = make([]*Point, 0)
 
-		if err := sess.DB.Raw(buildDescendantsQuery("point"), routeID).Scan(&points).Error; err != nil {
+		if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
+			INNER JOIN point ON tree.resource_id = point.id`,
+			withTreeQuery(routeID))).Scan(&points).Error; err != nil {
 			return nil, err
 		}
 
@@ -171,7 +174,9 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 	var pointsMap map[string]*Point = make(map[string]*Point)
 	var points []*Point = make([]*Point, 0)
 
-	if err := sess.DB.Raw(buildDescendantsQuery("point"), resourceID).Scan(&points).Error; err != nil {
+	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
+		INNER JOIN point ON tree.resource_id = point.id`,
+		withTreeQuery(resourceID))).Scan(&points).Error; err != nil {
 		return nil, err
 	}
 

@@ -16,6 +16,8 @@ GRANT ALL PRIVILEGES ON TABLE tree TO bultdatabasen;
 CREATE INDEX path_gist_idx ON tree USING GIST (path);
 CREATE INDEX path_idx ON tree USING BTREE (path);
 
+INSERT INTO tree VALUES ('7ea1df97-df3a-436b-b1d2-b211f1b9b363', '7ea1df97_df3a_436b_b1d2_b211f1b9b363');
+
 -- migrate old tree structure
 
 CREATE OR REPLACE FUNCTION
@@ -100,7 +102,7 @@ ALTER TABLE connection DROP CONSTRAINT fk_connection_2;
 ALTER TABLE connection DROP CONSTRAINT fk_connection_3;
 
 ALTER TABLE resource ALTER COLUMN id TYPE UUID USING id::uuid;
-ALTER TABLE resource ALTER COLUMN parent_id TYPE UUID USING id::uuid;
+ALTER TABLE resource ALTER COLUMN parent_id TYPE UUID USING parent_id::uuid;
 ALTER TABLE area ALTER COLUMN id TYPE UUID USING id::uuid;
 ALTER TABLE bolt ALTER COLUMN id TYPE UUID USING id::uuid;
 ALTER TABLE crag ALTER COLUMN id TYPE UUID USING id::uuid;

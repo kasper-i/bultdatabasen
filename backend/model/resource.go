@@ -22,7 +22,6 @@ type Resource struct {
 	ResourceBase
 	Name            *string   `json:"name,omitempty"`
 	Type            string    `json:"type"`
-	Depth           Depth     `json:"-"`
 	ParentID        *string   `json:"parentId,omitempty"`
 	BirthTime       time.Time `gorm:"column:btime" json:"-"`
 	ModifiedTime    time.Time `gorm:"column:mtime" json:"-"`
@@ -62,49 +61,10 @@ func (Trash) TableName() string {
 	return "trash"
 }
 
-type Depth int32
-
-const (
-	DepthArea    Depth = 100
-	DepthCrag    Depth = 200
-	DepthSector  Depth = 300
-	DepthRoute   Depth = 400
-	DepthPoint   Depth = 500
-	DepthBolt    Depth = 600
-	DepthImage   Depth = 700
-	DepthComment Depth = 700
-	DepthTask    Depth = 700
-)
-
 func (resource *ResourceBase) WithAncestors(r *http.Request) {
 
 	if value, ok := r.Context().Value("ancestors").([]Resource); ok {
 		resource.Ancestors = &value
-	}
-}
-
-func GetResourceDepth(resourceType string) Depth {
-	switch resourceType {
-	case "area":
-		return DepthArea
-	case "crag":
-		return DepthCrag
-	case "sector":
-		return DepthSector
-	case "route":
-		return DepthRoute
-	case "point":
-		return DepthPoint
-	case "bolt":
-		return DepthBolt
-	case "image":
-		return DepthImage
-	case "comment":
-		return DepthComment
-	case "task":
-		return DepthTask
-	default:
-		panic("illegal resource type")
 	}
 }
 
@@ -170,31 +130,17 @@ func (sess Session) getResourceWithLock(resourceID string) (*Resource, error) {
 func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	var ancestors []Resource
 
-	err := sess.DB.Raw(`SELECT DISTINCT ON (resource.id) resource.id, resource.name, resource.type, resource.parent_id FROM (
-		SELECT unnest(string_to_array(CASE WHEN nlevel(t1.path) > nlevel(t2.path) THEN t1.path::text ELSE t2.path::text END, '.')) AS id FROM resource
+	err := sess.DB.Raw(`WITH ancestor AS (
+		SELECT unnest(string_to_array(CASE WHEN nlevel(COALESCE(t1.path, '')) > nlevel(COALESCE(t2.path, '')) THEN t1.path::text ELSE t2.path::text END, '.')) AS id FROM resource
 		LEFT JOIN tree t1 ON resource.id = t1.resource_id
 		LEFT JOIN tree t2 ON resource.parent_id = t2.resource_id
 		WHERE id = ?
-	) ancestor
-	INNER JOIN resource ON resource.id = REPLACE(ancestor.id, '_', '-')::uuid`, resourceID).Scan(&ancestors).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return ancestors, nil
-}
-
-func (sess Session) GetAncestorsIncludingFosterParents(resourceID string) ([]Resource, error) {
-	var ancestors []Resource
-
-	err := sess.DB.Raw(`SELECT DISTINCT ON (resource.id) resource.id, resource.name, resource.type, resource.parent_id FROM (
-		SELECT unnest(string_to_array(CASE WHEN nlevel(t1.path) > nlevel(t2.path) THEN t1.path::text ELSE t2.path::text END, '.')) AS id FROM resource
-		LEFT JOIN tree t1 ON resource.id = t1.resource_id
-		LEFT JOIN tree t2 ON resource.parent_id = t2.resource_id
-		WHERE id = ?
-	) ancestor
-	INNER JOIN resource ON resource.id = REPLACE(ancestor.id, '_', '-')::uuid`, resourceID).Scan(&ancestors).Error
+	)
+	SELECT DISTINCT ON (resource.id) resource.id, name, type, REPLACE(subpath(path, -2, 1)::text, '_', '-')::uuid AS parent_id 
+	FROM ancestor
+	INNER JOIN resource ON resource.id = REPLACE(ancestor.id, '_', '-')::uuid
+	INNER JOIN tree ON resource.id = tree.resource_id
+	WHERE resource.id <> ?::uuid`, resourceID, resourceID).Scan(&ancestors).Error
 
 	if err != nil {
 		return nil, err
@@ -206,9 +152,11 @@ func (sess Session) GetAncestorsIncludingFosterParents(resourceID string) ([]Res
 func (sess Session) GetChildren(resourceID string) ([]Resource, error) {
 	var children []Resource = make([]Resource, 0)
 
-	err := sess.DB.Raw(`SELECT * FROM resource
-	WHERE parent_id = ?
-	ORDER BY name`, resourceID).Scan(&children).Error
+	err := sess.DB.Raw(`SELECT resource.* 
+	FROM tree
+	INNER JOIN resource ON tree.resource_id = resource.id
+	WHERE path ~ ?
+	ORDER BY name`, fmt.Sprintf("*.%s.*{1}", strings.ReplaceAll(resourceID, "-", "_"))).Scan(&children).Error
 
 	if err != nil {
 		return nil, err
@@ -281,7 +229,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 }
 
 func (sess Session) updateCountersForResourceAndAncestors(resourceID string, delta Counters) error {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
+	ancestors, err := sess.GetAncestors(resourceID)
 	if err != nil {
 		return err
 	}

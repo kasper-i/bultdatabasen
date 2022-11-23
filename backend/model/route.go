@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -27,7 +29,9 @@ func (route *Route) UpdateCounters() {
 func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
 	var routes []Route = make([]Route, 0)
 
-	if err := sess.DB.Raw(buildDescendantsQuery("route"), resourceID).Scan(&routes).Error; err != nil {
+	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
+		INNER JOIN route ON tree.resource_id = route.id`,
+		withTreeQuery(resourceID))).Scan(&routes).Error; err != nil {
 		return nil, err
 	}
 

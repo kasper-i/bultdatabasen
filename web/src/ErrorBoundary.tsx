@@ -35,7 +35,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <div className="flex flex-col gap-2.5 justify-center items-center h-screen w-screen">
           <h1 className="font-bold text-3xl">:(</h1>
           <p className="text-center">
-            <span className="font-medium">Attans, något gick fel.</span>
+            <span className="font-medium">Attans bananer, något gick fel.</span>
             <br />
 
             {this.state.eventId && (

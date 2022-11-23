@@ -22,7 +22,7 @@ const PageHeader = ({
     return <></>;
   }
 
-  const crumbs = ancestors?.slice().reverse();
+  const crumbs = ancestors?.slice();
   const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (

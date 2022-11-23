@@ -3,6 +3,7 @@ package model
 import (
 	"bultdatabasen/utils"
 	"fmt"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -24,47 +25,12 @@ func (sess Session) Transaction(fn func(sess Session) error) error {
 	})
 }
 
-func buildDescendantsCTE(depth Depth) string {
-	return fmt.Sprintf(`WITH RECURSIVE cte (id, name, type, parent_id, btime, mtime, buser_id, muser_id, first) AS (
-		SELECT id, name, type, parent_id, btime, mtime, buser_id, muser_id, TRUE
-		FROM resource
-		WHERE id = ?
-	UNION
-		SELECT * FROM (
-			WITH cte_inner AS (
-				SELECT * FROM cte
-			)
-			SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
-				FROM resource child
-				INNER JOIN cte_inner ON child.parent_id = cte_inner.id
-				WHERE depth <= %d
-			UNION
-				SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
-				FROM foster_care f
-				INNER JOIN cte_inner ON f.foster_parent_id = cte_inner.id
-				INNER JOIN resource child ON child.id = f.id
-				WHERE cte_inner.type = 'route'
-		) r 
-	)`, depth)
-}
-
-func buildDescendantsCountQuery(resourceType string) string {
-	return fmt.Sprintf(`%s
-	SELECT COUNT(*) AS total_items FROM cte
-	INNER JOIN %s ON cte.id = %s.id
-	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType)
-}
-
-func buildDescendantsQuery(resourceType string) string {
-	return fmt.Sprintf(`%s
-	SELECT %s.*, cte.name, cte.parent_id, cte.btime, cte.mtime, cte.buser_id, cte.muser_id FROM cte
-	INNER JOIN %s ON cte.id = %s.id
-	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType, resourceType)
+func withTreeQuery(resourceID string) string {
+	return fmt.Sprintf(`WITH tree AS (
+		SELECT DISTINCT ON (resource_id) * FROM tree WHERE path ~ '*.%s.*')`, strings.ReplaceAll(resourceID, "-", "_"))
 }
 
 func (sess Session) createResource(resource Resource) error {
-	resource.Depth = GetResourceDepth(resource.Type)
-
 	if resource.ParentID == nil {
 		return utils.ErrOrphanedResource
 	}
@@ -100,7 +66,7 @@ func (sess Session) touchResource(resourceID string) error {
 }
 
 func (sess Session) deleteResource(resourceID string) error {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
+	ancestors, err := sess.GetAncestors(resourceID)
 	if err != nil {
 		return err
 	}
