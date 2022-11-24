@@ -72,7 +72,7 @@ func (Image) TableName() string {
 func (sess Session) GetImages(resourceID string) ([]Image, error) {
 	var images []Image = make([]Image, 0)
 
-	if err := sess.DB.Raw(`SELECT * FROM resource INNER JOIN image ON resource.id = image.id WHERE parent_id = ?`, resourceID).Scan(&images).Error; err != nil {
+	if err := sess.DB.Raw(`SELECT * FROM resource INNER JOIN image ON resource.id = image.id WHERE leaf_of = ?`, resourceID).Scan(&images).Error; err != nil {
 		return nil, err
 	}
 

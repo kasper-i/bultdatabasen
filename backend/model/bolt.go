@@ -42,20 +42,19 @@ func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
 
 	query := fmt.Sprintf(`%s SELECT
 		bolt.*,
-		resource.parent_id,
+		resource.leaf_of AS parent_id,
 		resource.counters,
 		mf.name AS manufacturer,
 		mo.name AS model,
 		ma.name AS material
 	FROM tree
-	INNER JOIN resource ON tree.resource_id = resource.parent_id
+	INNER JOIN resource ON tree.resource_id = resource.leaf_of
 	INNER JOIN bolt ON resource.id = bolt.id
 	LEFT JOIN manufacturer mf ON bolt.manufacturer_id = mf.id
 	LEFT JOIN model mo ON bolt.model_id = mo.id
-	LEFT JOIN material ma ON bolt.material_id = ma.id
-	WHERE parent_id = ?`, withTreeQuery(resourceID))
+	LEFT JOIN material ma ON bolt.material_id = ma.id`, withTreeQuery(resourceID))
 
-	if err := sess.DB.Raw(query, resourceID).Scan(&bolts).Error; err != nil {
+	if err := sess.DB.Raw(query).Scan(&bolts).Error; err != nil {
 		return nil, err
 	}
 
@@ -67,7 +66,7 @@ func (sess Session) GetBolt(resourceID string) (*Bolt, error) {
 
 	if err := sess.DB.Raw(`SELECT
 			bolt.*,
-			resource.parent_id,
+			resource.leaf_of AS parent_id,
 			resource.counters,
 			mf.name AS manufacturer,
 			mo.name AS model,

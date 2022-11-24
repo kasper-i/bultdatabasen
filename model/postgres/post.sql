@@ -231,3 +231,7 @@ CREATE TYPE bultdatabasen.role AS ENUM (
 
 ALTER TABLE user_role ALTER COLUMN role TYPE role USING role::role;
 ALTER TABLE team_role ALTER COLUMN role TYPE role USING role::role;
+
+-- rename to leaf_of to catch every query that needs to be rewritten
+
+ALTER TABLE resource RENAME COLUMN parent_id TO leaf_of;

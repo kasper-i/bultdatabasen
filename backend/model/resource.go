@@ -133,10 +133,10 @@ func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	err := sess.DB.Raw(`WITH ancestor AS (
 		SELECT unnest(string_to_array(CASE WHEN nlevel(COALESCE(t1.path, '')) > nlevel(COALESCE(t2.path, '')) THEN t1.path::text ELSE t2.path::text END, '.')) AS id FROM resource
 		LEFT JOIN tree t1 ON resource.id = t1.resource_id
-		LEFT JOIN tree t2 ON resource.parent_id = t2.resource_id
+		LEFT JOIN tree t2 ON resource.leaf_of = t2.resource_id
 		WHERE id = ?
 	)
-	SELECT DISTINCT ON (resource.id) resource.id, name, type, REPLACE(subpath(path, -2, 1)::text, '_', '-')::uuid AS parent_id 
+	SELECT DISTINCT ON (resource.id) resource.id, name, type, REPLACE(subpath(path, -2, 1)::text, '_', '-')::uuid AS parent_id
 	FROM ancestor
 	INNER JOIN resource ON resource.id = REPLACE(ancestor.id, '_', '-')::uuid
 	INNER JOIN tree ON resource.id = tree.resource_id
@@ -216,7 +216,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 				},
 				Name:     parseString(result["name"]),
 				Type:     result["type"].(string),
-				ParentID: parseString(result["parent_id"])},
+			},
 			Parents: parents,
 		})
 	}
