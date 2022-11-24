@@ -22,7 +22,7 @@ type Resource struct {
 	ResourceBase
 	Name            *string   `json:"name,omitempty"`
 	Type            string    `json:"type"`
-	ParentID        *string   `json:"parentId,omitempty"`
+	LeafOf          *string   `json:"-"`
 	BirthTime       time.Time `gorm:"column:btime" json:"-"`
 	ModifiedTime    time.Time `gorm:"column:mtime" json:"-"`
 	CreatorID       string    `gorm:"column:buser_id" json:"-"`
@@ -94,7 +94,7 @@ func (sess Session) MoveResource(resourceID, newParentID string) error {
 			return utils.ErrMoveNotPermitted
 		}
 
-		oldParentID := *resource.ParentID
+		oldParentID := *resource.LeafOf
 
 		if oldParentID == newParentID {
 			return nil
@@ -258,7 +258,7 @@ func (sess Session) updateCountersForResource(resourceID string, delta Counters)
 		param = fmt.Sprintf("jsonb_set(%s::jsonb, '{%s}', DIV((COALESCE((counters->>'%s')::int, 0) + %d), 1)::text::jsonb, true)", param, counterType, counterType, count)
 	}
 
-	query := fmt.Sprintf("UPDATE resource SET counters = %s WHERE id = ? AND parent_id IS NOT NULL", param)
+	query := fmt.Sprintf("UPDATE resource SET counters = %s WHERE id = ?", param)
 
 	return sess.DB.Exec(query, resourceID).Error
 }

@@ -114,7 +114,7 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 	resource := Resource{
 		ResourceBase: bolt.ResourceBase,
 		Type:         "bolt",
-		ParentID:     &parentResourceID,
+		LeafOf:       &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {

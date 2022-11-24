@@ -76,8 +76,7 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 	resource := Resource{
 		ResourceBase: route.ResourceBase,
 		Name:         &route.Name,
-		Type:         "route",
-		ParentID:     &parentResourceID,
+		Type:         "route"
 	}
 
 	err := sess.Transaction(func(sess Session) error {

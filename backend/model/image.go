@@ -106,7 +106,7 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	resource := Resource{
 		ResourceBase: img.ResourceBase,
 		Type:         "image",
-		ParentID:     &parentResourceID,
+		LeafOf:       &parentResourceID,
 	}
 
 	tempFileName := "/tmp/." + img.ID

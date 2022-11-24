@@ -51,7 +51,6 @@ func (sess Session) CreateArea(area *Area, parentResourceID string, userID strin
 		ResourceBase: area.ResourceBase,
 		Name:         &area.Name,
 		Type:         "area",
-		ParentID:     &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {

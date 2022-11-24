@@ -51,8 +51,7 @@ func (sess Session) CreateSector(sector *Sector, parentResourceID string) error 
 	resource := Resource{
 		ResourceBase: sector.ResourceBase,
 		Name:         &sector.Name,
-		Type:         "sector",
-		ParentID:     &parentResourceID,
+		Type:         "sector"
 	}
 
 	err := sess.Transaction(func(sess Session) error {

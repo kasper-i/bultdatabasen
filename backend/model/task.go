@@ -117,7 +117,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	resource := Resource{
 		ResourceBase: task.ResourceBase,
 		Type:         "task",
-		ParentID:     &parentResourceID,
+		LeafOf:       &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {

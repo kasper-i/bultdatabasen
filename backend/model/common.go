@@ -31,11 +31,11 @@ func withTreeQuery(resourceID string) string {
 }
 
 func (sess Session) createResource(resource Resource) error {
-	if resource.ParentID == nil {
+	if resource.LeafOf == nil {
 		return utils.ErrOrphanedResource
 	}
 
-	if !sess.checkParentAllowed(resource, *resource.ParentID) {
+	if !sess.checkParentAllowed(resource, *resource.LeafOf) {
 		return utils.ErrHierarchyStructureViolation
 	}
 
@@ -81,10 +81,10 @@ func (sess Session) deleteResource(resourceID string) error {
 			ResourceID:   resource.ID,
 			DeletedTime:  time.Now(),
 			DeletedByID:  *sess.UserID,
-			OrigParentID: *resource.ParentID,
+			OrigParentID: *resource.LeafOf,
 		}
 
-		resource.ParentID = nil
+		resource.LeafOf = nil
 
 		if err := sess.DB.Select("ParentID").Updates(resource).Error; err != nil {
 			return err
@@ -159,11 +159,11 @@ func (sess Session) checkSameParent(resourceID1, resourceID2 string) bool {
 }
 
 func (sess Session) addFosterParent(resource Resource, fosterParentID string) error {
-	if resource.ParentID == nil {
+	if resource.LeafOf == nil {
 		return utils.ErrOrphanedResource
 	}
 
-	if !sess.checkSameParent(fosterParentID, *resource.ParentID) {
+	if !sess.checkSameParent(fosterParentID, *resource.LeafOf) {
 		return utils.ErrHierarchyStructureViolation
 	}
 

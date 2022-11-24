@@ -51,8 +51,7 @@ func (sess Session) CreateCrag(crag *Crag, parentResourceID string) error {
 	resource := Resource{
 		ResourceBase: crag.ResourceBase,
 		Name:         &crag.Name,
-		Type:         "crag",
-		ParentID:     &parentResourceID,
+		Type:         "crag"
 	}
 
 	err := sess.Transaction(func(sess Session) error {
