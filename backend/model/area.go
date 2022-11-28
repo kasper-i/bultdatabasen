@@ -22,7 +22,7 @@ func (sess Session) GetAreas(resourceID string) ([]Area, error) {
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN area ON tree.resource_id = area.id`,
-		withTreeQuery(resourceID))).Scan(&areas).Error; err != nil {
+		withTreeQuery()), resourceID).Scan(&areas).Error; err != nil {
 		return nil, err
 	}
 

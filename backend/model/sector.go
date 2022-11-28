@@ -22,7 +22,7 @@ func (sess Session) GetSectors(resourceID string) ([]Sector, error) {
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN sector ON tree.resource_id = sector.id`,
-		withTreeQuery(resourceID))).Scan(&sectors).Error; err != nil {
+		withTreeQuery()), resourceID).Scan(&sectors).Error; err != nil {
 		return nil, err
 	}
 
@@ -51,7 +51,7 @@ func (sess Session) CreateSector(sector *Sector, parentResourceID string) error 
 	resource := Resource{
 		ResourceBase: sector.ResourceBase,
 		Name:         &sector.Name,
-		Type:         "sector"
+		Type:         "sector",
 	}
 
 	err := sess.Transaction(func(sess Session) error {

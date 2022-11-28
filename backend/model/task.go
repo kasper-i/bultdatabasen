@@ -42,7 +42,8 @@ func (sess Session) GetTasks(resourceID string, pagination Pagination, statuses 
 	var tasks []Task = make([]Task, 0)
 	var meta Meta = Meta{}
 
-	params := make([]interface{}, 0)
+	params := make([]interface{}, 1)
+	params[0] = resourceID
 
 	var where string = "TRUE"
 	if len(statuses) > 0 {
@@ -56,9 +57,9 @@ func (sess Session) GetTasks(resourceID string, pagination Pagination, statuses 
 		where = fmt.Sprintf("status IN (%s)", strings.Join(placeholders, ", "))
 	}
 
-	countQuery := fmt.Sprintf("%s SELECT COUNT(task.id) AS total_items FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s", withTreeQuery(resourceID), where)
+	countQuery := fmt.Sprintf("%s SELECT COUNT(task.id) AS total_items FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s", withTreeQuery(), where)
 
-	dataQuery := fmt.Sprintf("%s SELECT * FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s ORDER BY priority ASC %s", withTreeQuery(resourceID), where, pagination.ToSQL())
+	dataQuery := fmt.Sprintf("%s SELECT * FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s ORDER BY priority ASC %s", withTreeQuery(), where, pagination.ToSQL())
 
 	if err := sess.DB.Raw(dataQuery, params...).Scan(&tasks).Error; err != nil {
 		return nil, meta, err

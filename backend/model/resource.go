@@ -2,12 +2,13 @@ package model
 
 import (
 	"bultdatabasen/utils"
+	"database/sql/driver"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"gorm.io/gorm"
+	"github.com/google/uuid"
 )
 
 const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
@@ -53,6 +54,42 @@ type ResourceWithParents struct {
 	Parents []Parent `json:"parents"`
 }
 
+type Path []uuid.UUID
+
+func (path Path) Value() (driver.Value, error) {
+	parts := make([]string, len(path))
+
+	for idx, resourceID := range(path) {
+		parts[idx] = strings.ReplaceAll(resourceID.String(), "-", "_")
+	}
+
+	return strings.Join(parts, "."), nil
+}
+
+func (out *Path) Scan(value interface{}) error {
+    s := strings.Split(value.(string), ".")
+	path := make([]uuid.UUID, len(s))
+
+	for idx, lvl := range(s) {
+		if val, err := uuid.Parse(strings.ReplaceAll(lvl, "_", "-")); err != nil {
+			return err
+		} else {
+			path[idx] = val
+		}
+	}
+
+    *out = path;
+	return nil
+}
+
+func (self Path) Parent() uuid.UUID {
+	return self[len(self) - 2]
+}
+
+func (self Path) Root() uuid.UUID {
+	return self[0]
+}
+
 func (Resource) TableName() string {
 	return "resource"
 }
@@ -78,33 +115,62 @@ func (sess Session) GetResource(resourceID string) (*Resource, error) {
 	return &resource, nil
 }
 
-func (sess Session) MoveResource(resourceID, newParentID string) error {
+func (sess Session) Move(resourceID, newParentID string) error {
 	var resource *Resource
+	var subtree Path
 	var err error
+	var oldParentID uuid.UUID
 
 	return sess.Transaction(func(sess Session) error {
-		if resource, err = sess.getResourceWithLock(resourceID); err != nil {
+		if err := sess.getSubtreeLock(resourceID); err != nil {
+			return err
+		}
+
+		if subtree, err = sess.GetPath(resourceID); err != nil {
+			return err
+		} else {
+			oldParentID = subtree.Parent()
+		}
+
+		if oldParentID.String() == newParentID {
+			return utils.ErrHierarchyStructureViolation
+		}
+
+		if resource, err = sess.GetResource(resourceID); err != nil {
 			return err
 		}
 
 		switch resource.Type {
-		case "area", "crag", "sector":
+		case "area", "crag", "sector", "route":
 			break
 		default:
 			return utils.ErrMoveNotPermitted
 		}
 
-		oldParentID := *resource.LeafOf
-
-		if oldParentID == newParentID {
-			return nil
+		if !sess.checkParentAllowed(*resource, newParentID) {
+			return utils.ErrHierarchyStructureViolation
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(oldParentID, Counters{}.Substract(resource.Counters)); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(oldParentID.String(), Counters{}.Substract(resource.Counters)); err != nil {
 			return err
 		}
 
-		if err := sess.moveResource(*resource, newParentID); err != nil {
+		var newParent struct {
+			Path string `gorm:"column:path"`
+			Type string `gorm:"column:type"`
+		}
+
+		if err := sess.DB.Raw(`SELECT path, type
+			FROM tree
+			INNER JOIN resource ON tree.resource_id = resource.id
+			WHERE resource_id = ? AND path <@ ?`, newParentID, strings.ReplaceAll(RootID, "-", "_")).Scan(&newParent).Error; err != nil {
+			return err
+		}
+
+
+		if err := sess.DB.Exec(`UPDATE tree
+			SET path = ? || subpath(path, nlevel(?) - 1)
+			WHERE path <@ ?`, newParent.Path, subtree, subtree).Error; err != nil {
 			return err
 		}
 
@@ -112,19 +178,29 @@ func (sess Session) MoveResource(resourceID, newParentID string) error {
 	})
 }
 
-func (sess Session) getResourceWithLock(resourceID string) (*Resource, error) {
-	var resource Resource
+func (sess Session) getSubtreeLock(resourceID string) error {
+	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT id
+		FROM tree
+		INNER JOIN resource ON tree.resource_id = resource.id
+		FOR UPDATE`, withTreeQuery()), resourceID).Error; err != nil {
+		return err
+	}
 
-	if err := sess.DB.Raw(`SELECT * FROM resource WHERE id = ? FOR UPDATE`, resourceID).
-		Scan(&resource).Error; err != nil {
+	return nil
+}
+
+func (sess Session) GetPath(resourceID string) (Path, error) {
+	var out struct {
+		Path Path `gorm:"column:path"`
+	}
+
+	if err := sess.DB.Raw(`SELECT path::text AS path
+		FROM tree
+		WHERE resource_id = ?`, resourceID).Scan(&out).Error; err != nil {
 		return nil, err
 	}
 
-	if resource.ID == "" {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	return &resource, nil
+	return out.Path, nil
 }
 
 func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
@@ -149,14 +225,14 @@ func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
 	return ancestors, nil
 }
 
-func (sess Session) GetChildren(resourceID string) ([]Resource, error) {
+func (sess Session) GetChildren(resourceID uuid.UUID) ([]Resource, error) {
 	var children []Resource = make([]Resource, 0)
 
 	err := sess.DB.Raw(`SELECT resource.* 
 	FROM tree
 	INNER JOIN resource ON tree.resource_id = resource.id
 	WHERE path ~ ?
-	ORDER BY name`, fmt.Sprintf("*.%s.*{1}", strings.ReplaceAll(resourceID, "-", "_"))).Scan(&children).Error
+	ORDER BY name`, fmt.Sprintf("*.%s.*{1}", strings.ReplaceAll(resourceID.String(), "-", "_"))).Scan(&children).Error
 
 	if err != nil {
 		return nil, err

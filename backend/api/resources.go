@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -67,7 +68,7 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := sess.MoveResource(id, newParentID); err != nil {
+		if err := sess.Move(id, newParentID); err != nil {
 			utils.WriteError(w, err)
 		} else {
 			utils.WriteResponse(w, http.StatusNoContent, nil)
@@ -98,7 +99,11 @@ func GetAncestors(w http.ResponseWriter, r *http.Request) {
 func GetChildren(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	id := vars["resourceID"]
+	id, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if children, err := sess.GetChildren(id); err != nil {
 		utils.WriteError(w, err)

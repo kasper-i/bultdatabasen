@@ -63,7 +63,7 @@ func (sess Session) getRouteGraph(routeID string) (map[string]*routeGraphVertex,
 
 		if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 			INNER JOIN point ON tree.resource_id = point.id`,
-			withTreeQuery(routeID))).Scan(&points).Error; err != nil {
+			withTreeQuery()), routeID).Scan(&points).Error; err != nil {
 			return nil, err
 		}
 
@@ -176,7 +176,7 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN point ON tree.resource_id = point.id`,
-		withTreeQuery(resourceID))).Scan(&points).Error; err != nil {
+		withTreeQuery()), resourceID).Scan(&points).Error; err != nil {
 		return nil, err
 	}
 
@@ -270,7 +270,7 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 
 			resource := Resource{
 				ResourceBase: point.ResourceBase,
-				Type:         "point"
+				Type:         "point",
 			}
 
 			if err := sess.createResource(resource); err != nil {
@@ -417,29 +417,6 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 
 			countersDifference := Counters{}.Substract(point.Counters)
 			if err := sess.updateCountersForResource(routeID, countersDifference); err != nil {
-				return err
-			}
-		} else {
-			var newOwnerID string
-
-			// Any of the current foster parents becomes the new real parent
-			for _, parent := range parents {
-				if parent.ID != routeID {
-					newOwnerID = parent.ID
-					break
-				}
-			}
-
-			countersDifference := Counters{}.Substract(point.Counters)
-			if err := sess.updateCountersForResource(routeID, countersDifference); err != nil {
-				return err
-			}
-
-			if err := sess.leaveFosterCare(pointID, newOwnerID); err != nil {
-				return err
-			}
-
-			if err := sess.moveResource(Resource{ResourceBase: ResourceBase{ID: pointID}, Type: "point"}, newOwnerID); err != nil {
 				return err
 			}
 		}

@@ -2,8 +2,6 @@ package model
 
 import (
 	"bultdatabasen/utils"
-	"fmt"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -25,9 +23,8 @@ func (sess Session) Transaction(fn func(sess Session) error) error {
 	})
 }
 
-func withTreeQuery(resourceID string) string {
-	return fmt.Sprintf(`WITH tree AS (
-		SELECT DISTINCT ON (resource_id) * FROM tree WHERE path ~ '*.%s.*')`, strings.ReplaceAll(resourceID, "-", "_"))
+func withTreeQuery() string {
+	return `WITH tree AS (SELECT * FROM tree WHERE path <@ (SELECT path FROM tree WHERE resource_id = ? LIMIT 1))`;
 }
 
 func (sess Session) createResource(resource Resource) error {
@@ -48,18 +45,6 @@ func (sess Session) createResource(resource Resource) error {
 	return sess.DB.Create(&resource).Error
 }
 
-func (sess Session) moveResource(resource Resource, newParentID string) error {
-	if newParentID == resource.ID {
-		return utils.ErrHierarchyStructureViolation
-	}
-
-	if !sess.checkParentAllowed(resource, newParentID) {
-		return utils.ErrHierarchyStructureViolation
-	}
-
-	return sess.DB.Exec(`UPDATE resource SET parent_id = ? WHERE id = ?`, newParentID, resource.ID).Error
-}
-
 func (sess Session) touchResource(resourceID string) error {
 	return sess.DB.Exec(`UPDATE resource SET mtime = ?, muser_id = ? WHERE id = ?`,
 		time.Now(), sess.UserID, resourceID).Error
@@ -72,10 +57,12 @@ func (sess Session) deleteResource(resourceID string) error {
 	}
 
 	err = sess.Transaction(func(sess Session) error {
-		resource, err := sess.getResourceWithLock(resourceID)
+		err := sess.getSubtreeLock(resourceID)
 		if err != nil {
 			return err
 		}
+
+		var resource Resource
 
 		trash := Trash{
 			ResourceID:   resource.ID,

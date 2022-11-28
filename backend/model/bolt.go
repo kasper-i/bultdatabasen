@@ -52,9 +52,9 @@ func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
 	INNER JOIN bolt ON resource.id = bolt.id
 	LEFT JOIN manufacturer mf ON bolt.manufacturer_id = mf.id
 	LEFT JOIN model mo ON bolt.model_id = mo.id
-	LEFT JOIN material ma ON bolt.material_id = ma.id`, withTreeQuery(resourceID))
+	LEFT JOIN material ma ON bolt.material_id = ma.id`, withTreeQuery())
 
-	if err := sess.DB.Raw(query).Scan(&bolts).Error; err != nil {
+	if err := sess.DB.Raw(query, resourceID).Scan(&bolts).Error; err != nil {
 		return nil, err
 	}
 

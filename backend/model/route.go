@@ -31,7 +31,7 @@ func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN route ON tree.resource_id = route.id`,
-		withTreeQuery(resourceID))).Scan(&routes).Error; err != nil {
+		withTreeQuery()), resourceID).Scan(&routes).Error; err != nil {
 		return nil, err
 	}
 
@@ -76,7 +76,7 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 	resource := Resource{
 		ResourceBase: route.ResourceBase,
 		Name:         &route.Name,
-		Type:         "route"
+		Type:         "route",
 	}
 
 	err := sess.Transaction(func(sess Session) error {
