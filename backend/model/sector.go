@@ -10,14 +10,14 @@ import (
 type Sector struct {
 	ResourceBase
 	Name     string `json:"name"`
-	ParentID string `gorm:"->" json:"parentId"`
+	ParentID uuid.UUID `gorm:"->" json:"parentId"`
 }
 
 func (Sector) TableName() string {
 	return "sector"
 }
 
-func (sess Session) GetSectors(resourceID string) ([]Sector, error) {
+func (sess Session) GetSectors(resourceID uuid.UUID) ([]Sector, error) {
 	var sectors []Sector = make([]Sector, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
@@ -29,7 +29,7 @@ func (sess Session) GetSectors(resourceID string) ([]Sector, error) {
 	return sectors, nil
 }
 
-func (sess Session) GetSector(resourceID string) (*Sector, error) {
+func (sess Session) GetSector(resourceID uuid.UUID) (*Sector, error) {
 	var sector Sector
 
 	if err := sess.DB.Raw(`SELECT * FROM sector INNER JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
@@ -37,15 +37,15 @@ func (sess Session) GetSector(resourceID string) (*Sector, error) {
 		return nil, err
 	}
 
-	if sector.ID == "" {
+	if sector.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &sector, nil
 }
 
-func (sess Session) CreateSector(sector *Sector, parentResourceID string) error {
-	sector.ID = uuid.Must(uuid.NewRandom()).String()
+func (sess Session) CreateSector(sector *Sector, parentResourceID uuid.UUID) error {
+	sector.ID = uuid.New()
 	sector.ParentID = parentResourceID
 
 	resource := Resource{
@@ -68,6 +68,6 @@ func (sess Session) CreateSector(sector *Sector, parentResourceID string) error 
 	return err
 }
 
-func (sess Session) DeleteSector(resourceID string) error {
+func (sess Session) DeleteSector(resourceID uuid.UUID) error {
 	return sess.deleteResource(resourceID)
 }

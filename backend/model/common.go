@@ -4,6 +4,7 @@ import (
 	"bultdatabasen/utils"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -28,11 +29,11 @@ func withTreeQuery() string {
 }
 
 func (sess Session) createResource(resource Resource) error {
-	if resource.LeafOf == nil {
+	if resource.LeafOf == uuid.Nil {
 		return utils.ErrOrphanedResource
 	}
 
-	if !sess.checkParentAllowed(resource, *resource.LeafOf) {
+	if !sess.checkParentAllowed(resource, resource.LeafOf) {
 		return utils.ErrHierarchyStructureViolation
 	}
 
@@ -45,12 +46,12 @@ func (sess Session) createResource(resource Resource) error {
 	return sess.DB.Create(&resource).Error
 }
 
-func (sess Session) touchResource(resourceID string) error {
+func (sess Session) touchResource(resourceID uuid.UUID) error {
 	return sess.DB.Exec(`UPDATE resource SET mtime = ?, muser_id = ? WHERE id = ?`,
 		time.Now(), sess.UserID, resourceID).Error
 }
 
-func (sess Session) deleteResource(resourceID string) error {
+func (sess Session) deleteResource(resourceID uuid.UUID) error {
 	ancestors, err := sess.GetAncestors(resourceID)
 	if err != nil {
 		return err
@@ -68,10 +69,10 @@ func (sess Session) deleteResource(resourceID string) error {
 			ResourceID:   resource.ID,
 			DeletedTime:  time.Now(),
 			DeletedByID:  *sess.UserID,
-			OrigParentID: *resource.LeafOf,
+			OrigParentID: resource.LeafOf,
 		}
 
-		resource.LeafOf = nil
+		resource.LeafOf = uuid.Nil
 
 		if err := sess.DB.Select("ParentID").Updates(resource).Error; err != nil {
 			return err
@@ -95,7 +96,7 @@ func (sess Session) deleteResource(resourceID string) error {
 	return nil
 }
 
-func (sess Session) checkParentAllowed(resource Resource, parentID string) bool {
+func (sess Session) checkParentAllowed(resource Resource, parentID uuid.UUID) bool {
 	var parentResource Resource
 
 	if err := sess.DB.First(&parentResource, "id = ?", parentID).Error; err != nil {
@@ -128,7 +129,7 @@ func (sess Session) checkParentAllowed(resource Resource, parentID string) bool 
 	}
 }
 
-func (sess Session) checkSameParent(resourceID1, resourceID2 string) bool {
+func (sess Session) checkSameParent(resourceID1, resourceID2 uuid.UUID) bool {
 	var parents []Resource = make([]Resource, 0)
 
 	if err := sess.DB.Raw(`SELECT parent.*
@@ -145,12 +146,12 @@ func (sess Session) checkSameParent(resourceID1, resourceID2 string) bool {
 	return parents[0].ID == parents[1].ID
 }
 
-func (sess Session) addFosterParent(resource Resource, fosterParentID string) error {
-	if resource.LeafOf == nil {
+func (sess Session) addFosterParent(resource Resource, fosterParentID uuid.UUID) error {
+	if resource.LeafOf == uuid.Nil {
 		return utils.ErrOrphanedResource
 	}
 
-	if !sess.checkSameParent(fosterParentID, *resource.LeafOf) {
+	if !sess.checkSameParent(fosterParentID, resource.LeafOf) {
 		return utils.ErrHierarchyStructureViolation
 	}
 
@@ -158,6 +159,6 @@ func (sess Session) addFosterParent(resource Resource, fosterParentID string) er
 		resource.ID, fosterParentID).Error
 }
 
-func (sess Session) leaveFosterCare(resourceID, fosterParentID string) error {
+func (sess Session) leaveFosterCare(resourceID, fosterParentID uuid.UUID) error {
 	return sess.DB.Exec(`DELETE FROM foster_care WHERE id = ? AND foster_parent_id = ?`, resourceID, fosterParentID).Error
 }

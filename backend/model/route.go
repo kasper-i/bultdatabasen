@@ -15,7 +15,7 @@ type Route struct {
 	Length       *int32  `json:"length,omitempty"`
 	ExternalLink *string `json:"externalLink,omitempty"`
 	RouteType    *string `json:"routeType,omitempty"`
-	ParentID     string  `gorm:"->" json:"parentId"`
+	ParenID uuid.UUID  `gorm:"->" json:"parentId"`
 }
 
 func (Route) TableName() string {
@@ -26,7 +26,7 @@ func (route *Route) UpdateCounters() {
 	route.Counters.Routes = 1
 }
 
-func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
+func (sess Session) GetRoutes(resourceID uuid.UUID) ([]Route, error) {
 	var routes []Route = make([]Route, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
@@ -38,7 +38,7 @@ func (sess Session) GetRoutes(resourceID string) ([]Route, error) {
 	return routes, nil
 }
 
-func (sess Session) GetRoute(resourceID string) (*Route, error) {
+func (sess Session) GetRoute(resourceID uuid.UUID) (*Route, error) {
 	var route Route
 
 	if err := sess.DB.Raw(`SELECT * FROM route INNER JOIN resource ON route.id = resource.id WHERE route.id = ?`, resourceID).
@@ -46,14 +46,14 @@ func (sess Session) GetRoute(resourceID string) (*Route, error) {
 		return nil, err
 	}
 
-	if route.ID == "" {
+	if route.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &route, nil
 }
 
-func (sess Session) getRouteWithLock(resourceID string) (*Route, error) {
+func (sess Session) getRouteWithLock(resourceID uuid.UUID) (*Route, error) {
 	var route Route
 
 	if err := sess.DB.Raw(`SELECT * FROM route INNER JOIN resource ON route.id = resource.id WHERE route.id = ? FOR UPDATE`, resourceID).
@@ -61,16 +61,15 @@ func (sess Session) getRouteWithLock(resourceID string) (*Route, error) {
 		return nil, err
 	}
 
-	if route.ID == "" {
+	if route.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &route, nil
 }
 
-func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
-	route.ID = uuid.Must(uuid.NewRandom()).String()
-	route.ParentID = parentResourceID
+func (sess Session) CreateRoute(route *Route, parentResourceID uuid.UUID) error {
+	route.ID = uuid.New()
 	route.UpdateCounters()
 
 	resource := Resource{
@@ -98,11 +97,11 @@ func (sess Session) CreateRoute(route *Route, parentResourceID string) error {
 	return err
 }
 
-func (sess Session) DeleteRoute(resourceID string) error {
+func (sess Session) DeleteRoute(resourceID uuid.UUID) error {
 	return sess.deleteResource(resourceID)
 }
 
-func (sess Session) UpdateRoute(routeID string, updatedRoute Route) (*Route, error) {
+func (sess Session) UpdateRoute(routeID uuid.UUID, updatedRoute Route) (*Route, error) {
 	err := sess.Transaction(func(sess Session) error {
 		original, err := sess.getRouteWithLock(routeID)
 		if err != nil {
@@ -110,7 +109,6 @@ func (sess Session) UpdateRoute(routeID string, updatedRoute Route) (*Route, err
 		}
 
 		updatedRoute.ID = original.ID
-		updatedRoute.ParentID = original.ParentID
 		updatedRoute.Counters = original.Counters
 		updatedRoute.UpdateCounters()
 

@@ -1,8 +1,10 @@
 package model
 
+import "github.com/google/uuid"
+
 type ResourceRole struct {
 	Role       string `json:"role"`
-	ResourceID string `json:"resourceID"`
+	ResourceID uuid.UUID `json:"resourceID"`
 }
 
 func (sess Session) GetRoles(userID string) []ResourceRole {

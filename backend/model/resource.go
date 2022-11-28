@@ -14,7 +14,7 @@ import (
 const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 
 type ResourceBase struct {
-	ID        string      `gorm:"primaryKey" json:"id"`
+ID uuid.UUID      `gorm:"primaryKey" json:"id"`
 	Ancestors *[]Resource `gorm:"-" json:"ancestors,omitempty"`
 	Counters  Counters    `gorm:"->" json:"counters"`
 }
@@ -23,7 +23,7 @@ type Resource struct {
 	ResourceBase
 	Name            *string   `json:"name,omitempty"`
 	Type            string    `json:"type"`
-	LeafOf          *string   `json:"-"`
+	LeafOf          uuid.UUID   `json:"-"`
 	BirthTime       time.Time `gorm:"column:btime" json:"-"`
 	ModifiedTime    time.Time `gorm:"column:mtime" json:"-"`
 	CreatorID       string    `gorm:"column:buser_id" json:"-"`
@@ -31,21 +31,21 @@ type Resource struct {
 }
 
 type ResourcePatch struct {
-	ParentID *string `json:"parentId"`
+	ParentID uuid.UUID `json:"parentId"`
 }
 
 type Trash struct {
-	ResourceID   string    `gorm:"primaryKey"`
+	ResourceID   uuid.UUID    `gorm:"primaryKey"`
 	DeletedTime  time.Time `gorm:"column:dtime"`
 	DeletedByID  string    `gorm:"column:duser_id"`
-	OrigParentID string
+	OrigParentID uuid.UUID
 }
 
 type Parent struct {
-	ID           string  `json:"id"`
+ID uuid.UUID  `json:"id"`
 	Name         *string `json:"name"`
 	Type         string  `json:"type"`
-	ChildID      *string `json:"-"`
+	ChildID      uuid.UUID `json:"-"`
 	FosterParent bool    `json:"-"`
 }
 
@@ -105,7 +105,7 @@ func (resource *ResourceBase) WithAncestors(r *http.Request) {
 	}
 }
 
-func (sess Session) GetResource(resourceID string) (*Resource, error) {
+func (sess Session) GetResource(resourceID uuid.UUID) (*Resource, error) {
 	var resource Resource
 
 	if err := sess.DB.First(&resource, "id = ?", resourceID).Error; err != nil {
@@ -115,7 +115,7 @@ func (sess Session) GetResource(resourceID string) (*Resource, error) {
 	return &resource, nil
 }
 
-func (sess Session) Move(resourceID, newParentID string) error {
+func (sess Session) Move(resourceID, newParentID uuid.UUID) error {
 	var resource *Resource
 	var subtree Path
 	var err error
@@ -132,7 +132,7 @@ func (sess Session) Move(resourceID, newParentID string) error {
 			oldParentID = subtree.Parent()
 		}
 
-		if oldParentID.String() == newParentID {
+		if oldParentID == newParentID {
 			return utils.ErrHierarchyStructureViolation
 		}
 
@@ -151,7 +151,7 @@ func (sess Session) Move(resourceID, newParentID string) error {
 			return utils.ErrHierarchyStructureViolation
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(oldParentID.String(), Counters{}.Substract(resource.Counters)); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(oldParentID, Counters{}.Substract(resource.Counters)); err != nil {
 			return err
 		}
 
@@ -178,7 +178,7 @@ func (sess Session) Move(resourceID, newParentID string) error {
 	})
 }
 
-func (sess Session) getSubtreeLock(resourceID string) error {
+func (sess Session) getSubtreeLock(resourceID uuid.UUID) error {
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT id
 		FROM tree
 		INNER JOIN resource ON tree.resource_id = resource.id
@@ -189,7 +189,7 @@ func (sess Session) getSubtreeLock(resourceID string) error {
 	return nil
 }
 
-func (sess Session) GetPath(resourceID string) (Path, error) {
+func (sess Session) GetPath(resourceID uuid.UUID) (Path, error) {
 	var out struct {
 		Path Path `gorm:"column:path"`
 	}
@@ -203,7 +203,7 @@ func (sess Session) GetPath(resourceID string) (Path, error) {
 	return out.Path, nil
 }
 
-func (sess Session) GetAncestors(resourceID string) ([]Resource, error) {
+func (sess Session) GetAncestors(resourceID uuid.UUID) ([]Resource, error) {
 	var ancestors []Resource
 
 	err := sess.DB.Raw(`WITH ancestor AS (
@@ -271,7 +271,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 
 		if result["r2_id"] != nil {
 			parents = append(parents, Parent{
-				ID:   result["r2_id"].(string),
+				ID:   result["r2_id"].(uuid.UUID),
 				Name: parseString(result["r2_name"]),
 				Type: result["r2_type"].(string),
 			})
@@ -279,7 +279,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 
 		if result["r3_id"] != nil {
 			parents = append(parents, Parent{
-				ID:   result["r3_id"].(string),
+				ID:   result["r3_id"].(uuid.UUID),
 				Name: parseString(result["r3_name"]),
 				Type: result["r3_type"].(string),
 			})
@@ -288,7 +288,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 		resources = append(resources, ResourceWithParents{
 			Resource: Resource{
 				ResourceBase: ResourceBase{
-					ID: result["id"].(string),
+					ID: result["id"].(uuid.UUID),
 				},
 				Name:     parseString(result["name"]),
 				Type:     result["type"].(string),
@@ -304,13 +304,13 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	return resources, nil
 }
 
-func (sess Session) updateCountersForResourceAndAncestors(resourceID string, delta Counters) error {
+func (sess Session) updateCountersForResourceAndAncestors(resourceID uuid.UUID, delta Counters) error {
 	ancestors, err := sess.GetAncestors(resourceID)
 	if err != nil {
 		return err
 	}
 
-	resourceIDs := append(utils.Map(ancestors, func(ancestor Resource) string { return ancestor.ID }), resourceID)
+	resourceIDs := append(utils.Map(ancestors, func(ancestor Resource) uuid.UUID { return ancestor.ID }), resourceID)
 
 	for _, resourceID := range resourceIDs {
 		if err := sess.updateCountersForResource(resourceID, delta); err != nil {
@@ -321,7 +321,7 @@ func (sess Session) updateCountersForResourceAndAncestors(resourceID string, del
 	return nil
 }
 
-func (sess Session) updateCountersForResource(resourceID string, delta Counters) error {
+func (sess Session) updateCountersForResource(resourceID uuid.UUID, delta Counters) error {
 	difference := delta.AsMap()
 
 	if len(difference) == 0 {

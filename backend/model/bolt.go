@@ -11,7 +11,7 @@ import (
 type Bolt struct {
 	ResourceBase
 	Type           *string    `json:"type,omitempty"`
-	ParentID       string     `gorm:"->" json:"parentId"`
+	ParenID uuid.UUID     `gorm:"->" json:"parentId"`
 	Position       *string    `json:"position,omitempty"`
 	Installed      *time.Time `json:"installed,omitempty"`
 	Dismantled     *time.Time `json:"dismantled,omitempty"`
@@ -37,7 +37,7 @@ func (bolt *Bolt) UpdateCounters() {
 	}
 }
 
-func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
+func (sess Session) GetBolts(resourceID uuid.UUID) ([]Bolt, error) {
 	var bolts []Bolt = make([]Bolt, 0)
 
 	query := fmt.Sprintf(`%s SELECT
@@ -61,7 +61,7 @@ func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
 	return bolts, nil
 }
 
-func (sess Session) GetBolt(resourceID string) (*Bolt, error) {
+func (sess Session) GetBolt(resourceID uuid.UUID) (*Bolt, error) {
 	var bolt Bolt
 
 	if err := sess.DB.Raw(`SELECT
@@ -81,14 +81,14 @@ func (sess Session) GetBolt(resourceID string) (*Bolt, error) {
 		return nil, err
 	}
 
-	if bolt.ID == "" {
+	if bolt.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &bolt, nil
 }
 
-func (sess Session) getBoltWithLock(resourceID string) (*Bolt, error) {
+func (sess Session) getBoltWithLock(resourceID uuid.UUID) (*Bolt, error) {
 	var bolt Bolt
 
 	if err := sess.DB.Raw(`SELECT * FROM bolt
@@ -99,22 +99,21 @@ func (sess Session) getBoltWithLock(resourceID string) (*Bolt, error) {
 		return nil, err
 	}
 
-	if bolt.ID == "" {
+	if bolt.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &bolt, nil
 }
 
-func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
-	bolt.ID = uuid.Must(uuid.NewRandom()).String()
-	bolt.ParentID = parentResourceID
+func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
+	bolt.ID = uuid.New()
 	bolt.UpdateCounters()
 
 	resource := Resource{
 		ResourceBase: bolt.ResourceBase,
 		Type:         "bolt",
-		LeafOf:       &parentResourceID,
+		LeafOf:       parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
@@ -142,11 +141,11 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 	return err
 }
 
-func (sess Session) DeleteBolt(resourceID string) error {
+func (sess Session) DeleteBolt(resourceID uuid.UUID) error {
 	return sess.deleteResource(resourceID)
 }
 
-func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
+func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt Bolt) (*Bolt, error) {
 	var refreshedBolt *Bolt
 
 	err := sess.Transaction(func(sess Session) error {
@@ -156,7 +155,6 @@ func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 		}
 
 		updatedBolt.ID = original.ID
-		updatedBolt.ParentID = original.ParentID
 		updatedBolt.Counters = original.Counters
 		updatedBolt.UpdateCounters()
 

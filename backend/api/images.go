@@ -11,13 +11,18 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 func GetImages(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if images, err := sess.GetImages(parentResourceID); err != nil {
 		utils.WriteError(w, err)
@@ -28,7 +33,11 @@ func GetImages(w http.ResponseWriter, r *http.Request) {
 
 func DownloadImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	imageID := vars["resourceID"]
+	imageID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 	version := vars["version"]
 
 	if _, ok := model.ImageSizes[version]; !ok && version != "original" {
@@ -68,9 +77,13 @@ func DownloadImage(w http.ResponseWriter, r *http.Request) {
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	err := r.ParseMultipartForm(10 << 20)
+	err = r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		utils.WriteError(w, err)
 		return
@@ -111,9 +124,13 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 func DeleteImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	imageID := vars["resourceID"]
+	imageID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	err := sess.DeleteImage(imageID)
+	err = sess.DeleteImage(imageID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -125,7 +142,11 @@ func DeleteImage(w http.ResponseWriter, r *http.Request) {
 func PatchImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	imageID := vars["resourceID"]
+	imageID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var patch model.ImagePatch
@@ -141,7 +162,7 @@ func PatchImage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err := sess.PatchImage(imageID, patch)
+	err = sess.PatchImage(imageID, patch)
 
 	if err != nil {
 		utils.WriteError(w, err)

@@ -10,14 +10,14 @@ import (
 type Area struct {
 	ResourceBase
 	Name     string `json:"name"`
-	ParentID string `gorm:"->" json:"parentId"`
+	ParentID uuid.UUID `gorm:"->" json:"parentId"`
 }
 
 func (Area) TableName() string {
 	return "area"
 }
 
-func (sess Session) GetAreas(resourceID string) ([]Area, error) {
+func (sess Session) GetAreas(resourceID uuid.UUID) ([]Area, error) {
 	var areas []Area = make([]Area, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
@@ -29,7 +29,7 @@ func (sess Session) GetAreas(resourceID string) ([]Area, error) {
 	return areas, nil
 }
 
-func (sess Session) GetArea(resourceID string) (*Area, error) {
+func (sess Session) GetArea(resourceID uuid.UUID) (*Area, error) {
 	var area Area
 
 	if err := sess.DB.Raw(`SELECT * FROM area INNER JOIN resource ON area.id = resource.id WHERE area.id = ?`, resourceID).
@@ -37,15 +37,15 @@ func (sess Session) GetArea(resourceID string) (*Area, error) {
 		return nil, err
 	}
 
-	if area.ID == "" {
+	if area.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &area, nil
 }
 
-func (sess Session) CreateArea(area *Area, parentResourceID string, userID string) error {
-	area.ID = uuid.Must(uuid.NewRandom()).String()
+func (sess Session) CreateArea(area *Area, parentResourceID uuid.UUID, userID string) error {
+	area.ID = uuid.New()
 
 	resource := Resource{
 		ResourceBase: area.ResourceBase,
@@ -72,6 +72,6 @@ func (sess Session) CreateArea(area *Area, parentResourceID string, userID strin
 	return err
 }
 
-func (sess Session) DeleteArea(resourceID string) error {
+func (sess Session) DeleteArea(resourceID uuid.UUID) error {
 	return sess.deleteResource(resourceID)
 }

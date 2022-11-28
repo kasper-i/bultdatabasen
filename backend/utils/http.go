@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Error struct {
 	Status     int     `json:"status"`
 	Message    string  `json:"message"`
-	ResourceID *string `json:"resourceId,omitempty"`
+	ResourceID uuid.UUID `json:"resourceId,omitempty"`
 }
 
 func WriteResponse(w http.ResponseWriter, statusCode int, payload interface{}) {

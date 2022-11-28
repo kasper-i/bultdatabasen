@@ -7,15 +7,20 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 func GetCrags(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceId := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if crags, err := sess.GetCrags(parentResourceId); err != nil {
+	if crags, err := sess.GetCrags(parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, crags)
@@ -25,9 +30,13 @@ func GetCrags(w http.ResponseWriter, r *http.Request) {
 func GetCrag(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if crag, err := sess.GetCrag(resourceId); err != nil {
+	if crag, err := sess.GetCrag(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		crag.WithAncestors(r)
@@ -38,7 +47,11 @@ func GetCrag(w http.ResponseWriter, r *http.Request) {
 func CreateCrag(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var crag model.Crag
@@ -47,7 +60,7 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := sess.CreateCrag(&crag, parentResourceID)
+	err = sess.CreateCrag(&crag, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -60,9 +73,13 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 func DeleteCrag(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if err := sess.DeleteCrag(resourceId); err != nil {
+	if err := sess.DeleteCrag(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

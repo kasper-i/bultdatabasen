@@ -1,9 +1,11 @@
 package model
 
+import "github.com/google/uuid"
+
 type Model struct {
-	ID             string   `json:"id"`
+ID uuid.UUID   `json:"id"`
 	Name           string   `json:"name"`
-	ManufacturerID string   `json:"manufacturerId"`
+	ManufacturerID uuid.UUID   `json:"manufacturerId"`
 	Type           *string  `json:"type,omitempty"`
 	MaterialID     *string  `json:"materialId,omitempty"`
 	Diameter       *float32 `json:"diameter,omitempty"`
@@ -14,7 +16,7 @@ func (Model) TableName() string {
 	return "model"
 }
 
-func (sess Session) GetModels(manufacturerID string) ([]Model, error) {
+func (sess Session) GetModels(manufacturerID uuid.UUID) ([]Model, error) {
 	var models []Model = make([]Model, 0)
 
 	query := "SELECT * FROM model where manufacturer_id = ? ORDER BY name ASC"

@@ -7,15 +7,20 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 func GetBolts(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceId := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if bolts, err := sess.GetBolts(parentResourceId); err != nil {
+	if bolts, err := sess.GetBolts(parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, bolts)
@@ -25,9 +30,13 @@ func GetBolts(w http.ResponseWriter, r *http.Request) {
 func GetBolt(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if bolt, err := sess.GetBolt(resourceId); err != nil {
+	if bolt, err := sess.GetBolt(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		bolt.WithAncestors(r)
@@ -38,7 +47,11 @@ func GetBolt(w http.ResponseWriter, r *http.Request) {
 func CreateBolt(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var bolt model.Bolt
@@ -47,7 +60,7 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := sess.CreateBolt(&bolt, parentResourceID)
+	err = sess.CreateBolt(&bolt, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -60,9 +73,13 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 func DeleteBolt(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if err := sess.DeleteBolt(resourceId); err != nil {
+	if err := sess.DeleteBolt(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)
@@ -72,7 +89,11 @@ func DeleteBolt(w http.ResponseWriter, r *http.Request) {
 func UpdateBolt(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	boltID := vars["resourceID"]
+	boltID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var bolt model.Bolt

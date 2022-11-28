@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -20,14 +21,18 @@ func New() *trashbin {
 func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		resourceID := vars["resourceID"]
+		resourceID, err := uuid.Parse(vars["resourceID"])
+		if err != nil {
+			utils.WriteError(w, err)
+			return
+		}
 
-		if resourceID == "" {
+		if resourceID == uuid.Nil {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		if resourceID == model.RootID {
+		if resourceID.String() == model.RootID {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -41,7 +46,7 @@ func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 
 		var foundRoot bool = false
 		for _, ancestor := range ancestors {
-			if ancestor.ID == model.RootID {
+			if ancestor.ID.String() == model.RootID {
 				foundRoot = true
 				break
 			}
@@ -56,11 +61,11 @@ func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-func writeNotFound(w http.ResponseWriter, resourceID string) {
+func writeNotFound(w http.ResponseWriter, resourceID uuid.UUID) {
 	err := utils.Error{
 		Status:     http.StatusNotFound,
 		Message:    "Not Found",
-		ResourceID: &resourceID,
+		ResourceID: resourceID,
 	}
 
 	w.WriteHeader(http.StatusNotFound)

@@ -16,21 +16,21 @@ type Point struct {
 }
 
 type InsertPosition struct {
-	PointID string `json:"pointId"`
+	PointID uuid.UUID `json:"pointId"`
 	Order   string `json:"order"`
 }
 
 type routeGraphVertex struct {
-	PointID         string `gorm:"primaryKey"`
-	OutgoingPointID *string
-	IncomingPointID *string
+	PointID uuid.UUID `gorm:"primaryKey"`
+	OutgoingPointID uuid.UUID 
+	IncomingPointID uuid.UUID 
 }
 
 func (Point) TableName() string {
 	return "point"
 }
 
-func (sess Session) getParents(pointIDs []string) ([]Parent, error) {
+func (sess Session) getParents(pointIDs []uuid.UUID) ([]Parent, error) {
 	var parents []Parent = make([]Parent, 0)
 
 	err := sess.DB.Raw(`
@@ -49,9 +49,9 @@ func (sess Session) getParents(pointIDs []string) ([]Parent, error) {
 	return parents, err
 }
 
-func (sess Session) getRouteGraph(routeID string) (map[string]*routeGraphVertex, error) {
+func (sess Session) getRouteGraph(routeID uuid.UUID) (map[uuid.UUID]*routeGraphVertex, error) {
 	var connections []Connection = make([]Connection, 0)
-	var graph map[string]*routeGraphVertex = make(map[string]*routeGraphVertex)
+	var graph map[uuid.UUID]*routeGraphVertex = make(map[uuid.UUID]*routeGraphVertex)
 
 	err := sess.DB.Raw(`
 		SELECT connection.*
@@ -88,7 +88,7 @@ func (sess Session) getRouteGraph(routeID string) (map[string]*routeGraphVertex,
 
 			{
 				p := connection.DstPointID
-				entry.OutgoingPointID = &p
+				entry.OutgoingPointID = p
 			}
 
 			if entry, ok = graph[connection.DstPointID]; !ok {
@@ -98,7 +98,7 @@ func (sess Session) getRouteGraph(routeID string) (map[string]*routeGraphVertex,
 
 			{
 				p := connection.SrcPointID
-				entry.IncomingPointID = &p
+				entry.IncomingPointID = p
 			}
 		}
 	}
@@ -106,24 +106,24 @@ func (sess Session) getRouteGraph(routeID string) (map[string]*routeGraphVertex,
 	return graph, err
 }
 
-func (sess Session) sortPoints(routeID string, pointsMap map[string]*Point) ([]*Point, error) {
-	var routeGraph map[string]*routeGraphVertex
+func (sess Session) sortPoints(routeID uuid.UUID, pointsMap map[uuid.UUID]*Point) ([]*Point, error) {
+	var routeGraph map[uuid.UUID]*routeGraphVertex
 	var orderedPoints []*Point = make([]*Point, 0)
 	var err error
-	var startPointID string
+	var startPointID uuid.UUID
 
 	if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
 		return nil, err
 	}
 
 	for _, connection := range routeGraph {
-		if connection.IncomingPointID == nil {
+		if connection.IncomingPointID == uuid.Nil {
 			startPointID = connection.PointID
 			break
 		}
 	}
 
-	if startPointID == "" {
+	if startPointID == uuid.Nil {
 		return nil, utils.ErrLoopDetected
 	} else {
 		currentPointID := startPointID
@@ -140,10 +140,10 @@ func (sess Session) sortPoints(routeID string, pointsMap map[string]*Point) ([]*
 				return nil, utils.ErrCorruptResource
 			}
 
-			if vertex.OutgoingPointID == nil {
+			if vertex.OutgoingPointID == uuid.Nil {
 				break
 			} else {
-				currentPointID = *vertex.OutgoingPointID
+				currentPointID = vertex.OutgoingPointID
 			}
 		}
 
@@ -155,7 +155,7 @@ func (sess Session) sortPoints(routeID string, pointsMap map[string]*Point) ([]*
 	return orderedPoints, nil
 }
 
-func (sess Session) getPointWithLock(pointID string) (*Point, error) {
+func (sess Session) getPointWithLock(pointID uuid.UUID) (*Point, error) {
 	var point Point
 
 	if err := sess.DB.Raw(`SELECT * FROM point INNER JOIN resource ON point.id = resource.id WHERE point.id = ? FOR UPDATE`, pointID).
@@ -163,15 +163,15 @@ func (sess Session) getPointWithLock(pointID string) (*Point, error) {
 		return nil, err
 	}
 
-	if point.ID == "" {
+	if point.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &point, nil
 }
 
-func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
-	var pointsMap map[string]*Point = make(map[string]*Point)
+func (sess Session) GetPoints(resourceID uuid.UUID) ([]*Point, error) {
+	var pointsMap map[uuid.UUID]*Point = make(map[uuid.UUID]*Point)
 	var points []*Point = make([]*Point, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
@@ -186,7 +186,7 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 		pointsMap[point.ID] = point
 	}
 
-	var pointIDs []string = make([]string, len(points))
+	var pointIDs []uuid.UUID = make([]uuid.UUID, len(points))
 	index := 0
 	for _, point := range points {
 		pointIDs[index] = point.ID
@@ -195,7 +195,7 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 
 	if parents, err := sess.getParents(pointIDs); err == nil {
 		for _, parent := range parents {
-			if point, ok := pointsMap[*parent.ChildID]; ok {
+			if point, ok := pointsMap[parent.ChildID]; ok {
 				point.Parents = append(point.Parents, parent)
 			}
 		}
@@ -208,11 +208,11 @@ func (sess Session) GetPoints(resourceID string) ([]*Point, error) {
 	return sess.sortPoints(resourceID, pointsMap)
 }
 
-func (sess Session) AttachPoint(routeID string, pointID *string, position *InsertPosition, anchor bool, bolts []Bolt) (*Point, error) {
+func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []Bolt) (*Point, error) {
 	var err error
 	var point *Point = &Point{}
 	var pointResource *Resource
-	var routeGraph map[string]*routeGraphVertex
+	var routeGraph map[uuid.UUID]*routeGraphVertex
 
 	if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
 		return nil, err
@@ -224,8 +224,8 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 	}
 
 	// Check that we are not creating a loop
-	if pointID != nil {
-		if _, ok := routeGraph[*pointID]; ok {
+	if pointID != uuid.Nil {
+		if _, ok := routeGraph[pointID]; ok {
 			return nil, utils.ErrLoopDetected
 		}
 	}
@@ -237,10 +237,10 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 		}
 	}
 
-	if pointID != nil {
+	if pointID != uuid.Nil {
 		var err error
 
-		if pointResource, err = sess.GetResource(*pointID); err != nil {
+		if pointResource, err = sess.GetResource(pointID); err != nil {
 			return nil, err
 		}
 
@@ -250,8 +250,8 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 	}
 
 	err = sess.Transaction(func(sess Session) error {
-		if pointID != nil {
-			if details, err := sess.getPointWithLock(*pointID); err != nil {
+		if pointID != uuid.Nil {
+			if details, err := sess.getPointWithLock(pointID); err != nil {
 				return err
 			} else {
 				point = details
@@ -265,7 +265,7 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 				return err
 			}
 		} else {
-			point.ID = uuid.Must(uuid.NewRandom()).String()
+			point.ID = uuid.New()
 			point.Anchor = anchor
 
 			resource := Resource{
@@ -300,20 +300,20 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 
 				switch position.Order {
 				case "after":
-					if nextPoint != nil {
-						if err := sess.DeleteConnection(routeID, insertionPoint, *nextPoint); err != nil {
+					if nextPoint != uuid.Nil {
+						if err := sess.DeleteConnection(routeID, insertionPoint, nextPoint); err != nil {
 							return err
 						}
-						if err := sess.CreateConnection(routeID, newPoint, *nextPoint); err != nil {
+						if err := sess.CreateConnection(routeID, newPoint, nextPoint); err != nil {
 							return err
 						}
 					}
 				case "before":
-					if prevPoint != nil {
-						if err := sess.DeleteConnection(routeID, *prevPoint, insertionPoint); err != nil {
+					if prevPoint != uuid.Nil {
+						if err := sess.DeleteConnection(routeID, prevPoint, insertionPoint); err != nil {
 							return err
 						}
-						if err := sess.CreateConnection(routeID, *prevPoint, newPoint); err != nil {
+						if err := sess.CreateConnection(routeID, prevPoint, newPoint); err != nil {
 							return err
 						}
 					}
@@ -332,7 +332,7 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 			}
 		}
 
-		if parents, err := sess.getParents([]string{point.ID}); err == nil {
+		if parents, err := sess.getParents([]uuid.UUID{point.ID}); err == nil {
 			point.Parents = parents
 		}
 
@@ -346,10 +346,10 @@ func (sess Session) AttachPoint(routeID string, pointID *string, position *Inser
 	return point, nil
 }
 
-func (sess Session) DetachPoint(routeID string, pointID string) error {
+func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 	return sess.Transaction(func(sess Session) error {
 		var err error
-		var routeGraph map[string]*routeGraphVertex
+		var routeGraph map[uuid.UUID]*routeGraphVertex
 		var parents []Parent
 
 		var point *Point
@@ -361,7 +361,7 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 			return err
 		}
 
-		if parents, err = sess.getParents([]string{pointID}); err != nil {
+		if parents, err = sess.getParents([]uuid.UUID{pointID}); err != nil {
 			return err
 		}
 
@@ -389,20 +389,20 @@ func (sess Session) DetachPoint(routeID string, pointID string) error {
 			nextPoint := vertex.OutgoingPointID
 			prevPoint := vertex.IncomingPointID
 
-			if prevPoint != nil {
-				if err := sess.DeleteConnection(routeID, *prevPoint, pointID); err != nil {
+			if prevPoint != uuid.Nil {
+				if err := sess.DeleteConnection(routeID, prevPoint, pointID); err != nil {
 					return err
 				}
 			}
 
-			if nextPoint != nil {
-				if err := sess.DeleteConnection(routeID, pointID, *nextPoint); err != nil {
+			if nextPoint != uuid.Nil {
+				if err := sess.DeleteConnection(routeID, pointID, nextPoint); err != nil {
 					return err
 				}
 			}
 
-			if prevPoint != nil && nextPoint != nil {
-				if err := sess.CreateConnection(routeID, *prevPoint, *nextPoint); err != nil {
+			if prevPoint != uuid.Nil && nextPoint != uuid.Nil {
+				if err := sess.CreateConnection(routeID, prevPoint, nextPoint); err != nil {
 					return err
 				}
 			}

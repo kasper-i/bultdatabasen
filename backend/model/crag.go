@@ -10,14 +10,14 @@ import (
 type Crag struct {
 	ResourceBase
 	Name     string `json:"name"`
-	ParentID string `gorm:"->" json:"parentId"`
+	ParentID uuid.UUID `gorm:"->" json:"parentId"`
 }
 
 func (Crag) TableName() string {
 	return "crag"
 }
 
-func (sess Session) GetCrags(resourceID string) ([]Crag, error) {
+func (sess Session) GetCrags(resourceID uuid.UUID) ([]Crag, error) {
 	var crags []Crag = make([]Crag, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
@@ -29,7 +29,7 @@ func (sess Session) GetCrags(resourceID string) ([]Crag, error) {
 	return crags, nil
 }
 
-func (sess Session) GetCrag(resourceID string) (*Crag, error) {
+func (sess Session) GetCrag(resourceID uuid.UUID) (*Crag, error) {
 	var crag Crag
 
 	if err := sess.DB.Raw(`SELECT * FROM crag INNER JOIN resource ON crag.id = resource.id WHERE crag.id = ?`, resourceID).
@@ -37,15 +37,15 @@ func (sess Session) GetCrag(resourceID string) (*Crag, error) {
 		return nil, err
 	}
 
-	if crag.ID == "" {
+	if crag.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &crag, nil
 }
 
-func (sess Session) CreateCrag(crag *Crag, parentResourceID string) error {
-	crag.ID = uuid.Must(uuid.NewRandom()).String()
+func (sess Session) CreateCrag(crag *Crag, parentResourceID uuid.UUID) error {
+	crag.ID = uuid.New()
 	crag.ParentID = parentResourceID
 
 	resource := Resource{
@@ -68,6 +68,6 @@ func (sess Session) CreateCrag(crag *Crag, parentResourceID string) error {
 	return err
 }
 
-func (sess Session) DeleteCrag(resourceID string) error {
+func (sess Session) DeleteCrag(resourceID uuid.UUID) error {
 	return sess.deleteResource(resourceID)
 }

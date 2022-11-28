@@ -7,15 +7,20 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 func GetSectors(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceId := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if sectors, err := sess.GetSectors(parentResourceId); err != nil {
+	if sectors, err := sess.GetSectors(parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, sectors)
@@ -25,9 +30,13 @@ func GetSectors(w http.ResponseWriter, r *http.Request) {
 func GetSector(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if sector, err := sess.GetSector(resourceId); err != nil {
+	if sector, err := sess.GetSector(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		sector.WithAncestors(r)
@@ -38,7 +47,11 @@ func GetSector(w http.ResponseWriter, r *http.Request) {
 func CreateSector(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var sector model.Sector
@@ -47,7 +60,7 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := sess.CreateSector(&sector, parentResourceID)
+	err = sess.CreateSector(&sector, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -60,9 +73,13 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 func DeleteSector(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if err := sess.DeleteSector(resourceId); err != nil {
+	if err := sess.DeleteSector(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

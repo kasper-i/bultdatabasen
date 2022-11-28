@@ -69,7 +69,7 @@ func (Image) TableName() string {
 	return "image"
 }
 
-func (sess Session) GetImages(resourceID string) ([]Image, error) {
+func (sess Session) GetImages(resourceID uuid.UUID) ([]Image, error) {
 	var images []Image = make([]Image, 0)
 
 	if err := sess.DB.Raw(`SELECT * FROM resource INNER JOIN image ON resource.id = image.id WHERE leaf_of = ?`, resourceID).Scan(&images).Error; err != nil {
@@ -79,7 +79,7 @@ func (sess Session) GetImages(resourceID string) ([]Image, error) {
 	return images, nil
 }
 
-func (sess Session) GetImage(imageID string) (*Image, error) {
+func (sess Session) GetImage(imageID uuid.UUID) (*Image, error) {
 	var image Image
 
 	if err := sess.DB.Raw(`SELECT * FROM image WHERE image.id = ?`, imageID).
@@ -87,17 +87,17 @@ func (sess Session) GetImage(imageID string) (*Image, error) {
 		return nil, err
 	}
 
-	if image.ID == "" {
+	if image.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &image, nil
 }
 
-func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mimeType string) (*Image, error) {
+func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (*Image, error) {
 	img := Image{
 		ResourceBase: ResourceBase{
-			ID: uuid.Must(uuid.NewRandom()).String(),
+			ID: uuid.New(),
 		},
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
@@ -106,10 +106,10 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	resource := Resource{
 		ResourceBase: img.ResourceBase,
 		Type:         "image",
-		LeafOf:       &parentResourceID,
+		LeafOf:       parentResourceID,
 	}
 
-	tempFileName := "/tmp/." + img.ID
+	tempFileName := "/tmp/." + img.ID.String()
 
 	f, err := os.Create(tempFileName)
 	if err != nil {
@@ -151,7 +151,7 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 
 	object := s3.PutObjectInput{
 		Bucket:      aws.String("bultdatabasen"),
-		Key:         aws.String("images/" + img.ID),
+		Key:         aws.String("images/" + img.ID.String()),
 		Body:        bytes.NewReader(imageBytes),
 		ACL:         aws.String("public-read"),
 		ContentType: &mimeType,
@@ -186,10 +186,10 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	return &img, nil
 }
 
-func rollbackObjectCreations(imageID string) {
+func rollbackObjectCreations(imageID uuid.UUID) {
 	listInput := &s3.ListObjectsInput{
 		Bucket: aws.String("bultdatabasen"),
-		Prefix: aws.String("images/" + imageID),
+		Prefix: aws.String("images/" + imageID.String()),
 	}
 
 	if objects, err := spaces.S3Client().ListObjects(listInput); err != nil {
@@ -206,7 +206,7 @@ func rollbackObjectCreations(imageID string) {
 	}
 }
 
-func (sess Session) DeleteImage(imageID string) error {
+func (sess Session) DeleteImage(imageID uuid.UUID) error {
 	err := sess.Transaction(func(sess Session) error {
 		if err := sess.deleteResource(imageID); err != nil {
 			return err
@@ -218,7 +218,7 @@ func (sess Session) DeleteImage(imageID string) error {
 	return err
 }
 
-func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
+func (sess Session) PatchImage(imageID uuid.UUID, patch ImagePatch) error {
 	original, err := sess.GetImage(imageID)
 	if err != nil {
 		return err
@@ -241,15 +241,15 @@ func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
 	})
 }
 
-func GetOriginalImageKey(imageID string) string {
-	return "images/" + imageID
+func GetOriginalImageKey(imageID uuid.UUID) string {
+	return "images/" + imageID.String()
 }
 
-func GetResizedImageKey(imageID string, version string) string {
-	return "images/" + imageID + "." + version
+func GetResizedImageKey(imageID uuid.UUID, version string) string {
+	return "images/" + imageID.String() + "." + version
 }
 
-func ResizeImage(imageID string, versions []string) error {
+func ResizeImage(imageID uuid.UUID, versions []string) error {
 	values := map[string]interface{}{"imageId": imageID, "sizes": versions}
 	json_data, err := json.Marshal(values)
 	if err != nil {
