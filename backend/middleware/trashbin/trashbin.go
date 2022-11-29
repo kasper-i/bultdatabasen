@@ -21,14 +21,16 @@ func New() *trashbin {
 func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		resourceID, err := uuid.Parse(vars["resourceID"])
-		if err != nil {
-			utils.WriteError(w, err)
+		var resourceID uuid.UUID
+
+		if vars["resourceID"] == "" {
+			next.ServeHTTP(w, r)
 			return
 		}
 
-		if resourceID == uuid.Nil {
-			next.ServeHTTP(w, r)
+		resourceID, err := uuid.Parse(vars["resourceID"])
+		if err != nil {
+			utils.WriteError(w, err)
 			return
 		}
 
@@ -56,12 +58,12 @@ func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 			ctx := context.WithValue(r.Context(), "ancestors", ancestors)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		} else {
-			writeNotFound(w, resourceID)
+			writeNotFound(w, &resourceID)
 		}
 	})
 }
 
-func writeNotFound(w http.ResponseWriter, resourceID uuid.UUID) {
+func writeNotFound(w http.ResponseWriter, resourceID *uuid.UUID) {
 	err := utils.Error{
 		Status:     http.StatusNotFound,
 		Message:    "Not Found",

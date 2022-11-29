@@ -182,6 +182,7 @@ func (sess Session) getSubtreeLock(resourceID uuid.UUID) error {
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT id
 		FROM tree
 		INNER JOIN resource ON tree.resource_id = resource.id
+		LEFT JOIN resource ON tree.resource_id = resource.leaf_of
 		FOR UPDATE`, withTreeQuery()), resourceID).Error; err != nil {
 		return err
 	}

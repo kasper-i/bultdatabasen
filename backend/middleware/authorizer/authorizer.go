@@ -29,12 +29,6 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 		var userID string
 		var ancestors []model.Resource
 
-		resourceID, err := uuid.Parse(vars["resourceID"])
-		if err != nil {
-			utils.WriteError(w, err)
-			return
-		}
-
 		if authenticator.IsPublic(r) {
 			next.ServeHTTP(w, r)
 			return
@@ -58,18 +52,25 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
+
 		if strings.HasPrefix(r.URL.Path, "/users/") {
 			if userID == vars["userID"] {
 				next.ServeHTTP(w, r)
 				return
 			} else {
-				writeForbidden(w, resourceID)
+				writeForbidden(w, nil)
 				return
 			}
 		}
 
+		resourceID, err := uuid.Parse(vars["resourceID"])
+		if err != nil {
+			utils.WriteError(w, err)
+			return
+		}
+
 		if maxRole := GetMaxRole(resourceID, ancestors, userID); maxRole == nil || maxRole.Role != "owner" {
-			writeForbidden(w, resourceID)
+			writeForbidden(w, &resourceID)
 		} else {
 			next.ServeHTTP(w, r)
 		}
@@ -135,7 +136,7 @@ func max(r1, r2 *model.ResourceRole) *model.ResourceRole {
 	}
 }
 
-func writeForbidden(w http.ResponseWriter, resourceID uuid.UUID) {
+func writeForbidden(w http.ResponseWriter, resourceID *uuid.UUID) {
 	err := utils.Error{
 		Status:     http.StatusForbidden,
 		Message:    "Forbidden",

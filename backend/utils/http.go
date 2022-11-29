@@ -13,7 +13,7 @@ import (
 type Error struct {
 	Status     int     `json:"status"`
 	Message    string  `json:"message"`
-	ResourceID uuid.UUID `json:"resourceId,omitempty"`
+	ResourceID *uuid.UUID `json:"resourceId,omitempty"`
 }
 
 func WriteResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
