@@ -17,13 +17,13 @@ type Point struct {
 
 type InsertPosition struct {
 	PointID uuid.UUID `json:"pointId"`
-	Order   string `json:"order"`
+	Order   string    `json:"order"`
 }
 
 type routeGraphVertex struct {
-	PointID uuid.UUID `gorm:"primaryKey"`
-	OutgoingPointID uuid.UUID 
-	IncomingPointID uuid.UUID 
+	PointID         uuid.UUID `gorm:"primaryKey"`
+	OutgoingPointID uuid.UUID
+	IncomingPointID uuid.UUID
 }
 
 func (Point) TableName() string {
@@ -244,7 +244,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 			return nil, err
 		}
 
-		if pointResource.Type != "point" {
+		if pointResource.Type != TypePoint {
 			return nil, utils.ErrHierarchyStructureViolation
 		}
 	}
@@ -257,9 +257,9 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 				point = details
 			}
 
-			if err := sess.addFosterParent(*pointResource, routeID); err != nil {
-				return err
-			}
+			//if err := sess.addFosterParent(*pointResource, routeID); err != nil {
+			//	return err
+			//}
 
 			if err := sess.updateCountersForResource(routeID, point.Counters); err != nil {
 				return err
@@ -270,10 +270,10 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 
 			resource := Resource{
 				ResourceBase: point.ResourceBase,
-				Type:         "point",
+				Type:         TypePoint,
 			}
 
-			if err := sess.createResource(resource); err != nil {
+			if err := sess.CreateResource(&resource, routeID); err != nil {
 				return err
 			}
 
@@ -409,11 +409,11 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 		}
 
 		if len(parents) == 1 {
-			return sess.deleteResource(pointID)
+			return sess.DeleteResource(pointID)
 		} else if inFosterCare {
-			if err := sess.leaveFosterCare(pointID, routeID); err != nil {
-				return err
-			}
+			//if err := sess.leaveFosterCare(pointID, routeID); err != nil {
+			//	return err
+			//}
 
 			countersDifference := Counters{}.Substract(point.Counters)
 			if err := sess.updateCountersForResource(routeID, countersDifference); err != nil {

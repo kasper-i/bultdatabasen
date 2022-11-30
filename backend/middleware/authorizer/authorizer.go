@@ -52,7 +52,6 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-
 		if strings.HasPrefix(r.URL.Path, "/users/") {
 			if userID == vars["userID"] {
 				next.ServeHTTP(w, r)

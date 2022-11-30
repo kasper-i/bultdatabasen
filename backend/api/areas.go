@@ -17,7 +17,7 @@ func GetAreas(w http.ResponseWriter, r *http.Request) {
 
 	var resourceID uuid.UUID
 	var err error
-	
+
 	if vars["resourceID"] == "" {
 		resourceID, _ = uuid.Parse(model.RootID)
 	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
@@ -54,7 +54,7 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var resourceID uuid.UUID
 	var err error
-	
+
 	if vars["resourceID"] == "" {
 		resourceID, _ = uuid.Parse(model.RootID)
 	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {

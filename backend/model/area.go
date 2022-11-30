@@ -9,8 +9,7 @@ import (
 
 type Area struct {
 	ResourceBase
-	Name     string `json:"name"`
-	ParentID uuid.UUID `gorm:"->" json:"parentId"`
+	Name string `json:"name"`
 }
 
 func (Area) TableName() string {
@@ -45,18 +44,17 @@ func (sess Session) GetArea(resourceID uuid.UUID) (*Area, error) {
 }
 
 func (sess Session) CreateArea(area *Area, parentResourceID uuid.UUID, userID string) error {
-	area.ID = uuid.New()
-
 	resource := Resource{
-		ResourceBase: area.ResourceBase,
-		Name:         &area.Name,
-		Type:         "area",
+		Name: &area.Name,
+		Type: TypeArea,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
+
+		area.ID = resource.ID
 
 		if err := sess.DB.Create(&area).Error; err != nil {
 			return err
@@ -73,5 +71,5 @@ func (sess Session) CreateArea(area *Area, parentResourceID uuid.UUID, userID st
 }
 
 func (sess Session) DeleteArea(resourceID uuid.UUID) error {
-	return sess.deleteResource(resourceID)
+	return sess.DeleteResource(resourceID)
 }

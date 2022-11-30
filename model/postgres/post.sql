@@ -235,3 +235,10 @@ ALTER TABLE team_role ALTER COLUMN role TYPE role USING role::role;
 -- rename to leaf_of to catch every query that needs to be rewritten
 
 ALTER TABLE resource RENAME COLUMN parent_id TO leaf_of;
+
+-- enhance trash bin
+
+ALTER TABLE trash RENAME COLUMN orig_parent_id TO orig_leaf_of;
+ALTER TABLE trash ALTER COLUMN orig_leaf_of DROP NOT NULL;
+ALTER TABLE trash ADD COLUMN 
+ALTER TABLE trash ADD orig_path ltree;

@@ -5,6 +5,7 @@ import (
 )
 
 var (
+	ErrNotPermitted                = errors.New("Operation not permitted")
 	ErrHierarchyStructureViolation = errors.New("Hierarchy violation")
 	ErrOrphanedResource            = errors.New("Orphaned resource")
 	ErrMissingAttachmentPoint      = errors.New("Missing attachment point")

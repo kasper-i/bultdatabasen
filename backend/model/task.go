@@ -16,7 +16,7 @@ type Task struct {
 	Priority    int        `json:"priority"`
 	Assignee    *string    `gorm:"->" json:"assignee,omitempty"`
 	Comment     *string    `json:"comment,omitempty"`
-	ParenID uuid.UUID     `gorm:"->" json:"parentId"`
+	ParenID     uuid.UUID  `gorm:"->" json:"parentId"`
 	BirthTime   time.Time  `gorm:"->;column:btime" json:"createdAt"`
 	UserID      string     `gorm:"->;column:buser_id" json:"userId"`
 	ClosedAt    *time.Time `json:"closedAt,omitempty"`
@@ -116,12 +116,12 @@ func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 
 	resource := Resource{
 		ResourceBase: task.ResourceBase,
-		Type:         "task",
-		LeafOf:       parentResourceID,
+		Type:         TypeTask,
+		LeafOf:       &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, uuid.Nil); err != nil {
 			return err
 		}
 
@@ -165,7 +165,7 @@ func (sess Session) UpdateTask(task *Task, taskID uuid.UUID) error {
 
 		countersDifference := task.Counters.Substract(original.Counters)
 
-		if err := sess.touchResource(taskID); err != nil {
+		if err := sess.TouchResource(taskID); err != nil {
 			return err
 		}
 
@@ -194,5 +194,5 @@ func (sess Session) UpdateTask(task *Task, taskID uuid.UUID) error {
 }
 
 func (sess Session) DeleteTask(resourceID uuid.UUID) error {
-	return sess.deleteResource(resourceID)
+	return sess.DeleteResource(resourceID)
 }

@@ -3,7 +3,7 @@ package model
 import "github.com/google/uuid"
 
 type ResourceRole struct {
-	Role       string `json:"role"`
+	Role       string    `json:"role"`
 	ResourceID uuid.UUID `json:"resourceID"`
 }
 

@@ -9,8 +9,7 @@ import (
 
 type Sector struct {
 	ResourceBase
-	Name     string `json:"name"`
-	ParentID uuid.UUID `gorm:"->" json:"parentId"`
+	Name string `json:"name"`
 }
 
 func (Sector) TableName() string {
@@ -45,19 +44,17 @@ func (sess Session) GetSector(resourceID uuid.UUID) (*Sector, error) {
 }
 
 func (sess Session) CreateSector(sector *Sector, parentResourceID uuid.UUID) error {
-	sector.ID = uuid.New()
-	sector.ParentID = parentResourceID
-
 	resource := Resource{
-		ResourceBase: sector.ResourceBase,
-		Name:         &sector.Name,
-		Type:         "sector",
+		Name: &sector.Name,
+		Type: TypeSector,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
+
+		sector.ID = resource.ID
 
 		if err := sess.DB.Create(&sector).Error; err != nil {
 			return err
@@ -69,5 +66,5 @@ func (sess Session) CreateSector(sector *Sector, parentResourceID uuid.UUID) err
 }
 
 func (sess Session) DeleteSector(resourceID uuid.UUID) error {
-	return sess.deleteResource(resourceID)
+	return sess.DeleteResource(resourceID)
 }

@@ -11,7 +11,7 @@ import (
 type Bolt struct {
 	ResourceBase
 	Type           *string    `json:"type,omitempty"`
-	ParenID uuid.UUID     `gorm:"->" json:"parentId"`
+	LeafOf         uuid.UUID  `gorm:"->" json:"leafOf"`
 	Position       *string    `json:"position,omitempty"`
 	Installed      *time.Time `json:"installed,omitempty"`
 	Dismantled     *time.Time `json:"dismantled,omitempty"`
@@ -112,12 +112,12 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
 
 	resource := Resource{
 		ResourceBase: bolt.ResourceBase,
-		Type:         "bolt",
-		LeafOf:       parentResourceID,
+		Type:         TypeBolt,
+		LeafOf:       &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, uuid.Nil); err != nil {
 			return err
 		}
 
@@ -142,7 +142,7 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
 }
 
 func (sess Session) DeleteBolt(resourceID uuid.UUID) error {
-	return sess.deleteResource(resourceID)
+	return sess.DeleteResource(resourceID)
 }
 
 func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt Bolt) (*Bolt, error) {
@@ -160,7 +160,7 @@ func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt Bolt) (*Bolt, error
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 
-		if err := sess.touchResource(boltID); err != nil {
+		if err := sess.TouchResource(boltID); err != nil {
 			return err
 		}
 

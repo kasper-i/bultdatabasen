@@ -9,8 +9,7 @@ import (
 
 type Crag struct {
 	ResourceBase
-	Name     string `json:"name"`
-	ParentID uuid.UUID `gorm:"->" json:"parentId"`
+	Name string `json:"name"`
 }
 
 func (Crag) TableName() string {
@@ -45,19 +44,17 @@ func (sess Session) GetCrag(resourceID uuid.UUID) (*Crag, error) {
 }
 
 func (sess Session) CreateCrag(crag *Crag, parentResourceID uuid.UUID) error {
-	crag.ID = uuid.New()
-	crag.ParentID = parentResourceID
-
 	resource := Resource{
-		ResourceBase: crag.ResourceBase,
-		Name:         &crag.Name,
-		Type:         "crag",
+		Name: &crag.Name,
+		Type: TypeCrag,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
+
+		crag.ID = resource.ID
 
 		if err := sess.DB.Create(&crag).Error; err != nil {
 			return err
@@ -69,5 +66,5 @@ func (sess Session) CreateCrag(crag *Crag, parentResourceID uuid.UUID) error {
 }
 
 func (sess Session) DeleteCrag(resourceID uuid.UUID) error {
-	return sess.deleteResource(resourceID)
+	return sess.DeleteResource(resourceID)
 }

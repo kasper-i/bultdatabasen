@@ -12,7 +12,7 @@ import (
 )
 
 type CreatePointRequest struct {
-	PointID  uuid.UUID               `json:"pointId"`
+	PointID  uuid.UUID             `json:"pointId"`
 	Position *model.InsertPosition `json:"position"`
 	Anchor   bool                  `json:"anchor"`
 	Bolts    []model.Bolt          `json:"bolts"`
@@ -30,7 +30,7 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 	if resource, err := sess.GetResource(routeID); err != nil {
 		utils.WriteError(w, err)
 		return
-	} else if resource.Type != "route" {
+	} else if resource.Type != model.TypeRoute {
 		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}

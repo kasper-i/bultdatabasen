@@ -105,8 +105,8 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 
 	resource := Resource{
 		ResourceBase: img.ResourceBase,
-		Type:         "image",
-		LeafOf:       parentResourceID,
+		Type:         TypeImage,
+		LeafOf:       &parentResourceID,
 	}
 
 	tempFileName := "/tmp/." + img.ID.String()
@@ -167,7 +167,7 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 	}
 
 	err = sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, uuid.Nil); err != nil {
 			return err
 		}
 
@@ -208,7 +208,7 @@ func rollbackObjectCreations(imageID uuid.UUID) {
 
 func (sess Session) DeleteImage(imageID uuid.UUID) error {
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.deleteResource(imageID); err != nil {
+		if err := sess.DeleteResource(imageID); err != nil {
 			return err
 		}
 
@@ -229,7 +229,7 @@ func (sess Session) PatchImage(imageID uuid.UUID, patch ImagePatch) error {
 	}
 
 	return sess.Transaction(func(sess Session) error {
-		if err := sess.touchResource(imageID); err != nil {
+		if err := sess.TouchResource(imageID); err != nil {
 			return err
 		}
 

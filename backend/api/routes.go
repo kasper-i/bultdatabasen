@@ -53,7 +53,6 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	reqBody, _ := io.ReadAll(r.Body)
 	var route model.Route
 	if err := json.Unmarshal(reqBody, &route); err != nil {
@@ -95,7 +94,6 @@ func UpdateRoute(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, err)
 		return
 	}
-
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var route model.Route

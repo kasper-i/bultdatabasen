@@ -13,21 +13,36 @@ import (
 
 const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
 
+type ResourceType string
+
+const (
+	TypeRoot    ResourceType = "root"
+	TypeArea                 = "area"
+	TypeCrag                 = "crag"
+	TypeSector               = "sector"
+	TypeRoute                = "route"
+	TypePoint                = "point"
+	TypeBolt                 = "bolt"
+	TypeImage                = "image"
+	TypeComment              = "comment"
+	TypeTask                 = "task"
+)
+
 type ResourceBase struct {
-ID uuid.UUID      `gorm:"primaryKey" json:"id"`
+	ID        uuid.UUID   `gorm:"primaryKey" json:"id"`
 	Ancestors *[]Resource `gorm:"-" json:"ancestors,omitempty"`
 	Counters  Counters    `gorm:"->" json:"counters"`
 }
 
 type Resource struct {
 	ResourceBase
-	Name            *string   `json:"name,omitempty"`
-	Type            string    `json:"type"`
-	LeafOf          uuid.UUID   `json:"-"`
-	BirthTime       time.Time `gorm:"column:btime" json:"-"`
-	ModifiedTime    time.Time `gorm:"column:mtime" json:"-"`
-	CreatorID       string    `gorm:"column:buser_id" json:"-"`
-	LastUpdatedByID string    `gorm:"column:muser_id" json:"-"`
+	Name            *string      `json:"name,omitempty"`
+	Type            ResourceType `json:"type"`
+	LeafOf          *uuid.UUID   `json:"leafOf,omitempty"`
+	BirthTime       time.Time    `gorm:"column:btime" json:"-"`
+	ModifiedTime    time.Time    `gorm:"column:mtime" json:"-"`
+	CreatorID       string       `gorm:"column:buser_id" json:"-"`
+	LastUpdatedByID string       `gorm:"column:muser_id" json:"-"`
 }
 
 type ResourcePatch struct {
@@ -35,18 +50,19 @@ type ResourcePatch struct {
 }
 
 type Trash struct {
-	ResourceID   uuid.UUID    `gorm:"primaryKey"`
-	DeletedTime  time.Time `gorm:"column:dtime"`
-	DeletedByID  string    `gorm:"column:duser_id"`
-	OrigParentID uuid.UUID
+	ResourceID  uuid.UUID `gorm:"primaryKey"`
+	DeletedTime time.Time `gorm:"column:dtime"`
+	DeletedByID string    `gorm:"column:duser_id"`
+	OrigPath    *Path
+	OrigLeafOf  *uuid.UUID
 }
 
 type Parent struct {
-ID uuid.UUID  `json:"id"`
-	Name         *string `json:"name"`
-	Type         string  `json:"type"`
-	ChildID      uuid.UUID `json:"-"`
-	FosterParent bool    `json:"-"`
+	ID           uuid.UUID    `json:"id"`
+	Name         *string      `json:"name"`
+	Type         ResourceType `json:"type"`
+	ChildID      uuid.UUID    `json:"-"`
+	FosterParent bool         `json:"-"`
 }
 
 type ResourceWithParents struct {
@@ -59,7 +75,7 @@ type Path []uuid.UUID
 func (path Path) Value() (driver.Value, error) {
 	parts := make([]string, len(path))
 
-	for idx, resourceID := range(path) {
+	for idx, resourceID := range path {
 		parts[idx] = strings.ReplaceAll(resourceID.String(), "-", "_")
 	}
 
@@ -67,10 +83,10 @@ func (path Path) Value() (driver.Value, error) {
 }
 
 func (out *Path) Scan(value interface{}) error {
-    s := strings.Split(value.(string), ".")
+	s := strings.Split(value.(string), ".")
 	path := make([]uuid.UUID, len(s))
 
-	for idx, lvl := range(s) {
+	for idx, lvl := range s {
 		if val, err := uuid.Parse(strings.ReplaceAll(lvl, "_", "-")); err != nil {
 			return err
 		} else {
@@ -78,16 +94,20 @@ func (out *Path) Scan(value interface{}) error {
 		}
 	}
 
-    *out = path;
+	*out = path
 	return nil
 }
 
 func (self Path) Parent() uuid.UUID {
-	return self[len(self) - 2]
+	return self[len(self)-2]
 }
 
 func (self Path) Root() uuid.UUID {
 	return self[0]
+}
+
+func (self Path) Add(id uuid.UUID) Path {
+	return append(self, id)
 }
 
 func (Resource) TableName() string {
@@ -141,7 +161,7 @@ func (sess Session) Move(resourceID, newParentID uuid.UUID) error {
 		}
 
 		switch resource.Type {
-		case "area", "crag", "sector", "route":
+		case TypeArea, TypeCrag, TypeSector, TypeRoute:
 			break
 		default:
 			return utils.ErrMoveNotPermitted
@@ -166,7 +186,6 @@ func (sess Session) Move(resourceID, newParentID uuid.UUID) error {
 			WHERE resource_id = ? AND path <@ ?`, newParentID, strings.ReplaceAll(RootID, "-", "_")).Scan(&newParent).Error; err != nil {
 			return err
 		}
-
 
 		if err := sess.DB.Exec(`UPDATE tree
 			SET path = ? || subpath(path, nlevel(?) - 1)
@@ -274,7 +293,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 			parents = append(parents, Parent{
 				ID:   result["r2_id"].(uuid.UUID),
 				Name: parseString(result["r2_name"]),
-				Type: result["r2_type"].(string),
+				Type: result["r2_type"].(ResourceType),
 			})
 		}
 
@@ -282,7 +301,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 			parents = append(parents, Parent{
 				ID:   result["r3_id"].(uuid.UUID),
 				Name: parseString(result["r3_name"]),
-				Type: result["r3_type"].(string),
+				Type: result["r3_type"].(ResourceType),
 			})
 		}
 
@@ -291,8 +310,8 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 				ResourceBase: ResourceBase{
 					ID: result["id"].(uuid.UUID),
 				},
-				Name:     parseString(result["name"]),
-				Type:     result["type"].(string),
+				Name: parseString(result["name"]),
+				Type: result["type"].(ResourceType),
 			},
 			Parents: parents,
 		})

@@ -9,13 +9,11 @@ import (
 
 type Route struct {
 	ResourceBase
-	Name         string  `json:"name"`
-	AltName      *string `json:"altName,omitempty"`
-	Year         *int32  `json:"year,omitempty"`
-	Length       *int32  `json:"length,omitempty"`
-	ExternalLink *string `json:"externalLink,omitempty"`
-	RouteType    *string `json:"routeType,omitempty"`
-	ParenID uuid.UUID  `gorm:"->" json:"parentId"`
+	Name      string  `json:"name"`
+	AltName   *string `json:"altName,omitempty"`
+	Year      *int32  `json:"year,omitempty"`
+	Length    *int32  `json:"length,omitempty"`
+	RouteType *string `json:"routeType,omitempty"`
 }
 
 func (Route) TableName() string {
@@ -69,19 +67,19 @@ func (sess Session) getRouteWithLock(resourceID uuid.UUID) (*Route, error) {
 }
 
 func (sess Session) CreateRoute(route *Route, parentResourceID uuid.UUID) error {
-	route.ID = uuid.New()
 	route.UpdateCounters()
 
 	resource := Resource{
-		ResourceBase: route.ResourceBase,
-		Name:         &route.Name,
-		Type:         "route",
+		Name: &route.Name,
+		Type: TypeRoute,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
+
+		route.ID = resource.ID
 
 		if err := sess.DB.Create(&route).Error; err != nil {
 			return err
@@ -98,7 +96,7 @@ func (sess Session) CreateRoute(route *Route, parentResourceID uuid.UUID) error 
 }
 
 func (sess Session) DeleteRoute(resourceID uuid.UUID) error {
-	return sess.deleteResource(resourceID)
+	return sess.DeleteResource(resourceID)
 }
 
 func (sess Session) UpdateRoute(routeID uuid.UUID, updatedRoute Route) (*Route, error) {
@@ -114,7 +112,7 @@ func (sess Session) UpdateRoute(routeID uuid.UUID, updatedRoute Route) (*Route, 
 
 		countersDifference := updatedRoute.Counters.Substract(original.Counters)
 
-		if err := sess.touchResource(routeID); err != nil {
+		if err := sess.TouchResource(routeID); err != nil {
 			return err
 		}
 

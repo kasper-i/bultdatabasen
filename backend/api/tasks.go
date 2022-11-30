@@ -58,7 +58,6 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	if task, err := sess.GetTask(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {

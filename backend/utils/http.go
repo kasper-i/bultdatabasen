@@ -11,8 +11,8 @@ import (
 )
 
 type Error struct {
-	Status     int     `json:"status"`
-	Message    string  `json:"message"`
+	Status     int        `json:"status"`
+	Message    string     `json:"message"`
 	ResourceID *uuid.UUID `json:"resourceId,omitempty"`
 }
 
@@ -48,6 +48,8 @@ func WriteError(w http.ResponseWriter, err error) {
 	} else if errors.Is(err, ErrCorruptResource) {
 		status = http.StatusInternalServerError
 		error.Message = err.Error()
+	} else if errors.Is(err, ErrNotPermitted) {
+		status = http.StatusForbidden
 	} else {
 		status = http.StatusInternalServerError
 	}
