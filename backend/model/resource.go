@@ -263,16 +263,22 @@ func (sess Session) GetChildren(resourceID uuid.UUID) ([]Resource, error) {
 	return children, nil
 }
 
-func parseString(value interface{}) *string {
-	if str, ok := value.(string); ok {
-		return &str
-	} else {
-		return nil
-	}
-}
-
 func (sess Session) Search(name string) ([]ResourceWithParents, error) {
-	var results []map[string]interface{}
+	type searchResult struct {
+		ID uuid.UUID
+		Name string
+		Type ResourceType
+
+		ParentID *uuid.UUID `gorm:"column:r2_id"`
+		ParentName string `gorm:"column:r2_name"`
+		ParentType ResourceType `gorm:"column:r2_type"`
+
+		GrandParentID *uuid.UUID `gorm:"column:r3_id"`
+		GrandParentName string `gorm:"column:r3_name"`
+		GrandParentType ResourceType `gorm:"column:r3_type"`
+	}
+
+	var results []searchResult
 	var resources []ResourceWithParents = make([]ResourceWithParents, 0)
 
 	err := sess.DB.Raw(`SELECT
@@ -291,29 +297,32 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	for _, result := range results {
 		parents := make([]Parent, 0)
 
-		if result["r2_id"] != nil {
+		if result.ParentID != nil {
+			parentName := strings.Clone(result.ParentName)
 			parents = append(parents, Parent{
-				ID:   result["r2_id"].(uuid.UUID),
-				Name: parseString(result["r2_name"]),
-				Type: result["r2_type"].(ResourceType),
+				ID:   *result.ParentID,
+				Name: &parentName,
+				Type: result.ParentType,
 			})
 		}
 
-		if result["r3_id"] != nil {
+		if result.GrandParentID != nil {
+			grandParentName := strings.Clone(result.GrandParentName)
 			parents = append(parents, Parent{
-				ID:   result["r3_id"].(uuid.UUID),
-				Name: parseString(result["r3_name"]),
-				Type: result["r3_type"].(ResourceType),
+				ID:   *result.GrandParentID,
+				Name: &grandParentName,
+				Type: result.GrandParentType,
 			})
 		}
 
+		name := strings.Clone(result.Name)
 		resources = append(resources, ResourceWithParents{
 			Resource: Resource{
 				ResourceBase: ResourceBase{
-					ID: result["id"].(uuid.UUID),
+					ID: result.ID,
 				},
-				Name: parseString(result["name"]),
-				Type: result["type"].(ResourceType),
+				Name: &name,
+				Type: result.Type,
 			},
 			Parents: parents,
 		})
