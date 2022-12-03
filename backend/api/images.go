@@ -83,7 +83,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = r.ParseMultipartForm(10 << 20)
+	err = r.ParseMultipartForm(32 << 20)
 	if err != nil {
 		utils.WriteError(w, err)
 		return

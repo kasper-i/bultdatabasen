@@ -6,6 +6,7 @@ import (
 	"bultdatabasen/middleware/authorizer"
 	"bultdatabasen/middleware/cors"
 	"bultdatabasen/middleware/trashbin"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -14,11 +15,21 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var Version = "devel"
+
 func checkHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = io.WriteString(w, `{"alive": true}`)
+}
+
+
+func getVersion(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = io.WriteString(w, fmt.Sprintf(`{"version": "%s"}`, Version))
 }
 
 func main() {
@@ -34,6 +45,7 @@ func main() {
 	router.Use(authorizer.Middleware)
 
 	router.HandleFunc("/health", checkHandler)
+	router.HandleFunc("/version", getVersion)
 
 	router.HandleFunc("/users/names", api.GetUserNames).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/myself", api.GetMyself).Methods(http.MethodGet, http.MethodOptions)

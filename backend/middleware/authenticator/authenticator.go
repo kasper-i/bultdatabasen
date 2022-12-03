@@ -30,6 +30,8 @@ func IsPublic(r *http.Request) bool {
 		switch {
 		case r.URL.Path == "/health":
 			return true
+		case r.URL.Path == "/version":
+			return true
 		case strings.HasPrefix(r.URL.Path, "/resources"):
 			return true
 		case strings.HasPrefix(r.URL.Path, "/areas"):

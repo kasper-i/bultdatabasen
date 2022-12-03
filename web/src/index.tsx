@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/react";
+import { init } from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import axios from "axios";
@@ -11,7 +11,7 @@ import "./index.css";
 import { store } from "./store";
 
 if (!import.meta.env.DEV) {
-  Sentry.init({
+  init({
     dsn: "https://04d52d3586ee4b5d97e09ceb7a0b906e@o4504061877157888.ingest.sentry.io/4504079496708096",
     integrations: [],
     release: "bultdatabasen@" + __APP_VERSION__,
