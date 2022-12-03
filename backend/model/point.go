@@ -371,10 +371,6 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 		for _, parent := range parents {
 			if parent.ID == routeID {
 				belongsToRoute = true
-
-				if parent.FosterParent {
-					inFosterCare = true
-				}
 			}
 		}
 

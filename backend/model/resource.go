@@ -2,6 +2,7 @@ package model
 
 import (
 	"bultdatabasen/utils"
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"net/http"
@@ -62,7 +63,6 @@ type Parent struct {
 	Name         *string      `json:"name"`
 	Type         ResourceType `json:"type"`
 	ChildID      uuid.UUID    `json:"-"`
-	FosterParent bool         `json:"-"`
 }
 
 type ResourceWithParents struct {
@@ -226,17 +226,19 @@ func (sess Session) GetPath(resourceID uuid.UUID) (Path, error) {
 func (sess Session) GetAncestors(resourceID uuid.UUID) ([]Resource, error) {
 	var ancestors []Resource
 
-	err := sess.DB.Raw(`WITH ancestor AS (
-		SELECT unnest(string_to_array(CASE WHEN nlevel(COALESCE(t1.path, '')) > nlevel(COALESCE(t2.path, '')) THEN t1.path::text ELSE t2.path::text END, '.')) AS id FROM resource
+	err := sess.DB.Raw(`WITH path_list AS (
+		SELECT COALESCE(t1.path, t2.path) AS path FROM resource
 		LEFT JOIN tree t1 ON resource.id = t1.resource_id
 		LEFT JOIN tree t2 ON resource.leaf_of = t2.resource_id
-		WHERE id = ?
+		WHERE id = @resourceID
 	)
-	SELECT DISTINCT ON (resource.id) resource.id, name, type, REPLACE(subpath(path, -2, 1)::text, '_', '-')::uuid AS parent_id
-	FROM ancestor
-	INNER JOIN resource ON resource.id = REPLACE(ancestor.id, '_', '-')::uuid
-	INNER JOIN tree ON resource.id = tree.resource_id
-	WHERE resource.id <> ?::uuid`, resourceID, resourceID).Scan(&ancestors).Error
+	SELECT REPLACE(id, '_', '-')::uuid AS id, name, type, CASE WHEN type <> 'root' THEN REPLACE(subpath(path, no::integer - 2, 1)::text, '_', '-')::uuid ELSE NULL END AS parent_id FROM (
+		SELECT DISTINCT ON (path.id) path.id, name, type, path_list.path, no
+		FROM path_list, unnest(string_to_array(path_list.path::text, '.')) WITH ORDINALITY AS path(id, no)
+		INNER JOIN resource ON REPLACE(path.id, '_', '-')::uuid = resource.id
+		WHERE resource.id <> @resourceID
+	) ancestor
+	ORDER BY no ASC`, sql.Named("resourceID", resourceID)).Scan(&ancestors).Error
 
 	if err != nil {
 		return nil, err
