@@ -2,7 +2,7 @@ import { isDefined } from "@/utils/common";
 import { Listbox, Transition } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { isArray } from "lodash";
+import { isArray } from "lodash-es";
 import { FC, Fragment, ReactNode } from "react";
 import Icon from "./Icon";
 import IconButton from "./IconButton";
