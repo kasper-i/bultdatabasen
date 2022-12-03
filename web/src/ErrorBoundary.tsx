@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/react";
+import { captureException, withScope } from "@sentry/core";
 import React, { ErrorInfo, ReactNode } from "react";
 import Button from "./components/atoms/Button";
 
@@ -22,9 +22,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    Sentry.withScope((scope) => {
+    withScope((scope) => {
       scope.setExtras({ componentStack: errorInfo.componentStack });
-      const eventId = Sentry.captureException(error);
+      const eventId = captureException(error);
       this.setState({ eventId });
     });
   }
