@@ -223,17 +223,6 @@ func (sess Session) GetPath(resourceID uuid.UUID) (Path, error) {
 	return out.Path, nil
 }
 
-func (sess Session) GetParents(pointIDs []uuid.UUID) ([]Parent, error) {
-	var parents []Parent = make([]Parent, 0)
-
-	err := sess.DB.Raw(`SELECT id, name, type, tree.resource_id as child_id
-		FROM tree
-		INNER JOIN resource parent ON REPLACE(subpath(tree.path, -2, 1)::text, '_', '-')::uuid = parent.id
-		WHERE resource_id IN ? AND nlevel(path) > 1`, pointIDs).Scan(&parents).Error
-
-	return parents, err
-}
-
 func (sess Session) GetAncestors(resourceID uuid.UUID) ([]Resource, error) {
 	var ancestors []Resource
 

@@ -2,6 +2,7 @@ package model
 
 import (
 	"bultdatabasen/utils"
+	"database/sql"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -28,6 +29,17 @@ type routeGraphVertex struct {
 
 func (Point) TableName() string {
 	return "point"
+}
+
+func (sess Session) getParents(pointIDs []uuid.UUID) ([]Parent, error) {
+	var parents []Parent = make([]Parent, 0)
+
+	err := sess.DB.Raw(`SELECT id, name, type, tree.resource_id as child_id
+		FROM tree
+		INNER JOIN resource parent ON REPLACE(subpath(tree.path, -2, 1)::text, '_', '-')::uuid = parent.id
+		WHERE resource_id IN ?`, pointIDs).Scan(&parents).Error
+
+	return parents, err
 }
 
 func (sess Session) getRouteGraph(routeID uuid.UUID) (map[uuid.UUID]*routeGraphVertex, error) {
@@ -174,7 +186,7 @@ func (sess Session) GetPoints(resourceID uuid.UUID) ([]*Point, error) {
 		index += 1
 	}
 
-	if parents, err := sess.GetParents(pointIDs); err == nil {
+	if parents, err := sess.getParents(pointIDs); err == nil {
 		for _, parent := range parents {
 			if point, ok := pointsMap[parent.ChildID]; ok {
 				point.Parents = append(point.Parents, parent)
@@ -194,6 +206,10 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 	var point *Point = &Point{}
 	var pointResource *Resource
 	var routeGraph map[uuid.UUID]*routeGraphVertex
+
+	if _, err := sess.getRouteWithLock(routeID); err != nil {
+		return nil, err
+	}
 
 	if routeGraph, err = sess.getRouteGraph(routeID); err != nil {
 		return nil, err
@@ -238,9 +254,12 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 				point = details
 			}
 
-			//if err := sess.addFosterParent(*pointResource, routeID); err != nil {
-			//	return err
-			//}
+			if err := sess.DB.Exec(`INSERT INTO tree (resource_id, path)
+				SELECT @pointID, path || REPLACE(@pointID, '-', '_')
+				FROM tree
+				WHERE resource_id = @routeID`, sql.Named("routeID", routeID), sql.Named("pointID", pointID)).Error; err != nil {
+					return err
+			}
 
 			if err := sess.updateCountersForResource(routeID, point.Counters); err != nil {
 				return err
@@ -314,7 +333,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 			}
 		}
 
-		if parents, err := sess.GetParents([]uuid.UUID{point.ID}); err == nil {
+		if parents, err := sess.getParents([]uuid.UUID{point.ID}); err == nil {
 			point.Parents = parents
 		}
 
@@ -334,6 +353,10 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 		var routeGraph map[uuid.UUID]*routeGraphVertex
 		var parents []Parent
 
+		if _, err := sess.getRouteWithLock(routeID); err != nil {
+			return err
+		}
+
 		var point *Point
 		if point, err = sess.getPointWithLock(pointID); err != nil {
 			return err
@@ -343,12 +366,11 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 			return err
 		}
 
-		if parents, err = sess.GetParents([]uuid.UUID{pointID}); err != nil {
+		if parents, err = sess.getParents([]uuid.UUID{pointID}); err != nil {
 			return err
 		}
 
 		var belongsToRoute bool = false
-		var inFosterCare bool = false
 
 		for _, parent := range parents {
 			if parent.ID == routeID {
@@ -388,10 +410,12 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 
 		if len(parents) == 1 {
 			return sess.DeleteResource(pointID)
-		} else if inFosterCare {
-			//if err := sess.leaveFosterCare(pointID, routeID); err != nil {
-			//	return err
-			//}
+		} else {
+			if err := sess.DB.Exec(`DELETE FROM tree
+				WHERE path <@ (SELECT path FROM tree WHERE resource_id = @routeID LIMIT 1) AND resource_id = @pointID`,
+				sql.Named("routeID", routeID), sql.Named("pointID", pointID)).Error; err != nil {
+					return err
+			}
 
 			countersDifference := Counters{}.Substract(point.Counters)
 			if err := sess.updateCountersForResource(routeID, countersDifference); err != nil {
