@@ -107,7 +107,6 @@ func (sess Session) getBoltWithLock(resourceID uuid.UUID) (*Bolt, error) {
 }
 
 func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
-	bolt.ID = uuid.New()
 	bolt.UpdateCounters()
 
 	resource := Resource{
@@ -120,6 +119,8 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
 		if err := sess.CreateResource(&resource, uuid.Nil); err != nil {
 			return err
 		}
+
+		bolt.ID = resource.ID
 
 		if err := sess.DB.Create(&bolt).Error; err != nil {
 			return err

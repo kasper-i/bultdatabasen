@@ -30,25 +30,6 @@ func (Point) TableName() string {
 	return "point"
 }
 
-func (sess Session) getParents(pointIDs []uuid.UUID) ([]Parent, error) {
-	var parents []Parent = make([]Parent, 0)
-
-	err := sess.DB.Raw(`
-		SELECT parent.*, child.id AS child_id, child.foster_care as foster_parent
-		FROM (
-				SELECT id, parent_id, FALSE as foster_care
-				FROM resource
-				WHERE id IN ?
-			UNION
-				SELECT id, foster_parent_id AS parent_id, TRUE as foster_care
-				FROM foster_care
-				WHERE id IN ?
-		) AS child
-		INNER JOIN resource parent ON child.parent_id = parent.id`, pointIDs, pointIDs).Scan(&parents).Error
-
-	return parents, err
-}
-
 func (sess Session) getRouteGraph(routeID uuid.UUID) (map[uuid.UUID]*routeGraphVertex, error) {
 	var connections []Connection = make([]Connection, 0)
 	var graph map[uuid.UUID]*routeGraphVertex = make(map[uuid.UUID]*routeGraphVertex)
@@ -193,7 +174,7 @@ func (sess Session) GetPoints(resourceID uuid.UUID) ([]*Point, error) {
 		index += 1
 	}
 
-	if parents, err := sess.getParents(pointIDs); err == nil {
+	if parents, err := sess.GetParents(pointIDs); err == nil {
 		for _, parent := range parents {
 			if point, ok := pointsMap[parent.ChildID]; ok {
 				point.Parents = append(point.Parents, parent)
@@ -265,7 +246,6 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 				return err
 			}
 		} else {
-			point.ID = uuid.New()
 			point.Anchor = anchor
 
 			resource := Resource{
@@ -276,6 +256,8 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 			if err := sess.CreateResource(&resource, routeID); err != nil {
 				return err
 			}
+
+			point.ID = resource.ID
 
 			if err := sess.DB.Create(&point).Error; err != nil {
 				return err
@@ -332,7 +314,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 			}
 		}
 
-		if parents, err := sess.getParents([]uuid.UUID{point.ID}); err == nil {
+		if parents, err := sess.GetParents([]uuid.UUID{point.ID}); err == nil {
 			point.Parents = parents
 		}
 
@@ -361,7 +343,7 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 			return err
 		}
 
-		if parents, err = sess.getParents([]uuid.UUID{pointID}); err != nil {
+		if parents, err = sess.GetParents([]uuid.UUID{pointID}); err != nil {
 			return err
 		}
 
