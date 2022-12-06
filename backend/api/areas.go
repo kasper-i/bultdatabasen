@@ -74,7 +74,6 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 	if err = sess.CreateArea(&area, resourceID, userId); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		area.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, area)
 	}
 }

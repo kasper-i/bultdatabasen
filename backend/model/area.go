@@ -20,7 +20,8 @@ func (sess Session) GetAreas(resourceID uuid.UUID) ([]Area, error) {
 	var areas []Area = make([]Area, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
-		INNER JOIN area ON tree.resource_id = area.id`,
+		INNER JOIN area ON tree.resource_id = area.id
+		INNER JOIN resource ON tree.resource_id = resource.id`,
 		withTreeQuery()), resourceID).Scan(&areas).Error; err != nil {
 		return nil, err
 	}
@@ -62,6 +63,12 @@ func (sess Session) CreateArea(area *Area, parentResourceID uuid.UUID, userID st
 
 		if err := sess.DB.Exec("INSERT INTO user_role VALUES (?, ?, ?)", userID, area.ID, "owner").Error; err != nil {
 			return err
+		}
+
+		if ancestors, err := sess.GetAncestors(area.ID); err != nil {
+			return nil
+		} else {
+			area.Ancestors = &ancestors
 		}
 
 		return nil
