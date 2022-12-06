@@ -146,16 +146,6 @@ func (sess Session) Move(resourceID, newParentID uuid.UUID) error {
 			return err
 		}
 
-		if subtree, err = sess.GetPath(resourceID); err != nil {
-			return err
-		} else {
-			oldParentID = subtree.Parent()
-		}
-
-		if oldParentID == newParentID {
-			return utils.ErrHierarchyStructureViolation
-		}
-
 		if resource, err = sess.GetResource(resourceID); err != nil {
 			return err
 		}
@@ -165,6 +155,16 @@ func (sess Session) Move(resourceID, newParentID uuid.UUID) error {
 			break
 		default:
 			return utils.ErrMoveNotPermitted
+		}
+
+		if subtree, err = sess.GetPath(resourceID); err != nil {
+			return err
+		} else {
+			oldParentID = subtree.Parent()
+		}
+
+		if oldParentID == newParentID {
+			return utils.ErrHierarchyStructureViolation
 		}
 
 		if !sess.checkParentAllowed(*resource, newParentID) {
@@ -198,11 +198,18 @@ func (sess Session) Move(resourceID, newParentID uuid.UUID) error {
 }
 
 func (sess Session) getSubtreeLock(resourceID uuid.UUID) error {
-	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT id
-		FROM tree
-		INNER JOIN resource ON tree.resource_id = resource.id
-		LEFT JOIN resource ON tree.resource_id = resource.leaf_of
-		FOR UPDATE`, withTreeQuery()), resourceID).Error; err != nil {
+	if err := sess.DB.Exec(fmt.Sprintf(`%s
+		SELECT * FROM (
+			SELECT resource_id
+			FROM tree
+			INNER JOIN resource ON tree.resource_id = resource.id
+			FOR UPDATE) t1
+		UNION ALL
+		SELECT * FROM (
+			SELECT resource_id
+			FROM tree
+			INNER JOIN resource leaf ON tree.resource_id = leaf.leaf_of
+			FOR UPDATE) t2`, withTreeQuery()), resourceID).Error; err != nil {
 		return err
 	}
 
