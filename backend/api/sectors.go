@@ -65,7 +65,6 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		sector.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, sector)
 	}
 }

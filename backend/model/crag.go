@@ -20,7 +20,8 @@ func (sess Session) GetCrags(resourceID uuid.UUID) ([]Crag, error) {
 	var crags []Crag = make([]Crag, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
-		INNER JOIN crag ON tree.resource_id = crag.id`,
+		INNER JOIN crag ON tree.resource_id = crag.id
+		INNER JOIN resource ON tree.resource_id = resource.id`,
 		withTreeQuery()), resourceID).Scan(&crags).Error; err != nil {
 		return nil, err
 	}
@@ -59,6 +60,13 @@ func (sess Session) CreateCrag(crag *Crag, parentResourceID uuid.UUID) error {
 		if err := sess.DB.Create(&crag).Error; err != nil {
 			return err
 		}
+
+		if ancestors, err := sess.GetAncestors(crag.ID); err != nil {
+			return nil
+		} else {
+			crag.Ancestors = &ancestors
+		}
+
 		return nil
 	})
 

@@ -20,7 +20,8 @@ func (sess Session) GetSectors(resourceID uuid.UUID) ([]Sector, error) {
 	var sectors []Sector = make([]Sector, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
-		INNER JOIN sector ON tree.resource_id = sector.id`,
+		INNER JOIN sector ON tree.resource_id = sector.id
+		INNER JOIN resource ON tree.resource_id = resource.id`,
 		withTreeQuery()), resourceID).Scan(&sectors).Error; err != nil {
 		return nil, err
 	}
@@ -59,6 +60,13 @@ func (sess Session) CreateSector(sector *Sector, parentResourceID uuid.UUID) err
 		if err := sess.DB.Create(&sector).Error; err != nil {
 			return err
 		}
+		
+		if ancestors, err := sess.GetAncestors(sector.ID); err != nil {
+			return nil
+		} else {
+			sector.Ancestors = &ancestors
+		}
+
 		return nil
 	})
 
