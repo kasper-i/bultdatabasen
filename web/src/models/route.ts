@@ -5,7 +5,8 @@ export type RouteType =
   | "traditional"
   | "partially_bolted"
   | "top_rope"
-  | "aid";
+  | "aid"
+  | "dws";
 
 export type Route = Omit<ResourceBase, "name"> & {
   name: string;

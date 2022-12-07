@@ -135,7 +135,7 @@ func (sess Session) GetResource(resourceID uuid.UUID) (*Resource, error) {
 	return &resource, nil
 }
 
-func (sess Session) Move(resourceID, newParentID uuid.UUID) error {
+func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 	var resource *Resource
 	var subtree Path
 	var err error
@@ -195,6 +195,10 @@ func (sess Session) Move(resourceID, newParentID uuid.UUID) error {
 
 		return sess.updateCountersForResourceAndAncestors(newParentID, resource.Counters)
 	})
+}
+
+func (sess Session) RenameResource(resourceID uuid.UUID, name string) error {
+	return sess.DB.Exec(`UPDATE resource SET name = ? WHERE id = ?`, name, resourceID).Error
 }
 
 func (sess Session) getSubtreeLock(resourceID uuid.UUID) error {

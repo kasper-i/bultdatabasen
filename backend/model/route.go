@@ -28,7 +28,8 @@ func (sess Session) GetRoutes(resourceID uuid.UUID) ([]Route, error) {
 	var routes []Route = make([]Route, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
-		INNER JOIN route ON tree.resource_id = route.id`,
+		INNER JOIN route ON tree.resource_id = route.id
+		INNER JOIN resource ON tree.resource_id = resource.id`,
 		withTreeQuery()), resourceID).Scan(&routes).Error; err != nil {
 		return nil, err
 	}
@@ -89,6 +90,12 @@ func (sess Session) CreateRoute(route *Route, parentResourceID uuid.UUID) error 
 			return err
 		}
 
+		if ancestors, err := sess.GetAncestors(route.ID); err != nil {
+			return nil
+		} else {
+			route.Ancestors = &ancestors
+		}
+
 		return nil
 	})
 
@@ -112,12 +119,16 @@ func (sess Session) UpdateRoute(routeID uuid.UUID, updatedRoute Route) (*Route, 
 
 		countersDifference := updatedRoute.Counters.Substract(original.Counters)
 
+		if updatedRoute.Name != original.Name {
+			sess.RenameResource(routeID, updatedRoute.Name)
+		}
+
 		if err := sess.TouchResource(routeID); err != nil {
 			return err
 		}
 
 		if err := sess.DB.Select(
-			"Name").Updates(updatedRoute).Error; err != nil {
+			"Name", "AltName", "Year", "Length", "RouteType").Updates(updatedRoute).Error; err != nil {
 			return err
 		}
 

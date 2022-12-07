@@ -5,7 +5,7 @@ import { useUnsafeParams } from "@/hooks/common";
 import { RouteType } from "@/models/route";
 import { usePoints } from "@/queries/pointQueries";
 import { useRoute } from "@/queries/routeQueries";
-import { Fragment, ReactElement } from "react";
+import { Fragment } from "react";
 
 const renderRouteType = (routeType: RouteType) => {
   switch (routeType) {
@@ -19,6 +19,8 @@ const renderRouteType = (routeType: RouteType) => {
       return "Topprepsled";
     case "aid":
       return "Aidled";
+    case "dws":
+      return "Djupvattensolo";
   }
 };
 

@@ -76,7 +76,7 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := sess.Move(id, newParentID); err != nil {
+		if err := sess.MoveResource(id, newParentID); err != nil {
 			utils.WriteError(w, err)
 		} else {
 			utils.WriteResponse(w, http.StatusNoContent, nil)
