@@ -11,7 +11,7 @@ import (
 func GetModels(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	manufacturerID, err := uuid.Parse(vars["resourceID"])
+	manufacturerID, err := uuid.Parse(vars["manufacturerID"])
 	if err != nil {
 		utils.WriteError(w, err)
 		return
