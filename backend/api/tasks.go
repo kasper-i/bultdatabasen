@@ -87,7 +87,6 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		task.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, task)
 	}
 }

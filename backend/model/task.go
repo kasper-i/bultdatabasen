@@ -16,7 +16,6 @@ type Task struct {
 	Priority    int        `json:"priority"`
 	Assignee    *string    `gorm:"->" json:"assignee,omitempty"`
 	Comment     *string    `json:"comment,omitempty"`
-	ParenID     uuid.UUID  `gorm:"->" json:"parentId"`
 	BirthTime   time.Time  `gorm:"->;column:btime" json:"createdAt"`
 	UserID      string     `gorm:"->;column:buser_id" json:"userId"`
 	ClosedAt    *time.Time `json:"closedAt,omitempty"`
@@ -103,8 +102,6 @@ func (sess Session) getTaskWithLock(resourceID uuid.UUID) (*Task, error) {
 }
 
 func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
-	task.ID = uuid.New()
-
 	if task.Assignee != nil {
 		task.Status = "assigned"
 	} else {
@@ -124,6 +121,10 @@ func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 		if err := sess.CreateResource(&resource, uuid.Nil); err != nil {
 			return err
 		}
+	
+		task.ID = resource.ID
+		task.BirthTime = resource.BirthTime
+		task.UserID = resource.CreatorID
 
 		if err := sess.DB.Create(&task).Error; err != nil {
 			return err
@@ -131,6 +132,12 @@ func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 
 		if err := sess.updateCountersForResourceAndAncestors(task.ID, task.Counters); err != nil {
 			return err
+		}
+
+		if ancestors, err := sess.GetAncestors(task.ID); err != nil {
+			return nil
+		} else {
+			task.Ancestors = &ancestors
 		}
 
 		return nil
