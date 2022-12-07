@@ -11,7 +11,6 @@ import (
 type Bolt struct {
 	ResourceBase
 	Type           *string    `json:"type,omitempty"`
-	LeafOf         uuid.UUID  `gorm:"->" json:"leafOf"`
 	Position       *string    `json:"position,omitempty"`
 	Installed      *time.Time `json:"installed,omitempty"`
 	Dismantled     *time.Time `json:"dismantled,omitempty"`
@@ -134,6 +133,12 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
 			return err
 		} else {
 			*bolt = *refreshedBolt
+		}
+
+		if ancestors, err := sess.GetAncestors(bolt.ID); err != nil {
+			return nil
+		} else {
+			bolt.Ancestors = &ancestors
 		}
 
 		return nil

@@ -168,7 +168,8 @@ func (sess Session) GetPoints(resourceID uuid.UUID) ([]*Point, error) {
 	var points []*Point = make([]*Point, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
-		INNER JOIN point ON tree.resource_id = point.id`,
+		INNER JOIN point ON tree.resource_id = point.id
+		INNER JOIN resource ON tree.resource_id = resource.id`,
 		withTreeQuery()), resourceID).Scan(&points).Error; err != nil {
 		return nil, err
 	}

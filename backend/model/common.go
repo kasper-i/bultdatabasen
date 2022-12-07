@@ -28,6 +28,16 @@ func withTreeQuery() string {
 	return `WITH tree AS (SELECT * FROM tree WHERE path <@ (SELECT path FROM tree WHERE resource_id = ? LIMIT 1))`
 }
 
+func (sess Session) getResourceWithLock(resourceID uuid.UUID) (*Resource, error) {
+	var resource Resource
+
+	if err := sess.DB.Raw(`SELECT * FROM resource WHERE id = ? FOR UPDATE`, resourceID).Scan(&resource).Error; err != nil {
+		return nil, err
+	}
+
+	return &resource, nil
+}
+
 func (sess Session) CreateResource(resource *Resource, parentResourceID uuid.UUID) error {
 	resource.ID = uuid.New()
 
@@ -97,7 +107,7 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 			return err
 		}
 
-		resource, err := sess.GetResource(resourceID)
+		resource, err := sess.getResourceWithLock(resourceID)
 		if err != nil {
 			return err
 		}

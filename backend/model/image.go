@@ -72,11 +72,29 @@ func (Image) TableName() string {
 func (sess Session) GetImages(resourceID uuid.UUID) ([]Image, error) {
 	var images []Image = make([]Image, 0)
 
-	if err := sess.DB.Raw(`SELECT * FROM resource INNER JOIN image ON resource.id = image.id WHERE leaf_of = ?`, resourceID).Scan(&images).Error; err != nil {
+	if err := sess.DB.Raw(fmt.Sprintf(`%s
+		SELECT * FROM tree
+		INNER JOIN resource ON tree.resource_id = resource.leaf_of
+		INNER JOIN image ON resource.id = image.id`, withTreeQuery()), resourceID).Scan(&images).Error; err != nil {
 		return nil, err
 	}
 
 	return images, nil
+}
+
+func (sess Session) getImageWithLock(imageID uuid.UUID) (*Image, error) {
+	var image Image
+
+	if err := sess.DB.Raw(`SELECT * FROM image INNER JOIN resource ON image.id = resource.id WHERE image.id = ? FOR UPDATE`, imageID).
+		Scan(&image).Error; err != nil {
+		return nil, err
+	}
+
+	if image.ID == uuid.Nil {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return &image, nil
 }
 
 func (sess Session) GetImage(imageID uuid.UUID) (*Image, error) {
@@ -219,7 +237,7 @@ func (sess Session) DeleteImage(imageID uuid.UUID) error {
 }
 
 func (sess Session) PatchImage(imageID uuid.UUID, patch ImagePatch) error {
-	original, err := sess.GetImage(imageID)
+	original, err := sess.getImageWithLock(imageID)
 	if err != nil {
 		return err
 	}
