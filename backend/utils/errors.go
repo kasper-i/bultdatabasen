@@ -13,4 +13,5 @@ var (
 	ErrLoopDetected                = errors.New("Loop detected")
 	ErrCorruptResource             = errors.New("Corrupt resource")
 	ErrMoveNotPermitted            = errors.New("Not permitted to move resource")
+	ErrNotFound                    = errors.New("Not found")
 )

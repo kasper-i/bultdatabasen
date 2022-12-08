@@ -29,7 +29,7 @@ func WriteError(w http.ResponseWriter, err error) {
 	error := Error{}
 	var status int
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, ErrNotFound) {
 		status = http.StatusNotFound
 	} else if errors.Is(err, gorm.ErrInvalidData) {
 		status = http.StatusBadRequest
