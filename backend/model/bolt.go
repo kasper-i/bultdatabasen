@@ -111,11 +111,10 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
 	resource := Resource{
 		ResourceBase: bolt.ResourceBase,
 		Type:         TypeBolt,
-		LeafOf:       &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(&resource, uuid.Nil); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
 

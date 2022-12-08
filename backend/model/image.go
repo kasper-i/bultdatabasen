@@ -151,7 +151,6 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 
 	resource := Resource{
 		Type:         TypeImage,
-		LeafOf:       &parentResourceID,
 	}
 	
 	reader := bytes.NewReader(imageBytes)
@@ -184,7 +183,7 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 	}
 
 	err = sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(&resource, uuid.Nil); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
 

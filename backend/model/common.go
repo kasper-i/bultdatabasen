@@ -57,9 +57,7 @@ func (sess Session) CreateResource(resource *Resource, parentResourceID uuid.UUI
 
 		resource.LeafOf = nil
 	default:
-		if resource.LeafOf == nil {
-			return utils.ErrOrphanedResource
-		}
+		resource.LeafOf = &parentResourceID
 	}
 
 	err := sess.Transaction(func(sess Session) error {

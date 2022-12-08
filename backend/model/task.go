@@ -114,11 +114,10 @@ func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 	resource := Resource{
 		ResourceBase: task.ResourceBase,
 		Type:         TypeTask,
-		LeafOf:       &parentResourceID,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(&resource, uuid.Nil); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
 	
