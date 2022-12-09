@@ -23,7 +23,7 @@ jobs:
           FUNCTIONS_SECRET: ${{ secrets.FUNCTIONS_SECRET }}
         run: |
           pip install virtualenv
-          doctl serverless deploy . --verbose-build --verbose-zip
+          doctl serverless deploy .
         working-directory: backend/functions
 
 on:
