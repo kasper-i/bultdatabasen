@@ -17,7 +17,7 @@ packages:
         parameters: {}
         environment: {}
         annotations:
-          webSecure: letmein
+          webSecure: true
         limits:
           timeout: 10000
           memory: 1024
