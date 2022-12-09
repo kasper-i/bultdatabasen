@@ -23,7 +23,7 @@ jobs:
           SECRET: "letmein"
         run: |
           pip install virtualenv
-          doctl serverless deploy . --verbose-build --verbose-zip
+          doctl serverless deploy . --verbose-build --verbose-zip --remote-build
         working-directory: backend/functions
 
 on:
