@@ -14,6 +14,7 @@ jobs:
         env:
           SPACES_SECRET: ${{ secrets.SPACES_SECRET }}
           SPACES_KEY: ${{ secrets.SPACES_KEY }}
+          SECRET: ${{ secrets.SECRET }}
         run: |
           doctl serverless connect sandbox
           doctl serverless deploy . --remote-build
