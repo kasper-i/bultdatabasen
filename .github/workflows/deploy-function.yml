@@ -11,6 +11,9 @@ jobs:
           doctl auth init --verbose --access-token=${{ secrets.DO_API_TOKEN }}
           doctl serverless install
       - name: Deploy
+        env:
+          SPACES_SECRET: ${{ secrets.SPACES_SECRET }}
+          SPACES_KEY: ${{ secrets.SPACES_KEY }}
         run: |
           doctl serverless connect sandbox
           doctl serverless deploy . --remote-build
