@@ -13,6 +13,7 @@ packages:
         main: ""
         runtime: "python:default"
         web: true
+        webSecure: "${FUNCTIONS_SECRET}"
         parameters: {}
         environment: {}
         annotations: {}
