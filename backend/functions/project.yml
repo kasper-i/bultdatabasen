@@ -17,7 +17,7 @@ packages:
         parameters: {}
         environment: {}
         annotations:
-          require-whisk-auth: letmein
+          webSecure: letmein
         limits:
           timeout: 10000
           memory: 1024
