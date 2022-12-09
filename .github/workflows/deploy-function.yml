@@ -10,18 +10,19 @@ jobs:
           python-version: "3.10"
       - name: Install and Configure doctl
         run: |
-          wget https://github.com/digitalocean/doctl/releases/download/v1.86.0/doctl-1.86.0-linux-amd64.tar.gz
+          wget --progress=bar:force:noscroll https://github.com/digitalocean/doctl/releases/download/v1.86.0/doctl-1.86.0-linux-amd64.tar.gz
           tar xf doctl-1.86.0-linux-amd64.tar.gz
           sudo mv doctl /usr/local/bin
           doctl auth init --verbose --access-token=${{ secrets.DO_API_TOKEN }}
           doctl serverless install
+          doctl serverless connect sandbox
       - name: Deploy
         env:
           SPACES_SECRET: ${{ secrets.SPACES_SECRET }}
           SPACES_KEY: ${{ secrets.SPACES_KEY }}
           SECRET: "letmein"
         run: |
-          doctl serverless connect sandbox
+          pip install virtualenv
           doctl serverless deploy .
         working-directory: backend/functions
 
