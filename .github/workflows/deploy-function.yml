@@ -9,10 +9,10 @@ jobs:
         run: |
           sudo snap install doctl
           doctl auth init --verbose --access-token=${{ secrets.DO_API_TOKEN }}
-          doctl account get
           doctl serverless install
       - name: Deploy
         run: |
+          doctl serverless connect sandbox
           doctl serverless deploy . --remote-build
         working-directory: backend/functions
 
