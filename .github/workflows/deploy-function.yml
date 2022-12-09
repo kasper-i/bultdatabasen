@@ -20,10 +20,10 @@ jobs:
         env:
           SPACES_SECRET: ${{ secrets.SPACES_SECRET }}
           SPACES_KEY: ${{ secrets.SPACES_KEY }}
-          FUNCTIONS_SECRET: "letmeout"
+          FUNCTIONS_SECRET: ${{ secrets.FUNCTIONS_SECRET }}
         run: |
           pip install virtualenv
-          doctl serverless deploy . --verbose-build --verbose-zip --remote-build
+          doctl serverless deploy . --verbose-build --verbose-zip
         working-directory: backend/functions
 
 on:
