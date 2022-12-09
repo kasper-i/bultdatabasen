@@ -14,10 +14,10 @@ packages:
         main: ""
         runtime: "python:default"
         web: true
+        webSecure: "letmein"
         parameters: {}
         environment: {}
-        annotations:
-          webSecure: true
+        annotations: {}
         limits:
           timeout: 10000
           memory: 1024
