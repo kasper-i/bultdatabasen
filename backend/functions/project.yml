@@ -14,11 +14,10 @@ packages:
         main: ""
         runtime: "python:default"
         web: true
-        annotations:
-          require-whisk-auth: letmein
         parameters: {}
         environment: {}
-        annotations: {}
+        annotations:
+          require-whisk-auth: letmein
         limits:
           timeout: 10000
           memory: 1024
