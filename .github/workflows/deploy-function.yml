@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install and Configure doctl
         run: |
-          snap install doctl
+          sudo snap install doctl
           mkdir ~/.config
           doctl auth init --access-token=${{ secrets.DO_API_TOKEN }}
           doctl account get
