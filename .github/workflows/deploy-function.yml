@@ -17,7 +17,7 @@ jobs:
           SECRET: "letmein"
         run: |
           doctl serverless connect sandbox
-          doctl serverless deploy . --remote-build
+          doctl serverless deploy .
         working-directory: backend/functions
 
 on:
