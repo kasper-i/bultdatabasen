@@ -1,0 +1,26 @@
+jobs:
+  build:
+    name: Deploy Function
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install and Configure doctl
+        run: |
+          snap install doctl
+          mkdir ~/.config
+          doctl auth init --access-token=${{ secrets.DO_API_TOKEN }}
+          doctl account get
+          doctl serverless install
+      - name: Deploy
+        run: |
+          doctl serverless deploy . --remote-build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - 245-create-github-workflow-to-deploy-image-resize-function-to-do
+    paths:
+      - "backend/functions/**"
