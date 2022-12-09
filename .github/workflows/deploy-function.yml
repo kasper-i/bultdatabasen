@@ -7,7 +7,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install and Configure doctl
         run: |
-          sudo snap install doctl
+          wget https://github.com/digitalocean/doctl/releases/download/v1.86.0/doctl-1.86.0-linux-amd64.tar.gz
+          tar xf ~/doctl-1.86.0-linux-amd64.tar.gz
+          sudo mv ~/doctl /usr/local/bin
           doctl auth init --verbose --access-token=${{ secrets.DO_API_TOKEN }}
           doctl serverless install
       - name: Deploy
