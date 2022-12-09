@@ -14,6 +14,7 @@ jobs:
       - name: Deploy
         run: |
           doctl serverless deploy . --remote-build
+        working-directory: backend/functions
 
 on:
   workflow_dispatch:
