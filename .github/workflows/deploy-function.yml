@@ -24,3 +24,4 @@ on:
       - 245-create-github-workflow-to-deploy-image-resize-function-to-do
     paths:
       - "backend/functions/**"
+      - ".github/workflows/deploy-function.yml"
