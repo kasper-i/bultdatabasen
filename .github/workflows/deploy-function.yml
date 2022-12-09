@@ -8,7 +8,7 @@ jobs:
       - name: Install and Configure doctl
         run: |
           sudo snap install doctl
-          doctl auth init --verbose --interactive=false --access-token=${{ secrets.DO_API_TOKEN }}
+          doctl auth init --verbose --access-token=${{ secrets.DO_API_TOKEN }}
           doctl account get
           doctl serverless install
       - name: Deploy
