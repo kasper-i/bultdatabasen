@@ -41,7 +41,6 @@ func (sess Session) GetBolts(resourceID uuid.UUID) ([]Bolt, error) {
 
 	query := fmt.Sprintf(`%s SELECT
 		bolt.*,
-		resource.leaf_of AS parent_id,
 		resource.counters,
 		mf.name AS manufacturer,
 		mo.name AS model,
