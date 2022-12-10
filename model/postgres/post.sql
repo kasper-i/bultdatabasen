@@ -240,5 +240,4 @@ ALTER TABLE resource RENAME COLUMN parent_id TO leaf_of;
 
 ALTER TABLE trash RENAME COLUMN orig_parent_id TO orig_leaf_of;
 ALTER TABLE trash ALTER COLUMN orig_leaf_of DROP NOT NULL;
-ALTER TABLE trash ADD COLUMN 
-ALTER TABLE trash ADD orig_path ltree;
+ALTER TABLE trash ADD COLUMN orig_path ltree;
