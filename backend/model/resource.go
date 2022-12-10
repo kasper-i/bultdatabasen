@@ -146,7 +146,7 @@ func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 			return err
 		}
 
-		if resource, err = sess.GetResource(resourceID); err != nil {
+		if resource, err = sess.getResourceWithLock(resourceID); err != nil {
 			return err
 		}
 
