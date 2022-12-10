@@ -51,13 +51,13 @@ func (sess Session) CreateResource(resource *Resource, parentResourceID uuid.UUI
 	case TypeRoot:
 		return utils.ErrNotPermitted
 	case TypeArea, TypeCrag, TypeSector, TypeRoute, TypePoint:
-		if !sess.checkParentAllowed(*resource, parentResourceID) {
-			return utils.ErrHierarchyStructureViolation
-		}
-
 		resource.LeafOf = nil
 	default:
 		resource.LeafOf = &parentResourceID
+	}
+
+	if !sess.checkParentAllowed(*resource, parentResourceID) {
+		return utils.ErrHierarchyStructureViolation
 	}
 
 	err := sess.Transaction(func(sess Session) error {
@@ -174,6 +174,14 @@ func (sess Session) checkParentAllowed(resource Resource, parentID uuid.UUID) bo
 		return pt == TypeArea || pt == TypeCrag || pt == TypeSector
 	case TypePoint:
 		return pt == TypeRoute
+	case TypeBolt:
+		return pt == TypePoint
+	case TypeImage:
+		return pt == TypePoint
+	case TypeComment:
+		return pt == TypePoint
+	case TypeTask:
+		return pt == TypeRoute || pt == TypePoint
 	default:
 		return false
 	}
