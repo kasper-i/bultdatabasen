@@ -120,7 +120,9 @@ func (sess Session) UpdateRoute(routeID uuid.UUID, updatedRoute Route) (*Route, 
 		countersDifference := updatedRoute.Counters.Substract(original.Counters)
 
 		if updatedRoute.Name != original.Name {
-			sess.RenameResource(routeID, updatedRoute.Name)
+			if err := sess.RenameResource(routeID, updatedRoute.Name); err != nil {
+				return err
+			}
 		}
 
 		if err := sess.TouchResource(routeID); err != nil {

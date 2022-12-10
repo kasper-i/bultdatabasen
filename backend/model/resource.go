@@ -198,7 +198,8 @@ func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 }
 
 func (sess Session) RenameResource(resourceID uuid.UUID, name string) error {
-	return sess.DB.Exec(`UPDATE resource SET name = ? WHERE id = ?`, name, resourceID).Error
+	return sess.DB.Exec(`UPDATE resource SET name = ?, mtime = ?, muser_id = ? WHERE id = ?`,
+		name, time.Now(), sess.UserID, resourceID).Error
 }
 
 func (sess Session) getSubtreeLock(resourceID uuid.UUID) error {
