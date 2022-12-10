@@ -241,3 +241,14 @@ ALTER TABLE resource RENAME COLUMN parent_id TO leaf_of;
 ALTER TABLE trash RENAME COLUMN orig_parent_id TO orig_leaf_of;
 ALTER TABLE trash ALTER COLUMN orig_leaf_of DROP NOT NULL;
 ALTER TABLE trash ADD COLUMN orig_path ltree;
+
+-- migrate trash bin items
+
+UPDATE trash
+SET orig_path = sub.orig_path, orig_leaf_of = NULL
+FROM (
+    SELECT trash.resource_id, path || REPLACE(trash.resource_id::text, '-', '_') AS orig_path FROM trash
+    INNER JOIN resource ON resource_id = resource.id
+    INNER JOIN tree ON orig_leaf_of = tree.resource_id
+    WHERE type IN ('area', 'crag', 'sector', 'route', 'point') AND orig_path IS NULL) sub
+WHERE trash.resource_id = sub.resource_id;
