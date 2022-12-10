@@ -63,7 +63,7 @@ ALTER TABLE resource DROP COLUMN depth;
 UPDATE resource SET parent_id = NULL WHERE type IN ('area', 'crag', 'point', 'root', 'route', 'sector');
 DROP TABLE foster_care;
 
--- mode resource types into resource_type enum type
+-- move resource types into resource_type enum type
 
 DROP TABLE resource_type;
 
