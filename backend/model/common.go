@@ -35,6 +35,10 @@ func (sess Session) getResourceWithLock(resourceID uuid.UUID) (*Resource, error)
 		return nil, err
 	}
 
+	if resource.ID == uuid.Nil {
+		return nil, gorm.ErrRecordNotFound
+	}
+
 	return &resource, nil
 }
 

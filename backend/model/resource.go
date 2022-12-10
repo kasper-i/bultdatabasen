@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
@@ -130,6 +131,10 @@ func (sess Session) GetResource(resourceID uuid.UUID) (*Resource, error) {
 
 	if err := sess.DB.First(&resource, "id = ?", resourceID).Error; err != nil {
 		return nil, err
+	}
+
+	if resource.ID == uuid.Nil {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &resource, nil
