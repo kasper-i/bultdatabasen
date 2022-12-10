@@ -64,7 +64,6 @@ func (sess Session) GetBolt(resourceID uuid.UUID) (*Bolt, error) {
 
 	if err := sess.DB.Raw(`SELECT
 			bolt.*,
-			resource.leaf_of AS parent_id,
 			resource.counters,
 			mf.name AS manufacturer,
 			mo.name AS model,
