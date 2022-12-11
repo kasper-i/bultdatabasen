@@ -58,6 +58,7 @@ BEGIN
 END $$ LANGUAGE plpgsql;
 
 SELECT populate_path(id) FROM resource WHERE type <> 'root' AND depth < 600 AND parent_id IS NOT NULL;
+DROP FUNCTION populate_path;
 
 ALTER TABLE resource DROP COLUMN depth;
 UPDATE resource SET parent_id = NULL WHERE type IN ('area', 'crag', 'point', 'root', 'route', 'sector');

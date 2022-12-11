@@ -24,6 +24,20 @@ CREATE SCHEMA bultdatabasen;
 
 
 --
+-- Name: ltree; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS ltree WITH SCHEMA bultdatabasen;
+
+
+--
+-- Name: EXTENSION ltree; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION ltree IS 'data type for hierarchical tree-like structures';
+
+
+--
 -- Name: bolt_diameter_unit; Type: TYPE; Schema: bultdatabasen; Owner: -
 --
 
@@ -88,6 +102,47 @@ CREATE TYPE bultdatabasen.model_type AS ENUM (
 
 
 --
+-- Name: resource_type; Type: TYPE; Schema: bultdatabasen; Owner: -
+--
+
+CREATE TYPE bultdatabasen.resource_type AS ENUM (
+    'area',
+    'bolt',
+    'comment',
+    'crag',
+    'image',
+    'point',
+    'root',
+    'route',
+    'sector',
+    'task'
+);
+
+
+--
+-- Name: role; Type: TYPE; Schema: bultdatabasen; Owner: -
+--
+
+CREATE TYPE bultdatabasen.role AS ENUM (
+    'owner'
+);
+
+
+--
+-- Name: route_type; Type: TYPE; Schema: bultdatabasen; Owner: -
+--
+
+CREATE TYPE bultdatabasen.route_type AS ENUM (
+    'aid',
+    'dws',
+    'partially_bolted',
+    'sport',
+    'top_rope',
+    'traditional'
+);
+
+
+--
 -- Name: task_status; Type: TYPE; Schema: bultdatabasen; Owner: -
 --
 
@@ -108,7 +163,7 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE bultdatabasen.area (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256) NOT NULL
 );
 
@@ -118,14 +173,14 @@ CREATE TABLE bultdatabasen.area (
 --
 
 CREATE TABLE bultdatabasen.bolt (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     type bultdatabasen.bolt_type,
     "position" bultdatabasen.bolt_position,
     installed timestamp with time zone,
     dismantled timestamp with time zone,
-    manufacturer_id character varying(36),
-    model_id character varying(36),
-    material_id character varying(36),
+    manufacturer_id uuid,
+    model_id uuid,
+    material_id uuid,
     diameter double precision,
     diameter_unit bultdatabasen.bolt_diameter_unit
 );
@@ -136,9 +191,9 @@ CREATE TABLE bultdatabasen.bolt (
 --
 
 CREATE TABLE bultdatabasen.connection (
-    route_id character varying(36) NOT NULL,
-    src_point_id character varying(36) NOT NULL,
-    dst_point_id character varying(36) NOT NULL
+    route_id uuid NOT NULL,
+    src_point_id uuid NOT NULL,
+    dst_point_id uuid NOT NULL
 );
 
 
@@ -147,18 +202,8 @@ CREATE TABLE bultdatabasen.connection (
 --
 
 CREATE TABLE bultdatabasen.crag (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256) NOT NULL
-);
-
-
---
--- Name: foster_care; Type: TABLE; Schema: bultdatabasen; Owner: -
---
-
-CREATE TABLE bultdatabasen.foster_care (
-    id character varying(36) NOT NULL,
-    foster_parent_id character varying(36) NOT NULL
 );
 
 
@@ -167,7 +212,7 @@ CREATE TABLE bultdatabasen.foster_care (
 --
 
 CREATE TABLE bultdatabasen.image (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     mime_type character varying(64) NOT NULL,
     "timestamp" timestamp with time zone NOT NULL,
     description text,
@@ -183,9 +228,9 @@ CREATE TABLE bultdatabasen.image (
 --
 
 CREATE TABLE bultdatabasen.invite (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     user_id character varying(36) NOT NULL,
-    team_id character varying(36) NOT NULL,
+    team_id uuid NOT NULL,
     expiration_date timestamp with time zone NOT NULL,
     status bultdatabasen.invite_status NOT NULL
 );
@@ -196,7 +241,7 @@ CREATE TABLE bultdatabasen.invite (
 --
 
 CREATE TABLE bultdatabasen.manufacturer (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256) NOT NULL
 );
 
@@ -206,7 +251,7 @@ CREATE TABLE bultdatabasen.manufacturer (
 --
 
 CREATE TABLE bultdatabasen.material (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256) NOT NULL
 );
 
@@ -216,11 +261,11 @@ CREATE TABLE bultdatabasen.material (
 --
 
 CREATE TABLE bultdatabasen.model (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256) NOT NULL,
-    manufacturer_id character varying(36) NOT NULL,
+    manufacturer_id uuid NOT NULL,
     type bultdatabasen.model_type,
-    material_id character varying(36),
+    material_id uuid,
     diameter double precision,
     diameter_unit bultdatabasen.model_diameter_unit
 );
@@ -231,7 +276,7 @@ CREATE TABLE bultdatabasen.model (
 --
 
 CREATE TABLE bultdatabasen.point (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     anchor boolean NOT NULL
 );
 
@@ -241,35 +286,15 @@ CREATE TABLE bultdatabasen.point (
 --
 
 CREATE TABLE bultdatabasen.resource (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256),
-    type character varying(64) NOT NULL,
-    depth integer NOT NULL,
-    parent_id character varying(36),
+    type bultdatabasen.resource_type NOT NULL,
+    leaf_of uuid,
     btime timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     mtime timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     buser_id character varying(36) NOT NULL,
     muser_id character varying(36) NOT NULL,
-    counters json NOT NULL
-);
-
-
---
--- Name: resource_type; Type: TABLE; Schema: bultdatabasen; Owner: -
---
-
-CREATE TABLE bultdatabasen.resource_type (
-    name character varying(64) NOT NULL,
-    depth integer NOT NULL
-);
-
-
---
--- Name: role; Type: TABLE; Schema: bultdatabasen; Owner: -
---
-
-CREATE TABLE bultdatabasen.role (
-    name character varying(64) NOT NULL
+    counters json DEFAULT json_build_object() NOT NULL
 );
 
 
@@ -278,22 +303,12 @@ CREATE TABLE bultdatabasen.role (
 --
 
 CREATE TABLE bultdatabasen.route (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256) NOT NULL,
     alt_name character varying(256),
     year integer,
-    route_type character varying(64),
-    external_link character varying(2048),
+    route_type bultdatabasen.route_type,
     length integer
-);
-
-
---
--- Name: route_type; Type: TABLE; Schema: bultdatabasen; Owner: -
---
-
-CREATE TABLE bultdatabasen.route_type (
-    name character varying(64) NOT NULL
 );
 
 
@@ -302,7 +317,7 @@ CREATE TABLE bultdatabasen.route_type (
 --
 
 CREATE TABLE bultdatabasen.sector (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256) NOT NULL
 );
 
@@ -312,7 +327,7 @@ CREATE TABLE bultdatabasen.sector (
 --
 
 CREATE TABLE bultdatabasen.task (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     status bultdatabasen.task_status DEFAULT 'open'::bultdatabasen.task_status NOT NULL,
     description text NOT NULL,
     priority integer DEFAULT 2 NOT NULL,
@@ -327,7 +342,7 @@ CREATE TABLE bultdatabasen.task (
 --
 
 CREATE TABLE bultdatabasen.team (
-    id character varying(36) NOT NULL,
+    id uuid NOT NULL,
     name character varying(256)
 );
 
@@ -337,9 +352,9 @@ CREATE TABLE bultdatabasen.team (
 --
 
 CREATE TABLE bultdatabasen.team_role (
-    team_id character varying(36) NOT NULL,
-    resource_id character varying(36) NOT NULL,
-    role character varying(64) NOT NULL
+    team_id uuid NOT NULL,
+    resource_id uuid NOT NULL,
+    role bultdatabasen.role NOT NULL
 );
 
 
@@ -348,10 +363,21 @@ CREATE TABLE bultdatabasen.team_role (
 --
 
 CREATE TABLE bultdatabasen.trash (
-    resource_id character varying(36) NOT NULL,
+    resource_id uuid NOT NULL,
     dtime timestamp with time zone NOT NULL,
     duser_id character varying(36) NOT NULL,
-    orig_parent_id character varying(36) NOT NULL
+    orig_leaf_of uuid,
+    orig_path bultdatabasen.ltree
+);
+
+
+--
+-- Name: tree; Type: TABLE; Schema: bultdatabasen; Owner: -
+--
+
+CREATE TABLE bultdatabasen.tree (
+    resource_id uuid NOT NULL,
+    path bultdatabasen.ltree NOT NULL
 );
 
 
@@ -374,8 +400,8 @@ CREATE TABLE bultdatabasen."user" (
 
 CREATE TABLE bultdatabasen.user_role (
     user_id character varying(36) NOT NULL,
-    resource_id character varying(36) NOT NULL,
-    role character varying(64) NOT NULL
+    resource_id uuid NOT NULL,
+    role bultdatabasen.role NOT NULL
 );
 
 
@@ -385,432 +411,379 @@ CREATE TABLE bultdatabasen.user_role (
 
 CREATE TABLE bultdatabasen.user_team (
     user_id character varying(36) NOT NULL,
-    team_id character varying(36) NOT NULL,
+    team_id uuid NOT NULL,
     admin smallint NOT NULL
 );
 
 
 --
--- Name: area idx_20557_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: area idx_29521_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.area
-    ADD CONSTRAINT idx_20557_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29521_primary PRIMARY KEY (id);
 
 
 --
--- Name: bolt idx_20560_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: bolt idx_29524_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.bolt
-    ADD CONSTRAINT idx_20560_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29524_primary PRIMARY KEY (id);
 
 
 --
--- Name: connection idx_20563_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: connection idx_29527_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.connection
-    ADD CONSTRAINT idx_20563_primary PRIMARY KEY (src_point_id, dst_point_id, route_id);
+    ADD CONSTRAINT idx_29527_primary PRIMARY KEY (src_point_id, dst_point_id, route_id);
 
 
 --
--- Name: crag idx_20566_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: crag idx_29530_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.crag
-    ADD CONSTRAINT idx_20566_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29530_primary PRIMARY KEY (id);
 
 
 --
--- Name: foster_care idx_20569_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.foster_care
-    ADD CONSTRAINT idx_20569_primary PRIMARY KEY (id, foster_parent_id);
-
-
---
--- Name: image idx_20572_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: image idx_29536_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.image
-    ADD CONSTRAINT idx_20572_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29536_primary PRIMARY KEY (id);
 
 
 --
--- Name: invite idx_20578_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: invite idx_29542_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.invite
-    ADD CONSTRAINT idx_20578_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29542_primary PRIMARY KEY (id);
 
 
 --
--- Name: manufacturer idx_20581_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: manufacturer idx_29545_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.manufacturer
-    ADD CONSTRAINT idx_20581_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29545_primary PRIMARY KEY (id);
 
 
 --
--- Name: material idx_20584_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: material idx_29548_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.material
-    ADD CONSTRAINT idx_20584_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29548_primary PRIMARY KEY (id);
 
 
 --
--- Name: model idx_20587_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: model idx_29551_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.model
-    ADD CONSTRAINT idx_20587_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29551_primary PRIMARY KEY (id);
 
 
 --
--- Name: point idx_20590_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: point idx_29554_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.point
-    ADD CONSTRAINT idx_20590_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29554_primary PRIMARY KEY (id);
 
 
 --
--- Name: resource idx_20593_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: resource idx_29557_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.resource
-    ADD CONSTRAINT idx_20593_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29557_primary PRIMARY KEY (id);
 
 
 --
--- Name: resource_type idx_20601_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.resource_type
-    ADD CONSTRAINT idx_20601_primary PRIMARY KEY (name);
-
-
---
--- Name: role idx_20604_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.role
-    ADD CONSTRAINT idx_20604_primary PRIMARY KEY (name);
-
-
---
--- Name: route idx_20607_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: route idx_29571_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.route
-    ADD CONSTRAINT idx_20607_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29571_primary PRIMARY KEY (id);
 
 
 --
--- Name: route_type idx_20613_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.route_type
-    ADD CONSTRAINT idx_20613_primary PRIMARY KEY (name);
-
-
---
--- Name: sector idx_20616_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: sector idx_29580_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.sector
-    ADD CONSTRAINT idx_20616_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29580_primary PRIMARY KEY (id);
 
 
 --
--- Name: task idx_20619_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: task idx_29583_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.task
-    ADD CONSTRAINT idx_20619_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29583_primary PRIMARY KEY (id);
 
 
 --
--- Name: team idx_20627_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: team idx_29591_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.team
-    ADD CONSTRAINT idx_20627_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29591_primary PRIMARY KEY (id);
 
 
 --
--- Name: team_role idx_20630_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: team_role idx_29594_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.team_role
-    ADD CONSTRAINT idx_20630_primary PRIMARY KEY (team_id, resource_id);
+    ADD CONSTRAINT idx_29594_primary PRIMARY KEY (team_id, resource_id);
 
 
 --
--- Name: trash idx_20633_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: trash idx_29597_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.trash
-    ADD CONSTRAINT idx_20633_primary PRIMARY KEY (resource_id);
+    ADD CONSTRAINT idx_29597_primary PRIMARY KEY (resource_id);
 
 
 --
--- Name: user idx_20636_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: user idx_29600_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen."user"
-    ADD CONSTRAINT idx_20636_primary PRIMARY KEY (id);
+    ADD CONSTRAINT idx_29600_primary PRIMARY KEY (id);
 
 
 --
--- Name: user_role idx_20643_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: user_role idx_29607_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.user_role
-    ADD CONSTRAINT idx_20643_primary PRIMARY KEY (user_id, resource_id);
+    ADD CONSTRAINT idx_29607_primary PRIMARY KEY (user_id, resource_id);
 
 
 --
--- Name: user_team idx_20646_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: user_team idx_29610_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.user_team
-    ADD CONSTRAINT idx_20646_primary PRIMARY KEY (user_id, team_id);
+    ADD CONSTRAINT idx_29610_primary PRIMARY KEY (user_id, team_id);
 
 
 --
--- Name: idx_20557_fk_area_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: fk_tree_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20557_fk_area_1_idx ON bultdatabasen.area USING btree (id, name);
+CREATE INDEX fk_tree_1_idx ON bultdatabasen.tree USING btree (resource_id);
 
 
 --
--- Name: idx_20560_fk_bolt_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29521_fk_area_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20560_fk_bolt_2_idx ON bultdatabasen.bolt USING btree (model_id, manufacturer_id);
+CREATE INDEX idx_29521_fk_area_1_idx ON bultdatabasen.area USING btree (id, name);
 
 
 --
--- Name: idx_20560_fk_bolt_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29524_fk_bolt_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20560_fk_bolt_3_idx ON bultdatabasen.bolt USING btree (manufacturer_id);
+CREATE INDEX idx_29524_fk_bolt_2_idx ON bultdatabasen.bolt USING btree (model_id, manufacturer_id);
 
 
 --
--- Name: idx_20560_fk_bolt_4_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29524_fk_bolt_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20560_fk_bolt_4_idx ON bultdatabasen.bolt USING btree (material_id);
+CREATE INDEX idx_29524_fk_bolt_3_idx ON bultdatabasen.bolt USING btree (manufacturer_id);
 
 
 --
--- Name: idx_20563_fk_connection_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29524_fk_bolt_4_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20563_fk_connection_1_idx ON bultdatabasen.connection USING btree (src_point_id);
+CREATE INDEX idx_29524_fk_bolt_4_idx ON bultdatabasen.bolt USING btree (material_id);
 
 
 --
--- Name: idx_20563_fk_connection_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29527_fk_connection_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20563_fk_connection_2_idx ON bultdatabasen.connection USING btree (dst_point_id);
+CREATE INDEX idx_29527_fk_connection_1_idx ON bultdatabasen.connection USING btree (src_point_id);
 
 
 --
--- Name: idx_20563_fk_connection_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29527_fk_connection_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20563_fk_connection_3_idx ON bultdatabasen.connection USING btree (route_id);
+CREATE INDEX idx_29527_fk_connection_2_idx ON bultdatabasen.connection USING btree (dst_point_id);
 
 
 --
--- Name: idx_20563_index5; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29527_fk_connection_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_20563_index5 ON bultdatabasen.connection USING btree (route_id, dst_point_id);
+CREATE INDEX idx_29527_fk_connection_3_idx ON bultdatabasen.connection USING btree (route_id);
 
 
 --
--- Name: idx_20563_index6; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29527_index5; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_20563_index6 ON bultdatabasen.connection USING btree (route_id, src_point_id);
+CREATE UNIQUE INDEX idx_29527_index5 ON bultdatabasen.connection USING btree (route_id, dst_point_id);
 
 
 --
--- Name: idx_20566_fk_crag_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29527_index6; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20566_fk_crag_1_idx ON bultdatabasen.crag USING btree (id, name);
+CREATE UNIQUE INDEX idx_29527_index6 ON bultdatabasen.connection USING btree (route_id, src_point_id);
 
 
 --
--- Name: idx_20569_fk_foster_care_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29530_fk_crag_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20569_fk_foster_care_2_idx ON bultdatabasen.foster_care USING btree (foster_parent_id);
+CREATE INDEX idx_29530_fk_crag_1_idx ON bultdatabasen.crag USING btree (id, name);
 
 
 --
--- Name: idx_20578_fk_invite_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29542_fk_invite_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20578_fk_invite_1_idx ON bultdatabasen.invite USING btree (user_id);
+CREATE INDEX idx_29542_fk_invite_1_idx ON bultdatabasen.invite USING btree (user_id);
 
 
 --
--- Name: idx_20578_fk_invite_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29542_fk_invite_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20578_fk_invite_2_idx ON bultdatabasen.invite USING btree (team_id);
+CREATE INDEX idx_29542_fk_invite_2_idx ON bultdatabasen.invite USING btree (team_id);
 
 
 --
--- Name: idx_20587_fk_model_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29551_fk_model_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20587_fk_model_1_idx ON bultdatabasen.model USING btree (manufacturer_id);
+CREATE INDEX idx_29551_fk_model_1_idx ON bultdatabasen.model USING btree (manufacturer_id);
 
 
 --
--- Name: idx_20587_fk_model_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29551_fk_model_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20587_fk_model_2_idx ON bultdatabasen.model USING btree (material_id);
+CREATE INDEX idx_29551_fk_model_2_idx ON bultdatabasen.model USING btree (material_id);
 
 
 --
--- Name: idx_20587_index3; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29551_index3; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_20587_index3 ON bultdatabasen.model USING btree (id, manufacturer_id);
+CREATE UNIQUE INDEX idx_29551_index3 ON bultdatabasen.model USING btree (id, manufacturer_id);
 
 
 --
--- Name: idx_20593_fk_resource_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29557_fk_resource_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20593_fk_resource_1_idx ON bultdatabasen.resource USING btree (parent_id);
+CREATE INDEX idx_29557_fk_resource_1_idx ON bultdatabasen.resource USING btree (leaf_of);
 
 
 --
--- Name: idx_20593_fk_resource_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29557_fk_resource_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20593_fk_resource_2_idx ON bultdatabasen.resource USING btree (type, depth);
+CREATE INDEX idx_29557_fk_resource_3_idx ON bultdatabasen.resource USING btree (buser_id);
 
 
 --
--- Name: idx_20593_fk_resource_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29557_fk_resource_4_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20593_fk_resource_3_idx ON bultdatabasen.resource USING btree (buser_id);
+CREATE INDEX idx_29557_fk_resource_4_idx ON bultdatabasen.resource USING btree (muser_id);
 
 
 --
--- Name: idx_20593_fk_resource_4_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29557_index4; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20593_fk_resource_4_idx ON bultdatabasen.resource USING btree (muser_id);
+CREATE UNIQUE INDEX idx_29557_index4 ON bultdatabasen.resource USING btree (id, name);
 
 
 --
--- Name: idx_20593_index4; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29571_fk_route_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_20593_index4 ON bultdatabasen.resource USING btree (id, name);
+CREATE INDEX idx_29571_fk_route_1_idx ON bultdatabasen.route USING btree (id, name);
 
 
 --
--- Name: idx_20601_index2; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29580_fk_sector_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_20601_index2 ON bultdatabasen.resource_type USING btree (name, depth);
+CREATE INDEX idx_29580_fk_sector_1_idx ON bultdatabasen.sector USING btree (id, name);
 
 
 --
--- Name: idx_20607_fk_route_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29583_fk_task_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20607_fk_route_1_idx ON bultdatabasen.route USING btree (id, name);
+CREATE INDEX idx_29583_fk_task_2_idx ON bultdatabasen.task USING btree (assignee);
 
 
 --
--- Name: idx_20607_fk_route_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29594_fk_team_role_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20607_fk_route_2_idx ON bultdatabasen.route USING btree (route_type);
+CREATE INDEX idx_29594_fk_team_role_2_idx ON bultdatabasen.team_role USING btree (resource_id);
 
 
 --
--- Name: idx_20616_fk_sector_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29597_fk_trash_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20616_fk_sector_1_idx ON bultdatabasen.sector USING btree (id, name);
+CREATE INDEX idx_29597_fk_trash_2_idx ON bultdatabasen.trash USING btree (orig_leaf_of);
 
 
 --
--- Name: idx_20619_fk_task_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29597_fk_trash_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20619_fk_task_2_idx ON bultdatabasen.task USING btree (assignee);
+CREATE INDEX idx_29597_fk_trash_3_idx ON bultdatabasen.trash USING btree (duser_id);
 
 
 --
--- Name: idx_20630_fk_team_role_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29607_fk_user_role_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20630_fk_team_role_2_idx ON bultdatabasen.team_role USING btree (resource_id);
+CREATE INDEX idx_29607_fk_user_role_2_idx ON bultdatabasen.user_role USING btree (resource_id);
 
 
 --
--- Name: idx_20630_fk_team_role_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: idx_29610_fk_user_team_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20630_fk_team_role_3_idx ON bultdatabasen.team_role USING btree (role);
+CREATE INDEX idx_29610_fk_user_team_2_idx ON bultdatabasen.user_team USING btree (team_id);
 
 
 --
--- Name: idx_20633_fk_trash_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: path_gist_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20633_fk_trash_2_idx ON bultdatabasen.trash USING btree (orig_parent_id);
+CREATE INDEX path_gist_idx ON bultdatabasen.tree USING gist (path);
 
 
 --
--- Name: idx_20633_fk_trash_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
+-- Name: path_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_20633_fk_trash_3_idx ON bultdatabasen.trash USING btree (duser_id);
-
-
---
--- Name: idx_20643_fk_user_role_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
---
-
-CREATE INDEX idx_20643_fk_user_role_2_idx ON bultdatabasen.user_role USING btree (resource_id);
-
-
---
--- Name: idx_20643_fk_user_role_3_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
---
-
-CREATE INDEX idx_20643_fk_user_role_3_idx ON bultdatabasen.user_role USING btree (role);
-
-
---
--- Name: idx_20646_fk_user_team_2_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
---
-
-CREATE INDEX idx_20646_fk_user_team_2_idx ON bultdatabasen.user_team USING btree (team_id);
+CREATE INDEX path_idx ON bultdatabasen.tree USING btree (path);
 
 
 --
@@ -886,19 +859,11 @@ ALTER TABLE ONLY bultdatabasen.crag
 
 
 --
--- Name: foster_care fk_foster_care_1; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: image fk_image_1; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
-ALTER TABLE ONLY bultdatabasen.foster_care
-    ADD CONSTRAINT fk_foster_care_1 FOREIGN KEY (id) REFERENCES bultdatabasen.resource(id);
-
-
---
--- Name: foster_care fk_foster_care_2; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.foster_care
-    ADD CONSTRAINT fk_foster_care_2 FOREIGN KEY (foster_parent_id) REFERENCES bultdatabasen.resource(id);
+ALTER TABLE ONLY bultdatabasen.image
+    ADD CONSTRAINT fk_image_1 FOREIGN KEY (id) REFERENCES bultdatabasen.resource(id);
 
 
 --
@@ -934,19 +899,11 @@ ALTER TABLE ONLY bultdatabasen.model
 
 
 --
--- Name: point fk_point_2; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
+-- Name: point fk_point_1; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
 ALTER TABLE ONLY bultdatabasen.point
-    ADD CONSTRAINT fk_point_2 FOREIGN KEY (id) REFERENCES bultdatabasen.resource(id);
-
-
---
--- Name: image fk_point_image_1; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.image
-    ADD CONSTRAINT fk_point_image_1 FOREIGN KEY (id) REFERENCES bultdatabasen.resource(id);
+    ADD CONSTRAINT fk_point_1 FOREIGN KEY (id) REFERENCES bultdatabasen.resource(id);
 
 
 --
@@ -954,15 +911,7 @@ ALTER TABLE ONLY bultdatabasen.image
 --
 
 ALTER TABLE ONLY bultdatabasen.resource
-    ADD CONSTRAINT fk_resource_1 FOREIGN KEY (parent_id) REFERENCES bultdatabasen.resource(id);
-
-
---
--- Name: resource fk_resource_2; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.resource
-    ADD CONSTRAINT fk_resource_2 FOREIGN KEY (type, depth) REFERENCES bultdatabasen.resource_type(name, depth) ON UPDATE CASCADE ON DELETE RESTRICT;
+    ADD CONSTRAINT fk_resource_1 FOREIGN KEY (leaf_of) REFERENCES bultdatabasen.resource(id);
 
 
 --
@@ -987,14 +936,6 @@ ALTER TABLE ONLY bultdatabasen.resource
 
 ALTER TABLE ONLY bultdatabasen.route
     ADD CONSTRAINT fk_route_1 FOREIGN KEY (id, name) REFERENCES bultdatabasen.resource(id, name) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: route fk_route_2; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.route
-    ADD CONSTRAINT fk_route_2 FOREIGN KEY (route_type) REFERENCES bultdatabasen.route_type(name) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -1038,14 +979,6 @@ ALTER TABLE ONLY bultdatabasen.team_role
 
 
 --
--- Name: team_role fk_team_role_3; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.team_role
-    ADD CONSTRAINT fk_team_role_3 FOREIGN KEY (role) REFERENCES bultdatabasen.role(name) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
 -- Name: trash fk_trash_1; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
@@ -1058,7 +991,7 @@ ALTER TABLE ONLY bultdatabasen.trash
 --
 
 ALTER TABLE ONLY bultdatabasen.trash
-    ADD CONSTRAINT fk_trash_2 FOREIGN KEY (orig_parent_id) REFERENCES bultdatabasen.resource(id);
+    ADD CONSTRAINT fk_trash_2 FOREIGN KEY (orig_leaf_of) REFERENCES bultdatabasen.resource(id);
 
 
 --
@@ -1067,6 +1000,14 @@ ALTER TABLE ONLY bultdatabasen.trash
 
 ALTER TABLE ONLY bultdatabasen.trash
     ADD CONSTRAINT fk_trash_3 FOREIGN KEY (duser_id) REFERENCES bultdatabasen."user"(id);
+
+
+--
+-- Name: tree fk_tree_1; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
+--
+
+ALTER TABLE ONLY bultdatabasen.tree
+    ADD CONSTRAINT fk_tree_1 FOREIGN KEY (resource_id) REFERENCES bultdatabasen.resource(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -1086,14 +1027,6 @@ ALTER TABLE ONLY bultdatabasen.user_role
 
 
 --
--- Name: user_role fk_user_role_3; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
---
-
-ALTER TABLE ONLY bultdatabasen.user_role
-    ADD CONSTRAINT fk_user_role_3 FOREIGN KEY (role) REFERENCES bultdatabasen.role(name) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
 -- Name: user_team fk_user_team_1; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
@@ -1110,5 +1043,13 @@ ALTER TABLE ONLY bultdatabasen.user_team
 
 
 --
+-- Name: TABLE tree; Type: ACL; Schema: bultdatabasen; Owner: -
+--
+
+GRANT ALL ON TABLE bultdatabasen.tree TO bultdatabasen;
+
+
+--
 -- PostgreSQL database dump complete
 --
+
