@@ -9,13 +9,18 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 func GetResource(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	id := vars["resourceID"]
+	id, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if resource, err := sess.GetResource(id); err != nil {
 		utils.WriteError(w, err)
@@ -25,7 +30,7 @@ func GetResource(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ownsResource(r *http.Request, sess model.Session, resourceID string) bool {
+func ownsResource(r *http.Request, sess model.Session, resourceID uuid.UUID) bool {
 	var ancestors []model.Resource
 	var userID string
 	var err error
@@ -49,8 +54,12 @@ func ownsResource(r *http.Request, sess model.Session, resourceID string) bool {
 func UpdateResource(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	id := vars["resourceID"]
 	var patch model.ResourcePatch
+	id, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	if err := json.Unmarshal(reqBody, &patch); err != nil {
@@ -59,10 +68,10 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch {
-	case patch.ParentID != nil:
-		newParentID := *patch.ParentID
+	case patch.ParentID != uuid.Nil:
+		newParentID := patch.ParentID
 
-		if newParentID != model.RootID && !ownsResource(r, sess, newParentID) {
+		if newParentID.String() != model.RootID && !ownsResource(r, sess, newParentID) {
 			utils.WriteResponse(w, http.StatusForbidden, nil)
 			return
 		}
@@ -82,7 +91,11 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 func GetAncestors(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	id := vars["resourceID"]
+	id, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if ancestors, err := sess.GetAncestors(id); err != nil {
 		utils.WriteError(w, err)
@@ -98,7 +111,11 @@ func GetAncestors(w http.ResponseWriter, r *http.Request) {
 func GetChildren(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	id := vars["resourceID"]
+	id, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if children, err := sess.GetChildren(id); err != nil {
 		utils.WriteError(w, err)
@@ -109,9 +126,15 @@ func GetChildren(w http.ResponseWriter, r *http.Request) {
 
 func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["resourceID"]
 	var userID string
 	var ancestors []model.Resource
+
+	id, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
+
 	role := model.ResourceRole{
 		Role:       "guest",
 		ResourceID: id,

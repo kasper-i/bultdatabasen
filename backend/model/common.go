@@ -2,9 +2,9 @@ package model
 
 import (
 	"bultdatabasen/utils"
-	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -24,49 +24,26 @@ func (sess Session) Transaction(fn func(sess Session) error) error {
 	})
 }
 
-func buildDescendantsCTE(depth Depth) string {
-	return fmt.Sprintf(`WITH RECURSIVE cte (id, name, type, parent_id, btime, mtime, buser_id, muser_id, first) AS (
-		SELECT id, name, type, parent_id, btime, mtime, buser_id, muser_id, TRUE
-		FROM resource
-		WHERE id = ?
-	UNION
-		SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
-		FROM resource child
-		INNER JOIN cte ON child.parent_id = cte.id
-		WHERE depth <= %d
-	UNION
-		SELECT child.id, child.name, child.type, child.parent_id, child.btime, child.mtime, child.buser_id, child.muser_id, FALSE
-		FROM foster_care f
-		INNER JOIN cte ON f.foster_parent_id = cte.id
-		INNER JOIN resource child ON child.id = f.id
-		WHERE cte.type = "route"
-	)`, depth)
+func withTreeQuery() string {
+	return `WITH tree AS (SELECT * FROM tree WHERE path <@ (SELECT path FROM tree WHERE resource_id = ? LIMIT 1))`
 }
 
-func buildDescendantsCountQuery(resourceType string) string {
-	return fmt.Sprintf(`%s
-	SELECT COUNT(*) AS totalItems FROM cte
-	INNER JOIN %s ON cte.id = %s.id
-	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType)
-}
+func (sess Session) getResourceWithLock(resourceID uuid.UUID) (*Resource, error) {
+	var resource Resource
 
-func buildDescendantsQuery(resourceType string) string {
-	return fmt.Sprintf(`%s
-	SELECT %s.*, cte.name, cte.parent_id, cte.btime, cte.mtime, cte.buser_id, cte.muser_id FROM cte
-	INNER JOIN %s ON cte.id = %s.id
-	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType, resourceType)
-}
-
-func (sess Session) createResource(resource Resource) error {
-	resource.Depth = GetResourceDepth(resource.Type)
-
-	if resource.ParentID == nil {
-		return utils.ErrOrphanedResource
+	if err := sess.DB.Raw(`SELECT * FROM resource WHERE id = ? FOR UPDATE`, resourceID).Scan(&resource).Error; err != nil {
+		return nil, err
 	}
 
-	if !sess.checkParentAllowed(resource, *resource.ParentID) {
-		return utils.ErrHierarchyStructureViolation
+	if resource.ID == uuid.Nil {
+		return nil, gorm.ErrRecordNotFound
 	}
+
+	return &resource, nil
+}
+
+func (sess Session) CreateResource(resource *Resource, parentResourceID uuid.UUID) error {
+	resource.ID = uuid.New()
 
 	resource.BirthTime = time.Now()
 	resource.ModifiedTime = time.Now()
@@ -74,50 +51,94 @@ func (sess Session) createResource(resource Resource) error {
 	resource.CreatorID = *sess.UserID
 	resource.LastUpdatedByID = *sess.UserID
 
-	return sess.DB.Create(&resource).Error
-}
+	switch resource.Type {
+	case TypeRoot:
+		return utils.ErrNotPermitted
+	case TypeArea, TypeCrag, TypeSector, TypeRoute, TypePoint:
+		resource.LeafOf = nil
+	default:
+		resource.LeafOf = &parentResourceID
+	}
 
-func (sess Session) moveResource(resource Resource, newParentID string) error {
-	if newParentID == resource.ID {
+	if !sess.checkParentAllowed(*resource, parentResourceID) {
 		return utils.ErrHierarchyStructureViolation
 	}
 
-	if !sess.checkParentAllowed(resource, newParentID) {
-		return utils.ErrHierarchyStructureViolation
-	}
+	err := sess.Transaction(func(sess Session) error {
+		if err := sess.DB.Create(&resource).Error; err != nil {
+			return err
+		}
 
-	return sess.DB.Exec(`UPDATE resource SET parent_id = ? WHERE id = ?`, newParentID, resource.ID).Error
+		switch resource.Type {
+		case TypeArea, TypeCrag, TypeSector, TypeRoute, TypePoint:
+			subtree, err := sess.GetPath(parentResourceID)
+			if err != nil {
+				return err
+			}
+
+			return sess.DB.Exec(`INSERT INTO tree (resource_id, path)
+				VALUES (?, ?)`, resource.ID, subtree.Add(resource.ID)).Error
+		}
+
+		return nil
+	})
+
+	return err
 }
 
-func (sess Session) touchResource(resourceID string) error {
+func (sess Session) TouchResource(resourceID uuid.UUID) error {
 	return sess.DB.Exec(`UPDATE resource SET mtime = ?, muser_id = ? WHERE id = ?`,
 		time.Now(), sess.UserID, resourceID).Error
 }
 
-func (sess Session) deleteResource(resourceID string) error {
-	ancestors, err := sess.GetAncestorsIncludingFosterParents(resourceID)
+func (sess Session) DeleteResource(resourceID uuid.UUID) error {
+	ancestors, err := sess.GetAncestors(resourceID)
 	if err != nil {
 		return err
 	}
 
+	trash := Trash{
+		ResourceID:   resourceID,
+		DeletedTime:  time.Now(),
+		DeletedByID:  *sess.UserID,
+	}
+
 	err = sess.Transaction(func(sess Session) error {
+		err := sess.getSubtreeLock(resourceID)
+		if err != nil {
+			return err
+		}
+
 		resource, err := sess.getResourceWithLock(resourceID)
 		if err != nil {
 			return err
 		}
 
-		trash := Trash{
-			ResourceID:   resource.ID,
-			DeletedTime:  time.Now(),
-			DeletedByID:  *sess.UserID,
-			OrigParentID: *resource.ParentID,
+		switch resource.Type {
+		case TypeRoot:
+			return utils.ErrNotPermitted
+		case TypeArea, TypeCrag, TypeSector, TypeRoute, TypePoint:
+			subtree, err := sess.GetPath(resourceID)
+			if err != nil {
+				return err
+			}
+
+			if err := sess.DB.Exec(`UPDATE tree
+				SET path = subpath(path, ?)
+				WHERE path <@ ?`, len(subtree)-1, subtree).Error; err != nil {
+				return err
+			}
+
+			trash.OrigPath = &subtree
+		default:
+			trash.OrigLeafOf = resource.LeafOf
+			resource.LeafOf = nil
+
+			if err := sess.DB.Select("LeafOf").Updates(resource).Error; err != nil {
+				return err
+			}
 		}
 
-		resource.ParentID = nil
-
-		if err := sess.DB.Select("ParentID").Updates(resource).Error; err != nil {
-			return err
-		}
 
 		countersDifference := Counters{}.Substract(resource.Counters)
 
@@ -137,7 +158,7 @@ func (sess Session) deleteResource(resourceID string) error {
 	return nil
 }
 
-func (sess Session) checkParentAllowed(resource Resource, parentID string) bool {
+func (sess Session) checkParentAllowed(resource Resource, parentID uuid.UUID) bool {
 	var parentResource Resource
 
 	if err := sess.DB.First(&parentResource, "id = ?", parentID).Error; err != nil {
@@ -147,30 +168,30 @@ func (sess Session) checkParentAllowed(resource Resource, parentID string) bool 
 	pt := parentResource.Type
 
 	switch resource.Type {
-	case "area":
-		return pt == "root" || pt == "area"
-	case "crag":
-		return pt == "area"
-	case "sector":
-		return pt == "crag"
-	case "route":
-		return pt == "area" || pt == "crag" || pt == "sector"
-	case "point":
-		return pt == "route"
-	case "bolt":
-		return pt == "point"
-	case "image":
-		return pt == "point"
-	case "comment":
-		return pt == "point"
-	case "task":
-		return pt == "route" || pt == "point"
+	case TypeArea:
+		return pt == TypeRoot || pt == TypeArea
+	case TypeCrag:
+		return pt == TypeArea
+	case TypeSector:
+		return pt == TypeCrag
+	case TypeRoute:
+		return pt == TypeArea || pt == TypeCrag || pt == TypeSector
+	case TypePoint:
+		return pt == TypeRoute
+	case TypeBolt:
+		return pt == TypePoint
+	case TypeImage:
+		return pt == TypePoint
+	case TypeComment:
+		return pt == TypePoint
+	case TypeTask:
+		return pt == TypeRoute || pt == TypePoint
 	default:
 		return false
 	}
 }
 
-func (sess Session) checkSameParent(resourceID1, resourceID2 string) bool {
+func (sess Session) checkSameParent(resourceID1, resourceID2 uuid.UUID) bool {
 	var parents []Resource = make([]Resource, 0)
 
 	if err := sess.DB.Raw(`SELECT parent.*
@@ -185,21 +206,4 @@ func (sess Session) checkSameParent(resourceID1, resourceID2 string) bool {
 	}
 
 	return parents[0].ID == parents[1].ID
-}
-
-func (sess Session) addFosterParent(resource Resource, fosterParentID string) error {
-	if resource.ParentID == nil {
-		return utils.ErrOrphanedResource
-	}
-
-	if !sess.checkSameParent(fosterParentID, *resource.ParentID) {
-		return utils.ErrHierarchyStructureViolation
-	}
-
-	return sess.DB.Exec(`INSERT INTO foster_care (id, foster_parent_id) VALUES (?, ?)`,
-		resource.ID, fosterParentID).Error
-}
-
-func (sess Session) leaveFosterCare(resourceID, fosterParentID string) error {
-	return sess.DB.Exec(`DELETE FROM foster_care WHERE id = ? AND foster_parent_id = ?`, resourceID, fosterParentID).Error
 }

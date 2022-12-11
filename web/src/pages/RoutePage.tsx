@@ -5,7 +5,7 @@ import { useUnsafeParams } from "@/hooks/common";
 import { RouteType } from "@/models/route";
 import { usePoints } from "@/queries/pointQueries";
 import { useRoute } from "@/queries/routeQueries";
-import { Fragment, ReactElement } from "react";
+import { Fragment } from "react";
 
 const renderRouteType = (routeType: RouteType) => {
   switch (routeType) {
@@ -19,10 +19,12 @@ const renderRouteType = (routeType: RouteType) => {
       return "Topprepsled";
     case "aid":
       return "Aidled";
+    case "dws":
+      return "Djupvattensolo";
   }
 };
 
-const RoutePage = (): ReactElement => {
+const RoutePage = () => {
   const { resourceId } = useUnsafeParams<"resourceId">();
 
   const { data: route } = useRoute(resourceId);
@@ -32,9 +34,14 @@ const RoutePage = (): ReactElement => {
     return <Fragment />;
   }
 
-  const { routeType, parentId, year, length } = route;
+  const { routeType, year, length } = route;
+  const parentId = route.ancestors?.slice(-1)[0]?.id;
 
   const numInstalledBolts = route?.counters?.installedBolts ?? 0;
+
+  if (!parentId) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col">

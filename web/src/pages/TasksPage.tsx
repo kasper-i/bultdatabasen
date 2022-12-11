@@ -31,7 +31,7 @@ const TasksPage = (): ReactElement => {
     return <Fragment />;
   }
 
-  const ancestors = resource?.ancestors?.slice().reverse();
+  const ancestors = resource?.ancestors?.slice();
   ancestors?.push(resource);
   const onlyRoot = ancestors?.length === 1;
 

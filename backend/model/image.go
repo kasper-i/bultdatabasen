@@ -2,6 +2,7 @@ package model
 
 import (
 	"bultdatabasen/spaces"
+	"bultdatabasen/utils"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -21,6 +22,7 @@ import (
 	"gorm.io/gorm"
 )
 
+var spacesBucket string
 var functionUrl string
 var functionSecret string
 
@@ -47,6 +49,8 @@ func init() {
 	if len(f) == 2 {
 		functionSecret = f[1]
 	}
+
+	spacesBucket = cfg.Section("spaces").Key("bucket").String()
 }
 
 type Image struct {
@@ -69,17 +73,35 @@ func (Image) TableName() string {
 	return "image"
 }
 
-func (sess Session) GetImages(resourceID string) ([]Image, error) {
+func (sess Session) GetImages(resourceID uuid.UUID) ([]Image, error) {
 	var images []Image = make([]Image, 0)
 
-	if err := sess.DB.Raw(buildDescendantsQuery("image"), resourceID).Scan(&images).Error; err != nil {
+	if err := sess.DB.Raw(fmt.Sprintf(`%s
+		SELECT * FROM tree
+		INNER JOIN resource ON tree.resource_id = resource.leaf_of
+		INNER JOIN image ON resource.id = image.id`, withTreeQuery()), resourceID).Scan(&images).Error; err != nil {
 		return nil, err
 	}
 
 	return images, nil
 }
 
-func (sess Session) GetImage(imageID string) (*Image, error) {
+func (sess Session) getImageWithLock(imageID uuid.UUID) (*Image, error) {
+	var image Image
+
+	if err := sess.DB.Raw(`SELECT * FROM image INNER JOIN resource ON image.id = resource.id WHERE image.id = ? FOR UPDATE`, imageID).
+		Scan(&image).Error; err != nil {
+		return nil, err
+	}
+
+	if image.ID == uuid.Nil {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return &image, nil
+}
+
+func (sess Session) GetImage(imageID uuid.UUID) (*Image, error) {
 	var image Image
 
 	if err := sess.DB.Raw(`SELECT * FROM image WHERE image.id = ?`, imageID).
@@ -87,46 +109,57 @@ func (sess Session) GetImage(imageID string) (*Image, error) {
 		return nil, err
 	}
 
-	if image.ID == "" {
+	if image.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &image, nil
 }
 
-func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mimeType string) (*Image, error) {
+func (sess Session) GetImageDownloadURL(imageID uuid.UUID, version string) (string, error) {
+	var imageKey string
+
+	if version == "original" {
+		imageKey = getOriginalImageKey(imageID)
+	} else {
+		imageKey = getResizedImageKey(imageID, version)
+	}
+
+	input := &s3.ListObjectsInput{
+		Bucket: aws.String(spacesBucket),
+		Prefix: aws.String(imageKey),
+	}
+
+	if objects, err := spaces.S3Client().ListObjects(input); err != nil {
+		return "", err
+	} else {
+		for _, object := range objects.Contents {
+			if *object.Key == imageKey {
+				return fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s", spacesBucket, imageKey), nil
+			}
+		}
+	}
+
+	return "", utils.ErrNotFound
+}
+
+func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (*Image, error) {
 	img := Image{
-		ResourceBase: ResourceBase{
-			ID: uuid.Must(uuid.NewRandom()).String(),
-		},
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
 		Size:      len(imageBytes)}
 
 	resource := Resource{
-		ResourceBase: img.ResourceBase,
-		Type:         "image",
-		ParentID:     &parentResourceID,
+		Type:         TypeImage,
 	}
+	
+	reader := bytes.NewReader(imageBytes)
 
-	tempFileName := "/tmp/." + img.ID
-
-	f, err := os.Create(tempFileName)
-	if err != nil {
+	if _, err := reader.Seek(0, io.SeekStart); err != nil {
 		return nil, err
 	}
 
-	defer os.Remove(tempFileName)
-
-	if _, err = f.Write(imageBytes); err != nil {
-		return nil, err
-	}
-
-	if _, err := f.Seek(0, io.SeekStart); err != nil {
-		return nil, err
-	}
-
-	decodedImage, _, err := image.Decode(f)
+	decodedImage, _, err := image.Decode(reader)
 	if err != nil {
 		return nil, err
 	}
@@ -134,11 +167,11 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	img.Width = decodedImage.Bounds().Dx()
 	img.Height = decodedImage.Bounds().Dy()
 
-	if _, err := f.Seek(0, io.SeekStart); err != nil {
+	if _, err := reader.Seek(0, io.SeekStart); err != nil {
 		return nil, err
 	}
 
-	exifData, err := exif.Decode(f)
+	exifData, err := exif.Decode(reader)
 	if err == nil {
 		if timestamp, err := exifData.DateTime(); err == nil {
 			img.Timestamp = timestamp
@@ -149,30 +182,39 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 		}
 	}
 
-	object := s3.PutObjectInput{
-		Bucket:      aws.String("bultdatabasen"),
-		Key:         aws.String("images/" + img.ID),
-		Body:        bytes.NewReader(imageBytes),
-		ACL:         aws.String("public-read"),
-		ContentType: &mimeType,
-	}
-
-	if _, err := spaces.S3Client().PutObject(&object); err != nil {
-		return nil, err
-	}
-
-	if err = ResizeImage(img.ID, []string{"sm", "xl"}); err != nil {
-		rollbackObjectCreations(img.ID)
-		return nil, err
-	}
-
 	err = sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
+			return err
+		}
+
+		img.ID = resource.ID
+		img.UserID = resource.CreatorID
+
+		object := s3.PutObjectInput{
+			Bucket:      aws.String(spacesBucket),
+			Key:         aws.String("images/" + img.ID.String()),
+			Body:        bytes.NewReader(imageBytes),
+			ACL:         aws.String("public-read"),
+			ContentType: &mimeType,
+		}
+
+		if _, err := spaces.S3Client().PutObject(&object); err != nil {
+			return err
+		}
+
+		if err = ResizeImage(img.ID, []string{"sm", "xl"}); err != nil {
+			rollbackObjectCreations(img.ID)
 			return err
 		}
 
 		if err := sess.DB.Create(&img).Error; err != nil {
 			return err
+		}
+
+		if ancestors, err := sess.GetAncestors(img.ID); err != nil {
+			return nil
+		} else {
+			img.Ancestors = &ancestors
 		}
 
 		return nil
@@ -186,10 +228,10 @@ func (sess Session) UploadImage(parentResourceID string, imageBytes []byte, mime
 	return &img, nil
 }
 
-func rollbackObjectCreations(imageID string) {
+func rollbackObjectCreations(imageID uuid.UUID) {
 	listInput := &s3.ListObjectsInput{
-		Bucket: aws.String("bultdatabasen"),
-		Prefix: aws.String("images/" + imageID),
+		Bucket: aws.String(spacesBucket),
+		Prefix: aws.String("images/" + imageID.String()),
 	}
 
 	if objects, err := spaces.S3Client().ListObjects(listInput); err != nil {
@@ -197,7 +239,7 @@ func rollbackObjectCreations(imageID string) {
 	} else {
 		for _, object := range objects.Contents {
 			deleteInput := s3.DeleteObjectInput{
-				Bucket: aws.String("bultdatabasen"),
+				Bucket: aws.String(spacesBucket),
 				Key:    aws.String(*object.Key),
 			}
 
@@ -206,20 +248,12 @@ func rollbackObjectCreations(imageID string) {
 	}
 }
 
-func (sess Session) DeleteImage(imageID string) error {
-	err := sess.Transaction(func(sess Session) error {
-		if err := sess.deleteResource(imageID); err != nil {
-			return err
-		}
-
-		return nil
-	})
-
-	return err
+func (sess Session) DeleteImage(imageID uuid.UUID) error {
+	return sess.DeleteResource(imageID)
 }
 
-func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
-	original, err := sess.GetImage(imageID)
+func (sess Session) PatchImage(imageID uuid.UUID, patch ImagePatch) error {
+	original, err := sess.getImageWithLock(imageID)
 	if err != nil {
 		return err
 	}
@@ -229,7 +263,7 @@ func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
 	}
 
 	return sess.Transaction(func(sess Session) error {
-		if err := sess.touchResource(imageID); err != nil {
+		if err := sess.TouchResource(imageID); err != nil {
 			return err
 		}
 
@@ -241,15 +275,15 @@ func (sess Session) PatchImage(imageID string, patch ImagePatch) error {
 	})
 }
 
-func GetOriginalImageKey(imageID string) string {
-	return "images/" + imageID
+func getOriginalImageKey(imageID uuid.UUID) string {
+	return "images/" + imageID.String()
 }
 
-func GetResizedImageKey(imageID string, version string) string {
-	return "images/" + imageID + "." + version
+func getResizedImageKey(imageID uuid.UUID, version string) string {
+	return "images/" + imageID.String() + "." + version
 }
 
-func ResizeImage(imageID string, versions []string) error {
+func ResizeImage(imageID uuid.UUID, versions []string) error {
 	values := map[string]interface{}{"imageId": imageID, "sizes": versions}
 	json_data, err := json.Marshal(values)
 	if err != nil {

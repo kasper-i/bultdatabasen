@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Error struct {
-	Status     int     `json:"status"`
-	Message    string  `json:"message"`
-	ResourceID *string `json:"resourceId,omitempty"`
+	Status     int        `json:"status"`
+	Message    string     `json:"message"`
+	ResourceID *uuid.UUID `json:"resourceId,omitempty"`
 }
 
 func WriteResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
@@ -28,7 +29,7 @@ func WriteError(w http.ResponseWriter, err error) {
 	error := Error{}
 	var status int
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, ErrNotFound) {
 		status = http.StatusNotFound
 	} else if errors.Is(err, gorm.ErrInvalidData) {
 		status = http.StatusBadRequest
@@ -47,6 +48,8 @@ func WriteError(w http.ResponseWriter, err error) {
 	} else if errors.Is(err, ErrCorruptResource) {
 		status = http.StatusInternalServerError
 		error.Message = err.Error()
+	} else if errors.Is(err, ErrNotPermitted) {
+		status = http.StatusForbidden
 	} else {
 		status = http.StatusInternalServerError
 	}

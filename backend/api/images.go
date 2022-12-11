@@ -2,22 +2,23 @@ package api
 
 import (
 	"bultdatabasen/model"
-	"bultdatabasen/spaces"
 	"bultdatabasen/utils"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 func GetImages(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if images, err := sess.GetImages(parentResourceID); err != nil {
 		utils.WriteError(w, err)
@@ -27,8 +28,13 @@ func GetImages(w http.ResponseWriter, r *http.Request) {
 }
 
 func DownloadImage(w http.ResponseWriter, r *http.Request) {
+	sess := createSession(r)
 	vars := mux.Vars(r)
-	imageID := vars["resourceID"]
+	imageID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 	version := vars["version"]
 
 	if _, ok := model.ImageSizes[version]; !ok && version != "original" {
@@ -36,41 +42,24 @@ func DownloadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var imageKey string
-
-	if version == "original" {
-		imageKey = model.GetOriginalImageKey(imageID)
-	} else {
-		imageKey = model.GetResizedImageKey(imageID, version)
-	}
-
-	input := &s3.ListObjectsInput{
-		Bucket: aws.String("bultdatabasen"),
-		Prefix: aws.String(imageKey),
-	}
-
-	if objects, err := spaces.S3Client().ListObjects(input); err != nil {
+	if url, err := sess.GetImageDownloadURL(imageID, version); err != nil {
 		utils.WriteError(w, err)
-		return
 	} else {
-		for _, object := range objects.Contents {
-			if *object.Key == imageKey {
-				w.Header().Set("Location", fmt.Sprintf("https://bultdatabasen.ams3.digitaloceanspaces.com/%s", imageKey))
-				utils.WriteResponse(w, http.StatusTemporaryRedirect, nil)
-				return
-			}
-		}
+		w.Header().Set("Location", url)
+		utils.WriteResponse(w, http.StatusTemporaryRedirect, nil)
 	}
-
-	utils.WriteResponse(w, http.StatusNotFound, nil)
 }
 
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	err := r.ParseMultipartForm(32 << 20)
+	err = r.ParseMultipartForm(32 << 20)
 	if err != nil {
 		utils.WriteError(w, err)
 		return
@@ -100,7 +89,6 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		image.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, image)
 	default:
 		utils.WriteResponse(w, http.StatusBadRequest, nil)
@@ -111,9 +99,13 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 func DeleteImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	imageID := vars["resourceID"]
+	imageID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	err := sess.DeleteImage(imageID)
+	err = sess.DeleteImage(imageID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -125,7 +117,11 @@ func DeleteImage(w http.ResponseWriter, r *http.Request) {
 func PatchImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	imageID := vars["resourceID"]
+	imageID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var patch model.ImagePatch
@@ -141,7 +137,7 @@ func PatchImage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err := sess.PatchImage(imageID, patch)
+	err = sess.PatchImage(imageID, patch)
 
 	if err != nil {
 		utils.WriteError(w, err)

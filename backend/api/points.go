@@ -7,11 +7,12 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 type CreatePointRequest struct {
-	PointID  *string               `json:"pointId"`
+	PointID  uuid.UUID             `json:"pointId"`
 	Position *model.InsertPosition `json:"position"`
 	Anchor   bool                  `json:"anchor"`
 	Bolts    []model.Bolt          `json:"bolts"`
@@ -20,12 +21,16 @@ type CreatePointRequest struct {
 func GetPoints(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	routeID := vars["resourceID"]
+	routeID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if resource, err := sess.GetResource(routeID); err != nil {
 		utils.WriteError(w, err)
 		return
-	} else if resource.Type != "route" {
+	} else if resource.Type != model.TypeRoute {
 		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
@@ -40,7 +45,11 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 func AttachPoint(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	routeID := vars["resourceID"]
+	routeID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var request CreatePointRequest
@@ -57,7 +66,7 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if request.PointID == nil && len(request.Bolts) == 0 {
+	if request.PointID == uuid.Nil && len(request.Bolts) == 0 {
 		utils.WriteResponse(w, http.StatusBadRequest, nil)
 		return
 	}
@@ -69,7 +78,7 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var status int
 
-		if request.PointID == nil {
+		if request.PointID == uuid.Nil {
 			status = http.StatusCreated
 		} else {
 			status = http.StatusOK
@@ -83,8 +92,18 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 func DetachPoint(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	routeID := vars["resourceID"]
-	pointID := vars["pointID"]
+
+	routeID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
+
+	pointID, err := uuid.Parse(vars["pointID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	if err := sess.DetachPoint(routeID, pointID); err != nil {
 		utils.WriteError(w, err)

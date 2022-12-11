@@ -1,0 +1,43 @@
+             table name     errors       rows      bytes      total time
+-----------------------  ---------  ---------  ---------  --------------
+        fetch meta data          0        118                     0.050s
+         Create Schemas          0          0                     0.001s
+       Create SQL Types          0          7                     0.008s
+          Create tables          0         48                     0.037s
+         Set Table OIDs          0         24                     0.004s
+-----------------------  ---------  ---------  ---------  --------------
+         bult_prod.area          0          3     0.1 kB          0.008s
+         bult_prod.bolt          0        917    77.2 kB          0.010s
+   bult_prod.connection          0        641    69.5 kB          0.054s
+  bult_prod.foster_care          0         78     5.6 kB          0.082s
+         bult_prod.crag          0         62     2.9 kB          0.006s
+       bult_prod.invite          0          0                     0.055s
+     bult_prod.material          0         10     0.4 kB          0.057s
+        bult_prod.image          0       1411   122.7 kB          0.061s
+        bult_prod.point          0        767    29.2 kB          0.102s
+bult_prod.resource_type          0         10     0.1 kB          0.082s
+        bult_prod.route          0       2503   173.3 kB          0.136s
+ bult_prod.manufacturer          0          9     0.4 kB          0.008s
+        bult_prod.model          0          4     0.5 kB          0.010s
+     bult_prod.resource          0       5888     1.1 MB          0.091s
+       bult_prod.sector          0        178     8.4 kB          0.141s
+         bult_prod.team          0          1     0.1 kB          0.113s
+        bult_prod.trash          0         40     4.9 kB          0.155s
+    bult_prod.user_role          0          6     0.4 kB          0.116s
+         bult_prod.role          0          1     0.0 kB          0.032s
+   bult_prod.route_type          0          6     0.1 kB          0.034s
+         bult_prod.task          0         46     5.4 kB          0.079s
+    bult_prod.team_role          0          1     0.1 kB          0.065s
+       bult_prod."user"          0          8     0.7 kB          0.072s
+    bult_prod.user_team          0          6     0.4 kB          0.076s
+-----------------------  ---------  ---------  ---------  --------------
+COPY Threads Completion          0          4                     0.173s
+         Create Indexes          0         57                     0.353s
+ Index Build Completion          0         57                     0.012s
+        Reset Sequences          0          0                     0.009s
+           Primary Keys          0         24                     0.009s
+    Create Foreign Keys          0         37                     0.044s
+        Create Triggers          0          0                     0.000s
+       Install Comments          0          0                     0.000s
+-----------------------  ---------  ---------  ---------  --------------
+      Total import time          ✓      12596     1.6 MB          0.600s

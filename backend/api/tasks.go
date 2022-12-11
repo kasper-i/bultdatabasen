@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -18,8 +19,12 @@ type GetTasksResponse struct {
 func GetTasks(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceId := vars["resourceID"]
 	query := r.URL.Query()
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	pagination := model.Pagination{}
 	if err := pagination.ParseQuery(query); err != nil {
@@ -34,7 +39,7 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 
 	statuses := query["status"]
 
-	if tasks, meta, err := sess.GetTasks(parentResourceId, pagination, statuses); err != nil {
+	if tasks, meta, err := sess.GetTasks(parentResourceID, pagination, statuses); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		response := GetTasksResponse{}
@@ -47,9 +52,13 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 func GetTask(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if task, err := sess.GetTask(resourceId); err != nil {
+	if task, err := sess.GetTask(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		task.WithAncestors(r)
@@ -60,7 +69,11 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 func CreateTask(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	parentResourceID := vars["resourceID"]
+	parentResourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var task model.Task
@@ -69,12 +82,11 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := sess.CreateTask(&task, parentResourceID)
+	err = sess.CreateTask(&task, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		task.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, task)
 	}
 }
@@ -82,7 +94,11 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	taskID := vars["resourceID"]
+	taskID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var task model.Task
@@ -91,7 +107,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := sess.UpdateTask(&task, taskID)
+	err = sess.UpdateTask(&task, taskID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -104,9 +120,13 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if err := sess.DeleteTask(resourceId); err != nil {
+	if err := sess.DeleteTask(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

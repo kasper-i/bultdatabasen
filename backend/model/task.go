@@ -16,7 +16,6 @@ type Task struct {
 	Priority    int        `json:"priority"`
 	Assignee    *string    `gorm:"->" json:"assignee,omitempty"`
 	Comment     *string    `json:"comment,omitempty"`
-	ParentID    string     `gorm:"->" json:"parentId"`
 	BirthTime   time.Time  `gorm:"->;column:btime" json:"createdAt"`
 	UserID      string     `gorm:"->;column:buser_id" json:"userId"`
 	ClosedAt    *time.Time `json:"closedAt,omitempty"`
@@ -38,7 +37,7 @@ func (task *Task) UpdateCounters() {
 	}
 }
 
-func (sess Session) GetTasks(resourceID string, pagination Pagination, statuses []string) ([]Task, Meta, error) {
+func (sess Session) GetTasks(resourceID uuid.UUID, pagination Pagination, statuses []string) ([]Task, Meta, error) {
 	var tasks []Task = make([]Task, 0)
 	var meta Meta = Meta{}
 
@@ -57,9 +56,9 @@ func (sess Session) GetTasks(resourceID string, pagination Pagination, statuses 
 		where = fmt.Sprintf("status IN (%s)", strings.Join(placeholders, ", "))
 	}
 
-	countQuery := fmt.Sprintf("%s AND %s", buildDescendantsCountQuery("task"), where)
+	countQuery := fmt.Sprintf("%s SELECT COUNT(task.id) AS total_items FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s", withTreeQuery(), where)
 
-	dataQuery := fmt.Sprintf("%s AND %s ORDER BY priority ASC %s", buildDescendantsQuery("task"), where, pagination.ToSQL())
+	dataQuery := fmt.Sprintf("%s SELECT * FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s ORDER BY priority ASC %s", withTreeQuery(), where, pagination.ToSQL())
 
 	if err := sess.DB.Raw(dataQuery, params...).Scan(&tasks).Error; err != nil {
 		return nil, meta, err
@@ -72,7 +71,7 @@ func (sess Session) GetTasks(resourceID string, pagination Pagination, statuses 
 	return tasks, meta, nil
 }
 
-func (sess Session) GetTask(resourceID string) (*Task, error) {
+func (sess Session) GetTask(resourceID uuid.UUID) (*Task, error) {
 	var task Task
 
 	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ?`, resourceID).
@@ -80,14 +79,14 @@ func (sess Session) GetTask(resourceID string) (*Task, error) {
 		return nil, err
 	}
 
-	if task.ID == "" {
+	if task.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &task, nil
 }
 
-func (sess Session) getTaskWithLock(resourceID string) (*Task, error) {
+func (sess Session) getTaskWithLock(resourceID uuid.UUID) (*Task, error) {
 	var task Task
 
 	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ? FOR UPDATE`, resourceID).
@@ -95,17 +94,14 @@ func (sess Session) getTaskWithLock(resourceID string) (*Task, error) {
 		return nil, err
 	}
 
-	if task.ID == "" {
+	if task.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &task, nil
 }
 
-func (sess Session) CreateTask(task *Task, parentResourceID string) error {
-	task.ID = uuid.Must(uuid.NewRandom()).String()
-	task.ParentID = parentResourceID
-
+func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 	if task.Assignee != nil {
 		task.Status = "assigned"
 	} else {
@@ -117,14 +113,17 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 
 	resource := Resource{
 		ResourceBase: task.ResourceBase,
-		Type:         "task",
-		ParentID:     &parentResourceID,
+		Type:         TypeTask,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
+	
+		task.ID = resource.ID
+		task.BirthTime = resource.BirthTime
+		task.UserID = resource.CreatorID
 
 		if err := sess.DB.Create(&task).Error; err != nil {
 			return err
@@ -132,6 +131,12 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 
 		if err := sess.updateCountersForResourceAndAncestors(task.ID, task.Counters); err != nil {
 			return err
+		}
+
+		if ancestors, err := sess.GetAncestors(task.ID); err != nil {
+			return nil
+		} else {
+			task.Ancestors = &ancestors
 		}
 
 		return nil
@@ -144,7 +149,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID string) error {
 	return nil
 }
 
-func (sess Session) UpdateTask(task *Task, taskID string) error {
+func (sess Session) UpdateTask(task *Task, taskID uuid.UUID) error {
 	err := sess.Transaction(func(sess Session) error {
 		original, err := sess.getTaskWithLock(taskID)
 		if err != nil {
@@ -152,7 +157,6 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 		}
 
 		task.ID = original.ID
-		task.ParentID = original.ParentID
 
 		if original.Assignee != nil && task.Assignee == nil {
 			task.Status = "open"
@@ -167,7 +171,7 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 
 		countersDifference := task.Counters.Substract(original.Counters)
 
-		if err := sess.touchResource(taskID); err != nil {
+		if err := sess.TouchResource(taskID); err != nil {
 			return err
 		}
 
@@ -195,6 +199,6 @@ func (sess Session) UpdateTask(task *Task, taskID string) error {
 	return nil
 }
 
-func (sess Session) DeleteTask(resourceID string) error {
-	return sess.deleteResource(resourceID)
+func (sess Session) DeleteTask(resourceID uuid.UUID) error {
+	return sess.DeleteResource(resourceID)
 }

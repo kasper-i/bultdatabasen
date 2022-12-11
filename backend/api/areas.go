@@ -7,18 +7,25 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 func GetAreas(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
-	if resourceId == "" {
-		resourceId = model.RootID
+
+	var resourceID uuid.UUID
+	var err error
+
+	if vars["resourceID"] == "" {
+		resourceID, _ = uuid.Parse(model.RootID)
+	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
+		utils.WriteError(w, err)
+		return
 	}
 
-	if areas, err := sess.GetAreas(resourceId); err != nil {
+	if areas, err := sess.GetAreas(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, areas)
@@ -28,9 +35,13 @@ func GetAreas(w http.ResponseWriter, r *http.Request) {
 func GetArea(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if area, err := sess.GetArea(resourceId); err != nil {
+	if area, err := sess.GetArea(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		area.WithAncestors(r)
@@ -41,9 +52,14 @@ func GetArea(w http.ResponseWriter, r *http.Request) {
 func CreateArea(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
-	if resourceId == "" {
-		resourceId = model.RootID
+	var resourceID uuid.UUID
+	var err error
+
+	if vars["resourceID"] == "" {
+		resourceID, _ = uuid.Parse(model.RootID)
+	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
+		utils.WriteError(w, err)
+		return
 	}
 
 	userId := r.Context().Value("user_id").(string)
@@ -55,12 +71,9 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := sess.CreateArea(&area, resourceId, userId)
-
-	if err != nil {
+	if err = sess.CreateArea(&area, resourceID, userId); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		area.WithAncestors(r)
 		utils.WriteResponse(w, http.StatusCreated, area)
 	}
 }
@@ -68,9 +81,13 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 func DeleteArea(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	resourceId := vars["resourceID"]
+	resourceID, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		utils.WriteError(w, err)
+		return
+	}
 
-	if err := sess.DeleteArea(resourceId); err != nil {
+	if err := sess.DeleteArea(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

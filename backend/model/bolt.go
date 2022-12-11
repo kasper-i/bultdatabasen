@@ -11,7 +11,6 @@ import (
 type Bolt struct {
 	ResourceBase
 	Type           *string    `json:"type,omitempty"`
-	ParentID       string     `gorm:"->" json:"parentId"`
 	Position       *string    `json:"position,omitempty"`
 	Installed      *time.Time `json:"installed,omitempty"`
 	Dismantled     *time.Time `json:"dismantled,omitempty"`
@@ -37,26 +36,21 @@ func (bolt *Bolt) UpdateCounters() {
 	}
 }
 
-func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
+func (sess Session) GetBolts(resourceID uuid.UUID) ([]Bolt, error) {
 	var bolts []Bolt = make([]Bolt, 0)
 
-	resourceType := "bolt"
-
-	query := fmt.Sprintf(`%s
-	SELECT
-		%s.*,
-		resource.parent_id,
+	query := fmt.Sprintf(`%s SELECT
+		bolt.*,
 		resource.counters,
 		mf.name AS manufacturer,
 		mo.name AS model,
 		ma.name AS material
-	FROM cte
-	INNER JOIN %s ON cte.id = %s.id
-	INNER JOIN resource ON bolt.id = resource.id
+	FROM tree
+	INNER JOIN resource ON tree.resource_id = resource.leaf_of
+	INNER JOIN bolt ON resource.id = bolt.id
 	LEFT JOIN manufacturer mf ON bolt.manufacturer_id = mf.id
 	LEFT JOIN model mo ON bolt.model_id = mo.id
-	LEFT JOIN material ma ON bolt.material_id = ma.id
-	WHERE cte.first <> TRUE`, buildDescendantsCTE(GetResourceDepth(resourceType)), resourceType, resourceType, resourceType)
+	LEFT JOIN material ma ON bolt.material_id = ma.id`, withTreeQuery())
 
 	if err := sess.DB.Raw(query, resourceID).Scan(&bolts).Error; err != nil {
 		return nil, err
@@ -65,12 +59,11 @@ func (sess Session) GetBolts(resourceID string) ([]Bolt, error) {
 	return bolts, nil
 }
 
-func (sess Session) GetBolt(resourceID string) (*Bolt, error) {
+func (sess Session) GetBolt(resourceID uuid.UUID) (*Bolt, error) {
 	var bolt Bolt
 
 	if err := sess.DB.Raw(`SELECT
 			bolt.*,
-			resource.parent_id,
 			resource.counters,
 			mf.name AS manufacturer,
 			mo.name AS model,
@@ -85,14 +78,14 @@ func (sess Session) GetBolt(resourceID string) (*Bolt, error) {
 		return nil, err
 	}
 
-	if bolt.ID == "" {
+	if bolt.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &bolt, nil
 }
 
-func (sess Session) getBoltWithLock(resourceID string) (*Bolt, error) {
+func (sess Session) getBoltWithLock(resourceID uuid.UUID) (*Bolt, error) {
 	var bolt Bolt
 
 	if err := sess.DB.Raw(`SELECT * FROM bolt
@@ -103,28 +96,27 @@ func (sess Session) getBoltWithLock(resourceID string) (*Bolt, error) {
 		return nil, err
 	}
 
-	if bolt.ID == "" {
+	if bolt.ID == uuid.Nil {
 		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &bolt, nil
 }
 
-func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
-	bolt.ID = uuid.Must(uuid.NewRandom()).String()
-	bolt.ParentID = parentResourceID
+func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
 	bolt.UpdateCounters()
 
 	resource := Resource{
 		ResourceBase: bolt.ResourceBase,
-		Type:         "bolt",
-		ParentID:     &parentResourceID,
+		Type:         TypeBolt,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.createResource(resource); err != nil {
+		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
+
+		bolt.ID = resource.ID
 
 		if err := sess.DB.Create(&bolt).Error; err != nil {
 			return err
@@ -140,17 +132,23 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID string) error {
 			*bolt = *refreshedBolt
 		}
 
+		if ancestors, err := sess.GetAncestors(bolt.ID); err != nil {
+			return nil
+		} else {
+			bolt.Ancestors = &ancestors
+		}
+
 		return nil
 	})
 
 	return err
 }
 
-func (sess Session) DeleteBolt(resourceID string) error {
-	return sess.deleteResource(resourceID)
+func (sess Session) DeleteBolt(resourceID uuid.UUID) error {
+	return sess.DeleteResource(resourceID)
 }
 
-func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
+func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt Bolt) (*Bolt, error) {
 	var refreshedBolt *Bolt
 
 	err := sess.Transaction(func(sess Session) error {
@@ -160,13 +158,12 @@ func (sess Session) UpdateBolt(boltID string, updatedBolt Bolt) (*Bolt, error) {
 		}
 
 		updatedBolt.ID = original.ID
-		updatedBolt.ParentID = original.ParentID
 		updatedBolt.Counters = original.Counters
 		updatedBolt.UpdateCounters()
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 
-		if err := sess.touchResource(boltID); err != nil {
+		if err := sess.TouchResource(boltID); err != nil {
 			return err
 		}
 

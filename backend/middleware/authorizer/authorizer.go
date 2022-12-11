@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -25,7 +26,6 @@ func New() *authorizer {
 func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		resourceID := vars["resourceID"]
 		var userID string
 		var ancestors []model.Resource
 
@@ -57,23 +57,29 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 				next.ServeHTTP(w, r)
 				return
 			} else {
-				writeForbidden(w, resourceID)
+				writeForbidden(w, nil)
 				return
 			}
 		}
 
+		resourceID, err := uuid.Parse(vars["resourceID"])
+		if err != nil {
+			utils.WriteError(w, err)
+			return
+		}
+
 		if maxRole := GetMaxRole(resourceID, ancestors, userID); maxRole == nil || maxRole.Role != "owner" {
-			writeForbidden(w, resourceID)
+			writeForbidden(w, &resourceID)
 		} else {
 			next.ServeHTTP(w, r)
 		}
 	})
 }
 
-func GetMaxRole(resourceID string, ancestors []model.Resource, userID string) *model.ResourceRole {
+func GetMaxRole(resourceID uuid.UUID, ancestors []model.Resource, userID string) *model.ResourceRole {
 	sess := model.NewSession(model.DB, &userID)
 
-	if resourceID == model.RootID {
+	if resourceID.String() == model.RootID {
 		return nil
 	}
 
@@ -129,11 +135,11 @@ func max(r1, r2 *model.ResourceRole) *model.ResourceRole {
 	}
 }
 
-func writeForbidden(w http.ResponseWriter, resourceID string) {
+func writeForbidden(w http.ResponseWriter, resourceID *uuid.UUID) {
 	err := utils.Error{
 		Status:     http.StatusForbidden,
 		Message:    "Forbidden",
-		ResourceID: &resourceID,
+		ResourceID: resourceID,
 	}
 
 	w.WriteHeader(http.StatusForbidden)
