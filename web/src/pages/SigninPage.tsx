@@ -1,91 +1,100 @@
-import axios from "axios";
-import { useAppDispatch } from "@/store";
-import { isEqual } from "lodash-es";
-import React, { Fragment, ReactElement, useEffect } from "react";
-import { login } from "@/slices/authSlice";
-import { Api } from "../Api";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { cognitoClientId, cognitoUrl } from "@/constants";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import { Card } from "@/components/features/routeEditor/Card";
+import { cognitoClientId, cognitoPoolId } from "@/constants";
+import {
+  AuthenticationDetails,
+  CognitoUser,
+  CognitoUserPool,
+} from "amazon-cognito-identity-js";
 
-export interface OAuthTokenResponse {
-  id_token: string;
-  access_token: string;
-  refresh_token: string;
-  expires_id: number;
-  token_type: string;
-}
+import { useState } from "react";
 
-const instance = axios.create({
-  baseURL: cognitoUrl,
-  timeout: 10000,
-  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-});
+const SigninPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [inProgress, setInProgress] = useState(false);
 
-const parseJwt = (token: string) => {
-  const base64Url = token.split(".")[1];
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(function (c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join("")
-  );
+  const login = () => {
+    setInProgress(true);
 
-  return JSON.parse(jsonPayload);
-};
+    try {
+      const authenticationDetails = new AuthenticationDetails({
+        Username: email,
+        Password: password,
+      });
 
-function SigninPage(): ReactElement {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+      const userPool = new CognitoUserPool({
+        UserPoolId: cognitoPoolId,
+        ClientId: cognitoClientId,
+      });
 
-  useEffect(() => {
-    const code = searchParams.get("code");
-
-    if (code == null) {
-      return;
-    }
-
-    const params = new URLSearchParams();
-    params.append("grant_type", "authorization_code");
-    params.append("client_id", cognitoClientId);
-    params.append("code", code);
-    params.append(
-      "redirect_uri",
-      window.location.protocol + "//" + window.location.host + "/signin"
-    );
-
-    instance.post("/oauth2/token", params).then(async (response) => {
-      const { id_token, access_token, refresh_token }: OAuthTokenResponse =
-        response.data;
-
-      Api.setTokens(id_token, access_token, refresh_token);
-
-      const { given_name, family_name } = parseJwt(id_token);
-
-      const info = await Api.getMyself();
-      const updatedInfo = {
-        ...info,
-        firstName: info.firstName ?? given_name,
-        lastName: info.lastName ?? family_name,
+      const userData = {
+        Username: email,
+        Pool: userPool,
       };
 
-      if (!isEqual(info, updatedInfo)) {
-        await Api.updateMyself(updatedInfo);
-      }
+      const cognitoUser = new CognitoUser(userData);
 
-      const returnPath = localStorage.getItem("returnPath");
-      localStorage.removeItem("returnPath");
+      cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function (result) {
+          const accessToken = result.getAccessToken().getJwtToken();
+          const idToken = result.getIdToken().getJwtToken();
+          const refreshToken = result.getRefreshToken().getToken();
 
-      dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
+          const tokens = {
+            accessToken,
+            idToken,
+            refreshToken,
+          };
 
-      navigate(returnPath != null ? returnPath : "/");
-    });
-  }, [location, navigate, dispatch]);
+          console.log(tokens);
+          setInProgress(false);
+        },
 
-  return <Fragment />;
-}
+        onFailure: function (err) {
+          console.error(err.message || JSON.stringify(err));
+          setInProgress(false);
+        },
+      });
+    } catch {
+      setInProgress(false);
+    }
+  };
+
+  return (
+    <div className="w-full mt-20 flex justify-center items-center">
+      <div className="w-96">
+        <Card>
+          <div className="flex flex-col items-center gap-2.5">
+            <Input
+              label="E-post"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Input
+              label="Password"
+              password
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button
+              className="mt-2.5"
+              onClick={login}
+              disabled={!email || !password}
+              loading={inProgress}
+              full
+            >
+              Logga in
+            </Button>
+            <a className="text-sm text-purple-600" href="">
+              Skapa nytt konto
+            </a>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};
 
 export default SigninPage;
