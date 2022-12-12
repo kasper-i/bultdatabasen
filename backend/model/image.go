@@ -150,9 +150,9 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 		Size:      len(imageBytes)}
 
 	resource := Resource{
-		Type:         TypeImage,
+		Type: TypeImage,
 	}
-	
+
 	reader := bytes.NewReader(imageBytes)
 
 	if _, err := reader.Seek(0, io.SeekStart); err != nil {

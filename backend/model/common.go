@@ -98,9 +98,9 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 	}
 
 	trash := Trash{
-		ResourceID:   resourceID,
-		DeletedTime:  time.Now(),
-		DeletedByID:  *sess.UserID,
+		ResourceID:  resourceID,
+		DeletedTime: time.Now(),
+		DeletedByID: *sess.UserID,
 	}
 
 	err = sess.Transaction(func(sess Session) error {
@@ -138,7 +138,6 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 				return err
 			}
 		}
-
 
 		countersDifference := Counters{}.Substract(resource.Counters)
 
