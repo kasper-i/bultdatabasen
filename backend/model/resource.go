@@ -19,15 +19,15 @@ type ResourceType string
 
 const (
 	TypeRoot    ResourceType = "root"
-	TypeArea                 = "area"
-	TypeCrag                 = "crag"
-	TypeSector               = "sector"
-	TypeRoute                = "route"
-	TypePoint                = "point"
-	TypeBolt                 = "bolt"
-	TypeImage                = "image"
-	TypeComment              = "comment"
-	TypeTask                 = "task"
+	TypeArea    ResourceType = "area"
+	TypeCrag    ResourceType = "crag"
+	TypeSector  ResourceType = "sector"
+	TypeRoute   ResourceType = "route"
+	TypePoint   ResourceType = "point"
+	TypeBolt    ResourceType = "bolt"
+	TypeImage   ResourceType = "image"
+	TypeComment ResourceType = "comment"
+	TypeTask    ResourceType = "task"
 )
 
 type ResourceBase struct {
@@ -60,10 +60,10 @@ type Trash struct {
 }
 
 type Parent struct {
-	ID           uuid.UUID    `json:"id"`
-	Name         *string      `json:"name"`
-	Type         ResourceType `json:"type"`
-	ChildID      uuid.UUID    `json:"-"`
+	ID      uuid.UUID    `json:"id"`
+	Name    *string      `json:"name"`
+	Type    ResourceType `json:"type"`
+	ChildID uuid.UUID    `json:"-"`
 }
 
 type ResourceWithParents struct {
@@ -282,16 +282,16 @@ func (sess Session) GetChildren(resourceID uuid.UUID) ([]Resource, error) {
 
 func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	type searchResult struct {
-		ID uuid.UUID
+		ID   uuid.UUID
 		Name string
 		Type ResourceType
 
-		ParentID *uuid.UUID `gorm:"column:r2_id"`
-		ParentName string `gorm:"column:r2_name"`
+		ParentID   *uuid.UUID   `gorm:"column:r2_id"`
+		ParentName string       `gorm:"column:r2_name"`
 		ParentType ResourceType `gorm:"column:r2_type"`
 
-		GrandParentID *uuid.UUID `gorm:"column:r3_id"`
-		GrandParentName string `gorm:"column:r3_name"`
+		GrandParentID   *uuid.UUID   `gorm:"column:r3_id"`
+		GrandParentName string       `gorm:"column:r3_name"`
 		GrandParentType ResourceType `gorm:"column:r3_type"`
 	}
 

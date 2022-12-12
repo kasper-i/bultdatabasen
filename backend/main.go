@@ -24,7 +24,6 @@ func checkHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = io.WriteString(w, `{"alive": true}`)
 }
 
-
 func getVersion(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
