@@ -60,7 +60,7 @@ func (sess Session) CreateSector(sector *Sector, parentResourceID uuid.UUID) err
 		if err := sess.DB.Create(&sector).Error; err != nil {
 			return err
 		}
-		
+
 		if ancestors, err := sess.GetAncestors(sector.ID); err != nil {
 			return nil
 		} else {

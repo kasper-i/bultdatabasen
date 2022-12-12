@@ -259,7 +259,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 				SELECT @pointID, path || REPLACE(@pointID, '-', '_')
 				FROM tree
 				WHERE resource_id = @routeID`, sql.Named("routeID", routeID), sql.Named("pointID", pointID)).Error; err != nil {
-					return err
+				return err
 			}
 
 			if err := sess.updateCountersForResource(routeID, point.Counters); err != nil {
@@ -415,7 +415,7 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 			if err := sess.DB.Exec(`DELETE FROM tree
 				WHERE path <@ (SELECT path FROM tree WHERE resource_id = @routeID LIMIT 1) AND resource_id = @pointID`,
 				sql.Named("routeID", routeID), sql.Named("pointID", pointID)).Error; err != nil {
-					return err
+				return err
 			}
 
 			countersDifference := Counters{}.Substract(point.Counters)

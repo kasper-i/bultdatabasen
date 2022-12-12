@@ -120,7 +120,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
 			return err
 		}
-	
+
 		task.ID = resource.ID
 		task.BirthTime = resource.BirthTime
 		task.UserID = resource.CreatorID
