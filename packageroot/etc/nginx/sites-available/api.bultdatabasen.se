@@ -1,6 +1,6 @@
 server {
 	listen 443 ssl;
-	server_name api.bultdatabasen.se;
+	server_name api.test.bultdatabasen.se;
 
 	# Gzip Settings
 	include snippets/gzip.conf;
@@ -15,6 +15,6 @@ server {
 	}
 
 	include /etc/nginx/options-ssl.conf;
-	ssl_certificate /etc/letsencrypt/live/bultdatabasen.se/fullchain.pem;
-	ssl_certificate_key /etc/letsencrypt/live/bultdatabasen.se/privkey.pem;
+	ssl_certificate /etc/letsencrypt/live/test.bultdatabasen.se/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/test.bultdatabasen.se/privkey.pem;
 }
