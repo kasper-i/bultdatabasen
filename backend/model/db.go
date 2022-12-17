@@ -28,6 +28,7 @@ func init() {
 	var port string
 	var username string
 	var password string
+	var debug bool
 
 	database = cfg.Section("database").Key("database").String()
 	schema = cfg.Section("database").Key("schema").String()
@@ -35,13 +36,19 @@ func init() {
 	port = cfg.Section("database").Key("port").String()
 	username = cfg.Section("database").Key("username").String()
 	password = cfg.Section("database").Key("password").String()
+	debug = cfg.Section("database").Key("debug").MustBool()
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable search_path=%s TimeZone=Europe/Stockholm",
 		host, username, password, database, port, schema)
 
+	var logLevel logger.LogLevel = logger.Warn
+	if debug {
+		logLevel = logger.Info
+	}
+
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Warn),
+		Logger: logger.Default.LogMode(logLevel),
 	})
 	if err != nil {
 		panic("failed to connect database")
