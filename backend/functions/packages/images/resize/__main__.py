@@ -29,16 +29,14 @@ def resize(im, size):
       im.save(TEMP_FILE)
 
 def upload(file, upload_url):
-      files = { 'file': open(file, 'rb')}
-      
       requests.put(upload_url, headers={
           'x-amz-acl':    'public-read',
           'Content-Type': 'image/jpeg',
-      }, files=files)
+      }, data=open(file, 'rb'))
 
 def main(args):
       download_url = args.get("downloadUrl")
-      versions = args.get("versions")      
+      versions = args.get("versions")
 
       urllib.request.urlretrieve(download_url, ORIG_FILE)
 
