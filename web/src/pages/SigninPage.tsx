@@ -8,12 +8,37 @@ import {
   CognitoUserPool,
 } from "amazon-cognito-identity-js";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+
+export const useCognitoUserPool = () => {
+  return useMemo(() => {
+    return new CognitoUserPool({
+      UserPoolId: cognitoPoolId,
+      ClientId: cognitoClientId,
+    });
+  }, []);
+};
+
+export const useCognitoUser = (username: string) => {
+  const userPool = useCognitoUserPool();
+
+  return useMemo(() => {
+    const userData = {
+      Username: username,
+      Pool: userPool,
+    };
+
+    return new CognitoUser(userData);
+  }, [username]);
+};
 
 const SigninPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [inProgress, setInProgress] = useState(false);
+
+  const cognitoUser = useCognitoUser(email);
 
   const login = () => {
     setInProgress(true);
@@ -24,31 +49,12 @@ const SigninPage = () => {
         Password: password,
       });
 
-      const userPool = new CognitoUserPool({
-        UserPoolId: cognitoPoolId,
-        ClientId: cognitoClientId,
-      });
-
-      const userData = {
-        Username: email,
-        Pool: userPool,
-      };
-
-      const cognitoUser = new CognitoUser(userData);
-
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: function (result) {
           const accessToken = result.getAccessToken().getJwtToken();
           const idToken = result.getIdToken().getJwtToken();
           const refreshToken = result.getRefreshToken().getToken();
 
-          const tokens = {
-            accessToken,
-            idToken,
-            refreshToken,
-          };
-
-          console.log(tokens);
           setInProgress(false);
         },
 
@@ -73,11 +79,17 @@ const SigninPage = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
             <Input
-              label="Password"
+              label="Lösenord"
               password
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <Link
+              to="/signin/forgot-password"
+              className="text-sm text-purple-600 self-start"
+            >
+              Återställ lösenord
+            </Link>
             <Button
               className="mt-2.5"
               onClick={login}
