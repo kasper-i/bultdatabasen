@@ -4,6 +4,8 @@ inputs:
     options:
       - test
       - production
+  secret:
+    required: true
 
 runs:
   using: "composite"
@@ -23,7 +25,7 @@ runs:
     - name: Deploy
       shell: bash
       env:
-        FUNCTIONS_SECRET: ${{ secrets.FUNCTIONS_SECRET }}
+        FUNCTIONS_SECRET: ${{ inputs.secret }}
       run: |
         pip install virtualenv
         doctl serverless deploy .

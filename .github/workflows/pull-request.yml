@@ -61,5 +61,6 @@ jobs:
       - uses: ./.github/actions/deploy-function
         with:
           namespace: test
+          secret: ${{ secrets.FUNCTIONS_SECRET }}
 
 on: pull_request
