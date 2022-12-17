@@ -6,9 +6,6 @@ port = 5432
 username = bultdatabasen
 password = bultdatabasen
 
-[auth]
-issuer = https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_bo9kHBKxM
-
 [spaces]
 bucket = bultdatabasen
 key = mykey

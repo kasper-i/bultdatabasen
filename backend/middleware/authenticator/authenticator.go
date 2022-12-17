@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	"gopkg.in/ini.v1"
 	"gopkg.in/square/go-jose.v2"
 )
 
@@ -75,34 +75,36 @@ type Claims struct {
 }
 
 var keys jose.JSONWebKeySet
-var cognitoIssuer string
 
 func init() {
-	j1 := []byte(`{"alg":"RS256","e":"AQAB","kid":"P4lcFQ/F2RpTTQy0dEGefnbJkRw4n56TVRBoHBix194=","kty":"RSA","n":"7P8wQGwo6hiGn6ocDl-YQd4QxMGwPFbC2BSdQlqELTkR-389Cdi975V1HsebrMTeDAc07Bw2Hum-pF0yG1b8vr4WpX6U4zU1MiRZDj28_uybZHYtURQb5PvHenoW7INQImw2gY4OTmcbf59S3YlHhTffIngGHjp2y0L2JeaO5IbUT6sCtzqlhuYkMaeSF_P6Zbmthp2KXP2XXXFE_oIUKv-KNpol6MZ9NMIkXBZem_epKn8SL02rUX64yxH1Hu6w4R8c5mYjo97lD3itHAlSpdr1P8TVSPS5k0Pd3rZAqWd4FKa32hlOJywb30XcT7FIYn4bMyGtM_d4YBD3jPDBhw","use":"sig"}`)
-	j2 := []byte(`{"alg":"RS256","e":"AQAB","kid":"gfmWfYBUTrl2CsA+5TzTr1bCO1lQIcYBsDYRviUvKvc=","kty":"RSA","n":"whA_cKNimWDjUK6eElfabWALj0gVcoUjNwsa_VZkZzvzQJlcIXR_E4qZgPDHVaCgDrPZ1ViViUbrrZpIwUI1scZvUH6ZCJTZYuO0dfyvAIUQavvxak5v-ZzUNrm3sIwyxzs44OZaRxGg6NCthxHtks47YSmfcLniY9iNdkl32zU1HvEd-W6UJrPlrOTDlX564ZnTmdWPX2RFlRouCSBQl66LprzUKX71mE6dca4S7jsnuELK5CLjWkUaZWfmGgSJH38zzZ9eSWttIpTBAYEF81n6PaGBarv2tZgo3SeuwlI3TwXgn_ylRVaiLezLPBTh4H_WqkEeDE30NqeOMBMM1Q","use":"sig"}`)
-
-	k1 := jose.JSONWebKey{}
-	if err := k1.UnmarshalJSON(j1); err != nil {
+	keysFile, err := os.Open("/etc/bultdatabasen/keys.json")
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
+	byteValue, _ := ioutil.ReadAll(keysFile)
 
-	k2 := jose.JSONWebKey{}
-	if err := k2.UnmarshalJSON(j2); err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
+	var keyList struct {
+		Keys []interface{} `json:"keys"`
 	}
 
-	keys.Keys = append(keys.Keys, k1)
-	keys.Keys = append(keys.Keys, k2)
-
-	cfg, err := ini.Load("/etc/bultdatabasen.ini")
+	err = json.Unmarshal(byteValue, &keyList)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 
-	cognitoIssuer = cfg.Section("auth").Key("issuer").String()
+	for _, jsonKey := range(keyList.Keys) {
+		bytes, _ := json.Marshal(jsonKey)
+
+		k1 := jose.JSONWebKey{}
+		if err := k1.UnmarshalJSON(bytes); err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+	
+		keys.Keys = append(keys.Keys, k1)
+	}
 }
 
 func authenticate(rawJWT string) (string, error) {
@@ -114,7 +116,14 @@ func authenticate(rawJWT string) (string, error) {
 	}
 
 	kid := signature.Signatures[0].Header.KeyID
-	payload, err := signature.Verify(keys.Key(kid)[0].Key)
+	var key interface{}
+	if result := keys.Key(kid); len(result) == 1 {
+		key = result[0].Key
+	} else {
+		return userID, ErrUnexpectedIssuer
+	}
+
+	payload, err := signature.Verify(key)
 	if err != nil {
 		return userID, err
 	}
@@ -126,10 +135,6 @@ func authenticate(rawJWT string) (string, error) {
 
 	if time.Unix(claims.Expiration, 0).Before(time.Now()) {
 		return userID, ErrTokenExpired
-	}
-
-	if claims.Issuer != cognitoIssuer {
-		return userID, ErrUnexpectedIssuer
 	}
 
 	userID = claims.Username
