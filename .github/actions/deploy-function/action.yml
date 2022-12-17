@@ -6,6 +6,8 @@ inputs:
       - production
   secret:
     required: true
+  token:
+    required: true
 
 runs:
   using: "composite"
@@ -19,7 +21,7 @@ runs:
         wget --progress=bar:force:noscroll https://github.com/digitalocean/doctl/releases/download/v1.86.0/doctl-1.86.0-linux-amd64.tar.gz
         tar xf doctl-1.86.0-linux-amd64.tar.gz
         sudo mv doctl /usr/local/bin
-        doctl auth init --access-token=${{ secrets.DO_API_TOKEN }}
+        doctl auth init --access-token=${{ inputs.token }}
         doctl serverless install
         doctl serverless connect ${{ inputs.namespace }}
     - name: Deploy

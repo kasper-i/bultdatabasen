@@ -62,5 +62,6 @@ jobs:
         with:
           namespace: test
           secret: ${{ secrets.FUNCTIONS_SECRET }}
+          token: ${{ secrets.DO_API_TOKEN }}
 
 on: pull_request

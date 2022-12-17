@@ -29,6 +29,7 @@ jobs:
         with:
           namespace: production
           secret: ${{ secrets.FUNCTIONS_SECRET }}
+          token: ${{ secrets.DO_API_TOKEN }}
 
 on:
   push:
