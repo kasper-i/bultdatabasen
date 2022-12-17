@@ -316,7 +316,7 @@ CREATE TABLE bultdatabasen.route (
 -- Name: sector; Type: TABLE; Schema: bultdatabasen; Owner: -
 --
 
-CREATE TABLE test.bultdatabasen.sector (
+CREATE TABLE bultdatabasen.sector (
     id uuid NOT NULL,
     name character varying(256) NOT NULL
 );
@@ -516,7 +516,7 @@ ALTER TABLE ONLY bultdatabasen.route
 -- Name: sector idx_29580_primary; Type: CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
-ALTER TABLE ONLY test.bultdatabasen.sector
+ALTER TABLE ONLY bultdatabasen.sector
     ADD CONSTRAINT idx_29580_primary PRIMARY KEY (id);
 
 
@@ -727,7 +727,7 @@ CREATE INDEX idx_29571_fk_route_1_idx ON bultdatabasen.route USING btree (id, na
 -- Name: idx_29580_fk_sector_1_idx; Type: INDEX; Schema: bultdatabasen; Owner: -
 --
 
-CREATE INDEX idx_29580_fk_sector_1_idx ON test.bultdatabasen.sector USING btree (id, name);
+CREATE INDEX idx_29580_fk_sector_1_idx ON bultdatabasen.sector USING btree (id, name);
 
 
 --
@@ -942,7 +942,7 @@ ALTER TABLE ONLY bultdatabasen.route
 -- Name: sector fk_sector_1; Type: FK CONSTRAINT; Schema: bultdatabasen; Owner: -
 --
 
-ALTER TABLE ONLY test.bultdatabasen.sector
+ALTER TABLE ONLY bultdatabasen.sector
     ADD CONSTRAINT fk_sector_1 FOREIGN KEY (id, name) REFERENCES bultdatabasen.resource(id, name) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
