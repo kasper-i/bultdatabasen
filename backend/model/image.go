@@ -284,21 +284,46 @@ func getResizedImageKey(imageID uuid.UUID, version string) string {
 }
 
 func ResizeImage(imageID uuid.UUID, versions []string) error {
-	values := map[string]interface{}{"imageId": imageID, "sizes": versions}
-	json_data, err := json.Marshal(values)
+	var requestedVersions map[string]string = make(map[string]string)
+
+	originalUrl := fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s",
+		spacesBucket, getOriginalImageKey(imageID))
+
+	for _, version := range versions {
+		req, _ := spaces.S3Client().PutObjectRequest(&s3.PutObjectInput{
+			Bucket:      &spacesBucket,
+			Key:         aws.String(getResizedImageKey(imageID, version)),
+			ACL:         aws.String("public-read"),
+			ContentType: aws.String("image/jpeg"),
+		})
+
+		urlStr, err := req.Presign(10 * time.Minute)
+		if err != nil {
+			return err
+		}
+
+		requestedVersions[version] = urlStr
+	}
+
+	values := map[string]interface{}{
+		"downloadUrl": originalUrl,
+		"versions":    requestedVersions,
+	}
+
+	jsonData, err := json.Marshal(values)
 	if err != nil {
 		return err
 	}
 
-	req, _ := http.NewRequest(
+	httpReq, _ := http.NewRequest(
 		"POST",
 		functionUrl,
-		bytes.NewReader(json_data))
+		bytes.NewReader(jsonData))
 
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Require-Whisk-Auth", functionSecret)
+	httpReq.Header.Add("Content-Type", "application/json")
+	httpReq.Header.Add("X-Require-Whisk-Auth", functionSecret)
 
-	if resp, err := http.DefaultClient.Do(req); err != nil {
+	if resp, err := http.DefaultClient.Do(httpReq); err != nil {
 		return err
 	} else if resp.StatusCode != 204 {
 		return fmt.Errorf("images/resize: %s", resp.Status)

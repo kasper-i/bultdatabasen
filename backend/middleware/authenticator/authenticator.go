@@ -94,7 +94,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	for _, jsonKey := range(keyList.Keys) {
+	for _, jsonKey := range keyList.Keys {
 		bytes, _ := json.Marshal(jsonKey)
 
 		k1 := jose.JSONWebKey{}
@@ -102,7 +102,7 @@ func init() {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
-	
+
 		keys.Keys = append(keys.Keys, k1)
 	}
 }
