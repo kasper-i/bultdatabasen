@@ -1,3 +1,5 @@
 {
-  "API_URL": "https://api.bultdatabasen.se"
+  "API_URL": "https://api.bultdatabasen.se",
+  "COGNITO_URL": "https://bultdatabasen.auth.eu-west-1.amazoncognito.com",
+  "COGNITO_CLIENT_ID": "4bc4eb6q54d9poodouksahhk86"
 }
