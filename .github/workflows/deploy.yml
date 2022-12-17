@@ -2,6 +2,7 @@ jobs:
   build:
     name: Deploy
     runs-on: ubuntu-20.04
+    environment: production
 
     steps:
       - uses: actions/checkout@v3
@@ -16,6 +17,17 @@ jobs:
           ./node_modules/.bin/sentry-cli releases new "bultdatabasen@${GITHUB_RUN_ID}" --org bultdatabasen --project bultdatabasen
           ./node_modules/.bin/sentry-cli releases files "bultdatabasen@${GITHUB_RUN_ID}" upload-sourcemaps --ext map dist/assets --org bultdatabasen --project bultdatabasen
         working-directory: web
+
+  build-function:
+    name: Deploy Function
+    runs-on: ubuntu-20.04
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/deploy-function
+        with:
+          - namespace: production
 
 on:
   push:

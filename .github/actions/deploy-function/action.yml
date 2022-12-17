@@ -1,10 +1,13 @@
-jobs:
-  build:
-    name: Deploy Function
-    runs-on: ubuntu-20.04
+inputs:
+  namespace:
+    required: true
+    options:
+      - test
+      - production
 
+runs:
+  using:
     steps:
-      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: "3.9"
@@ -15,22 +18,11 @@ jobs:
           sudo mv doctl /usr/local/bin
           doctl auth init --access-token=${{ secrets.DO_API_TOKEN }}
           doctl serverless install
-          doctl serverless connect sandbox
+          doctl serverless connect ${{ inputs.namespace }}
       - name: Deploy
         env:
-          SPACES_SECRET: ${{ secrets.SPACES_SECRET }}
-          SPACES_KEY: ${{ secrets.SPACES_KEY }}
           FUNCTIONS_SECRET: ${{ secrets.FUNCTIONS_SECRET }}
         run: |
           pip install virtualenv
           doctl serverless deploy .
         working-directory: backend/functions
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - develop
-    paths:
-      - "backend/functions/**"
-      - ".github/workflows/deploy-function.yml"

@@ -2,6 +2,7 @@ jobs:
   lint-app:
     name: Lint app
     runs-on: ubuntu-20.04
+    environment: test
 
     steps:
       - uses: actions/checkout@v3
@@ -20,6 +21,7 @@ jobs:
   lint-backend:
     name: Lint backend
     runs-on: ubuntu-20.04
+    environment: test
 
     steps:
       - uses: actions/checkout@v3
@@ -38,6 +40,7 @@ jobs:
     name: Build
     runs-on: ubuntu-20.04
     needs: [lint-app, lint-backend]
+    environment: test
 
     steps:
       - uses: actions/checkout@v3
@@ -47,5 +50,16 @@ jobs:
           echo $(jq '.COGNITO_URL = "https://bultdatabasen-test.auth.eu-west-1.amazoncognito.com" | .COGNITO_CLIENT_ID = "2lnodlocb4poce8o3rlut10gl2"' web/src/config.json) > web/src/config.json
       - run: cp backend/keys/test.json packageroot/etc/bultdatabasen/keys.json
       - uses: ./.github/actions/build
+
+  build:
+    name: Deploy Function
+    runs-on: ubuntu-20.04
+    environment: test
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/deploy-function
+        with:
+          namespace: test
 
 on: pull_request
