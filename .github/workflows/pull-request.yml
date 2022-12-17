@@ -51,7 +51,7 @@ jobs:
       - run: cp backend/keys/test.json packageroot/etc/bultdatabasen/keys.json
       - uses: ./.github/actions/build
 
-  build:
+  build-function:
     name: Deploy Function
     runs-on: ubuntu-20.04
     environment: test
