@@ -1,6 +1,4 @@
-environment:
-  SPACES_KEY: "${SPACES_KEY}"
-  SPACES_SECRET: "${SPACES_SECRET}"
+environment: {}
 parameters: {}
 packages:
   - name: images

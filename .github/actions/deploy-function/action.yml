@@ -1,0 +1,34 @@
+inputs:
+  namespace:
+    required: true
+    options:
+      - test
+      - production
+  secret:
+    required: true
+  token:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+    - name: Install and Configure doctl
+      shell: bash
+      run: |
+        wget --progress=bar:force:noscroll https://github.com/digitalocean/doctl/releases/download/v1.86.0/doctl-1.86.0-linux-amd64.tar.gz
+        tar xf doctl-1.86.0-linux-amd64.tar.gz
+        sudo mv doctl /usr/local/bin
+        doctl auth init --access-token=${{ inputs.token }}
+        doctl serverless install
+        doctl serverless connect ${{ inputs.namespace }}
+    - name: Deploy
+      shell: bash
+      env:
+        FUNCTIONS_SECRET: ${{ inputs.secret }}
+      run: |
+        pip install virtualenv
+        doctl serverless deploy .
+      working-directory: backend/functions

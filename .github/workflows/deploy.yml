@@ -2,22 +2,12 @@ jobs:
   build:
     name: Deploy
     runs-on: ubuntu-20.04
+    environment: production
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "16"
-      - uses: actions/setup-go@v3
-        with:
-          go-version: "1.19"
-          check-latest: true
-      - name: Build app
-        run: |
-          sed -i -E "s/(\"version\": )\".+\"/\1\"${GITHUB_RUN_ID}\"/" package.json
-          npm install
-          npm run build
-        working-directory: web
+      - run: cp backend/keys/production.json packageroot/etc/bultdatabasen/keys.json
+      - uses: ./.github/actions/build
       - name: Upload sourcemap
         env:
           SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
@@ -27,23 +17,19 @@ jobs:
           ./node_modules/.bin/sentry-cli releases new "bultdatabasen@${GITHUB_RUN_ID}" --org bultdatabasen --project bultdatabasen
           ./node_modules/.bin/sentry-cli releases files "bultdatabasen@${GITHUB_RUN_ID}" upload-sourcemaps --ext map dist/assets --org bultdatabasen --project bultdatabasen
         working-directory: web
-      - name: Build backend
-        run: |
-          go build -ldflags="-X 'main.Version=${GITHUB_RUN_ID}'"
-        working-directory: backend
-      - name: Build package archive
-        run: |
-          mkdir -p packageroot/var/lib/bultdatabasen/images
-          mkdir -p packageroot/usr/share/bultdatabasen
-          mkdir -p packageroot/usr/bin
-          mv web/dist packageroot/usr/share/bultdatabasen/
-          mv backend/bultdatabasen packageroot/usr/bin
-          sed -i "s/VERSION/${GITHUB_RUN_ID}/g" packageroot/DEBIAN/control
-          dpkg-deb -b packageroot .
-      - name: Upload archive
-        uses: actions/upload-artifact@v3
+
+  build-function:
+    name: Deploy Function
+    runs-on: ubuntu-20.04
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/deploy-function
         with:
-          path: bultdatabasen_*_amd64.deb
+          namespace: production
+          secret: ${{ secrets.FUNCTIONS_SECRET }}
+          token: ${{ secrets.DO_API_TOKEN }}
 
 on:
   push:

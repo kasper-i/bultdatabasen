@@ -1,8 +1,8 @@
 import os
 import urllib.request
 
-import boto3
 from PIL import Image
+import requests
 
 ORIG_FILE = "in"
 TEMP_FILE = "out.jpg"
@@ -14,13 +14,6 @@ SIZE_TABLE = {
 	"xl": 1500,
 	"2xl": 2500
 }
-
-session = boto3.session.Session()
-s3_client = session.client('s3',
-                        region_name='ams3',
-                        endpoint_url='https://ams3.digitaloceanspaces.com',
-                        aws_access_key_id=os.getenv('SPACES_KEY'),
-                        aws_secret_access_key=os.getenv('SPACES_SECRET'))
 
 def resize(im, size):
       width, height = im.size
@@ -35,29 +28,23 @@ def resize(im, size):
       im = im.resize(target, Image.ANTIALIAS)
       im.save(TEMP_FILE)
 
-def upload(file, image_id, size=None):
-      if size:
-            key = f'images/{image_id}.{size}'
-      else:
-            key = f'images/{image_id}'
-
-      s3_client.upload_file(file, 'bultdatabasen', key,
-            ExtraArgs={
-                  'ACL': 'public-read',
-                  'ContentType': 'image/jpeg'
-      })
+def upload(file, upload_url):
+      requests.put(upload_url, headers={
+          'x-amz-acl':    'public-read',
+          'Content-Type': 'image/jpeg',
+      }, data=open(file, 'rb'))
 
 def main(args):
-      image_id = args.get("imageId")
-      sizes = args.get("sizes")      
+      download_url = args.get("downloadUrl")
+      versions = args.get("versions")
 
-      urllib.request.urlretrieve(f'https://bultdatabasen.ams3.digitaloceanspaces.com/images/{image_id}', ORIG_FILE)
+      urllib.request.urlretrieve(download_url, ORIG_FILE)
 
       try:
             with Image.open(ORIG_FILE) as im:
-                  for size in sizes:
-                        resize(im, SIZE_TABLE[size])
-                        upload(TEMP_FILE, image_id, size)
+                  for version, upload_url in versions.items():
+                        resize(im, SIZE_TABLE[version])
+                        upload(TEMP_FILE, upload_url)
                         
       except Exception as e:
             raise e
