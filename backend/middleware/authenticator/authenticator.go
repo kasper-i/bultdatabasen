@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -82,7 +82,7 @@ func init() {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
-	byteValue, _ := ioutil.ReadAll(keysFile)
+	byteValue, _ := io.ReadAll(keysFile)
 
 	var keyList struct {
 		Keys []interface{} `json:"keys"`
