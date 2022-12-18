@@ -4,7 +4,7 @@ import { Card } from "@/components/features/routeEditor/Card";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
-import { useCognitoUserPool } from "./SigninPage";
+import { useCognitoUser, useCognitoUserPool } from "./SigninPage";
 
 const RegisterPage = () => {
   const [phase, setPhase] = useState<1 | 2>(1);
@@ -16,6 +16,7 @@ const RegisterPage = () => {
   const [inProgress, setInProgress] = useState(false);
 
   const cognitoUserPool = useCognitoUserPool();
+  const cognitoUser = useCognitoUser(email);
 
   const register = () => {
     const attributeList: CognitoUserAttribute[] = [];
@@ -52,6 +53,15 @@ const RegisterPage = () => {
         console.log("user name is " + cognitoUser.getUsername());
       }
     );
+  };
+
+  const confirm = () => {
+    cognitoUser.confirmRegistration(confirmationCode, true, (err, result) => {
+      if (err) {
+        alert(err.message || JSON.stringify(err));
+        return;
+      }
+    });
   };
 
   return (
@@ -110,7 +120,7 @@ const RegisterPage = () => {
                   className="mt-2.5"
                   loading={inProgress}
                   full
-                  onClick={() => {}}
+                  onClick={confirm}
                 >
                   Bekräfta
                 </Button>
