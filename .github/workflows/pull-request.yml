@@ -2,7 +2,6 @@ jobs:
   lint-app:
     name: Lint app
     runs-on: ubuntu-20.04
-    environment: test
 
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +20,6 @@ jobs:
   lint-backend:
     name: Lint backend
     runs-on: ubuntu-20.04
-    environment: test
 
     steps:
       - uses: actions/checkout@v3

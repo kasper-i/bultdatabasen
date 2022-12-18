@@ -97,13 +97,13 @@ func init() {
 	for _, jsonKey := range keyList.Keys {
 		bytes, _ := json.Marshal(jsonKey)
 
-		k1 := jose.JSONWebKey{}
-		if err := k1.UnmarshalJSON(bytes); err != nil {
+		k := jose.JSONWebKey{}
+		if err := k.UnmarshalJSON(bytes); err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
 
-		keys.Keys = append(keys.Keys, k1)
+		keys.Keys = append(keys.Keys, k)
 	}
 }
 
