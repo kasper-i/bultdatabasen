@@ -1,4 +1,3 @@
-import { cognitoClientId, cognitoUrl } from "@/constants";
 import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import axios from "axios";
@@ -6,6 +5,7 @@ import { isEqual } from "lodash-es";
 import { Fragment, ReactElement, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Api } from "../Api";
+import configData from "@/config.json";
 
 export interface OAuthTokenResponse {
   id_token: string;
@@ -16,7 +16,7 @@ export interface OAuthTokenResponse {
 }
 
 const instance = axios.create({
-  baseURL: cognitoUrl,
+  baseURL: configData.COGNITO_URL,
   timeout: 10000,
   headers: { "Content-Type": "application/x-www-form-urlencoded" },
 });
@@ -50,7 +50,7 @@ function OldSigninPage(): ReactElement {
 
     const params = new URLSearchParams();
     params.append("grant_type", "authorization_code");
-    params.append("client_id", cognitoClientId);
+    params.append("client_id", configData.COGNITO_CLIENT_ID);
     params.append("code", code);
     params.append(
       "redirect_uri",

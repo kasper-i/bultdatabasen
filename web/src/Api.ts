@@ -9,10 +9,9 @@ import { Route } from "@/models/route";
 import { Sector } from "@/models/sector";
 import { Task } from "@/models/task";
 import { User } from "@/models/user";
-import { OAuthTokenResponse } from "@/pages/SigninPage";
+import { OAuthTokenResponse } from "@/pages/OldSigninPage";
 import axios, { AxiosRequestHeaders } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
-import { cognitoClientId, cognitoUrl } from "./constants";
 import { Manufacturer } from "./models/manufacturer";
 import { Material } from "./models/material";
 import { Model } from "./models/model";
@@ -130,14 +129,14 @@ export class Api {
     }
 
     const instance = axios.create({
-      baseURL: cognitoUrl,
+      baseURL: configData.COGNITO_URL,
       timeout: 10000,
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
 
     const params = new URLSearchParams();
     params.append("grant_type", "refresh_token");
-    params.append("client_id", cognitoClientId);
+    params.append("client_id", configData.COGNITO_CLIENT_ID);
     params.append("refresh_token", Api.refreshToken);
 
     await instance.post("/oauth2/token", params).then((response) => {

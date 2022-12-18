@@ -1,6 +1,6 @@
 jobs:
-  app:
-    name: Build app
+  lint-app:
+    name: Lint app
     runs-on: ubuntu-20.04
 
     steps:
@@ -16,13 +16,9 @@ jobs:
         run: |
           npm run lint
         working-directory: web
-      - name: Build app
-        run: |
-          npm run build
-        working-directory: web
 
-  backend:
-    name: Build backend
+  lint-backend:
+    name: Lint backend
     runs-on: ubuntu-20.04
 
     steps:
@@ -37,9 +33,33 @@ jobs:
           version: "latest"
           working-directory: backend
           args: --issues-exit-code=0
-      - name: Build backend
-        run: |
-          go build -ldflags="-X 'main.Version=${GITHUB_RUN_ID}'"
-        working-directory: backend
+
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    needs: [lint-app, lint-backend]
+    environment: test
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          git grep -l "bultdatabasen.se" | xargs sed -i 's/bultdatabasen.se/test.bultdatabasen.se/g'
+          sudo apt install -y jq
+          echo $(jq '.COGNITO_URL = "https://bultdatabasen-test.auth.eu-west-1.amazoncognito.com" | .COGNITO_CLIENT_ID = "2lnodlocb4poce8o3rlut10gl2"' web/src/config.json) > web/src/config.json
+      - run: cp backend/keys/test.json packageroot/etc/bultdatabasen/keys.json
+      - uses: ./.github/actions/build
+
+  build-function:
+    name: Deploy Function
+    runs-on: ubuntu-20.04
+    environment: test
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/deploy-function
+        with:
+          namespace: test
+          secret: ${{ secrets.FUNCTIONS_SECRET }}
+          token: ${{ secrets.DO_API_TOKEN }}
 
 on: pull_request

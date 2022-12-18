@@ -1,12 +1,12 @@
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import { Card } from "@/components/features/routeEditor/Card";
-import { cognitoClientId, cognitoPoolId } from "@/constants";
 import {
   AuthenticationDetails,
   CognitoUser,
   CognitoUserPool,
 } from "amazon-cognito-identity-js";
+import configData from "@/config.json";
 
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -14,8 +14,8 @@ import { Link } from "react-router-dom";
 export const useCognitoUserPool = () => {
   return useMemo(() => {
     return new CognitoUserPool({
-      UserPoolId: cognitoPoolId,
-      ClientId: cognitoClientId,
+      UserPoolId: configData.COGNITO_POOL_ID,
+      ClientId: configData.COGNITO_CLIENT_ID,
     });
   }, []);
 };

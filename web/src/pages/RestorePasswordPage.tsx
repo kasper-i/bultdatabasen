@@ -58,7 +58,7 @@ const RestorePasswordPage = () => {
         });
       },
       onFailure(err) {
-        console.log("Password not confirmed!", err);
+        console.error(err.message || JSON.stringify(err));
         setInProgress(false);
       },
     });
