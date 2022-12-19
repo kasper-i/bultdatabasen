@@ -62,7 +62,7 @@ const SigninPage = () => {
         },
 
         onFailure: function (err) {
-          setErrorMessage(err.message || JSON.stringify(err));
+          setErrorMessage(JSON.stringify(err.name));
           setInProgress(false);
         },
       });
@@ -72,45 +72,39 @@ const SigninPage = () => {
   };
 
   return (
-    <div className="w-full mt-20 flex justify-center items-center">
-      <div className="min-w-96">
-        <Card>
-          <div className="flex flex-col items-center gap-2.5">
-            <Input
-              label="E-post"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Input
-              label="Lösenord"
-              password
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Link
-              to="/signin/forgot-password"
-              className="text-sm text-purple-600 self-start"
-            >
-              Återställ lösenord
-            </Link>
+    <div className="flex flex-col items-center gap-2.5">
+      <Input
+        label="E-post"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <Input
+        label="Lösenord"
+        password
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <Link
+        to="/auth/forgot-password"
+        className="text-sm text-purple-600 self-start"
+      >
+        Återställ lösenord
+      </Link>
 
-            <hr />
+      <hr />
 
-            <Alert>{errorMessage}</Alert>
-            <Button
-              onClick={login}
-              disabled={!email || !password}
-              loading={inProgress}
-              full
-            >
-              Logga in
-            </Button>
-            <Link to="/signin/register">
-              <span className="text-sm text-purple-600">Skapa nytt konto</span>
-            </Link>
-          </div>
-        </Card>
-      </div>
+      <Alert>{errorMessage}</Alert>
+      <Button
+        onClick={login}
+        disabled={!email || !password}
+        loading={inProgress}
+        full
+      >
+        Logga in
+      </Button>
+      <Link to="/auth/register">
+        <span className="text-sm text-purple-600">Skapa nytt konto</span>
+      </Link>
     </div>
   );
 };

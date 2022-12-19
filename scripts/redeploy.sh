@@ -13,3 +13,4 @@ apt install "/tmp/$DEB"
 rm /tmp/artifact.zip "/tmp/$DEB"
 systemctl daemon-reload
 systemctl restart bultdatabasen
+systemctl restart nginx

@@ -24,7 +24,7 @@ const RestorePasswordPage = () => {
         setInProgress(false);
       },
       onFailure: (err) => {
-        console.error(err.message || JSON.stringify(err));
+        console.error(JSON.stringify(err.name));
         setInProgress(false);
       },
     });
@@ -65,52 +65,46 @@ const RestorePasswordPage = () => {
   };
 
   return (
-    <div className="w-full mt-20 flex justify-center items-center">
-      <div className="w-96">
-        <Card>
-          <div className="flex flex-col items-center gap-2.5">
-            {phase === 1 ? (
-              <>
-                <Input
-                  label="E-post"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <Button
-                  className="mt-2.5"
-                  loading={inProgress}
-                  full
-                  onClick={forgotPassword}
-                >
-                  Återställ
-                </Button>
-              </>
-            ) : (
-              <>
-                <Input
-                  label="Verifikationskod"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                />
-                <Input
-                  label="Lösenord"
-                  value={newPassword}
-                  password
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <Button
-                  className="mt-2.5"
-                  loading={inProgress}
-                  full
-                  onClick={confirmPassword}
-                >
-                  Bekräfta
-                </Button>
-              </>
-            )}
-          </div>
-        </Card>
-      </div>
+    <div className="flex flex-col items-center gap-2.5">
+      {phase === 1 ? (
+        <>
+          <Input
+            label="E-post"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Button
+            className="mt-2.5"
+            loading={inProgress}
+            full
+            onClick={forgotPassword}
+          >
+            Återställ
+          </Button>
+        </>
+      ) : (
+        <>
+          <Input
+            label="Verifikationskod"
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value)}
+          />
+          <Input
+            label="Lösenord"
+            value={newPassword}
+            password
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <Button
+            className="mt-2.5"
+            loading={inProgress}
+            full
+            onClick={confirmPassword}
+          >
+            Bekräfta
+          </Button>
+        </>
+      )}
     </div>
   );
 };
