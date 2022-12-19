@@ -38,7 +38,7 @@ const SigninPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [inProgress, setInProgress] = useState(false);
-  const [errorMessage, setErrorMessage] = useState();
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const cognitoUser = useCognitoUser(email);
 
@@ -73,7 +73,7 @@ const SigninPage = () => {
 
   return (
     <div className="w-full mt-20 flex justify-center items-center">
-      <div className="w-96">
+      <div className="min-w-96">
         <Card>
           <div className="flex flex-col items-center gap-2.5">
             <Input
@@ -105,9 +105,9 @@ const SigninPage = () => {
             >
               Logga in
             </Button>
-            <a className="text-sm text-purple-600" href="">
-              Skapa nytt konto
-            </a>
+            <Link to="/signin/register">
+              <span className="text-sm text-purple-600">Skapa nytt konto</span>
+            </Link>
           </div>
         </Card>
       </div>
