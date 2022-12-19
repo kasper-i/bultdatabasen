@@ -10,6 +10,7 @@ import configData from "@/config.json";
 
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Alert } from "@/components/atoms/Alert";
 
 export const useCognitoUserPool = () => {
   return useMemo(() => {
@@ -37,11 +38,13 @@ const SigninPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [inProgress, setInProgress] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
 
   const cognitoUser = useCognitoUser(email);
 
   const login = () => {
     setInProgress(true);
+    setErrorMessage(undefined);
 
     try {
       const authenticationDetails = new AuthenticationDetails({
@@ -59,7 +62,7 @@ const SigninPage = () => {
         },
 
         onFailure: function (err) {
-          console.error(err.message || JSON.stringify(err));
+          setErrorMessage(err.message || JSON.stringify(err));
           setInProgress(false);
         },
       });
@@ -90,8 +93,11 @@ const SigninPage = () => {
             >
               Återställ lösenord
             </Link>
+
+            <hr />
+
+            <Alert>{errorMessage}</Alert>
             <Button
-              className="mt-2.5"
               onClick={login}
               disabled={!email || !password}
               loading={inProgress}
