@@ -18,22 +18,49 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+interface State {
+  phase: 1 | 2;
+  email: string;
+  password: string;
+  givenName: string;
+  lastName: string;
+  confirmationCode: string;
+  inProgress: boolean;
+  errorMessage?: string;
+}
+
 const RegisterPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const [phase, setPhase] = useState<1 | 2>(1);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [givenName, setGivenName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [confirmationCode, setConfirmationCode] = useState("");
-  const [inProgress, setInProgress] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>();
+  const [
+    {
+      phase,
+      email,
+      password,
+      givenName,
+      lastName,
+      confirmationCode,
+      inProgress,
+      errorMessage,
+    },
+    setState,
+  ] = useState<State>({
+    phase: 1,
+    email: "",
+    password: "",
+    givenName: "",
+    lastName: "",
+    confirmationCode: "",
+    inProgress: false,
+  });
+
+  const updateState = (updates: Partial<State>) => {
+    setState((state) => ({ ...state, ...updates }));
+  };
 
   const register = async () => {
-    setInProgress(true);
-    setErrorMessage(undefined);
+    updateState({ inProgress: true, errorMessage: undefined });
 
     const attributeList: CognitoUserAttribute[] = [];
 
@@ -56,16 +83,16 @@ const RegisterPage = () => {
         return;
       }
 
-      setPhase(2);
+      updateState({ phase: 2 });
     } catch (err) {
-      setErrorMessage(translateCognitoError(err));
+      updateState({ errorMessage: translateCognitoError(err) });
     } finally {
-      setInProgress(false);
+      updateState({ inProgress: false });
     }
   };
 
   const confirm = async () => {
-    setInProgress(true);
+    updateState({ inProgress: true, errorMessage: undefined });
 
     try {
       confirmRegistration(email, confirmationCode);
@@ -82,19 +109,22 @@ const RegisterPage = () => {
 
       Api.setTokens(idToken, accessToken, refreshToken);
 
-      await Api.updateMyself({ email: email, firstName: givenName, lastName });
+      await Api.updateMyself({
+        email: email,
+        firstName: givenName,
+        lastName: lastName,
+      });
 
       const returnPath = localStorage.getItem("returnPath");
       localStorage.removeItem("returnPath");
 
-      dispatch(login({ firstName: givenName, lastName }));
+      dispatch(login({ firstName: givenName, lastName: lastName }));
 
       navigate(returnPath != null ? returnPath : "/");
     } catch (err) {
-      setErrorMessage(JSON.stringify(err));
-      return;
+      updateState({ errorMessage: translateCognitoError(err) });
     } finally {
-      setInProgress(false);
+      updateState({ inProgress: false });
     }
   };
 
@@ -107,27 +137,27 @@ const RegisterPage = () => {
           <Input
             label="E-post"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => updateState({ email: e.target.value })}
             tabIndex={1}
           />
           <Input
             label="Lösenord"
             value={password}
             password
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => updateState({ password: e.target.value })}
             tabIndex={2}
           />
           <div className="flex gap-2.5">
             <Input
               label="Förnamn"
               value={givenName}
-              onChange={(e) => setGivenName(e.target.value)}
+              onChange={(e) => updateState({ givenName: e.target.value })}
               tabIndex={3}
             />
             <Input
               label="Efternamn"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => updateState({ lastName: e.target.value })}
               tabIndex={4}
             />
           </div>
@@ -150,7 +180,7 @@ const RegisterPage = () => {
           <Input
             label="Verifikationskod"
             value={confirmationCode}
-            onChange={(e) => setConfirmationCode(e.target.value)}
+            onChange={(e) => updateState({ confirmationCode: e.target.value })}
           />
 
           <hr />
