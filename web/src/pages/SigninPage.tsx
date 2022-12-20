@@ -1,67 +1,21 @@
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import configData from "@/config.json";
-import {
-  AuthenticationDetails,
-  CognitoUser,
-  CognitoUserPool,
-} from "amazon-cognito-identity-js";
+import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
-import { login } from "@/slices/authSlice";
-import { Alert } from "@/components/atoms/Alert";
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { Api } from "@/Api";
+import { Alert } from "@/components/atoms/Alert";
+import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
+import {
+  confirmRegistration,
+  parseJwt,
+  resendConfirmationCode,
+  signin as cognitoSignin,
+  translateCognitoError,
+} from "@/utils/cognito";
 import { isEqual } from "lodash-es";
-
-const parseJwt = (token: string) => {
-  const base64Url = token.split(".")[1];
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(function (c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join("")
-  );
-
-  return JSON.parse(jsonPayload);
-};
-
-export const useCognitoUserPool = () => {
-  return useMemo(() => {
-    return new CognitoUserPool({
-      UserPoolId: configData.COGNITO_POOL_ID,
-      ClientId: configData.COGNITO_CLIENT_ID,
-    });
-  }, []);
-};
-
-export const useCognitoUser = (username: string) => {
-  const userPool = useCognitoUserPool();
-
-  return useMemo(() => {
-    const userData = {
-      Username: username,
-      Pool: userPool,
-    };
-
-    return new CognitoUser(userData);
-  }, [username]);
-};
-
-const getErrorMessage = (cognitoException: string) => {
-  switch (cognitoException) {
-    case "NotAuthorizedException":
-      return "Fel e-postadress eller lösenord";
-    case "CodeMismatchException":
-      return "Fel verfikationskod";
-    default:
-      return cognitoException;
-  }
-};
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 interface State {
   email: string;
@@ -70,7 +24,7 @@ interface State {
   errorMessage?: string;
   confirmationCode: string;
   requireConfirmationCode: boolean;
-  verficationCodeSent: boolean;
+  verficationCodeExpired: boolean;
 }
 
 const SigninPage = () => {
@@ -83,94 +37,73 @@ const SigninPage = () => {
     inProgress: false,
     confirmationCode: "",
     requireConfirmationCode: false,
-    verficationCodeSent: false,
+    verficationCodeExpired: false,
   });
 
   const updateState = (updates: Partial<State>) => {
     setState((state) => ({ ...state, ...updates }));
   };
 
-  const cognitoUser = useCognitoUser(state.email);
+  let canSubmit = !!state.email && !!state.password;
+  if (state.requireConfirmationCode) {
+    canSubmit = canSubmit && !!state.confirmationCode;
+  }
 
   const signin = async () => {
     updateState({ inProgress: true, errorMessage: undefined });
 
+    const authenticationDetails = new AuthenticationDetails({
+      Username: state.email,
+      Password: state.password,
+    });
+
     try {
-      const authenticationDetails = new AuthenticationDetails({
-        Username: state.email,
-        Password: state.password,
-      });
+      if (state.requireConfirmationCode) {
+        await confirmRegistration(state.email, state.confirmationCode);
+      }
 
-      cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: async function (result) {
-          const accessToken = result.getAccessToken().getJwtToken();
-          const idToken = result.getIdToken().getJwtToken();
-          const refreshToken = result.getRefreshToken().getToken();
+      const result = await cognitoSignin(authenticationDetails);
+      const accessToken = result.getAccessToken().getJwtToken();
+      const idToken = result.getIdToken().getJwtToken();
+      const refreshToken = result.getRefreshToken().getToken();
 
-          Api.setTokens(idToken, accessToken, refreshToken);
+      Api.setTokens(idToken, accessToken, refreshToken);
 
-          const { given_name, family_name } = parseJwt(idToken);
+      const { given_name, family_name } = parseJwt(idToken);
 
-          const info = await Api.getMyself();
-          const updatedInfo = {
-            ...info,
-            firstName: info.firstName ?? given_name,
-            lastName: info.lastName ?? family_name,
-          };
+      const info = await Api.getMyself();
+      const updatedInfo = {
+        ...info,
+        firstName: info.firstName ?? given_name,
+        lastName: info.lastName ?? family_name,
+      };
 
-          if (!isEqual(info, updatedInfo)) {
-            await Api.updateMyself(updatedInfo);
-          }
+      if (!isEqual(info, updatedInfo)) {
+        await Api.updateMyself(updatedInfo);
+      }
 
-          const returnPath = localStorage.getItem("returnPath");
-          localStorage.removeItem("returnPath");
+      const returnPath = localStorage.getItem("returnPath");
+      localStorage.removeItem("returnPath");
 
-          dispatch(
-            login({ firstName: info.firstName, lastName: info.lastName })
-          );
+      dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
 
-          navigate(returnPath != null ? returnPath : "/");
+      navigate(returnPath != null ? returnPath : "/");
+    } catch (err: any) {
+      updateState({ errorMessage: translateCognitoError(err) });
 
-          updateState({ inProgress: false });
-        },
-
-        onFailure: function (err) {
-          if (err.name === "UserNotConfirmedException") {
-            updateState({ requireConfirmationCode: true });
-            updateState({ inProgress: false });
-            resendConfirmationCode();
-          } else {
-            updateState({ errorMessage: getErrorMessage(err.name) });
-            updateState({ inProgress: false });
-          }
-        },
-      });
-    } catch {
+      switch (err.name) {
+        case "UserNotConfirmedException":
+          updateState({ requireConfirmationCode: true });
+          await resendConfirmationCode(state.email);
+          updateState({ verficationCodeExpired: false });
+          break;
+        case "ExpiredCodeException":
+          updateState({ verficationCodeExpired: true });
+          break;
+      }
+    } finally {
       updateState({ inProgress: false });
     }
-  };
-
-  const resendConfirmationCode = () => {
-    cognitoUser.resendConfirmationCode(function (err) {
-      if (!err) {
-        updateState({ verficationCodeSent: true });
-      }
-    });
-  };
-
-  const confirmRegistration = () => {
-    cognitoUser.confirmRegistration(
-      state.confirmationCode,
-      true,
-      function (err) {
-        if (err) {
-          updateState({ errorMessage: getErrorMessage(err.name) });
-          return;
-        }
-
-        signin();
-      }
-    );
   };
 
   return (
@@ -180,6 +113,7 @@ const SigninPage = () => {
         value={state.email}
         onChange={(e) => updateState({ email: e.target.value })}
         tabIndex={1}
+        disabled={state.requireConfirmationCode}
       />
       <Input
         label="Lösenord"
@@ -187,6 +121,7 @@ const SigninPage = () => {
         value={state.password}
         onChange={(e) => updateState({ password: e.target.value })}
         tabIndex={2}
+        disabled={state.requireConfirmationCode}
       />
       {state.requireConfirmationCode ? (
         <Input
@@ -208,8 +143,8 @@ const SigninPage = () => {
 
       <Alert>{state.errorMessage}</Alert>
       <Button
-        onClick={state.requireConfirmationCode ? confirmRegistration : signin}
-        disabled={!state.email || !state.password}
+        onClick={signin}
+        disabled={!canSubmit}
         loading={state.inProgress}
         full
       >

@@ -11,6 +11,7 @@ const Input: FC<{
   inputRef?: LegacyRef<HTMLInputElement>;
   password?: boolean;
   tabIndex?: number;
+  disabled?: boolean;
 }> = ({
   label,
   placeholder,
@@ -21,6 +22,7 @@ const Input: FC<{
   inputRef,
   password,
   tabIndex,
+  disabled,
 }) => {
   const id = useId();
 
@@ -33,6 +35,7 @@ const Input: FC<{
       </label>
       <div className="relative">
         <input
+          disabled={disabled}
           tabIndex={tabIndex ?? -1}
           ref={inputRef}
           type={password ? "password" : "text"}

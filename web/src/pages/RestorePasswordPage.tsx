@@ -1,10 +1,19 @@
+import { Api } from "@/Api";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import { Card } from "@/components/features/routeEditor/Card";
+import { login } from "@/slices/authSlice";
+import { useAppDispatch } from "@/store";
+import {
+  confirmPassword,
+  forgotPassword,
+  parseJwt,
+  signin,
+  translateCognitoError,
+} from "@/utils/cognito";
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
-import { useCognitoUser } from "./SigninPage";
+import { useNavigate } from "react-router-dom";
 
 const RestorePasswordPage = () => {
   const [phase, setPhase] = useState<1 | 2>(1);
@@ -12,56 +21,53 @@ const RestorePasswordPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [inProgress, setInProgress] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
-  const cognitoUser = useCognitoUser(email);
-
-  const forgotPassword = () => {
+  const restore = () => {
     setInProgress(true);
 
-    cognitoUser.forgotPassword({
-      onSuccess: () => {
-        setPhase(2);
-        setInProgress(false);
-      },
-      onFailure: (err) => {
-        console.error(JSON.stringify(err.name));
-        setInProgress(false);
-      },
-    });
+    try {
+      forgotPassword(email);
+      setPhase(2);
+    } catch (err) {
+      console.error(translateCognitoError(err));
+    } finally {
+      setInProgress(false);
+    }
   };
 
-  const confirmPassword = () => {
+  const confirm = async () => {
     setInProgress(true);
 
-    cognitoUser.confirmPassword(verificationCode, newPassword, {
-      onSuccess() {
-        setPhase(2);
+    try {
+      await confirmPassword(email, verificationCode, newPassword);
 
-        const authenticationDetails = new AuthenticationDetails({
-          Username: email,
-          Password: newPassword,
-        });
+      const authenticationDetails = new AuthenticationDetails({
+        Username: email,
+        Password: newPassword,
+      });
 
-        cognitoUser.authenticateUser(authenticationDetails, {
-          onSuccess: function (result) {
-            const accessToken = result.getAccessToken().getJwtToken();
-            const idToken = result.getIdToken().getJwtToken();
-            const refreshToken = result.getRefreshToken().getToken();
+      const result = await signin(authenticationDetails);
+      const accessToken = result.getAccessToken().getJwtToken();
+      const idToken = result.getIdToken().getJwtToken();
+      const refreshToken = result.getRefreshToken().getToken();
 
-            setInProgress(false);
-          },
+      Api.setTokens(idToken, accessToken, refreshToken);
 
-          onFailure: function (err) {
-            console.error(err.message || JSON.stringify(err));
-            setInProgress(false);
-          },
-        });
-      },
-      onFailure(err) {
-        console.error(err.message || JSON.stringify(err));
-        setInProgress(false);
-      },
-    });
+      const returnPath = localStorage.getItem("returnPath");
+      localStorage.removeItem("returnPath");
+
+      const { given_name, family_name } = parseJwt(idToken);
+
+      dispatch(login({ firstName: given_name, lastName: family_name }));
+
+      navigate(returnPath != null ? returnPath : "/");
+    } catch (err) {
+      console.error(translateCognitoError(err));
+    } finally {
+      setInProgress(false);
+    }
   };
 
   return (
@@ -77,7 +83,7 @@ const RestorePasswordPage = () => {
             className="mt-2.5"
             loading={inProgress}
             full
-            onClick={forgotPassword}
+            onClick={restore}
           >
             Återställ
           </Button>
@@ -99,7 +105,7 @@ const RestorePasswordPage = () => {
             className="mt-2.5"
             loading={inProgress}
             full
-            onClick={confirmPassword}
+            onClick={confirm}
           >
             Bekräfta
           </Button>

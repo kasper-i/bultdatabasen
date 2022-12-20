@@ -1,11 +1,14 @@
 import { Alert } from "@/components/atoms/Alert";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import { Card } from "@/components/features/routeEditor/Card";
+import {
+  confirmRegistration,
+  signUp,
+  translateCognitoError,
+} from "@/utils/cognito";
 import { CognitoUserAttribute } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
-import { useCognitoUser, useCognitoUserPool } from "./SigninPage";
 
 const RegisterPage = () => {
   const [phase, setPhase] = useState<1 | 2>(1);
@@ -17,10 +20,7 @@ const RegisterPage = () => {
   const [inProgress, setInProgress] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const cognitoUserPool = useCognitoUserPool();
-  const cognitoUser = useCognitoUser(email);
-
-  const register = () => {
+  const register = async () => {
     setErrorMessage(undefined);
     const attributeList: CognitoUserAttribute[] = [];
 
@@ -37,34 +37,25 @@ const RegisterPage = () => {
       })
     );
 
-    cognitoUserPool.signUp(
-      email,
-      password,
-      attributeList,
-      [],
-      (err, result) => {
-        if (err) {
-          setErrorMessage(JSON.stringify(err.name));
-          return;
-        }
-
-        if (!result) {
-          return;
-        }
-
-        const cognitoUser = result.user;
-        console.log("user name is " + cognitoUser.getUsername());
+    try {
+      const result = await signUp(email, password, attributeList);
+      if (!result) {
+        return;
       }
-    );
+
+      setPhase(2);
+    } catch (err) {
+      setErrorMessage(translateCognitoError(err));
+    }
   };
 
   const confirm = () => {
-    cognitoUser.confirmRegistration(confirmationCode, true, (err, result) => {
-      if (err) {
-        setErrorMessage(JSON.stringify(err.name));
-        return;
-      }
-    });
+    try {
+      confirmRegistration(email, confirmationCode);
+    } catch (err) {
+      setErrorMessage(JSON.stringify(err));
+      return;
+    }
   };
 
   return (
