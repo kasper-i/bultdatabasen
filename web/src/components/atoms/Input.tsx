@@ -10,6 +10,7 @@ const Input: FC<{
   icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
   inputRef?: LegacyRef<HTMLInputElement>;
   password?: boolean;
+  tabIndex?: number;
 }> = ({
   label,
   placeholder,
@@ -19,6 +20,7 @@ const Input: FC<{
   icon,
   inputRef,
   password,
+  tabIndex,
 }) => {
   const id = useId();
 
@@ -31,6 +33,7 @@ const Input: FC<{
       </label>
       <div className="relative">
         <input
+          tabIndex={tabIndex ?? -1}
           ref={inputRef}
           type={password ? "password" : "text"}
           id={id}

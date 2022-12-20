@@ -75,23 +75,27 @@ const RegisterPage = () => {
             label="E-post"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            tabIndex={1}
           />
           <Input
             label="Lösenord"
             value={password}
             password
             onChange={(e) => setPassword(e.target.value)}
+            tabIndex={2}
           />
           <div className="flex gap-2.5">
             <Input
               label="Förnamn"
               value={givenName}
               onChange={(e) => setGivenName(e.target.value)}
+              tabIndex={3}
             />
             <Input
               label="Efternamn"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
+              tabIndex={4}
             />
           </div>
           <hr />
