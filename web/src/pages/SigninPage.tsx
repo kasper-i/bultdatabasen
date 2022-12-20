@@ -31,7 +31,17 @@ const SigninPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const [state, setState] = useState<State>({
+  const [
+    {
+      email,
+      password,
+      inProgress,
+      confirmationCode,
+      requireConfirmationCode,
+      errorMessage,
+    },
+    setState,
+  ] = useState<State>({
     email: "",
     password: "",
     inProgress: false,
@@ -44,22 +54,22 @@ const SigninPage = () => {
     setState((state) => ({ ...state, ...updates }));
   };
 
-  let canSubmit = !!state.email && !!state.password;
-  if (state.requireConfirmationCode) {
-    canSubmit = canSubmit && !!state.confirmationCode;
+  let canSubmit = !!email && !!password;
+  if (requireConfirmationCode) {
+    canSubmit = canSubmit && !!confirmationCode;
   }
 
   const signin = async () => {
     updateState({ inProgress: true, errorMessage: undefined });
 
     const authenticationDetails = new AuthenticationDetails({
-      Username: state.email,
-      Password: state.password,
+      Username: email,
+      Password: password,
     });
 
     try {
-      if (state.requireConfirmationCode) {
-        await confirmRegistration(state.email, state.confirmationCode);
+      if (requireConfirmationCode) {
+        await confirmRegistration(email, confirmationCode);
       }
 
       const result = await cognitoSignin(authenticationDetails);
@@ -94,7 +104,7 @@ const SigninPage = () => {
       switch (err.name) {
         case "UserNotConfirmedException":
           updateState({ requireConfirmationCode: true });
-          await resendConfirmationCode(state.email);
+          await resendConfirmationCode(email);
           updateState({ verficationCodeExpired: false });
           break;
         case "ExpiredCodeException":
@@ -110,23 +120,23 @@ const SigninPage = () => {
     <div className="flex flex-col items-center gap-2.5">
       <Input
         label="E-postadress"
-        value={state.email}
+        value={email}
         onChange={(e) => updateState({ email: e.target.value })}
         tabIndex={1}
-        disabled={state.requireConfirmationCode}
+        disabled={requireConfirmationCode}
       />
       <Input
         label="Lösenord"
         password
-        value={state.password}
+        value={password}
         onChange={(e) => updateState({ password: e.target.value })}
         tabIndex={2}
-        disabled={state.requireConfirmationCode}
+        disabled={requireConfirmationCode}
       />
-      {state.requireConfirmationCode ? (
+      {requireConfirmationCode ? (
         <Input
           label="Verifikationskod"
-          value={state.confirmationCode}
+          value={confirmationCode}
           onChange={(e) => updateState({ confirmationCode: e.target.value })}
           tabIndex={3}
         />
@@ -141,13 +151,8 @@ const SigninPage = () => {
 
       <hr />
 
-      <Alert>{state.errorMessage}</Alert>
-      <Button
-        onClick={signin}
-        disabled={!canSubmit}
-        loading={state.inProgress}
-        full
-      >
+      <Alert>{errorMessage}</Alert>
+      <Button onClick={signin} disabled={!canSubmit} loading={inProgress} full>
         Logga in
       </Button>
       <Link to="/auth/register">
