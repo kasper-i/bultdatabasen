@@ -86,6 +86,7 @@ const RestorePasswordPage = () => {
             label="E-post"
             value={email}
             onChange={(e) => updateState({ email: e.target.value })}
+            tabIndex={1}
           />
 
           <hr />
