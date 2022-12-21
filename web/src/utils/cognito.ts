@@ -48,6 +48,8 @@ export const translateCognitoError = (cognitoError: any) => {
       return "Verifikationskoden är inte längre giltig";
     case "UserNotConfirmedException":
       return "Kontot är ej verifierat";
+    case "LimitExceededException":
+      return "För många försök under kort period";
     default:
       return "Ett oväntat fel inträffade";
   }

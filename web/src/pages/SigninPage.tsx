@@ -1,6 +1,9 @@
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import { AuthenticationDetails } from "amazon-cognito-identity-js";
+import {
+  AuthenticationDetails,
+  CognitoUserSession,
+} from "amazon-cognito-identity-js";
 
 import { Api } from "@/Api";
 import { Alert } from "@/components/atoms/Alert";
@@ -15,7 +18,7 @@ import {
 } from "@/utils/cognito";
 import { isEqual } from "lodash-es";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 
 interface State {
   email: string;
@@ -24,8 +27,40 @@ interface State {
   errorMessage?: string;
   confirmationCode: string;
   requireConfirmationCode: boolean;
-  verficationCodeExpired: boolean;
 }
+
+export const handleLogin = async (
+  session: CognitoUserSession,
+  navigate: NavigateFunction,
+  dispatch: ReturnType<typeof useAppDispatch>
+) => {
+  const accessToken = session.getAccessToken().getJwtToken();
+  const idToken = session.getIdToken().getJwtToken();
+  const refreshToken = session.getRefreshToken().getToken();
+
+  Api.setTokens(idToken, accessToken, refreshToken);
+  const { given_name: firstName, family_name: lastName } = parseJwt(idToken);
+
+  (async () => {
+    const info = await Api.getMyself();
+    const updatedInfo = {
+      ...info,
+      firstName,
+      lastName,
+    };
+
+    if (!isEqual(info, updatedInfo)) {
+      await Api.updateMyself(updatedInfo);
+    }
+  })();
+
+  const returnPath = localStorage.getItem("returnPath");
+  localStorage.removeItem("returnPath");
+
+  dispatch(login({ firstName, lastName }));
+
+  navigate(returnPath != null ? returnPath : "/");
+};
 
 const SigninPage = () => {
   const navigate = useNavigate();
@@ -47,7 +82,6 @@ const SigninPage = () => {
     inProgress: false,
     confirmationCode: "",
     requireConfirmationCode: false,
-    verficationCodeExpired: false,
   });
 
   const updateState = (updates: Partial<State>) => {
@@ -72,32 +106,8 @@ const SigninPage = () => {
         await confirmRegistration(email, confirmationCode);
       }
 
-      const result = await cognitoSignin(authenticationDetails);
-      const accessToken = result.getAccessToken().getJwtToken();
-      const idToken = result.getIdToken().getJwtToken();
-      const refreshToken = result.getRefreshToken().getToken();
-
-      Api.setTokens(idToken, accessToken, refreshToken);
-
-      const { given_name, family_name } = parseJwt(idToken);
-
-      const info = await Api.getMyself();
-      const updatedInfo = {
-        ...info,
-        firstName: info.firstName ?? given_name,
-        lastName: info.lastName ?? family_name,
-      };
-
-      if (!isEqual(info, updatedInfo)) {
-        await Api.updateMyself(updatedInfo);
-      }
-
-      const returnPath = localStorage.getItem("returnPath");
-      localStorage.removeItem("returnPath");
-
-      dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
-
-      navigate(returnPath != null ? returnPath : "/");
+      const session = await cognitoSignin(authenticationDetails);
+      handleLogin(session, navigate, dispatch);
     } catch (err: any) {
       updateState({ errorMessage: translateCognitoError(err) });
 
@@ -105,10 +115,6 @@ const SigninPage = () => {
         case "UserNotConfirmedException":
           updateState({ requireConfirmationCode: true });
           await resendConfirmationCode(email);
-          updateState({ verficationCodeExpired: false });
-          break;
-        case "ExpiredCodeException":
-          updateState({ verficationCodeExpired: true });
           break;
       }
     } finally {

@@ -1,8 +1,6 @@
-import { Api } from "@/Api";
 import { Alert } from "@/components/atoms/Alert";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
@@ -17,6 +15,7 @@ import {
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { handleLogin } from "./SigninPage";
 
 interface State {
   phase: 1 | 2;
@@ -102,25 +101,8 @@ const RegisterPage = () => {
         Password: password,
       });
 
-      const result = await signin(authenticationDetails);
-      const accessToken = result.getAccessToken().getJwtToken();
-      const idToken = result.getIdToken().getJwtToken();
-      const refreshToken = result.getRefreshToken().getToken();
-
-      Api.setTokens(idToken, accessToken, refreshToken);
-
-      await Api.updateMyself({
-        email: email,
-        firstName: givenName,
-        lastName: lastName,
-      });
-
-      const returnPath = localStorage.getItem("returnPath");
-      localStorage.removeItem("returnPath");
-
-      dispatch(login({ firstName: givenName, lastName: lastName }));
-
-      navigate(returnPath != null ? returnPath : "/");
+      const session = await signin(authenticationDetails);
+      handleLogin(session, navigate, dispatch);
     } catch (err) {
       updateState({ errorMessage: translateCognitoError(err) });
     } finally {

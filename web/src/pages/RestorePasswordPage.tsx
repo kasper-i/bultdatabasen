@@ -1,12 +1,10 @@
-import { Api } from "@/Api";
+import { Alert } from "@/components/atoms/Alert";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import {
   confirmPassword,
   forgotPassword,
-  parseJwt,
   signin,
   translateCognitoError,
 } from "@/utils/cognito";
@@ -14,31 +12,50 @@ import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { handleLogin } from "./SigninPage";
+
+interface State {
+  phase: 1 | 2;
+  email: string;
+  newPassword: string;
+  inProgress: boolean;
+  errorMessage?: string;
+  verificationCode: string;
+}
 
 const RestorePasswordPage = () => {
-  const [phase, setPhase] = useState<1 | 2>(1);
-  const [email, setEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [inProgress, setInProgress] = useState(false);
+  const [
+    { phase, email, errorMessage, newPassword, inProgress, verificationCode },
+    setState,
+  ] = useState<State>({
+    phase: 1,
+    email: "",
+    newPassword: "",
+    inProgress: false,
+    verificationCode: "",
+  });
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
+  const updateState = (updates: Partial<State>) => {
+    setState((state) => ({ ...state, ...updates }));
+  };
+
   const restore = () => {
-    setInProgress(true);
+    updateState({ inProgress: true, errorMessage: undefined });
 
     try {
       forgotPassword(email);
-      setPhase(2);
+      updateState({ phase: 2 });
     } catch (err) {
-      console.error(translateCognitoError(err));
+      updateState({ errorMessage: translateCognitoError(err) });
     } finally {
-      setInProgress(false);
+      updateState({ inProgress: false });
     }
   };
 
   const confirm = async () => {
-    setInProgress(true);
+    updateState({ inProgress: true, errorMessage: undefined });
 
     try {
       await confirmPassword(email, verificationCode, newPassword);
@@ -48,25 +65,12 @@ const RestorePasswordPage = () => {
         Password: newPassword,
       });
 
-      const result = await signin(authenticationDetails);
-      const accessToken = result.getAccessToken().getJwtToken();
-      const idToken = result.getIdToken().getJwtToken();
-      const refreshToken = result.getRefreshToken().getToken();
-
-      Api.setTokens(idToken, accessToken, refreshToken);
-
-      const returnPath = localStorage.getItem("returnPath");
-      localStorage.removeItem("returnPath");
-
-      const { given_name, family_name } = parseJwt(idToken);
-
-      dispatch(login({ firstName: given_name, lastName: family_name }));
-
-      navigate(returnPath != null ? returnPath : "/");
+      const session = await signin(authenticationDetails);
+      handleLogin(session, navigate, dispatch);
     } catch (err) {
-      console.error(translateCognitoError(err));
+      updateState({ errorMessage: translateCognitoError(err) });
     } finally {
-      setInProgress(false);
+      updateState({ inProgress: false });
     }
   };
 
@@ -77,8 +81,12 @@ const RestorePasswordPage = () => {
           <Input
             label="E-post"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => updateState({ email: e.target.value })}
           />
+
+          <hr />
+
+          <Alert>{errorMessage}</Alert>
           <Button
             className="mt-2.5"
             loading={inProgress}
@@ -93,21 +101,25 @@ const RestorePasswordPage = () => {
           <Input
             label="Verifikationskod"
             value={verificationCode}
-            onChange={(e) => setVerificationCode(e.target.value)}
+            onChange={(e) => updateState({ verificationCode: e.target.value })}
           />
           <Input
             label="Lösenord"
             value={newPassword}
             password
-            onChange={(e) => setNewPassword(e.target.value)}
+            onChange={(e) => updateState({ newPassword: e.target.value })}
           />
+
+          <hr />
+
+          <Alert>{errorMessage}</Alert>
           <Button
             className="mt-2.5"
             loading={inProgress}
             full
             onClick={confirm}
           >
-            Bekräfta
+            Uppdatera
           </Button>
         </>
       )}
