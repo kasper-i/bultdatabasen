@@ -52,6 +52,8 @@ export const translateCognitoError = (cognitoError: any) => {
       return "För många försök under kort period";
     case "InvalidPasswordException":
       return "Lösenordet måste vara minst 8 tecken långt";
+    case "UsernameExistsException":
+      return "E-postadressen är redan använd";
     default:
       return "Ett oväntat fel inträffade";
   }
