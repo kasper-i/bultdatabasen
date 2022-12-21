@@ -43,7 +43,7 @@ export const translateCognitoError = (cognitoError: any) => {
     case "NotAuthorizedException":
       return "Fel e-postadress eller lösenord";
     case "CodeMismatchException":
-      return "Fel verfikationskod";
+      return "Fel verifikationskod";
     case "ExpiredCodeException":
       return "Verifikationskoden är inte längre giltig";
     case "UserNotConfirmedException":
