@@ -151,7 +151,7 @@ const SigninPage = () => {
           to="/auth/forgot-password"
           className="text-sm text-purple-600 self-start"
         >
-          Återställ lösenord
+          Glömt lösenord?
         </Link>
       )}
 
