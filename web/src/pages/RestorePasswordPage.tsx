@@ -114,6 +114,7 @@ const RestorePasswordPage = () => {
             value={newPassword}
             password
             onChange={(e) => updateState({ newPassword: e.target.value })}
+            tabIndex={2}
           />
 
           <hr />
