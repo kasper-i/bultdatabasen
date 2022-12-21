@@ -66,18 +66,18 @@ const RegisterPage = () => {
     attributeList.push(
       new CognitoUserAttribute({
         Name: "given_name",
-        Value: givenName,
+        Value: givenName.trim(),
       })
     );
     attributeList.push(
       new CognitoUserAttribute({
         Name: "family_name",
-        Value: lastName,
+        Value: lastName.trim(),
       })
     );
 
     try {
-      const result = await signUp(email, password, attributeList);
+      const result = await signUp(email.trim(), password.trim(), attributeList);
       if (!result) {
         return;
       }
@@ -94,11 +94,11 @@ const RegisterPage = () => {
     updateState({ inProgress: true, errorMessage: undefined });
 
     try {
-      confirmRegistration(email, confirmationCode);
+      confirmRegistration(email.trim(), confirmationCode.trim());
 
       const authenticationDetails = new AuthenticationDetails({
-        Username: email,
-        Password: password,
+        Username: email.trim(),
+        Password: password.trim(),
       });
 
       const session = await signin(authenticationDetails);

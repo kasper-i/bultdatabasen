@@ -45,7 +45,7 @@ const RestorePasswordPage = () => {
     updateState({ inProgress: true, errorMessage: undefined });
 
     try {
-      forgotPassword(email);
+      forgotPassword(email.trim());
       updateState({ phase: 2 });
     } catch (err) {
       updateState({ errorMessage: translateCognitoError(err) });
@@ -58,11 +58,15 @@ const RestorePasswordPage = () => {
     updateState({ inProgress: true, errorMessage: undefined });
 
     try {
-      await confirmPassword(email, verificationCode, newPassword);
+      await confirmPassword(
+        email.trim(),
+        verificationCode.trim(),
+        newPassword.trim()
+      );
 
       const authenticationDetails = new AuthenticationDetails({
-        Username: email,
-        Password: newPassword,
+        Username: email.trim(),
+        Password: newPassword.trim(),
       });
 
       const session = await signin(authenticationDetails);

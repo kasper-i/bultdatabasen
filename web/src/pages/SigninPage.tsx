@@ -97,13 +97,13 @@ const SigninPage = () => {
     updateState({ inProgress: true, errorMessage: undefined });
 
     const authenticationDetails = new AuthenticationDetails({
-      Username: email,
-      Password: password,
+      Username: email.trim(),
+      Password: password.trim(),
     });
 
     try {
       if (requireConfirmationCode) {
-        await confirmRegistration(email, confirmationCode);
+        await confirmRegistration(email.trim(), confirmationCode.trim());
       }
 
       const session = await cognitoSignin(authenticationDetails);
@@ -114,7 +114,7 @@ const SigninPage = () => {
       switch (err.name) {
         case "UserNotConfirmedException":
           updateState({ requireConfirmationCode: true });
-          await resendConfirmationCode(email);
+          await resendConfirmationCode(email.trim());
           break;
       }
     } finally {
