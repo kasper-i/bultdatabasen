@@ -167,12 +167,7 @@ const RegisterPage = () => {
           <hr />
 
           <Alert>{errorMessage}</Alert>
-          <Button
-            className="mt-2.5"
-            loading={inProgress}
-            full
-            onClick={confirm}
-          >
+          <Button loading={inProgress} full onClick={confirm}>
             Bekräfta
           </Button>
         </>
