@@ -92,11 +92,7 @@ const RestorePasswordPage = () => {
           <hr />
 
           <Alert>{errorMessage}</Alert>
-          <Button
-            loading={inProgress}
-            full
-            onClick={restore}
-          >
+          <Button loading={inProgress} full onClick={restore}>
             Återställ
           </Button>
         </>
@@ -119,12 +115,7 @@ const RestorePasswordPage = () => {
           <hr />
 
           <Alert>{errorMessage}</Alert>
-          <Button
-            className="mt-2.5"
-            loading={inProgress}
-            full
-            onClick={confirm}
-          >
+          <Button loading={inProgress} full onClick={confirm}>
             Uppdatera
           </Button>
         </>
