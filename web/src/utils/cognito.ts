@@ -50,6 +50,8 @@ export const translateCognitoError = (cognitoError: any) => {
       return "Kontot är ej verifierat";
     case "LimitExceededException":
       return "För många försök under kort period";
+    case "InvalidPasswordException":
+      return "Lösenordet måste vara minst 8 tecken långt";
     default:
       return "Ett oväntat fel inträffade";
   }
