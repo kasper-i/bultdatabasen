@@ -93,7 +93,6 @@ const RestorePasswordPage = () => {
 
           <Alert>{errorMessage}</Alert>
           <Button
-            className="mt-2.5"
             loading={inProgress}
             full
             onClick={restore}
