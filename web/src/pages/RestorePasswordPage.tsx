@@ -107,6 +107,7 @@ const RestorePasswordPage = () => {
             label="Verifikationskod"
             value={verificationCode}
             onChange={(e) => updateState({ verificationCode: e.target.value })}
+            tabIndex={1}
           />
           <Input
             label="Lösenord"
