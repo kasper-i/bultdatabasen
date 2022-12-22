@@ -189,20 +189,3 @@ func (sess Session) checkParentAllowed(resource Resource, parentID uuid.UUID) bo
 		return false
 	}
 }
-
-func (sess Session) checkSameParent(resourceID1, resourceID2 uuid.UUID) bool {
-	var parents []Resource = make([]Resource, 0)
-
-	if err := sess.DB.Raw(`SELECT parent.*
-		FROM resource
-		INNER JOIN resource parent ON resource.parent_id = parent.id
-		WHERE resource.id IN (?, ?)`, resourceID1, resourceID2).Scan(&parents).Error; err != nil {
-		return false
-	}
-
-	if len(parents) != 2 {
-		return false
-	}
-
-	return parents[0].ID == parents[1].ID
-}
