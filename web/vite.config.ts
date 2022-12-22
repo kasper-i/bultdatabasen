@@ -9,7 +9,12 @@ export default defineConfig({
     sourcemap: true,
   },
   plugins: [
-    react(),
+    react({
+      jsxImportSource: "@emotion/react",
+      babel: {
+        plugins: ["@emotion/babel-plugin"],
+      },
+    }),
     visualizer({
       template: "sunburst",
     }),
