@@ -7,6 +7,7 @@ export enum Color {
 
 export enum ExtendedColor {
   Label = "#374151",
+  Input = "#9ca3af",
 }
 
 export enum Size {
@@ -26,6 +27,7 @@ export enum FontSize {
   Sm = "0.875rem",
   Base = "1rem",
   Lg = "1.125rem",
+  Xl = "1.25rem",
 }
 
 export enum FontWeight {

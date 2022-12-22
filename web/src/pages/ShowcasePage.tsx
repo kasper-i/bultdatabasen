@@ -13,6 +13,7 @@ import { Select } from "@/components/atoms/Select";
 import { Switch } from "@/components/atoms/Switch";
 import { Menu } from "@/components/molecules/Menu";
 import Search from "@/components/Search";
+import { CogIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 type Fruit = "banana" | "apple" | "orange" | "pineapple" | "kiwi" | "pear";
@@ -138,6 +139,16 @@ export const ShowcasePage = () => {
           label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          icon={CogIcon}
+          tabIndex={2}
+        />
+      </div>
+      <div>
+        <Input
+          label="Password"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          password
         />
       </div>
       <div>

@@ -1,5 +1,15 @@
-import clsx from "clsx";
+import { css } from "@emotion/css";
 import React, { FC, LegacyRef, useId } from "react";
+import {
+  Border,
+  Color,
+  ExtendedColor,
+  FontSize,
+  Rounding,
+  Shadow,
+  Size,
+} from "./constants";
+import { Label } from "./Label";
 
 const Input: FC<{
   label: string;
@@ -29,11 +39,34 @@ const Input: FC<{
   const Icon = icon;
 
   return (
-    <div className="w-full">
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-        {label}
-      </label>
-      <div className="relative">
+    <div>
+      <Label htmlForId={id}>{label}</Label>
+      <div
+        className={css`
+          position: relative;
+          input {
+            display: block;
+            width: 100%;
+            box-shadow: ${Shadow.Sm};
+            font-size: ${FontSize.Sm};
+            border-width: ${Border.Thin};
+            border-radius: ${Rounding.Base};
+            border-color: ${ExtendedColor.Input};
+            height: ${Size.Base};
+            &:focus {
+              border-color: ${Color.Primary};
+              outline: ${Color.Primary} solid ${Border.Thin};
+              outline-offset: 0;
+              & + div * {
+                color: ${Color.Primary};
+              }
+            }
+          }
+          input[type="password"] {
+            font-size: ${FontSize.Xl};
+          }
+        `}
+      >
         <input
           disabled={disabled}
           tabIndex={tabIndex ?? -1}
@@ -43,13 +76,8 @@ const Input: FC<{
           onChange={onChange}
           readOnly={!onChange}
           onClick={onClick}
-          onFocus={(e) => (onClick ? e.target.blur() : undefined)}
           placeholder={placeholder}
           value={value}
-          className={clsx(
-            "mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-md h-[2.125rem]",
-            password && "text-xl tracking-wide"
-          )}
         />
         {Icon && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-2">
