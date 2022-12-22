@@ -8,6 +8,7 @@
     "lint": "eslint --ext .ts,.tsx ."
   },
   "dependencies": {
+    "@emotion/css": "^11.10.5",
     "@headlessui/react": "^1.7.3",
     "@heroicons/react": "^v2.0.0",
     "@popperjs/core": "^2.11.6",

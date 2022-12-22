@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { css, cx } from "@emotion/css";
 import React, { FC, ReactNode } from "react";
 import { Dots } from "react-activity";
 import "react-activity/dist/Dots.css";
@@ -28,62 +28,80 @@ const Button: FC<ButtonProps> = ({
   full,
   outlined,
 }) => {
-  const solidStyle = () => {
-    if (color === "white") {
-      return false;
-    }
+  const colorHex =
+    color === "danger" ? "#EF4444" : color === "white" ? "white" : "#7D2AE8";
 
-    const colors: Record<Exclude<ColorType, "white">, string> = {
-      danger: "bg-red-500 !disabled:hover:bg-red-600 focus:ring-red-400",
-      primary:
-        "bg-primary-500 !disabled:hover:bg-primary-600 focus:ring-primary-400",
-    };
+  const solidStyle = css`
+    background: ${colorHex};
+    color: white;
+  `;
 
-    return [colors[color], "text-white"];
-  };
-
-  const outlinedStyle = () => {
-    const colors: Record<ColorType, string> = {
-      danger:
-        "text-red-500 border-2 border-red-500 !disabled:hover:border-red-600 !disabled:hover:text-red-600 focus:ring-red-400",
-      primary:
-        "text-primary-500 border-2 border-primary-500 !disabled:hover:border-primary-600 !disabled:hover:text-primary-600 focus:ring-primary-400",
-      white: "text-white border-2 border-white focus:ring-white",
-    };
-
-    return colors[color];
-  };
+  const outlinedStyle = css`
+    color: ${colorHex};
+    border-width: 1px;
+    border-color: ${colorHex};
+  `;
 
   return (
     <button
       onClick={onClick}
-      className={clsx(
-        "relative h-[2.125rem] flex justify-center items-center py-1.5 px-3 gap-1.5 text-sm shadow-sm rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
-        outlined ? outlinedStyle() : solidStyle(),
-        "disabled:opacity-40",
-        full && "w-full",
+      className={cx(
+        css`
+          outline: none;
+          height: 2rem;
+          line-height: calc(2rem - 0.75rem - 2px);
+          padding: 0.375rem 0.75rem;
+          box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+          border-radius: 0.25rem;
+          white-space: nowrap;
+          & > span {
+            position: relative;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+          }
+          &:hover,
+          &:focus {
+            filter: brightness(120%);
+          }
+          &:disabled {
+            filter: grayscale(100%);
+            opacity: 0.4;
+          }
+        `,
+        outlined ? outlinedStyle : solidStyle,
+        full &&
+          css`
+            width: 100%;
+          `,
+        loading &&
+          css`
+            & > span > :not(:last-child) {
+              visibility: hidden;
+            }
+            & > span > :last-child {
+              position: absolute;
+              inset: 0;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              color: ${colorHex};
+              filter: saturate(300%);
+            }
+          `,
         className
       )}
       disabled={disabled}
     >
-      {icon && <Icon name={icon} className={clsx(loading && "invisible")} />}
-      <div className={clsx(loading && "invisible", "whitespace-nowrap")}>
-        {children}
-      </div>
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Dots
-            className={clsx(
-              color === "danger"
-                ? "text-danger-100"
-                : color === "primary"
-                ? "text-primary-100"
-                : "text-white",
-              "flex items-center"
-            )}
-          />
-        </div>
-      )}
+      <span>
+        {icon && <Icon name={icon} />}
+        <span>{children}</span>
+        {loading && <Dots />}
+      </span>
     </button>
   );
 };
