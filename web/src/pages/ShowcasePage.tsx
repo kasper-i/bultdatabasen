@@ -1,5 +1,6 @@
 import Button from "@/components/atoms/Button";
 import { Combobox } from "@/components/atoms/Combobox";
+import { Color } from "@/components/atoms/constants";
 import { Datepicker } from "@/components/atoms/DatePicker";
 import IconButton from "@/components/atoms/IconButton";
 import Input from "@/components/atoms/Input";
@@ -73,11 +74,23 @@ export const ShowcasePage = () => {
     <div className="flex flex-col gap-5 max-w-xs">
       <div className="flex flex-wrap gap-2">
         <Button>Save</Button>
-        <Button disabled>Save</Button>
-        <Button loading>Save</Button>
-        <Button icon="wrench">Save</Button>
         <Button outlined>Save</Button>
-        <Button color="danger">Delete</Button>
+        <Button disabled>Save</Button>
+        <Button disabled outlined>
+          Save
+        </Button>
+        <Button loading>Save</Button>
+        <Button outlined loading>
+          Save
+        </Button>
+        <Button icon="wrench">Save</Button>
+        <Button outlined icon="wrench">
+          Save
+        </Button>
+        <Button color={Color.Danger}>Delete</Button>
+        <Button full icon="wrench">
+          Wide
+        </Button>
       </div>
       <div className="flex gap-2">
         <IconButton icon="wrench" />

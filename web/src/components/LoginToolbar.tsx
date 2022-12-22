@@ -4,6 +4,7 @@ import { useAppSelector } from "@/store";
 import { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import Button from "./atoms/Button";
+import { Color } from "./atoms/constants";
 
 function LoginToolbar(): ReactElement {
   const isAuthenticated = useAppSelector(selectAuthenticated);
@@ -21,7 +22,7 @@ function LoginToolbar(): ReactElement {
     return (
       <Button
         outlined
-        color="white"
+        color={Color.White}
         onClick={gotoCognitoSignout}
         className="ring-offset-primary-300"
       >
@@ -31,7 +32,11 @@ function LoginToolbar(): ReactElement {
   } else {
     return (
       <Link to="/auth/signin">
-        <Button outlined color="white" className="ring-offset-primary-300">
+        <Button
+          outlined
+          color={Color.White}
+          className="ring-offset-primary-300"
+        >
           Logga In
         </Button>
       </Link>

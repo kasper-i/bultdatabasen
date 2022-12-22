@@ -19,6 +19,7 @@
     "amazon-cognito-identity-js": "^6.0.1",
     "axios": "^0.26.1",
     "axios-auth-refresh": "^3.2.2",
+    "chroma-js": "^2.4.2",
     "clsx": "^1.1.1",
     "date-fns": "^2.28.0",
     "dayzed": "^3.2.3",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.0",
+    "@types/chroma-js": "^2.1.4",
     "@types/lodash-es": "^4.17.6",
     "@types/react": "^18.0.5",
     "@types/react-dom": "^18.0.1",
