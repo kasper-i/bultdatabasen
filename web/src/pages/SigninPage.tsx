@@ -1,91 +1,171 @@
-import axios from "axios";
-import { useAppDispatch } from "@/store";
-import { isEqual } from "lodash-es";
-import React, { Fragment, ReactElement, useEffect } from "react";
-import { login } from "@/slices/authSlice";
-import { Api } from "../Api";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import configData from "@/config.json";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import {
+  AuthenticationDetails,
+  CognitoUserSession,
+} from "amazon-cognito-identity-js";
 
-export interface OAuthTokenResponse {
-  id_token: string;
-  access_token: string;
-  refresh_token: string;
-  expires_id: number;
-  token_type: string;
+import { Api } from "@/Api";
+import { Alert } from "@/components/atoms/Alert";
+import { login } from "@/slices/authSlice";
+import { useAppDispatch } from "@/store";
+import {
+  confirmRegistration,
+  parseJwt,
+  resendConfirmationCode,
+  signin as cognitoSignin,
+  translateCognitoError,
+} from "@/utils/cognito";
+import { isEqual } from "lodash-es";
+import { useState } from "react";
+import { Link, NavigateFunction, useNavigate } from "react-router-dom";
+
+interface State {
+  email: string;
+  password: string;
+  inProgress: boolean;
+  errorMessage?: string;
+  confirmationCode: string;
+  requireConfirmationCode: boolean;
 }
 
-const instance = axios.create({
-  baseURL: configData.COGNITO_URL,
-  timeout: 10000,
-  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-});
+export const handleLogin = async (
+  session: CognitoUserSession,
+  navigate: NavigateFunction,
+  dispatch: ReturnType<typeof useAppDispatch>
+) => {
+  const accessToken = session.getAccessToken().getJwtToken();
+  const idToken = session.getIdToken().getJwtToken();
+  const refreshToken = session.getRefreshToken().getToken();
 
-const parseJwt = (token: string) => {
-  const base64Url = token.split(".")[1];
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(function (c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join("")
-  );
+  Api.setTokens(idToken, accessToken, refreshToken);
+  const { given_name: firstName, family_name: lastName } = parseJwt(idToken);
 
-  return JSON.parse(jsonPayload);
+  (async () => {
+    const info = await Api.getMyself();
+    const updatedInfo = {
+      ...info,
+      firstName,
+      lastName,
+    };
+
+    if (!isEqual(info, updatedInfo)) {
+      await Api.updateMyself(updatedInfo);
+    }
+  })();
+
+  const returnPath = localStorage.getItem("returnPath");
+  localStorage.removeItem("returnPath");
+
+  dispatch(login({ firstName, lastName }));
+
+  navigate(returnPath != null ? returnPath : "/");
 };
 
-function SigninPage(): ReactElement {
-  const [searchParams] = useSearchParams();
+const SigninPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    const code = searchParams.get("code");
+  const [
+    {
+      email,
+      password,
+      inProgress,
+      confirmationCode,
+      requireConfirmationCode,
+      errorMessage,
+    },
+    setState,
+  ] = useState<State>({
+    email: "",
+    password: "",
+    inProgress: false,
+    confirmationCode: "",
+    requireConfirmationCode: false,
+  });
 
-    if (code == null) {
-      return;
-    }
+  const updateState = (updates: Partial<State>) => {
+    setState((state) => ({ ...state, ...updates }));
+  };
 
-    const params = new URLSearchParams();
-    params.append("grant_type", "authorization_code");
-    params.append("client_id", configData.COGNITO_CLIENT_ID);
-    params.append("code", code);
-    params.append(
-      "redirect_uri",
-      window.location.protocol + "//" + window.location.host + "/signin"
-    );
+  let canSubmit = !!email && !!password;
+  if (requireConfirmationCode) {
+    canSubmit = canSubmit && !!confirmationCode;
+  }
 
-    instance.post("/oauth2/token", params).then(async (response) => {
-      const { id_token, access_token, refresh_token }: OAuthTokenResponse =
-        response.data;
+  const signin = async () => {
+    updateState({ inProgress: true, errorMessage: undefined });
 
-      Api.setTokens(id_token, access_token, refresh_token);
+    const authenticationDetails = new AuthenticationDetails({
+      Username: email.trim(),
+      Password: password.trim(),
+    });
 
-      const { given_name, family_name } = parseJwt(id_token);
-
-      const info = await Api.getMyself();
-      const updatedInfo = {
-        ...info,
-        firstName: info.firstName ?? given_name,
-        lastName: info.lastName ?? family_name,
-      };
-
-      if (!isEqual(info, updatedInfo)) {
-        await Api.updateMyself(updatedInfo);
+    try {
+      if (requireConfirmationCode) {
+        await confirmRegistration(email.trim(), confirmationCode.trim());
       }
 
-      const returnPath = localStorage.getItem("returnPath");
-      localStorage.removeItem("returnPath");
+      const session = await cognitoSignin(authenticationDetails);
+      handleLogin(session, navigate, dispatch);
+    } catch (err: any) {
+      updateState({ errorMessage: translateCognitoError(err) });
 
-      dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
+      switch (err.name) {
+        case "UserNotConfirmedException":
+          updateState({ requireConfirmationCode: true });
+          await resendConfirmationCode(email.trim());
+          break;
+      }
+    } finally {
+      updateState({ inProgress: false });
+    }
+  };
 
-      navigate(returnPath != null ? returnPath : "/");
-    });
-  }, [location, navigate, dispatch]);
+  return (
+    <div className="flex flex-col items-center gap-2.5">
+      <Input
+        label="E-postadress"
+        value={email}
+        onChange={(e) => updateState({ email: e.target.value })}
+        tabIndex={1}
+        disabled={requireConfirmationCode}
+      />
+      <Input
+        label="Lösenord"
+        password
+        value={password}
+        onChange={(e) => updateState({ password: e.target.value })}
+        tabIndex={2}
+        disabled={requireConfirmationCode}
+      />
+      {requireConfirmationCode ? (
+        <Input
+          label="Verifikationskod"
+          value={confirmationCode}
+          onChange={(e) => updateState({ confirmationCode: e.target.value })}
+          tabIndex={3}
+        />
+      ) : (
+        <Link
+          to={`/auth/forgot-password?email=${email}`}
+          className="text-sm text-purple-600 self-start"
+        >
+          Glömt lösenord?
+        </Link>
+      )}
 
-  return <Fragment />;
-}
+      <hr />
+
+      <Alert>{errorMessage}</Alert>
+      <Button onClick={signin} disabled={!canSubmit} loading={inProgress} full>
+        Logga in
+      </Button>
+      <Link to="/auth/register">
+        <span className="text-sm text-purple-600">Skapa nytt konto</span>
+      </Link>
+    </div>
+  );
+};
 
 export default SigninPage;

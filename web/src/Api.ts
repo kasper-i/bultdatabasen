@@ -9,13 +9,20 @@ import { Route } from "@/models/route";
 import { Sector } from "@/models/sector";
 import { Task } from "@/models/task";
 import { User } from "@/models/user";
-import { OAuthTokenResponse } from "@/pages/SigninPage";
 import axios, { AxiosRequestHeaders } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { Manufacturer } from "./models/manufacturer";
 import { Material } from "./models/material";
 import { Model } from "./models/model";
 import { ResourceRole } from "./models/role";
+
+interface OAuthTokenResponse {
+  id_token: string;
+  access_token: string;
+  refresh_token: string;
+  expires_id: number;
+  token_type: string;
+}
 
 export interface Pagination {
   page: number;

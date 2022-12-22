@@ -18,6 +18,9 @@ import { login } from "./slices/authSlice";
 import { useAppDispatch } from "./store";
 import { ShowcasePage } from "./pages/ShowcasePage";
 import { ErrorBoundary } from "./ErrorBoundary";
+import RestorePasswordPage from "./pages/RestorePasswordPage";
+import RegisterPage from "./pages/RegisterPage";
+import Auth from "./layouts/Auth";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -69,7 +72,14 @@ const App = () => {
         <Routes>
           <Route element={<Main />}>
             <Route path="/showcase" element={<ShowcasePage />} />
-            <Route path="/signin" element={<SigninPage />} />
+            <Route element={<Auth />}>
+              <Route path="/auth/signin" element={<SigninPage />} />
+              <Route
+                path="/auth/forgot-password"
+                element={<RestorePasswordPage />}
+              />
+              <Route path="/auth/register" element={<RegisterPage />} />
+            </Route>
             <Route path="/signout" element={<SignoutPage />} />
             <Route
               path="/"

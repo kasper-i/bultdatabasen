@@ -45,7 +45,7 @@ jobs:
       - run: |
           git grep -l "bultdatabasen.se" | xargs sed -i 's/bultdatabasen.se/test.bultdatabasen.se/g'
           sudo apt install -y jq
-          echo $(jq '.COGNITO_URL = "https://bultdatabasen-test.auth.eu-west-1.amazoncognito.com" | .COGNITO_CLIENT_ID = "2lnodlocb4poce8o3rlut10gl2"' web/src/config.json) > web/src/config.json
+          echo $(jq '.COGNITO_URL = "https://bultdatabasen-test.auth.eu-west-1.amazoncognito.com" | .COGNITO_CLIENT_ID = "2lnodlocb4poce8o3rlut10gl2" | .COGNITO_POOL_ID = "eu-west-1_d1eMD1FK1"' web/src/config.json) > web/src/config.json
       - run: cp backend/keys/test.json packageroot/etc/bultdatabasen/keys.json
       - uses: ./.github/actions/build
 

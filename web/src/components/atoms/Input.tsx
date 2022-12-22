@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import React, { FC, LegacyRef, useId } from "react";
 
 const Input: FC<{
@@ -8,7 +9,21 @@ const Input: FC<{
   onClick?: () => void;
   icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
   inputRef?: LegacyRef<HTMLInputElement>;
-}> = ({ label, placeholder, onChange, value, onClick, icon, inputRef }) => {
+  password?: boolean;
+  tabIndex?: number;
+  disabled?: boolean;
+}> = ({
+  label,
+  placeholder,
+  onChange,
+  value,
+  onClick,
+  icon,
+  inputRef,
+  password,
+  tabIndex,
+  disabled,
+}) => {
   const id = useId();
 
   const Icon = icon;
@@ -20,8 +35,10 @@ const Input: FC<{
       </label>
       <div className="relative">
         <input
+          disabled={disabled}
+          tabIndex={tabIndex ?? -1}
           ref={inputRef}
-          type="text"
+          type={password ? "password" : "text"}
           id={id}
           onChange={onChange}
           readOnly={!onChange}
@@ -29,7 +46,10 @@ const Input: FC<{
           onFocus={(e) => (onClick ? e.target.blur() : undefined)}
           placeholder={placeholder}
           value={value}
-          className="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-md h-[2.125rem]"
+          className={clsx(
+            "mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-md h-[2.125rem]",
+            password && "text-xl tracking-wide"
+          )}
         />
         {Icon && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-2">
