@@ -148,7 +148,7 @@ const SigninPage = () => {
         />
       ) : (
         <Link
-          to="/auth/forgot-password"
+          to={`/auth/forgot-password?email=${email}`}
           className="text-sm text-purple-600 self-start"
         >
           Glömt lösenord?

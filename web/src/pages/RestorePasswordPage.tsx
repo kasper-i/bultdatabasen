@@ -11,7 +11,7 @@ import {
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { handleLogin } from "./SigninPage";
 
 interface State {
@@ -24,18 +24,20 @@ interface State {
 }
 
 const RestorePasswordPage = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
   const [
     { phase, email, errorMessage, newPassword, inProgress, verificationCode },
     setState,
   ] = useState<State>({
     phase: 1,
-    email: "",
+    email: searchParams.get("email") ?? "",
     newPassword: "",
     inProgress: false,
     verificationCode: "",
   });
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   const updateState = (updates: Partial<State>) => {
     setState((state) => ({ ...state, ...updates }));
@@ -92,7 +94,7 @@ const RestorePasswordPage = () => {
           <hr />
 
           <Alert>{errorMessage}</Alert>
-          <Button loading={inProgress} full onClick={restore}>
+          <Button loading={inProgress} full onClick={restore} disabled={!email}>
             Återställ
           </Button>
         </>
@@ -115,7 +117,12 @@ const RestorePasswordPage = () => {
           <hr />
 
           <Alert>{errorMessage}</Alert>
-          <Button loading={inProgress} full onClick={confirm}>
+          <Button
+            loading={inProgress}
+            full
+            onClick={confirm}
+            disabled={!verificationCode || !newPassword}
+          >
             Uppdatera
           </Button>
         </>
