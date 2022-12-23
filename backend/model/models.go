@@ -2,11 +2,12 @@ package model
 
 import (
 	"bultdatabasen/domain"
+	"context"
 
 	"github.com/google/uuid"
 )
 
-func (sess Session) GetModels(manufacturerID uuid.UUID) ([]domain.Model, error) {
+func (sess Session) GetModels(ctx context.Context, manufacturerID uuid.UUID) ([]domain.Model, error) {
 	var models []domain.Model = make([]domain.Model, 0)
 
 	query := "SELECT * FROM model where manufacturer_id = ? ORDER BY name ASC"

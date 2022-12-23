@@ -3,6 +3,7 @@ package model
 import (
 	"bultdatabasen/domain"
 	"bultdatabasen/utils"
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -25,7 +26,7 @@ func GetStoredAncestors(r *http.Request) []domain.Resource {
 	return nil
 }
 
-func (sess Session) GetResource(resourceID uuid.UUID) (*domain.Resource, error) {
+func (sess Session) GetResource(ctx context.Context, resourceID uuid.UUID) (*domain.Resource, error) {
 	var resource domain.Resource
 
 	if err := sess.DB.First(&resource, "id = ?", resourceID).Error; err != nil {
@@ -39,7 +40,7 @@ func (sess Session) GetResource(resourceID uuid.UUID) (*domain.Resource, error) 
 	return &resource, nil
 }
 
-func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
+func (sess Session) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUID) error {
 	var resource *domain.Resource
 	var subtree domain.Path
 	var err error
@@ -61,7 +62,7 @@ func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 			return utils.ErrMoveNotPermitted
 		}
 
-		if subtree, err = sess.GetPath(resourceID); err != nil {
+		if subtree, err = sess.GetPath(ctx, resourceID); err != nil {
 			return err
 		} else {
 			oldParentID = subtree.Parent()
@@ -75,7 +76,7 @@ func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 			return utils.ErrHierarchyStructureViolation
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(oldParentID, domain.Counters{}.Substract(resource.Counters)); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, oldParentID, domain.Counters{}.Substract(resource.Counters)); err != nil {
 			return err
 		}
 
@@ -97,11 +98,11 @@ func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 			return err
 		}
 
-		return sess.updateCountersForResourceAndAncestors(newParentID, resource.Counters)
+		return sess.UpdateCountersForResourceAndAncestors(ctx, newParentID, resource.Counters)
 	})
 }
 
-func (sess Session) RenameResource(resourceID uuid.UUID, name string) error {
+func (sess Session) RenameResource(ctx context.Context, resourceID uuid.UUID, name string) error {
 	return sess.DB.Exec(`UPDATE resource SET name = ?, mtime = ?, muser_id = ? WHERE id = ?`,
 		name, time.Now(), sess.UserID, resourceID).Error
 }
@@ -125,7 +126,7 @@ func (sess Session) getSubtreeLock(resourceID uuid.UUID) error {
 	return nil
 }
 
-func (sess Session) GetPath(resourceID uuid.UUID) (domain.Path, error) {
+func (sess Session) GetPath(ctx context.Context, resourceID uuid.UUID) (domain.Path, error) {
 	var out struct {
 		Path domain.Path `gorm:"column:path"`
 	}
@@ -139,7 +140,7 @@ func (sess Session) GetPath(resourceID uuid.UUID) (domain.Path, error) {
 	return out.Path, nil
 }
 
-func (sess Session) GetAncestors(resourceID uuid.UUID) ([]domain.Resource, error) {
+func (sess Session) GetAncestors(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
 	var ancestors []domain.Resource
 
 	err := sess.DB.Raw(`WITH path_list AS (
@@ -163,7 +164,7 @@ func (sess Session) GetAncestors(resourceID uuid.UUID) ([]domain.Resource, error
 	return ancestors, nil
 }
 
-func (sess Session) GetChildren(resourceID uuid.UUID) ([]domain.Resource, error) {
+func (sess Session) GetChildren(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
 	var children []domain.Resource = make([]domain.Resource, 0)
 
 	err := sess.DB.Raw(`SELECT resource.* 
@@ -179,7 +180,7 @@ func (sess Session) GetChildren(resourceID uuid.UUID) ([]domain.Resource, error)
 	return children, nil
 }
 
-func (sess Session) Search(name string) ([]domain.ResourceWithParents, error) {
+func (sess Session) Search(ctx context.Context, name string) ([]domain.ResourceWithParents, error) {
 	type searchResult struct {
 		ID   uuid.UUID
 		Name string
@@ -251,8 +252,8 @@ func (sess Session) Search(name string) ([]domain.ResourceWithParents, error) {
 	return resources, nil
 }
 
-func (sess Session) updateCountersForResourceAndAncestors(resourceID uuid.UUID, delta domain.Counters) error {
-	ancestors, err := sess.GetAncestors(resourceID)
+func (sess Session) UpdateCountersForResourceAndAncestors(ctx context.Context, resourceID uuid.UUID, delta domain.Counters) error {
+	ancestors, err := sess.GetAncestors(ctx, resourceID)
 	if err != nil {
 		return err
 	}
@@ -260,7 +261,7 @@ func (sess Session) updateCountersForResourceAndAncestors(resourceID uuid.UUID, 
 	resourceIDs := append(utils.Map(ancestors, func(ancestor domain.Resource) uuid.UUID { return ancestor.ID }), resourceID)
 
 	for _, resourceID := range resourceIDs {
-		if err := sess.updateCountersForResource(resourceID, delta); err != nil {
+		if err := sess.UpdateCountersForResource(ctx, resourceID, delta); err != nil {
 			return err
 		}
 	}
@@ -268,7 +269,7 @@ func (sess Session) updateCountersForResourceAndAncestors(resourceID uuid.UUID, 
 	return nil
 }
 
-func (sess Session) updateCountersForResource(resourceID uuid.UUID, delta domain.Counters) error {
+func (sess Session) UpdateCountersForResource(ctx context.Context, resourceID uuid.UUID, delta domain.Counters) error {
 	difference := delta.AsMap()
 
 	if len(difference) == 0 {

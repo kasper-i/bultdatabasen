@@ -21,7 +21,7 @@ func GetBolts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if bolts, err := sess.GetBolts(parentResourceID); err != nil {
+	if bolts, err := sess.GetBolts(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, bolts)
@@ -37,7 +37,7 @@ func GetBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if bolt, err := sess.GetBolt(resourceID); err != nil {
+	if bolt, err := sess.GetBolt(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		bolt.Ancestors = model.GetStoredAncestors(r)
@@ -61,7 +61,7 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateBolt(&bolt, parentResourceID)
+	err = sess.CreateBolt(r.Context(), &bolt, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -79,7 +79,7 @@ func DeleteBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteBolt(resourceID); err != nil {
+	if err := sess.DeleteBolt(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)
@@ -103,7 +103,7 @@ func UpdateBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedBolt, err := sess.UpdateBolt(boltID, bolt)
+	updatedBolt, err := sess.UpdateBolt(r.Context(), boltID, bolt)
 
 	if err != nil {
 		utils.WriteError(w, err)

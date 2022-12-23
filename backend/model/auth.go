@@ -1,8 +1,11 @@
 package model
 
-import "bultdatabasen/domain"
+import (
+	"bultdatabasen/domain"
+	"context"
+)
 
-func (sess Session) GetRoles(userID string) []domain.ResourceRole {
+func (sess Session) GetRoles(ctx context.Context, userID string) []domain.ResourceRole {
 	var roles []domain.ResourceRole
 
 	sess.DB.Raw(`SELECT resource_id, role

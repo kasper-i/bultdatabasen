@@ -21,7 +21,7 @@ func GetCrags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if crags, err := sess.GetCrags(parentResourceID); err != nil {
+	if crags, err := sess.GetCrags(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, crags)
@@ -37,7 +37,7 @@ func GetCrag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if crag, err := sess.GetCrag(resourceID); err != nil {
+	if crag, err := sess.GetCrag(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		crag.Ancestors = model.GetStoredAncestors(r)
@@ -61,7 +61,7 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateCrag(&crag, parentResourceID)
+	err = sess.CreateCrag(r.Context(), &crag, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -79,7 +79,7 @@ func DeleteCrag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteCrag(resourceID); err != nil {
+	if err := sess.DeleteCrag(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

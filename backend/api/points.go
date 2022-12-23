@@ -28,7 +28,7 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if resource, err := sess.GetResource(routeID); err != nil {
+	if resource, err := sess.GetResource(r.Context(), routeID); err != nil {
 		utils.WriteError(w, err)
 		return
 	} else if resource.Type != domain.TypeRoute {
@@ -36,7 +36,7 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if points, err := sess.GetPoints(routeID); err != nil {
+	if points, err := sess.GetPoints(r.Context(), routeID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, points)
@@ -72,7 +72,7 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	point, err := sess.AttachPoint(routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
+	point, err := sess.AttachPoint(r.Context(), routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -106,7 +106,7 @@ func DetachPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DetachPoint(routeID, pointID); err != nil {
+	if err := sess.DetachPoint(r.Context(), routeID, pointID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

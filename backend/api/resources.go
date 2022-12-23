@@ -23,7 +23,7 @@ func GetResource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if resource, err := sess.GetResource(id); err != nil {
+	if resource, err := sess.GetResource(r.Context(), id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		resource.Ancestors = model.GetStoredAncestors(r)
@@ -40,11 +40,11 @@ func ownsResource(r *http.Request, sess model.Session, resourceID uuid.UUID) boo
 		userID = value
 	}
 
-	if ancestors, err = sess.GetAncestors(resourceID); err != nil {
+	if ancestors, err = sess.GetAncestors(r.Context(), resourceID); err != nil {
 		return false
 	}
 
-	role := authorizer.GetMaxRole(resourceID, ancestors, userID)
+	role := authorizer.GetMaxRole(r.Context(), resourceID, ancestors, userID)
 	if role == nil {
 		return false
 	}
@@ -77,7 +77,7 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := sess.MoveResource(id, newParentID); err != nil {
+		if err := sess.MoveResource(r.Context(), id, newParentID); err != nil {
 			utils.WriteError(w, err)
 		} else {
 			utils.WriteResponse(w, http.StatusNoContent, nil)
@@ -98,7 +98,7 @@ func GetAncestors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ancestors, err := sess.GetAncestors(id); err != nil {
+	if ancestors, err := sess.GetAncestors(r.Context(), id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		for i, j := 0, len(ancestors)-1; i < j; i, j = i+1, j-1 {
@@ -118,7 +118,7 @@ func GetChildren(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if children, err := sess.GetChildren(id); err != nil {
+	if children, err := sess.GetChildren(r.Context(), id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, children)
@@ -149,7 +149,7 @@ func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 		ancestors = value
 	}
 
-	if maxRole := authorizer.GetMaxRole(id, ancestors, userID); maxRole != nil {
+	if maxRole := authorizer.GetMaxRole(r.Context(), id, ancestors, userID); maxRole != nil {
 		role.Role = maxRole.Role
 	}
 
@@ -172,7 +172,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if results, err := sess.Search(name); err != nil {
+	if results, err := sess.Search(r.Context(), name); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, results)

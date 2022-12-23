@@ -3,6 +3,7 @@ package model
 import (
 	"bultdatabasen/domain"
 	"bultdatabasen/utils"
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -153,7 +154,7 @@ func (sess Session) getPointWithLock(pointID uuid.UUID) (*domain.Point, error) {
 	return &point, nil
 }
 
-func (sess Session) GetPoints(resourceID uuid.UUID) ([]*domain.Point, error) {
+func (sess Session) GetPoints(ctx context.Context, resourceID uuid.UUID) ([]*domain.Point, error) {
 	var pointsMap map[uuid.UUID]*domain.Point = make(map[uuid.UUID]*domain.Point)
 	var points []*domain.Point = make([]*domain.Point, 0)
 
@@ -192,7 +193,7 @@ func (sess Session) GetPoints(resourceID uuid.UUID) ([]*domain.Point, error) {
 	return sess.sortPoints(resourceID, pointsMap)
 }
 
-func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []domain.Bolt) (*domain.Point, error) {
+func (sess Session) AttachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []domain.Bolt) (*domain.Point, error) {
 	var err error
 	var point *domain.Point = &domain.Point{}
 	var pointResource *domain.Resource
@@ -228,7 +229,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 	if pointID != uuid.Nil {
 		var err error
 
-		if pointResource, err = sess.GetResource(pointID); err != nil {
+		if pointResource, err = sess.GetResource(ctx, pointID); err != nil {
 			return nil, err
 		}
 
@@ -252,7 +253,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 				return err
 			}
 
-			if err := sess.updateCountersForResource(routeID, point.Counters); err != nil {
+			if err := sess.UpdateCountersForResource(ctx, routeID, point.Counters); err != nil {
 				return err
 			}
 		} else {
@@ -263,7 +264,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 				Type:         domain.TypePoint,
 			}
 
-			if err := sess.CreateResource(&resource, routeID); err != nil {
+			if err := sess.CreateResource(ctx, &resource, routeID); err != nil {
 				return err
 			}
 
@@ -274,7 +275,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 			}
 
 			for _, bolt := range bolts {
-				if err := sess.CreateBolt(&bolt, point.ID); err != nil {
+				if err := sess.CreateBolt(ctx, &bolt, point.ID); err != nil {
 					return err
 				}
 			}
@@ -293,19 +294,19 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 				switch position.Order {
 				case "after":
 					if nextPoint != uuid.Nil {
-						if err := sess.DeleteConnection(routeID, insertionPoint, nextPoint); err != nil {
+						if err := sess.DeleteConnection(ctx, routeID, insertionPoint, nextPoint); err != nil {
 							return err
 						}
-						if err := sess.CreateConnection(routeID, newPoint, nextPoint); err != nil {
+						if err := sess.CreateConnection(ctx, routeID, newPoint, nextPoint); err != nil {
 							return err
 						}
 					}
 				case "before":
 					if prevPoint != uuid.Nil {
-						if err := sess.DeleteConnection(routeID, prevPoint, insertionPoint); err != nil {
+						if err := sess.DeleteConnection(ctx, routeID, prevPoint, insertionPoint); err != nil {
 							return err
 						}
-						if err := sess.CreateConnection(routeID, prevPoint, newPoint); err != nil {
+						if err := sess.CreateConnection(ctx, routeID, prevPoint, newPoint); err != nil {
 							return err
 						}
 					}
@@ -314,11 +315,11 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 
 			switch position.Order {
 			case "after":
-				if err := sess.CreateConnection(routeID, insertionPoint, newPoint); err != nil {
+				if err := sess.CreateConnection(ctx, routeID, insertionPoint, newPoint); err != nil {
 					return err
 				}
 			case "before":
-				if err := sess.CreateConnection(routeID, newPoint, insertionPoint); err != nil {
+				if err := sess.CreateConnection(ctx, routeID, newPoint, insertionPoint); err != nil {
 					return err
 				}
 			}
@@ -338,7 +339,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 	return point, nil
 }
 
-func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
+func (sess Session) DetachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID) error {
 	return sess.Transaction(func(sess Session) error {
 		var err error
 		var routeGraph map[uuid.UUID]*routeGraphVertex
@@ -381,26 +382,26 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 			prevPoint := vertex.IncomingPointID
 
 			if prevPoint != uuid.Nil {
-				if err := sess.DeleteConnection(routeID, prevPoint, pointID); err != nil {
+				if err := sess.DeleteConnection(ctx, routeID, prevPoint, pointID); err != nil {
 					return err
 				}
 			}
 
 			if nextPoint != uuid.Nil {
-				if err := sess.DeleteConnection(routeID, pointID, nextPoint); err != nil {
+				if err := sess.DeleteConnection(ctx, routeID, pointID, nextPoint); err != nil {
 					return err
 				}
 			}
 
 			if prevPoint != uuid.Nil && nextPoint != uuid.Nil {
-				if err := sess.CreateConnection(routeID, prevPoint, nextPoint); err != nil {
+				if err := sess.CreateConnection(ctx, routeID, prevPoint, nextPoint); err != nil {
 					return err
 				}
 			}
 		}
 
 		if len(parents) == 1 {
-			return sess.DeleteResource(pointID)
+			return sess.DeleteResource(ctx, pointID)
 		} else {
 			if err := sess.DB.Exec(`DELETE FROM tree
 				WHERE path <@ (SELECT path FROM tree WHERE resource_id = @routeID LIMIT 1) AND resource_id = @pointID`,
@@ -409,7 +410,7 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 			}
 
 			countersDifference := domain.Counters{}.Substract(point.Counters)
-			if err := sess.updateCountersForResource(routeID, countersDifference); err != nil {
+			if err := sess.UpdateCountersForResource(ctx, routeID, countersDifference); err != nil {
 				return err
 			}
 		}

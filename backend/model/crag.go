@@ -2,13 +2,14 @@ package model
 
 import (
 	"bultdatabasen/domain"
+	"context"
 	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func (sess Session) GetCrags(resourceID uuid.UUID) ([]domain.Crag, error) {
+func (sess Session) GetCrags(ctx context.Context, resourceID uuid.UUID) ([]domain.Crag, error) {
 	var crags []domain.Crag = make([]domain.Crag, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
@@ -21,7 +22,7 @@ func (sess Session) GetCrags(resourceID uuid.UUID) ([]domain.Crag, error) {
 	return crags, nil
 }
 
-func (sess Session) GetCrag(resourceID uuid.UUID) (*domain.Crag, error) {
+func (sess Session) GetCrag(ctx context.Context, resourceID uuid.UUID) (*domain.Crag, error) {
 	var crag domain.Crag
 
 	if err := sess.DB.Raw(`SELECT * FROM crag INNER JOIN resource ON crag.id = resource.id WHERE crag.id = ?`, resourceID).
@@ -36,14 +37,14 @@ func (sess Session) GetCrag(resourceID uuid.UUID) (*domain.Crag, error) {
 	return &crag, nil
 }
 
-func (sess Session) CreateCrag(crag *domain.Crag, parentResourceID uuid.UUID) error {
+func (sess Session) CreateCrag(ctx context.Context, crag *domain.Crag, parentResourceID uuid.UUID) error {
 	resource := domain.Resource{
 		Name: &crag.Name,
 		Type: domain.TypeCrag,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
+		if err := sess.CreateResource(ctx, &resource, parentResourceID); err != nil {
 			return err
 		}
 
@@ -53,7 +54,7 @@ func (sess Session) CreateCrag(crag *domain.Crag, parentResourceID uuid.UUID) er
 			return err
 		}
 
-		if ancestors, err := sess.GetAncestors(crag.ID); err != nil {
+		if ancestors, err := sess.GetAncestors(ctx, crag.ID); err != nil {
 			return nil
 		} else {
 			crag.Ancestors = ancestors
@@ -65,6 +66,6 @@ func (sess Session) CreateCrag(crag *domain.Crag, parentResourceID uuid.UUID) er
 	return err
 }
 
-func (sess Session) DeleteCrag(resourceID uuid.UUID) error {
-	return sess.DeleteResource(resourceID)
+func (sess Session) DeleteCrag(ctx context.Context, resourceID uuid.UUID) error {
+	return sess.DeleteResource(ctx, resourceID)
 }

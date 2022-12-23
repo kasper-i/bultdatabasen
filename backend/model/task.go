@@ -2,6 +2,7 @@ package model
 
 import (
 	"bultdatabasen/domain"
+	"context"
 	"fmt"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (sess Session) GetTasks(resourceID uuid.UUID, pagination domain.Pagination, statuses []string) ([]domain.Task, domain.Meta, error) {
+func (sess Session) GetTasks(ctx context.Context, resourceID uuid.UUID, pagination domain.Pagination, statuses []string) ([]domain.Task, domain.Meta, error) {
 	var tasks []domain.Task = make([]domain.Task, 0)
 	var meta domain.Meta = domain.Meta{}
 
@@ -43,7 +44,7 @@ func (sess Session) GetTasks(resourceID uuid.UUID, pagination domain.Pagination,
 	return tasks, meta, nil
 }
 
-func (sess Session) GetTask(resourceID uuid.UUID) (*domain.Task, error) {
+func (sess Session) GetTask(ctx context.Context, resourceID uuid.UUID) (*domain.Task, error) {
 	var task domain.Task
 
 	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ?`, resourceID).
@@ -73,7 +74,7 @@ func (sess Session) getTaskWithLock(resourceID uuid.UUID) (*domain.Task, error) 
 	return &task, nil
 }
 
-func (sess Session) CreateTask(task *domain.Task, parentResourceID uuid.UUID) error {
+func (sess Session) CreateTask(ctx context.Context, task *domain.Task, parentResourceID uuid.UUID) error {
 	if task.Assignee != nil {
 		task.Status = "assigned"
 	} else {
@@ -89,7 +90,7 @@ func (sess Session) CreateTask(task *domain.Task, parentResourceID uuid.UUID) er
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
+		if err := sess.CreateResource(ctx, &resource, parentResourceID); err != nil {
 			return err
 		}
 
@@ -101,11 +102,11 @@ func (sess Session) CreateTask(task *domain.Task, parentResourceID uuid.UUID) er
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(task.ID, task.Counters); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, task.ID, task.Counters); err != nil {
 			return err
 		}
 
-		if ancestors, err := sess.GetAncestors(task.ID); err != nil {
+		if ancestors, err := sess.GetAncestors(ctx, task.ID); err != nil {
 			return nil
 		} else {
 			task.Ancestors = ancestors
@@ -121,7 +122,7 @@ func (sess Session) CreateTask(task *domain.Task, parentResourceID uuid.UUID) er
 	return nil
 }
 
-func (sess Session) UpdateTask(task *domain.Task, taskID uuid.UUID) error {
+func (sess Session) UpdateTask(ctx context.Context, task *domain.Task, taskID uuid.UUID) error {
 	err := sess.Transaction(func(sess Session) error {
 		original, err := sess.getTaskWithLock(taskID)
 		if err != nil {
@@ -143,7 +144,7 @@ func (sess Session) UpdateTask(task *domain.Task, taskID uuid.UUID) error {
 
 		countersDifference := task.Counters.Substract(original.Counters)
 
-		if err := sess.TouchResource(taskID); err != nil {
+		if err := sess.TouchResource(ctx, taskID); err != nil {
 			return err
 		}
 
@@ -157,7 +158,7 @@ func (sess Session) UpdateTask(task *domain.Task, taskID uuid.UUID) error {
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(taskID, countersDifference); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, taskID, countersDifference); err != nil {
 			return err
 		}
 
@@ -171,6 +172,6 @@ func (sess Session) UpdateTask(task *domain.Task, taskID uuid.UUID) error {
 	return nil
 }
 
-func (sess Session) DeleteTask(resourceID uuid.UUID) error {
-	return sess.DeleteResource(resourceID)
+func (sess Session) DeleteTask(ctx context.Context, resourceID uuid.UUID) error {
+	return sess.DeleteResource(ctx, resourceID)
 }

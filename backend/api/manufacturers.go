@@ -8,7 +8,7 @@ import (
 func GetManufacturers(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 
-	if manufacturers, err := sess.GetManufacturers(); err != nil {
+	if manufacturers, err := sess.GetManufacturers(r.Context()); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, manufacturers)

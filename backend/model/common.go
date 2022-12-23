@@ -3,6 +3,7 @@ package model
 import (
 	"bultdatabasen/domain"
 	"bultdatabasen/utils"
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -43,7 +44,7 @@ func (sess Session) getResourceWithLock(resourceID uuid.UUID) (*domain.Resource,
 	return &resource, nil
 }
 
-func (sess Session) CreateResource(resource *domain.Resource, parentResourceID uuid.UUID) error {
+func (sess Session) CreateResource(ctx context.Context, resource *domain.Resource, parentResourceID uuid.UUID) error {
 	resource.ID = uuid.New()
 
 	resource.BirthTime = time.Now()
@@ -72,7 +73,7 @@ func (sess Session) CreateResource(resource *domain.Resource, parentResourceID u
 
 		switch resource.Type {
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
-			subtree, err := sess.GetPath(parentResourceID)
+			subtree, err := sess.GetPath(ctx, parentResourceID)
 			if err != nil {
 				return err
 			}
@@ -87,13 +88,13 @@ func (sess Session) CreateResource(resource *domain.Resource, parentResourceID u
 	return err
 }
 
-func (sess Session) TouchResource(resourceID uuid.UUID) error {
+func (sess Session) TouchResource(ctx context.Context, resourceID uuid.UUID) error {
 	return sess.DB.Exec(`UPDATE resource SET mtime = ?, muser_id = ? WHERE id = ?`,
 		time.Now(), sess.UserID, resourceID).Error
 }
 
-func (sess Session) DeleteResource(resourceID uuid.UUID) error {
-	ancestors, err := sess.GetAncestors(resourceID)
+func (sess Session) DeleteResource(ctx context.Context, resourceID uuid.UUID) error {
+	ancestors, err := sess.GetAncestors(ctx, resourceID)
 	if err != nil {
 		return err
 	}
@@ -119,7 +120,7 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 		case domain.TypeRoot:
 			return utils.ErrNotPermitted
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
-			subtree, err := sess.GetPath(resourceID)
+			subtree, err := sess.GetPath(ctx, resourceID)
 			if err != nil {
 				return err
 			}
@@ -143,7 +144,7 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 		countersDifference := domain.Counters{}.Substract(resource.Counters)
 
 		for _, ancestor := range ancestors {
-			if err := sess.updateCountersForResource(ancestor.ID, countersDifference); err != nil {
+			if err := sess.UpdateCountersForResource(ctx, ancestor.ID, countersDifference); err != nil {
 				return err
 			}
 		}
