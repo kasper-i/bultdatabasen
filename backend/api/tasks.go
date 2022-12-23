@@ -47,7 +47,7 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pagination := domain.Pagination{}
+	var pagination domain.Pagination
 	if pagination, err = parsePaginationQuery(query); err != nil {
 		utils.WriteResponse(w, http.StatusBadRequest, nil)
 		return
