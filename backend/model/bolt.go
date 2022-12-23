@@ -95,7 +95,7 @@ func (sess Session) CreateBolt(ctx context.Context, bolt *domain.Bolt, parentRes
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(ctx, bolt.ID, bolt.Counters); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, bolt.ID, bolt.Counters); err != nil {
 			return err
 		}
 
@@ -153,7 +153,7 @@ func (sess Session) UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBol
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(ctx, boltID, countersDifference); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, boltID, countersDifference); err != nil {
 			return err
 		}
 

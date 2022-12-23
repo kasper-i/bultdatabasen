@@ -144,7 +144,7 @@ func (sess Session) DeleteResource(ctx context.Context, resourceID uuid.UUID) er
 		countersDifference := domain.Counters{}.Substract(resource.Counters)
 
 		for _, ancestor := range ancestors {
-			if err := sess.updateCountersForResource(ctx, ancestor.ID, countersDifference); err != nil {
+			if err := sess.UpdateCountersForResource(ctx, ancestor.ID, countersDifference); err != nil {
 				return err
 			}
 		}

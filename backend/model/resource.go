@@ -76,7 +76,7 @@ func (sess Session) MoveResource(ctx context.Context, resourceID, newParentID uu
 			return utils.ErrHierarchyStructureViolation
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(ctx, oldParentID, domain.Counters{}.Substract(resource.Counters)); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, oldParentID, domain.Counters{}.Substract(resource.Counters)); err != nil {
 			return err
 		}
 
@@ -98,7 +98,7 @@ func (sess Session) MoveResource(ctx context.Context, resourceID, newParentID uu
 			return err
 		}
 
-		return sess.updateCountersForResourceAndAncestors(ctx, newParentID, resource.Counters)
+		return sess.UpdateCountersForResourceAndAncestors(ctx, newParentID, resource.Counters)
 	})
 }
 
@@ -252,7 +252,7 @@ func (sess Session) Search(ctx context.Context, name string) ([]domain.ResourceW
 	return resources, nil
 }
 
-func (sess Session) updateCountersForResourceAndAncestors(ctx context.Context, resourceID uuid.UUID, delta domain.Counters) error {
+func (sess Session) UpdateCountersForResourceAndAncestors(ctx context.Context, resourceID uuid.UUID, delta domain.Counters) error {
 	ancestors, err := sess.GetAncestors(ctx, resourceID)
 	if err != nil {
 		return err
@@ -261,7 +261,7 @@ func (sess Session) updateCountersForResourceAndAncestors(ctx context.Context, r
 	resourceIDs := append(utils.Map(ancestors, func(ancestor domain.Resource) uuid.UUID { return ancestor.ID }), resourceID)
 
 	for _, resourceID := range resourceIDs {
-		if err := sess.updateCountersForResource(ctx, resourceID, delta); err != nil {
+		if err := sess.UpdateCountersForResource(ctx, resourceID, delta); err != nil {
 			return err
 		}
 	}
@@ -269,7 +269,7 @@ func (sess Session) updateCountersForResourceAndAncestors(ctx context.Context, r
 	return nil
 }
 
-func (sess Session) updateCountersForResource(ctx context.Context, resourceID uuid.UUID, delta domain.Counters) error {
+func (sess Session) UpdateCountersForResource(ctx context.Context, resourceID uuid.UUID, delta domain.Counters) error {
 	difference := delta.AsMap()
 
 	if len(difference) == 0 {

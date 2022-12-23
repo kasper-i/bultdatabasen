@@ -102,7 +102,7 @@ func (sess Session) CreateTask(ctx context.Context, task *domain.Task, parentRes
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(ctx, task.ID, task.Counters); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, task.ID, task.Counters); err != nil {
 			return err
 		}
 
@@ -158,7 +158,7 @@ func (sess Session) UpdateTask(ctx context.Context, task *domain.Task, taskID uu
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(ctx, taskID, countersDifference); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, taskID, countersDifference); err != nil {
 			return err
 		}
 

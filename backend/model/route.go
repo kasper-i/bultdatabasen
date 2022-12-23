@@ -71,7 +71,7 @@ func (sess Session) CreateRoute(ctx context.Context, route *domain.Route, parent
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(ctx, route.ID, route.Counters); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, route.ID, route.Counters); err != nil {
 			return err
 		}
 
@@ -119,7 +119,7 @@ func (sess Session) UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedR
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(ctx, routeID, countersDifference); err != nil {
+		if err := sess.UpdateCountersForResourceAndAncestors(ctx, routeID, countersDifference); err != nil {
 			return err
 		}
 

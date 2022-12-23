@@ -253,7 +253,7 @@ func (sess Session) AttachPoint(ctx context.Context, routeID uuid.UUID, pointID 
 				return err
 			}
 
-			if err := sess.updateCountersForResource(ctx, routeID, point.Counters); err != nil {
+			if err := sess.UpdateCountersForResource(ctx, routeID, point.Counters); err != nil {
 				return err
 			}
 		} else {
@@ -294,19 +294,19 @@ func (sess Session) AttachPoint(ctx context.Context, routeID uuid.UUID, pointID 
 				switch position.Order {
 				case "after":
 					if nextPoint != uuid.Nil {
-						if err := sess.DeleteConnection(routeID, insertionPoint, nextPoint); err != nil {
+						if err := sess.DeleteConnection(ctx, routeID, insertionPoint, nextPoint); err != nil {
 							return err
 						}
-						if err := sess.CreateConnection(routeID, newPoint, nextPoint); err != nil {
+						if err := sess.CreateConnection(ctx, routeID, newPoint, nextPoint); err != nil {
 							return err
 						}
 					}
 				case "before":
 					if prevPoint != uuid.Nil {
-						if err := sess.DeleteConnection(routeID, prevPoint, insertionPoint); err != nil {
+						if err := sess.DeleteConnection(ctx, routeID, prevPoint, insertionPoint); err != nil {
 							return err
 						}
-						if err := sess.CreateConnection(routeID, prevPoint, newPoint); err != nil {
+						if err := sess.CreateConnection(ctx, routeID, prevPoint, newPoint); err != nil {
 							return err
 						}
 					}
@@ -315,11 +315,11 @@ func (sess Session) AttachPoint(ctx context.Context, routeID uuid.UUID, pointID 
 
 			switch position.Order {
 			case "after":
-				if err := sess.CreateConnection(routeID, insertionPoint, newPoint); err != nil {
+				if err := sess.CreateConnection(ctx, routeID, insertionPoint, newPoint); err != nil {
 					return err
 				}
 			case "before":
-				if err := sess.CreateConnection(routeID, newPoint, insertionPoint); err != nil {
+				if err := sess.CreateConnection(ctx, routeID, newPoint, insertionPoint); err != nil {
 					return err
 				}
 			}
@@ -382,19 +382,19 @@ func (sess Session) DetachPoint(ctx context.Context, routeID uuid.UUID, pointID 
 			prevPoint := vertex.IncomingPointID
 
 			if prevPoint != uuid.Nil {
-				if err := sess.DeleteConnection(routeID, prevPoint, pointID); err != nil {
+				if err := sess.DeleteConnection(ctx, routeID, prevPoint, pointID); err != nil {
 					return err
 				}
 			}
 
 			if nextPoint != uuid.Nil {
-				if err := sess.DeleteConnection(routeID, pointID, nextPoint); err != nil {
+				if err := sess.DeleteConnection(ctx, routeID, pointID, nextPoint); err != nil {
 					return err
 				}
 			}
 
 			if prevPoint != uuid.Nil && nextPoint != uuid.Nil {
-				if err := sess.CreateConnection(routeID, prevPoint, nextPoint); err != nil {
+				if err := sess.CreateConnection(ctx, routeID, prevPoint, nextPoint); err != nil {
 					return err
 				}
 			}
@@ -410,7 +410,7 @@ func (sess Session) DetachPoint(ctx context.Context, routeID uuid.UUID, pointID 
 			}
 
 			countersDifference := domain.Counters{}.Substract(point.Counters)
-			if err := sess.updateCountersForResource(ctx, routeID, countersDifference); err != nil {
+			if err := sess.UpdateCountersForResource(ctx, routeID, countersDifference); err != nil {
 				return err
 			}
 		}
