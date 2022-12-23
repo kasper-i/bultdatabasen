@@ -42,7 +42,7 @@ func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 
 		sess := model.NewSession(model.DB, nil)
 
-		ancestors, err := sess.GetAncestors(resourceID)
+		ancestors, err := sess.GetAncestors(r.Context(), resourceID)
 		if err != nil {
 			panic(err)
 		}

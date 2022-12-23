@@ -21,7 +21,7 @@ func GetRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if routes, err := sess.GetRoutes(parentResourceID); err != nil {
+	if routes, err := sess.GetRoutes(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, routes)
@@ -37,7 +37,7 @@ func GetRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if route, err := sess.GetRoute(resourceID); err != nil {
+	if route, err := sess.GetRoute(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		route.Ancestors = model.GetStoredAncestors(r)
@@ -61,7 +61,7 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateRoute(&route, parentResourceID)
+	err = sess.CreateRoute(r.Context(), &route, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -79,7 +79,7 @@ func DeleteRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteRoute(resourceID); err != nil {
+	if err := sess.DeleteRoute(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)
@@ -103,7 +103,7 @@ func UpdateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedRoute, err := sess.UpdateRoute(routeID, route)
+	updatedRoute, err := sess.UpdateRoute(r.Context(), routeID, route)
 
 	if err != nil {
 		utils.WriteError(w, err)

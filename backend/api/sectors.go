@@ -21,7 +21,7 @@ func GetSectors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if sectors, err := sess.GetSectors(parentResourceID); err != nil {
+	if sectors, err := sess.GetSectors(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, sectors)
@@ -37,7 +37,7 @@ func GetSector(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if sector, err := sess.GetSector(resourceID); err != nil {
+	if sector, err := sess.GetSector(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		sector.Ancestors = model.GetStoredAncestors(r)
@@ -61,7 +61,7 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateSector(&sector, parentResourceID)
+	err = sess.CreateSector(r.Context(), &sector, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -79,7 +79,7 @@ func DeleteSector(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteSector(resourceID); err != nil {
+	if err := sess.DeleteSector(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

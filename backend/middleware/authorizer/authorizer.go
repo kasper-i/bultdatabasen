@@ -5,6 +5,7 @@ import (
 	"bultdatabasen/middleware/authenticator"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -69,7 +70,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if maxRole := GetMaxRole(resourceID, ancestors, userID); maxRole == nil || maxRole.Role != "owner" {
+		if maxRole := GetMaxRole(r.Context(), resourceID, ancestors, userID); maxRole == nil || maxRole.Role != "owner" {
 			writeForbidden(w, &resourceID)
 		} else {
 			next.ServeHTTP(w, r)
@@ -77,14 +78,14 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-func GetMaxRole(resourceID uuid.UUID, ancestors []domain.Resource, userID string) *domain.ResourceRole {
+func GetMaxRole(ctx context.Context, resourceID uuid.UUID, ancestors []domain.Resource, userID string) *domain.ResourceRole {
 	sess := model.NewSession(model.DB, &userID)
 
 	if resourceID.String() == domain.RootID {
 		return nil
 	}
 
-	roles := sess.GetRoles(userID)
+	roles := sess.GetRoles(ctx, userID)
 
 	if len(roles) == 0 {
 		return nil

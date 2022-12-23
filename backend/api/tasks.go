@@ -60,7 +60,7 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 
 	statuses := query["status"]
 
-	if tasks, meta, err := sess.GetTasks(parentResourceID, pagination, statuses); err != nil {
+	if tasks, meta, err := sess.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		response := GetTasksResponse{}
@@ -79,7 +79,7 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if task, err := sess.GetTask(resourceID); err != nil {
+	if task, err := sess.GetTask(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		task.Ancestors = model.GetStoredAncestors(r)
@@ -103,7 +103,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateTask(&task, parentResourceID)
+	err = sess.CreateTask(r.Context(), &task, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -128,7 +128,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.UpdateTask(&task, taskID)
+	err = sess.UpdateTask(r.Context(), &task, taskID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -147,7 +147,7 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteTask(resourceID); err != nil {
+	if err := sess.DeleteTask(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

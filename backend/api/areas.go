@@ -26,7 +26,7 @@ func GetAreas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if areas, err := sess.GetAreas(resourceID); err != nil {
+	if areas, err := sess.GetAreas(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, areas)
@@ -42,7 +42,7 @@ func GetArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if area, err := sess.GetArea(resourceID); err != nil {
+	if area, err := sess.GetArea(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		area.Ancestors = model.GetStoredAncestors(r)
@@ -72,7 +72,7 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = sess.CreateArea(&area, resourceID, userId); err != nil {
+	if err = sess.CreateArea(r.Context(), &area, resourceID, userId); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusCreated, area)
@@ -88,7 +88,7 @@ func DeleteArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteArea(resourceID); err != nil {
+	if err := sess.DeleteArea(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

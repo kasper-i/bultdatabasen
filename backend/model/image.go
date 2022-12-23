@@ -5,6 +5,7 @@ import (
 	"bultdatabasen/spaces"
 	"bultdatabasen/utils"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -58,7 +59,7 @@ type ImagePatch struct {
 	Rotation *int `json:"rotation"`
 }
 
-func (sess Session) GetImages(resourceID uuid.UUID) ([]domain.Image, error) {
+func (sess Session) GetImages(ctx context.Context, resourceID uuid.UUID) ([]domain.Image, error) {
 	var images []domain.Image = make([]domain.Image, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s
@@ -86,7 +87,7 @@ func (sess Session) getImageWithLock(imageID uuid.UUID) (*domain.Image, error) {
 	return &image, nil
 }
 
-func (sess Session) GetImage(imageID uuid.UUID) (*domain.Image, error) {
+func (sess Session) GetImage(ctx context.Context, imageID uuid.UUID) (*domain.Image, error) {
 	var image domain.Image
 
 	if err := sess.DB.Raw(`SELECT * FROM image WHERE image.id = ?`, imageID).
@@ -101,7 +102,7 @@ func (sess Session) GetImage(imageID uuid.UUID) (*domain.Image, error) {
 	return &image, nil
 }
 
-func (sess Session) GetImageDownloadURL(imageID uuid.UUID, version string) (string, error) {
+func (sess Session) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error) {
 	var imageKey string
 
 	if version == "original" {
@@ -128,7 +129,7 @@ func (sess Session) GetImageDownloadURL(imageID uuid.UUID, version string) (stri
 	return "", utils.ErrNotFound
 }
 
-func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (*domain.Image, error) {
+func (sess Session) UploadImage(ctx context.Context, parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (*domain.Image, error) {
 	img := domain.Image{
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
@@ -168,7 +169,7 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 	}
 
 	err = sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
+		if err := sess.CreateResource(ctx, &resource, parentResourceID); err != nil {
 			return err
 		}
 
@@ -187,7 +188,7 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 			return err
 		}
 
-		if err = ResizeImage(img.ID, []string{"sm", "xl"}); err != nil {
+		if err = ResizeImage(ctx, img.ID, []string{"sm", "xl"}); err != nil {
 			rollbackObjectCreations(img.ID)
 			return err
 		}
@@ -196,7 +197,7 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 			return err
 		}
 
-		if ancestors, err := sess.GetAncestors(img.ID); err != nil {
+		if ancestors, err := sess.GetAncestors(ctx, img.ID); err != nil {
 			return nil
 		} else {
 			img.Ancestors = ancestors
@@ -233,11 +234,11 @@ func rollbackObjectCreations(imageID uuid.UUID) {
 	}
 }
 
-func (sess Session) DeleteImage(imageID uuid.UUID) error {
-	return sess.DeleteResource(imageID)
+func (sess Session) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
+	return sess.DeleteResource(ctx, imageID)
 }
 
-func (sess Session) PatchImage(imageID uuid.UUID, patch ImagePatch) error {
+func (sess Session) PatchImage(ctx context.Context, imageID uuid.UUID, patch ImagePatch) error {
 	original, err := sess.getImageWithLock(imageID)
 	if err != nil {
 		return err
@@ -248,7 +249,7 @@ func (sess Session) PatchImage(imageID uuid.UUID, patch ImagePatch) error {
 	}
 
 	return sess.Transaction(func(sess Session) error {
-		if err := sess.TouchResource(imageID); err != nil {
+		if err := sess.TouchResource(ctx, imageID); err != nil {
 			return err
 		}
 
@@ -268,7 +269,7 @@ func getResizedImageKey(imageID uuid.UUID, version string) string {
 	return "images/" + imageID.String() + "." + version
 }
 
-func ResizeImage(imageID uuid.UUID, versions []string) error {
+func ResizeImage(ctx context.Context, imageID uuid.UUID, versions []string) error {
 	var requestedVersions map[string]string = make(map[string]string)
 
 	originalUrl := fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s",

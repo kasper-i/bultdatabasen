@@ -15,7 +15,7 @@ import (
 func GetUserNames(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 
-	if names, err := sess.GetUserNames(); err != nil {
+	if names, err := sess.GetUserNames(r.Context()); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, names)
@@ -27,14 +27,14 @@ func GetMyself(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	userID := r.Context().Value("user_id").(string)
 
-	if user, err := sess.GetUser(userID); err != nil {
+	if user, err := sess.GetUser(r.Context(), userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			user = &domain.User{
 				ID:        userID,
 				FirstSeen: time.Now(),
 			}
 
-			if err := sess.CreateUser(user); err != nil {
+			if err := sess.CreateUser(r.Context(), user); err != nil {
 				utils.WriteError(w, err)
 				return
 			} else {
@@ -61,7 +61,7 @@ func UpdateMyself(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user, err := sess.GetUser(userID); err != nil {
+	if user, err := sess.GetUser(r.Context(), userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			user = &domain.User{
 				ID:        userID,
@@ -70,7 +70,7 @@ func UpdateMyself(w http.ResponseWriter, r *http.Request) {
 				FirstSeen: time.Now(),
 			}
 
-			if err := sess.CreateUser(user); err != nil {
+			if err := sess.CreateUser(r.Context(), user); err != nil {
 				utils.WriteError(w, err)
 				return
 			} else {
@@ -85,7 +85,7 @@ func UpdateMyself(w http.ResponseWriter, r *http.Request) {
 		user.FirstName = desiredUser.FirstName
 		user.LastName = desiredUser.LastName
 
-		err := sess.UpdateUser(user)
+		err := sess.UpdateUser(r.Context(), user)
 
 		if err != nil {
 			utils.WriteError(w, err)

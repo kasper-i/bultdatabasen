@@ -17,7 +17,7 @@ func GetModels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if models, err := sess.GetModels(manufacturerID); err != nil {
+	if models, err := sess.GetModels(r.Context(), manufacturerID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, models)

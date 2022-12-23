@@ -1,8 +1,11 @@
 package model
 
-import "bultdatabasen/domain"
+import (
+	"bultdatabasen/domain"
+	"context"
+)
 
-func (sess Session) GetMaterials() ([]domain.Material, error) {
+func (sess Session) GetMaterials(ctx context.Context) ([]domain.Material, error) {
 	var materials []domain.Material = make([]domain.Material, 0)
 
 	query := "SELECT * FROM material ORDER BY name ASC"

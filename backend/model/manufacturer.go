@@ -1,8 +1,11 @@
 package model
 
-import "bultdatabasen/domain"
+import (
+	"bultdatabasen/domain"
+	"context"
+)
 
-func (sess Session) GetManufacturers() ([]domain.Manufacturer, error) {
+func (sess Session) GetManufacturers(ctx context.Context) ([]domain.Manufacturer, error) {
 	var manufacturers []domain.Manufacturer = make([]domain.Manufacturer, 0)
 
 	query := "SELECT * FROM manufacturer ORDER BY name ASC"

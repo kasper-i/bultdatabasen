@@ -2,13 +2,14 @@ package model
 
 import (
 	"bultdatabasen/domain"
+	"context"
 	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func (sess Session) GetBolts(resourceID uuid.UUID) ([]domain.Bolt, error) {
+func (sess Session) GetBolts(ctx context.Context, resourceID uuid.UUID) ([]domain.Bolt, error) {
 	var bolts []domain.Bolt = make([]domain.Bolt, 0)
 
 	query := fmt.Sprintf(`%s SELECT
@@ -31,7 +32,7 @@ func (sess Session) GetBolts(resourceID uuid.UUID) ([]domain.Bolt, error) {
 	return bolts, nil
 }
 
-func (sess Session) GetBolt(resourceID uuid.UUID) (*domain.Bolt, error) {
+func (sess Session) GetBolt(ctx context.Context, resourceID uuid.UUID) (*domain.Bolt, error) {
 	var bolt domain.Bolt
 
 	if err := sess.DB.Raw(`SELECT
@@ -75,7 +76,7 @@ func (sess Session) getBoltWithLock(resourceID uuid.UUID) (*domain.Bolt, error) 
 	return &bolt, nil
 }
 
-func (sess Session) CreateBolt(bolt *domain.Bolt, parentResourceID uuid.UUID) error {
+func (sess Session) CreateBolt(ctx context.Context, bolt *domain.Bolt, parentResourceID uuid.UUID) error {
 	bolt.UpdateCounters()
 
 	resource := domain.Resource{
@@ -84,7 +85,7 @@ func (sess Session) CreateBolt(bolt *domain.Bolt, parentResourceID uuid.UUID) er
 	}
 
 	err := sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(&resource, parentResourceID); err != nil {
+		if err := sess.CreateResource(ctx, &resource, parentResourceID); err != nil {
 			return err
 		}
 
@@ -94,17 +95,17 @@ func (sess Session) CreateBolt(bolt *domain.Bolt, parentResourceID uuid.UUID) er
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(bolt.ID, bolt.Counters); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(ctx, bolt.ID, bolt.Counters); err != nil {
 			return err
 		}
 
-		if refreshedBolt, err := sess.GetBolt(bolt.ID); err != nil {
+		if refreshedBolt, err := sess.GetBolt(ctx, bolt.ID); err != nil {
 			return err
 		} else {
 			*bolt = *refreshedBolt
 		}
 
-		if ancestors, err := sess.GetAncestors(bolt.ID); err != nil {
+		if ancestors, err := sess.GetAncestors(ctx, bolt.ID); err != nil {
 			return nil
 		} else {
 			bolt.Ancestors = ancestors
@@ -116,11 +117,11 @@ func (sess Session) CreateBolt(bolt *domain.Bolt, parentResourceID uuid.UUID) er
 	return err
 }
 
-func (sess Session) DeleteBolt(resourceID uuid.UUID) error {
-	return sess.DeleteResource(resourceID)
+func (sess Session) DeleteBolt(ctx context.Context, resourceID uuid.UUID) error {
+	return sess.DeleteResource(ctx, resourceID)
 }
 
-func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt domain.Bolt) (*domain.Bolt, error) {
+func (sess Session) UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBolt domain.Bolt) (*domain.Bolt, error) {
 	var refreshedBolt *domain.Bolt
 
 	err := sess.Transaction(func(sess Session) error {
@@ -135,7 +136,7 @@ func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt domain.Bolt) (*doma
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 
-		if err := sess.TouchResource(boltID); err != nil {
+		if err := sess.TouchResource(ctx, boltID); err != nil {
 			return err
 		}
 
@@ -152,11 +153,11 @@ func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt domain.Bolt) (*doma
 			return err
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(boltID, countersDifference); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(ctx, boltID, countersDifference); err != nil {
 			return err
 		}
 
-		refreshedBolt, err = sess.GetBolt(boltID)
+		refreshedBolt, err = sess.GetBolt(ctx, boltID)
 		if err != nil {
 			return err
 		}

@@ -20,7 +20,7 @@ func GetImages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if images, err := sess.GetImages(parentResourceID); err != nil {
+	if images, err := sess.GetImages(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, images)
@@ -42,7 +42,7 @@ func DownloadImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if url, err := sess.GetImageDownloadURL(imageID, version); err != nil {
+	if url, err := sess.GetImageDownloadURL(r.Context(), imageID, version); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		w.Header().Set("Location", url)
@@ -82,7 +82,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	switch mimeType {
 	case "image/jpeg", "image/jpg":
-		image, err := sess.UploadImage(parentResourceID, fileBytes, mimeType)
+		image, err := sess.UploadImage(r.Context(), parentResourceID, fileBytes, mimeType)
 
 		if err != nil {
 			utils.WriteError(w, err)
@@ -105,7 +105,7 @@ func DeleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.DeleteImage(imageID)
+	err = sess.DeleteImage(r.Context(), imageID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -137,7 +137,7 @@ func PatchImage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = sess.PatchImage(imageID, patch)
+	err = sess.PatchImage(r.Context(), imageID, patch)
 
 	if err != nil {
 		utils.WriteError(w, err)
