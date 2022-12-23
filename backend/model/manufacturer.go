@@ -1,18 +1,9 @@
 package model
 
-import "github.com/google/uuid"
+import "bultdatabasen/domain"
 
-type Manufacturer struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-}
-
-func (Manufacturer) TableName() string {
-	return "manufacturer"
-}
-
-func (sess Session) GetManufacturers() ([]Manufacturer, error) {
-	var manufacturers []Manufacturer = make([]Manufacturer, 0)
+func (sess Session) GetManufacturers() ([]domain.Manufacturer, error) {
+	var manufacturers []domain.Manufacturer = make([]domain.Manufacturer, 0)
 
 	query := "SELECT * FROM manufacturer ORDER BY name ASC"
 

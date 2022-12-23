@@ -1,14 +1,9 @@
 package model
 
-import "github.com/google/uuid"
+import "bultdatabasen/domain"
 
-type ResourceRole struct {
-	Role       string    `json:"role"`
-	ResourceID uuid.UUID `json:"resourceID"`
-}
-
-func (sess Session) GetRoles(userID string) []ResourceRole {
-	var roles []ResourceRole
+func (sess Session) GetRoles(userID string) []domain.ResourceRole {
+	var roles []domain.ResourceRole
 
 	sess.DB.Raw(`SELECT resource_id, role
 			FROM "user" u

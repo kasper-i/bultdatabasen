@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
@@ -15,7 +16,7 @@ type CreatePointRequest struct {
 	PointID  uuid.UUID             `json:"pointId"`
 	Position *model.InsertPosition `json:"position"`
 	Anchor   bool                  `json:"anchor"`
-	Bolts    []model.Bolt          `json:"bolts"`
+	Bolts    []domain.Bolt         `json:"bolts"`
 }
 
 func GetPoints(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,7 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 	if resource, err := sess.GetResource(routeID); err != nil {
 		utils.WriteError(w, err)
 		return
-	} else if resource.Type != model.TypeRoute {
+	} else if resource.Type != domain.TypeRoute {
 		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
 		return
 	}
@@ -84,7 +85,7 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 			status = http.StatusOK
 		}
 
-		point.WithAncestors(r)
+		point.Ancestors = model.GetStoredAncestors(r)
 		utils.WriteResponse(w, status, point)
 	}
 }

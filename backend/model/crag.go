@@ -1,23 +1,15 @@
 package model
 
 import (
+	"bultdatabasen/domain"
 	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type Crag struct {
-	ResourceBase
-	Name string `json:"name"`
-}
-
-func (Crag) TableName() string {
-	return "crag"
-}
-
-func (sess Session) GetCrags(resourceID uuid.UUID) ([]Crag, error) {
-	var crags []Crag = make([]Crag, 0)
+func (sess Session) GetCrags(resourceID uuid.UUID) ([]domain.Crag, error) {
+	var crags []domain.Crag = make([]domain.Crag, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN crag ON tree.resource_id = crag.id
@@ -29,8 +21,8 @@ func (sess Session) GetCrags(resourceID uuid.UUID) ([]Crag, error) {
 	return crags, nil
 }
 
-func (sess Session) GetCrag(resourceID uuid.UUID) (*Crag, error) {
-	var crag Crag
+func (sess Session) GetCrag(resourceID uuid.UUID) (*domain.Crag, error) {
+	var crag domain.Crag
 
 	if err := sess.DB.Raw(`SELECT * FROM crag INNER JOIN resource ON crag.id = resource.id WHERE crag.id = ?`, resourceID).
 		Scan(&crag).Error; err != nil {
@@ -44,10 +36,10 @@ func (sess Session) GetCrag(resourceID uuid.UUID) (*Crag, error) {
 	return &crag, nil
 }
 
-func (sess Session) CreateCrag(crag *Crag, parentResourceID uuid.UUID) error {
-	resource := Resource{
+func (sess Session) CreateCrag(crag *domain.Crag, parentResourceID uuid.UUID) error {
+	resource := domain.Resource{
 		Name: &crag.Name,
-		Type: TypeCrag,
+		Type: domain.TypeCrag,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
@@ -64,7 +56,7 @@ func (sess Session) CreateCrag(crag *Crag, parentResourceID uuid.UUID) error {
 		if ancestors, err := sess.GetAncestors(crag.ID); err != nil {
 			return nil
 		} else {
-			crag.Ancestors = &ancestors
+			crag.Ancestors = ancestors
 		}
 
 		return nil

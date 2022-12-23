@@ -1,23 +1,15 @@
 package model
 
 import (
+	"bultdatabasen/domain"
 	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type Sector struct {
-	ResourceBase
-	Name string `json:"name"`
-}
-
-func (Sector) TableName() string {
-	return "sector"
-}
-
-func (sess Session) GetSectors(resourceID uuid.UUID) ([]Sector, error) {
-	var sectors []Sector = make([]Sector, 0)
+func (sess Session) GetSectors(resourceID uuid.UUID) ([]domain.Sector, error) {
+	var sectors []domain.Sector = make([]domain.Sector, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN sector ON tree.resource_id = sector.id
@@ -29,8 +21,8 @@ func (sess Session) GetSectors(resourceID uuid.UUID) ([]Sector, error) {
 	return sectors, nil
 }
 
-func (sess Session) GetSector(resourceID uuid.UUID) (*Sector, error) {
-	var sector Sector
+func (sess Session) GetSector(resourceID uuid.UUID) (*domain.Sector, error) {
+	var sector domain.Sector
 
 	if err := sess.DB.Raw(`SELECT * FROM sector INNER JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
 		Scan(&sector).Error; err != nil {
@@ -44,10 +36,10 @@ func (sess Session) GetSector(resourceID uuid.UUID) (*Sector, error) {
 	return &sector, nil
 }
 
-func (sess Session) CreateSector(sector *Sector, parentResourceID uuid.UUID) error {
-	resource := Resource{
+func (sess Session) CreateSector(sector *domain.Sector, parentResourceID uuid.UUID) error {
+	resource := domain.Resource{
 		Name: &sector.Name,
-		Type: TypeSector,
+		Type: domain.TypeSector,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
@@ -64,7 +56,7 @@ func (sess Session) CreateSector(sector *Sector, parentResourceID uuid.UUID) err
 		if ancestors, err := sess.GetAncestors(sector.ID); err != nil {
 			return nil
 		} else {
-			sector.Ancestors = &ancestors
+			sector.Ancestors = ancestors
 		}
 
 		return nil

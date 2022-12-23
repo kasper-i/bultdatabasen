@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
@@ -39,7 +40,7 @@ func GetRoute(w http.ResponseWriter, r *http.Request) {
 	if route, err := sess.GetRoute(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		route.WithAncestors(r)
+		route.Ancestors = model.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, route)
 	}
 }
@@ -54,7 +55,7 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var route model.Route
+	var route domain.Route
 	if err := json.Unmarshal(reqBody, &route); err != nil {
 		utils.WriteError(w, err)
 		return
@@ -95,7 +96,7 @@ func UpdateRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var route model.Route
+	var route domain.Route
 
 	if err := json.Unmarshal(reqBody, &route); err != nil {
 		utils.WriteError(w, err)

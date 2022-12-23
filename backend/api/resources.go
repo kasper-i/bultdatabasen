@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/middleware/authorizer"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
@@ -25,13 +26,13 @@ func GetResource(w http.ResponseWriter, r *http.Request) {
 	if resource, err := sess.GetResource(id); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		resource.WithAncestors(r)
+		resource.Ancestors = model.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, resource)
 	}
 }
 
 func ownsResource(r *http.Request, sess model.Session, resourceID uuid.UUID) bool {
-	var ancestors []model.Resource
+	var ancestors []domain.Resource
 	var userID string
 	var err error
 
@@ -71,7 +72,7 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 	case patch.ParentID != uuid.Nil:
 		newParentID := patch.ParentID
 
-		if newParentID.String() != model.RootID && !ownsResource(r, sess, newParentID) {
+		if newParentID.String() != domain.RootID && !ownsResource(r, sess, newParentID) {
 			utils.WriteResponse(w, http.StatusForbidden, nil)
 			return
 		}
@@ -127,7 +128,7 @@ func GetChildren(w http.ResponseWriter, r *http.Request) {
 func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var userID string
-	var ancestors []model.Resource
+	var ancestors []domain.Resource
 
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -135,7 +136,7 @@ func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role := model.ResourceRole{
+	role := domain.ResourceRole{
 		Role:       "guest",
 		ResourceID: id,
 	}
@@ -144,7 +145,7 @@ func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 		userID = value
 	}
 
-	if value, ok := r.Context().Value("ancestors").([]model.Resource); ok {
+	if value, ok := r.Context().Value("ancestors").([]domain.Resource); ok {
 		ancestors = value
 	}
 
