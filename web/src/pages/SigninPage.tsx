@@ -123,10 +123,11 @@ const SigninPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <div className="flex flex-col gap-2.5">
       <Input
         label="E-postadress"
         value={email}
+        placeholder="förnamn.efternamn@gmail.com"
         onChange={(e) => updateState({ email: e.target.value })}
         tabIndex={1}
         disabled={requireConfirmationCode}
