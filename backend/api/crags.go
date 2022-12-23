@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
@@ -39,7 +40,7 @@ func GetCrag(w http.ResponseWriter, r *http.Request) {
 	if crag, err := sess.GetCrag(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		crag.WithAncestors(r)
+		crag.Ancestors = model.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, crag)
 	}
 }
@@ -54,7 +55,7 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var crag model.Crag
+	var crag domain.Crag
 	if err := json.Unmarshal(reqBody, &crag); err != nil {
 		utils.WriteError(w, err)
 		return

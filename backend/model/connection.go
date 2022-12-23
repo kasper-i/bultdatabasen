@@ -1,21 +1,15 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	"bultdatabasen/domain"
 
-type Connection struct {
-	RouteID    uuid.UUID `gorm:"primaryKey"`
-	SrcPointID uuid.UUID `gorm:"primaryKey"`
-	DstPointID uuid.UUID `gorm:"primaryKey"`
-}
-
-func (Connection) TableName() string {
-	return "connection"
-}
+	"github.com/google/uuid"
+)
 
 func (sess Session) CreateConnection(routeID, srcPointID, dstPointID uuid.UUID) error {
-	return sess.DB.Create(Connection{RouteID: routeID, SrcPointID: srcPointID, DstPointID: dstPointID}).Error
+	return sess.DB.Create(domain.PointConnection{RouteID: routeID, SrcPointID: srcPointID, DstPointID: dstPointID}).Error
 }
 
 func (sess Session) DeleteConnection(routeID, srcPointID, dstPointID uuid.UUID) error {
-	return sess.DB.Delete(Connection{RouteID: routeID, SrcPointID: srcPointID, DstPointID: dstPointID}).Error
+	return sess.DB.Delete(domain.PointConnection{RouteID: routeID, SrcPointID: srcPointID, DstPointID: dstPointID}).Error
 }

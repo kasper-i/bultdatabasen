@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/spaces"
 	"bultdatabasen/utils"
 	"bytes"
@@ -53,28 +54,12 @@ func init() {
 	spacesBucket = cfg.Section("spaces").Key("bucket").String()
 }
 
-type Image struct {
-	ResourceBase
-	MimeType    string    `json:"mimeType"`
-	Timestamp   time.Time `json:"timestamp"`
-	Description string    `json:"description"`
-	Rotation    int       `json:"rotation"`
-	Size        int       `json:"size"`
-	Width       int       `json:"width"`
-	Height      int       `json:"height"`
-	UserID      string    `gorm:"->;column:buser_id" json:"userId"`
-}
-
 type ImagePatch struct {
 	Rotation *int `json:"rotation"`
 }
 
-func (Image) TableName() string {
-	return "image"
-}
-
-func (sess Session) GetImages(resourceID uuid.UUID) ([]Image, error) {
-	var images []Image = make([]Image, 0)
+func (sess Session) GetImages(resourceID uuid.UUID) ([]domain.Image, error) {
+	var images []domain.Image = make([]domain.Image, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s
 		SELECT * FROM tree
@@ -86,8 +71,8 @@ func (sess Session) GetImages(resourceID uuid.UUID) ([]Image, error) {
 	return images, nil
 }
 
-func (sess Session) getImageWithLock(imageID uuid.UUID) (*Image, error) {
-	var image Image
+func (sess Session) getImageWithLock(imageID uuid.UUID) (*domain.Image, error) {
+	var image domain.Image
 
 	if err := sess.DB.Raw(`SELECT * FROM image INNER JOIN resource ON image.id = resource.id WHERE image.id = ? FOR UPDATE`, imageID).
 		Scan(&image).Error; err != nil {
@@ -101,8 +86,8 @@ func (sess Session) getImageWithLock(imageID uuid.UUID) (*Image, error) {
 	return &image, nil
 }
 
-func (sess Session) GetImage(imageID uuid.UUID) (*Image, error) {
-	var image Image
+func (sess Session) GetImage(imageID uuid.UUID) (*domain.Image, error) {
+	var image domain.Image
 
 	if err := sess.DB.Raw(`SELECT * FROM image WHERE image.id = ?`, imageID).
 		Scan(&image).Error; err != nil {
@@ -143,14 +128,14 @@ func (sess Session) GetImageDownloadURL(imageID uuid.UUID, version string) (stri
 	return "", utils.ErrNotFound
 }
 
-func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (*Image, error) {
-	img := Image{
+func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (*domain.Image, error) {
+	img := domain.Image{
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
 		Size:      len(imageBytes)}
 
-	resource := Resource{
-		Type: TypeImage,
+	resource := domain.Resource{
+		Type: domain.TypeImage,
 	}
 
 	reader := bytes.NewReader(imageBytes)
@@ -214,7 +199,7 @@ func (sess Session) UploadImage(parentResourceID uuid.UUID, imageBytes []byte, m
 		if ancestors, err := sess.GetAncestors(img.ID); err != nil {
 			return nil
 		} else {
-			img.Ancestors = &ancestors
+			img.Ancestors = ancestors
 		}
 
 		return nil

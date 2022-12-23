@@ -1,6 +1,7 @@
 package trashbin
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"context"
@@ -34,7 +35,7 @@ func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if resourceID.String() == model.RootID {
+		if resourceID.String() == domain.RootID {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -48,7 +49,7 @@ func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 
 		var foundRoot bool = false
 		for _, ancestor := range ancestors {
-			if ancestor.ID.String() == model.RootID {
+			if ancestor.ID.String() == domain.RootID {
 				foundRoot = true
 				break
 			}

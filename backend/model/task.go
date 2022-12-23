@@ -1,45 +1,17 @@
 package model
 
 import (
+	"bultdatabasen/domain"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type Task struct {
-	ResourceBase
-	Status      string     `json:"status"`
-	Description string     `json:"description"`
-	Priority    int        `json:"priority"`
-	Assignee    *string    `gorm:"->" json:"assignee,omitempty"`
-	Comment     *string    `json:"comment,omitempty"`
-	BirthTime   time.Time  `gorm:"->;column:btime" json:"createdAt"`
-	UserID      string     `gorm:"->;column:buser_id" json:"userId"`
-	ClosedAt    *time.Time `json:"closedAt,omitempty"`
-}
-
-func (Task) TableName() string {
-	return "task"
-}
-
-func (task *Task) IsOpen() bool {
-	return task.Status == "open" || task.Status == "assigned"
-}
-
-func (task *Task) UpdateCounters() {
-	if task.IsOpen() {
-		task.Counters.OpenTasks = 1
-	} else {
-		task.Counters.OpenTasks = 0
-	}
-}
-
-func (sess Session) GetTasks(resourceID uuid.UUID, pagination Pagination, statuses []string) ([]Task, Meta, error) {
-	var tasks []Task = make([]Task, 0)
-	var meta Meta = Meta{}
+func (sess Session) GetTasks(resourceID uuid.UUID, pagination domain.Pagination, statuses []string) ([]domain.Task, domain.Meta, error) {
+	var tasks []domain.Task = make([]domain.Task, 0)
+	var meta domain.Meta = domain.Meta{}
 
 	params := make([]interface{}, 1)
 	params[0] = resourceID
@@ -58,7 +30,7 @@ func (sess Session) GetTasks(resourceID uuid.UUID, pagination Pagination, status
 
 	countQuery := fmt.Sprintf("%s SELECT COUNT(task.id) AS total_items FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s", withTreeQuery(), where)
 
-	dataQuery := fmt.Sprintf("%s SELECT * FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s ORDER BY priority ASC %s", withTreeQuery(), where, pagination.ToSQL())
+	dataQuery := fmt.Sprintf("%s SELECT * FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s ORDER BY priority ASC %s", withTreeQuery(), where, paginationToSql(&pagination))
 
 	if err := sess.DB.Raw(dataQuery, params...).Scan(&tasks).Error; err != nil {
 		return nil, meta, err
@@ -71,8 +43,8 @@ func (sess Session) GetTasks(resourceID uuid.UUID, pagination Pagination, status
 	return tasks, meta, nil
 }
 
-func (sess Session) GetTask(resourceID uuid.UUID) (*Task, error) {
-	var task Task
+func (sess Session) GetTask(resourceID uuid.UUID) (*domain.Task, error) {
+	var task domain.Task
 
 	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ?`, resourceID).
 		Scan(&task).Error; err != nil {
@@ -86,8 +58,8 @@ func (sess Session) GetTask(resourceID uuid.UUID) (*Task, error) {
 	return &task, nil
 }
 
-func (sess Session) getTaskWithLock(resourceID uuid.UUID) (*Task, error) {
-	var task Task
+func (sess Session) getTaskWithLock(resourceID uuid.UUID) (*domain.Task, error) {
+	var task domain.Task
 
 	if err := sess.DB.Raw(`SELECT * FROM task INNER JOIN resource ON task.id = resource.id WHERE task.id = ? FOR UPDATE`, resourceID).
 		Scan(&task).Error; err != nil {
@@ -101,7 +73,7 @@ func (sess Session) getTaskWithLock(resourceID uuid.UUID) (*Task, error) {
 	return &task, nil
 }
 
-func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
+func (sess Session) CreateTask(task *domain.Task, parentResourceID uuid.UUID) error {
 	if task.Assignee != nil {
 		task.Status = "assigned"
 	} else {
@@ -111,9 +83,9 @@ func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 	task.ClosedAt = nil
 	task.UpdateCounters()
 
-	resource := Resource{
+	resource := domain.Resource{
 		ResourceBase: task.ResourceBase,
-		Type:         TypeTask,
+		Type:         domain.TypeTask,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
@@ -136,7 +108,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 		if ancestors, err := sess.GetAncestors(task.ID); err != nil {
 			return nil
 		} else {
-			task.Ancestors = &ancestors
+			task.Ancestors = ancestors
 		}
 
 		return nil
@@ -149,7 +121,7 @@ func (sess Session) CreateTask(task *Task, parentResourceID uuid.UUID) error {
 	return nil
 }
 
-func (sess Session) UpdateTask(task *Task, taskID uuid.UUID) error {
+func (sess Session) UpdateTask(task *domain.Task, taskID uuid.UUID) error {
 	err := sess.Transaction(func(sess Session) error {
 		original, err := sess.getTaskWithLock(taskID)
 		if err != nil {

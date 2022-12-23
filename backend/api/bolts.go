@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
@@ -39,7 +40,7 @@ func GetBolt(w http.ResponseWriter, r *http.Request) {
 	if bolt, err := sess.GetBolt(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		bolt.WithAncestors(r)
+		bolt.Ancestors = model.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, bolt)
 	}
 }
@@ -54,7 +55,7 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var bolt model.Bolt
+	var bolt domain.Bolt
 	if err := json.Unmarshal(reqBody, &bolt); err != nil {
 		utils.WriteError(w, err)
 		return
@@ -95,7 +96,7 @@ func UpdateBolt(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var bolt model.Bolt
+	var bolt domain.Bolt
 
 	if err := json.Unmarshal(reqBody, &bolt); err != nil {
 		utils.WriteError(w, err)

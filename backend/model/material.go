@@ -1,18 +1,9 @@
 package model
 
-import "github.com/google/uuid"
+import "bultdatabasen/domain"
 
-type Material struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-}
-
-func (Material) TableName() string {
-	return "material"
-}
-
-func (sess Session) GetMaterials() ([]Material, error) {
-	var materials []Material = make([]Material, 0)
+func (sess Session) GetMaterials() ([]domain.Material, error) {
+	var materials []domain.Material = make([]domain.Material, 0)
 
 	query := "SELECT * FROM material ORDER BY name ASC"
 

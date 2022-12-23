@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/utils"
 	"time"
 
@@ -28,8 +29,8 @@ func withTreeQuery() string {
 	return `WITH tree AS (SELECT * FROM tree WHERE path <@ (SELECT path FROM tree WHERE resource_id = ? LIMIT 1))`
 }
 
-func (sess Session) getResourceWithLock(resourceID uuid.UUID) (*Resource, error) {
-	var resource Resource
+func (sess Session) getResourceWithLock(resourceID uuid.UUID) (*domain.Resource, error) {
+	var resource domain.Resource
 
 	if err := sess.DB.Raw(`SELECT * FROM resource WHERE id = ? FOR UPDATE`, resourceID).Scan(&resource).Error; err != nil {
 		return nil, err
@@ -42,7 +43,7 @@ func (sess Session) getResourceWithLock(resourceID uuid.UUID) (*Resource, error)
 	return &resource, nil
 }
 
-func (sess Session) CreateResource(resource *Resource, parentResourceID uuid.UUID) error {
+func (sess Session) CreateResource(resource *domain.Resource, parentResourceID uuid.UUID) error {
 	resource.ID = uuid.New()
 
 	resource.BirthTime = time.Now()
@@ -52,9 +53,9 @@ func (sess Session) CreateResource(resource *Resource, parentResourceID uuid.UUI
 	resource.LastUpdatedByID = *sess.UserID
 
 	switch resource.Type {
-	case TypeRoot:
+	case domain.TypeRoot:
 		return utils.ErrNotPermitted
-	case TypeArea, TypeCrag, TypeSector, TypeRoute, TypePoint:
+	case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 		resource.LeafOf = nil
 	default:
 		resource.LeafOf = &parentResourceID
@@ -70,7 +71,7 @@ func (sess Session) CreateResource(resource *Resource, parentResourceID uuid.UUI
 		}
 
 		switch resource.Type {
-		case TypeArea, TypeCrag, TypeSector, TypeRoute, TypePoint:
+		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 			subtree, err := sess.GetPath(parentResourceID)
 			if err != nil {
 				return err
@@ -97,7 +98,7 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 		return err
 	}
 
-	trash := Trash{
+	trash := domain.Trash{
 		ResourceID:  resourceID,
 		DeletedTime: time.Now(),
 		DeletedByID: *sess.UserID,
@@ -115,9 +116,9 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 		}
 
 		switch resource.Type {
-		case TypeRoot:
+		case domain.TypeRoot:
 			return utils.ErrNotPermitted
-		case TypeArea, TypeCrag, TypeSector, TypeRoute, TypePoint:
+		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 			subtree, err := sess.GetPath(resourceID)
 			if err != nil {
 				return err
@@ -139,7 +140,7 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 			}
 		}
 
-		countersDifference := Counters{}.Substract(resource.Counters)
+		countersDifference := domain.Counters{}.Substract(resource.Counters)
 
 		for _, ancestor := range ancestors {
 			if err := sess.updateCountersForResource(ancestor.ID, countersDifference); err != nil {
@@ -157,8 +158,8 @@ func (sess Session) DeleteResource(resourceID uuid.UUID) error {
 	return nil
 }
 
-func (sess Session) checkParentAllowed(resource Resource, parentID uuid.UUID) bool {
-	var parentResource Resource
+func (sess Session) checkParentAllowed(resource domain.Resource, parentID uuid.UUID) bool {
+	var parentResource domain.Resource
 
 	if err := sess.DB.First(&parentResource, "id = ?", parentID).Error; err != nil {
 		return false
@@ -167,24 +168,24 @@ func (sess Session) checkParentAllowed(resource Resource, parentID uuid.UUID) bo
 	pt := parentResource.Type
 
 	switch resource.Type {
-	case TypeArea:
-		return pt == TypeRoot || pt == TypeArea
-	case TypeCrag:
-		return pt == TypeArea
-	case TypeSector:
-		return pt == TypeCrag
-	case TypeRoute:
-		return pt == TypeArea || pt == TypeCrag || pt == TypeSector
-	case TypePoint:
-		return pt == TypeRoute
-	case TypeBolt:
-		return pt == TypePoint
-	case TypeImage:
-		return pt == TypePoint
-	case TypeComment:
-		return pt == TypePoint
-	case TypeTask:
-		return pt == TypeRoute || pt == TypePoint
+	case domain.TypeArea:
+		return pt == domain.TypeRoot || pt == domain.TypeArea
+	case domain.TypeCrag:
+		return pt == domain.TypeArea
+	case domain.TypeSector:
+		return pt == domain.TypeCrag
+	case domain.TypeRoute:
+		return pt == domain.TypeArea || pt == domain.TypeCrag || pt == domain.TypeSector
+	case domain.TypePoint:
+		return pt == domain.TypeRoute
+	case domain.TypeBolt:
+		return pt == domain.TypePoint
+	case domain.TypeImage:
+		return pt == domain.TypePoint
+	case domain.TypeComment:
+		return pt == domain.TypePoint
+	case domain.TypeTask:
+		return pt == domain.TypeRoute || pt == domain.TypePoint
 	default:
 		return false
 	}

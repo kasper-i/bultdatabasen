@@ -1,43 +1,15 @@
 package model
 
 import (
+	"bultdatabasen/domain"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type Bolt struct {
-	ResourceBase
-	Type           *string    `json:"type,omitempty"`
-	Position       *string    `json:"position,omitempty"`
-	Installed      *time.Time `json:"installed,omitempty"`
-	Dismantled     *time.Time `json:"dismantled,omitempty"`
-	ManufacturerID *string    `json:"manufacturerId,omitempty"`
-	Manufacturer   *string    `gorm:"->" json:"manufacturer,omitempty"`
-	ModelID        *string    `json:"modelId,omitempty"`
-	Model          *string    `gorm:"->" json:"model,omitempty"`
-	MaterialID     *string    `json:"materialId,omitempty"`
-	Material       *string    `gorm:"->" json:"material,omitempty"`
-	Diameter       *float32   `json:"diameter,omitempty"`
-	DiameterUnit   *string    `json:"diameterUnit,omitempty"`
-}
-
-func (Bolt) TableName() string {
-	return "bolt"
-}
-
-func (bolt *Bolt) UpdateCounters() {
-	if bolt.Dismantled == nil {
-		bolt.Counters.InstalledBolts = 1
-	} else {
-		bolt.Counters.InstalledBolts = 0
-	}
-}
-
-func (sess Session) GetBolts(resourceID uuid.UUID) ([]Bolt, error) {
-	var bolts []Bolt = make([]Bolt, 0)
+func (sess Session) GetBolts(resourceID uuid.UUID) ([]domain.Bolt, error) {
+	var bolts []domain.Bolt = make([]domain.Bolt, 0)
 
 	query := fmt.Sprintf(`%s SELECT
 		bolt.*,
@@ -59,8 +31,8 @@ func (sess Session) GetBolts(resourceID uuid.UUID) ([]Bolt, error) {
 	return bolts, nil
 }
 
-func (sess Session) GetBolt(resourceID uuid.UUID) (*Bolt, error) {
-	var bolt Bolt
+func (sess Session) GetBolt(resourceID uuid.UUID) (*domain.Bolt, error) {
+	var bolt domain.Bolt
 
 	if err := sess.DB.Raw(`SELECT
 			bolt.*,
@@ -85,8 +57,8 @@ func (sess Session) GetBolt(resourceID uuid.UUID) (*Bolt, error) {
 	return &bolt, nil
 }
 
-func (sess Session) getBoltWithLock(resourceID uuid.UUID) (*Bolt, error) {
-	var bolt Bolt
+func (sess Session) getBoltWithLock(resourceID uuid.UUID) (*domain.Bolt, error) {
+	var bolt domain.Bolt
 
 	if err := sess.DB.Raw(`SELECT * FROM bolt
 		INNER JOIN resource ON bolt.id = resource.id
@@ -103,12 +75,12 @@ func (sess Session) getBoltWithLock(resourceID uuid.UUID) (*Bolt, error) {
 	return &bolt, nil
 }
 
-func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
+func (sess Session) CreateBolt(bolt *domain.Bolt, parentResourceID uuid.UUID) error {
 	bolt.UpdateCounters()
 
-	resource := Resource{
+	resource := domain.Resource{
 		ResourceBase: bolt.ResourceBase,
-		Type:         TypeBolt,
+		Type:         domain.TypeBolt,
 	}
 
 	err := sess.Transaction(func(sess Session) error {
@@ -135,7 +107,7 @@ func (sess Session) CreateBolt(bolt *Bolt, parentResourceID uuid.UUID) error {
 		if ancestors, err := sess.GetAncestors(bolt.ID); err != nil {
 			return nil
 		} else {
-			bolt.Ancestors = &ancestors
+			bolt.Ancestors = ancestors
 		}
 
 		return nil
@@ -148,8 +120,8 @@ func (sess Session) DeleteBolt(resourceID uuid.UUID) error {
 	return sess.DeleteResource(resourceID)
 }
 
-func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt Bolt) (*Bolt, error) {
-	var refreshedBolt *Bolt
+func (sess Session) UpdateBolt(boltID uuid.UUID, updatedBolt domain.Bolt) (*domain.Bolt, error) {
+	var refreshedBolt *domain.Bolt
 
 	err := sess.Transaction(func(sess Session) error {
 		original, err := sess.getBoltWithLock(boltID)

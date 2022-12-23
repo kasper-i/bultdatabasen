@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
@@ -19,7 +20,7 @@ func GetAreas(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if vars["resourceID"] == "" {
-		resourceID, _ = uuid.Parse(model.RootID)
+		resourceID, _ = uuid.Parse(domain.RootID)
 	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
 		utils.WriteError(w, err)
 		return
@@ -44,7 +45,7 @@ func GetArea(w http.ResponseWriter, r *http.Request) {
 	if area, err := sess.GetArea(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		area.WithAncestors(r)
+		area.Ancestors = model.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, area)
 	}
 }
@@ -56,7 +57,7 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if vars["resourceID"] == "" {
-		resourceID, _ = uuid.Parse(model.RootID)
+		resourceID, _ = uuid.Parse(domain.RootID)
 	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
 		utils.WriteError(w, err)
 		return
@@ -65,7 +66,7 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value("user_id").(string)
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var area model.Area
+	var area domain.Area
 	if err := json.Unmarshal(reqBody, &area); err != nil {
 		utils.WriteError(w, err)
 		return

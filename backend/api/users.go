@@ -1,7 +1,7 @@
 package api
 
 import (
-	"bultdatabasen/model"
+	"bultdatabasen/domain"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"errors"
@@ -29,7 +29,7 @@ func GetMyself(w http.ResponseWriter, r *http.Request) {
 
 	if user, err := sess.GetUser(userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			user = &model.User{
+			user = &domain.User{
 				ID:        userID,
 				FirstSeen: time.Now(),
 			}
@@ -55,7 +55,7 @@ func UpdateMyself(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id").(string)
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var desiredUser model.User
+	var desiredUser domain.User
 	if err := json.Unmarshal(reqBody, &desiredUser); err != nil {
 		utils.WriteError(w, err)
 		return
@@ -63,7 +63,7 @@ func UpdateMyself(w http.ResponseWriter, r *http.Request) {
 
 	if user, err := sess.GetUser(userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			user = &model.User{
+			user = &domain.User{
 				ID:        userID,
 				FirstName: desiredUser.FirstName,
 				LastName:  desiredUser.LastName,

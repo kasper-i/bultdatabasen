@@ -1,9 +1,9 @@
 package model
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/utils"
 	"database/sql"
-	"database/sql/driver"
 	"fmt"
 	"net/http"
 	"strings"
@@ -13,121 +13,20 @@ import (
 	"gorm.io/gorm"
 )
 
-const RootID = "7ea1df97-df3a-436b-b1d2-b211f1b9b363"
-
-type ResourceType string
-
-const (
-	TypeRoot    ResourceType = "root"
-	TypeArea    ResourceType = "area"
-	TypeCrag    ResourceType = "crag"
-	TypeSector  ResourceType = "sector"
-	TypeRoute   ResourceType = "route"
-	TypePoint   ResourceType = "point"
-	TypeBolt    ResourceType = "bolt"
-	TypeImage   ResourceType = "image"
-	TypeComment ResourceType = "comment"
-	TypeTask    ResourceType = "task"
-)
-
-type ResourceBase struct {
-	ID        uuid.UUID   `gorm:"primaryKey" json:"id"`
-	Ancestors *[]Resource `gorm:"-" json:"ancestors,omitempty"`
-	Counters  Counters    `gorm:"->" json:"counters"`
-}
-
-type Resource struct {
-	ResourceBase
-	Name            *string      `json:"name,omitempty"`
-	Type            ResourceType `json:"type"`
-	LeafOf          *uuid.UUID   `json:"leafOf,omitempty"`
-	BirthTime       time.Time    `gorm:"column:btime" json:"-"`
-	ModifiedTime    time.Time    `gorm:"column:mtime" json:"-"`
-	CreatorID       string       `gorm:"column:buser_id" json:"-"`
-	LastUpdatedByID string       `gorm:"column:muser_id" json:"-"`
-}
-
 type ResourcePatch struct {
 	ParentID uuid.UUID `json:"parentId"`
 }
 
-type Trash struct {
-	ResourceID  uuid.UUID `gorm:"primaryKey"`
-	DeletedTime time.Time `gorm:"column:dtime"`
-	DeletedByID string    `gorm:"column:duser_id"`
-	OrigPath    *Path
-	OrigLeafOf  *uuid.UUID
-}
-
-type Parent struct {
-	ID      uuid.UUID    `json:"id"`
-	Name    *string      `json:"name"`
-	Type    ResourceType `json:"type"`
-	ChildID uuid.UUID    `json:"-"`
-}
-
-type ResourceWithParents struct {
-	Resource
-	Parents []Parent `json:"parents"`
-}
-
-type Path []uuid.UUID
-
-func (path Path) Value() (driver.Value, error) {
-	parts := make([]string, len(path))
-
-	for idx, resourceID := range path {
-		parts[idx] = strings.ReplaceAll(resourceID.String(), "-", "_")
+func GetStoredAncestors(r *http.Request) []domain.Resource {
+	if value, ok := r.Context().Value("ancestors").([]domain.Resource); ok {
+		return value
 	}
 
-	return strings.Join(parts, "."), nil
-}
-
-func (out *Path) Scan(value interface{}) error {
-	s := strings.Split(value.(string), ".")
-	path := make([]uuid.UUID, len(s))
-
-	for idx, lvl := range s {
-		if val, err := uuid.Parse(strings.ReplaceAll(lvl, "_", "-")); err != nil {
-			return err
-		} else {
-			path[idx] = val
-		}
-	}
-
-	*out = path
 	return nil
 }
 
-func (self Path) Parent() uuid.UUID {
-	return self[len(self)-2]
-}
-
-func (self Path) Root() uuid.UUID {
-	return self[0]
-}
-
-func (self Path) Add(id uuid.UUID) Path {
-	return append(self, id)
-}
-
-func (Resource) TableName() string {
-	return "resource"
-}
-
-func (Trash) TableName() string {
-	return "trash"
-}
-
-func (resource *ResourceBase) WithAncestors(r *http.Request) {
-
-	if value, ok := r.Context().Value("ancestors").([]Resource); ok {
-		resource.Ancestors = &value
-	}
-}
-
-func (sess Session) GetResource(resourceID uuid.UUID) (*Resource, error) {
-	var resource Resource
+func (sess Session) GetResource(resourceID uuid.UUID) (*domain.Resource, error) {
+	var resource domain.Resource
 
 	if err := sess.DB.First(&resource, "id = ?", resourceID).Error; err != nil {
 		return nil, err
@@ -141,8 +40,8 @@ func (sess Session) GetResource(resourceID uuid.UUID) (*Resource, error) {
 }
 
 func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
-	var resource *Resource
-	var subtree Path
+	var resource *domain.Resource
+	var subtree domain.Path
 	var err error
 	var oldParentID uuid.UUID
 
@@ -156,7 +55,7 @@ func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 		}
 
 		switch resource.Type {
-		case TypeArea, TypeCrag, TypeSector, TypeRoute:
+		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute:
 			break
 		default:
 			return utils.ErrMoveNotPermitted
@@ -176,7 +75,7 @@ func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 			return utils.ErrHierarchyStructureViolation
 		}
 
-		if err := sess.updateCountersForResourceAndAncestors(oldParentID, Counters{}.Substract(resource.Counters)); err != nil {
+		if err := sess.updateCountersForResourceAndAncestors(oldParentID, domain.Counters{}.Substract(resource.Counters)); err != nil {
 			return err
 		}
 
@@ -188,7 +87,7 @@ func (sess Session) MoveResource(resourceID, newParentID uuid.UUID) error {
 		if err := sess.DB.Raw(`SELECT path, type
 			FROM tree
 			INNER JOIN resource ON tree.resource_id = resource.id
-			WHERE resource_id = ? AND path <@ ?`, newParentID, strings.ReplaceAll(RootID, "-", "_")).Scan(&newParent).Error; err != nil {
+			WHERE resource_id = ? AND path <@ ?`, newParentID, strings.ReplaceAll(domain.RootID, "-", "_")).Scan(&newParent).Error; err != nil {
 			return err
 		}
 
@@ -226,9 +125,9 @@ func (sess Session) getSubtreeLock(resourceID uuid.UUID) error {
 	return nil
 }
 
-func (sess Session) GetPath(resourceID uuid.UUID) (Path, error) {
+func (sess Session) GetPath(resourceID uuid.UUID) (domain.Path, error) {
 	var out struct {
-		Path Path `gorm:"column:path"`
+		Path domain.Path `gorm:"column:path"`
 	}
 
 	if err := sess.DB.Raw(`SELECT path::text AS path
@@ -240,8 +139,8 @@ func (sess Session) GetPath(resourceID uuid.UUID) (Path, error) {
 	return out.Path, nil
 }
 
-func (sess Session) GetAncestors(resourceID uuid.UUID) ([]Resource, error) {
-	var ancestors []Resource
+func (sess Session) GetAncestors(resourceID uuid.UUID) ([]domain.Resource, error) {
+	var ancestors []domain.Resource
 
 	err := sess.DB.Raw(`WITH path_list AS (
 		SELECT COALESCE(t1.path, t2.path) AS path FROM resource
@@ -264,8 +163,8 @@ func (sess Session) GetAncestors(resourceID uuid.UUID) ([]Resource, error) {
 	return ancestors, nil
 }
 
-func (sess Session) GetChildren(resourceID uuid.UUID) ([]Resource, error) {
-	var children []Resource = make([]Resource, 0)
+func (sess Session) GetChildren(resourceID uuid.UUID) ([]domain.Resource, error) {
+	var children []domain.Resource = make([]domain.Resource, 0)
 
 	err := sess.DB.Raw(`SELECT resource.* 
 	FROM tree
@@ -280,23 +179,23 @@ func (sess Session) GetChildren(resourceID uuid.UUID) ([]Resource, error) {
 	return children, nil
 }
 
-func (sess Session) Search(name string) ([]ResourceWithParents, error) {
+func (sess Session) Search(name string) ([]domain.ResourceWithParents, error) {
 	type searchResult struct {
 		ID   uuid.UUID
 		Name string
-		Type ResourceType
+		Type domain.ResourceType
 
-		ParentID   *uuid.UUID   `gorm:"column:r2_id"`
-		ParentName string       `gorm:"column:r2_name"`
-		ParentType ResourceType `gorm:"column:r2_type"`
+		ParentID   *uuid.UUID          `gorm:"column:r2_id"`
+		ParentName string              `gorm:"column:r2_name"`
+		ParentType domain.ResourceType `gorm:"column:r2_type"`
 
-		GrandParentID   *uuid.UUID   `gorm:"column:r3_id"`
-		GrandParentName string       `gorm:"column:r3_name"`
-		GrandParentType ResourceType `gorm:"column:r3_type"`
+		GrandParentID   *uuid.UUID          `gorm:"column:r3_id"`
+		GrandParentName string              `gorm:"column:r3_name"`
+		GrandParentType domain.ResourceType `gorm:"column:r3_type"`
 	}
 
 	var results []searchResult
-	var resources []ResourceWithParents = make([]ResourceWithParents, 0)
+	var resources []domain.ResourceWithParents = make([]domain.ResourceWithParents, 0)
 
 	err := sess.DB.Raw(`SELECT
 		r1.*,
@@ -309,14 +208,14 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	WHERE r1.type IN ('area', 'crag', 'sector', 'route') AND r1.name ILIKE ? AND subpath(tree.path, 0, 1) = ?
 	LIMIT 20`,
 		fmt.Sprintf("%%%s%%", name),
-		strings.ReplaceAll(RootID, "-", "_")).Scan(&results).Error
+		strings.ReplaceAll(domain.RootID, "-", "_")).Scan(&results).Error
 
 	for _, result := range results {
-		parents := make([]Parent, 0)
+		parents := make([]domain.Parent, 0)
 
 		if result.ParentID != nil {
 			parentName := strings.Clone(result.ParentName)
-			parents = append(parents, Parent{
+			parents = append(parents, domain.Parent{
 				ID:   *result.ParentID,
 				Name: &parentName,
 				Type: result.ParentType,
@@ -325,7 +224,7 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 
 		if result.GrandParentID != nil {
 			grandParentName := strings.Clone(result.GrandParentName)
-			parents = append(parents, Parent{
+			parents = append(parents, domain.Parent{
 				ID:   *result.GrandParentID,
 				Name: &grandParentName,
 				Type: result.GrandParentType,
@@ -333,9 +232,9 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 		}
 
 		name := strings.Clone(result.Name)
-		resources = append(resources, ResourceWithParents{
-			Resource: Resource{
-				ResourceBase: ResourceBase{
+		resources = append(resources, domain.ResourceWithParents{
+			Resource: domain.Resource{
+				ResourceBase: domain.ResourceBase{
 					ID: result.ID,
 				},
 				Name: &name,
@@ -352,13 +251,13 @@ func (sess Session) Search(name string) ([]ResourceWithParents, error) {
 	return resources, nil
 }
 
-func (sess Session) updateCountersForResourceAndAncestors(resourceID uuid.UUID, delta Counters) error {
+func (sess Session) updateCountersForResourceAndAncestors(resourceID uuid.UUID, delta domain.Counters) error {
 	ancestors, err := sess.GetAncestors(resourceID)
 	if err != nil {
 		return err
 	}
 
-	resourceIDs := append(utils.Map(ancestors, func(ancestor Resource) uuid.UUID { return ancestor.ID }), resourceID)
+	resourceIDs := append(utils.Map(ancestors, func(ancestor domain.Resource) uuid.UUID { return ancestor.ID }), resourceID)
 
 	for _, resourceID := range resourceIDs {
 		if err := sess.updateCountersForResource(resourceID, delta); err != nil {
@@ -369,7 +268,7 @@ func (sess Session) updateCountersForResourceAndAncestors(resourceID uuid.UUID, 
 	return nil
 }
 
-func (sess Session) updateCountersForResource(resourceID uuid.UUID, delta Counters) error {
+func (sess Session) updateCountersForResource(resourceID uuid.UUID, delta domain.Counters) error {
 	difference := delta.AsMap()
 
 	if len(difference) == 0 {

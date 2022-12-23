@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/utils"
 	"database/sql"
 	"fmt"
@@ -8,13 +9,6 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
-
-type Point struct {
-	ResourceBase
-	Parents []Parent `gorm:"-" json:"parents"`
-	Number  int      `gorm:"-" json:"number"`
-	Anchor  bool     `json:"anchor"`
-}
 
 type InsertPosition struct {
 	PointID uuid.UUID `json:"pointId"`
@@ -27,12 +21,8 @@ type routeGraphVertex struct {
 	IncomingPointID uuid.UUID
 }
 
-func (Point) TableName() string {
-	return "point"
-}
-
-func (sess Session) getParents(pointIDs []uuid.UUID) ([]Parent, error) {
-	var parents []Parent = make([]Parent, 0)
+func (sess Session) getParents(pointIDs []uuid.UUID) ([]domain.Parent, error) {
+	var parents []domain.Parent = make([]domain.Parent, 0)
 
 	err := sess.DB.Raw(`SELECT id, name, type, tree.resource_id as child_id
 		FROM tree
@@ -43,7 +33,7 @@ func (sess Session) getParents(pointIDs []uuid.UUID) ([]Parent, error) {
 }
 
 func (sess Session) getRouteGraph(routeID uuid.UUID) (map[uuid.UUID]*routeGraphVertex, error) {
-	var connections []Connection = make([]Connection, 0)
+	var connections []domain.PointConnection = make([]domain.PointConnection, 0)
 	var graph map[uuid.UUID]*routeGraphVertex = make(map[uuid.UUID]*routeGraphVertex)
 
 	err := sess.DB.Raw(`
@@ -52,7 +42,7 @@ func (sess Session) getRouteGraph(routeID uuid.UUID) (map[uuid.UUID]*routeGraphV
 		WHERE route_id = ?`, routeID).Scan(&connections).Error
 
 	if len(connections) == 0 {
-		var points []*Point = make([]*Point, 0)
+		var points []*domain.Point = make([]*domain.Point, 0)
 
 		if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 			INNER JOIN point ON tree.resource_id = point.id`,
@@ -99,9 +89,9 @@ func (sess Session) getRouteGraph(routeID uuid.UUID) (map[uuid.UUID]*routeGraphV
 	return graph, err
 }
 
-func (sess Session) sortPoints(routeID uuid.UUID, pointsMap map[uuid.UUID]*Point) ([]*Point, error) {
+func (sess Session) sortPoints(routeID uuid.UUID, pointsMap map[uuid.UUID]*domain.Point) ([]*domain.Point, error) {
 	var routeGraph map[uuid.UUID]*routeGraphVertex
-	var orderedPoints []*Point = make([]*Point, 0)
+	var orderedPoints []*domain.Point = make([]*domain.Point, 0)
 	var err error
 	var startPointID uuid.UUID
 
@@ -148,8 +138,8 @@ func (sess Session) sortPoints(routeID uuid.UUID, pointsMap map[uuid.UUID]*Point
 	return orderedPoints, nil
 }
 
-func (sess Session) getPointWithLock(pointID uuid.UUID) (*Point, error) {
-	var point Point
+func (sess Session) getPointWithLock(pointID uuid.UUID) (*domain.Point, error) {
+	var point domain.Point
 
 	if err := sess.DB.Raw(`SELECT * FROM point INNER JOIN resource ON point.id = resource.id WHERE point.id = ? FOR UPDATE`, pointID).
 		Scan(&point).Error; err != nil {
@@ -163,9 +153,9 @@ func (sess Session) getPointWithLock(pointID uuid.UUID) (*Point, error) {
 	return &point, nil
 }
 
-func (sess Session) GetPoints(resourceID uuid.UUID) ([]*Point, error) {
-	var pointsMap map[uuid.UUID]*Point = make(map[uuid.UUID]*Point)
-	var points []*Point = make([]*Point, 0)
+func (sess Session) GetPoints(resourceID uuid.UUID) ([]*domain.Point, error) {
+	var pointsMap map[uuid.UUID]*domain.Point = make(map[uuid.UUID]*domain.Point)
+	var points []*domain.Point = make([]*domain.Point, 0)
 
 	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN point ON tree.resource_id = point.id
@@ -175,7 +165,7 @@ func (sess Session) GetPoints(resourceID uuid.UUID) ([]*Point, error) {
 	}
 
 	for _, point := range points {
-		point.Parents = make([]Parent, 0)
+		point.Parents = make([]domain.Parent, 0)
 		point.Number = 1
 		pointsMap[point.ID] = point
 	}
@@ -202,10 +192,10 @@ func (sess Session) GetPoints(resourceID uuid.UUID) ([]*Point, error) {
 	return sess.sortPoints(resourceID, pointsMap)
 }
 
-func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []Bolt) (*Point, error) {
+func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []domain.Bolt) (*domain.Point, error) {
 	var err error
-	var point *Point = &Point{}
-	var pointResource *Resource
+	var point *domain.Point = &domain.Point{}
+	var pointResource *domain.Resource
 	var routeGraph map[uuid.UUID]*routeGraphVertex
 
 	if _, err := sess.getRouteWithLock(routeID); err != nil {
@@ -242,7 +232,7 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 			return nil, err
 		}
 
-		if pointResource.Type != TypePoint {
+		if pointResource.Type != domain.TypePoint {
 			return nil, utils.ErrHierarchyStructureViolation
 		}
 	}
@@ -268,9 +258,9 @@ func (sess Session) AttachPoint(routeID uuid.UUID, pointID uuid.UUID, position *
 		} else {
 			point.Anchor = anchor
 
-			resource := Resource{
+			resource := domain.Resource{
 				ResourceBase: point.ResourceBase,
-				Type:         TypePoint,
+				Type:         domain.TypePoint,
 			}
 
 			if err := sess.CreateResource(&resource, routeID); err != nil {
@@ -352,13 +342,13 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 	return sess.Transaction(func(sess Session) error {
 		var err error
 		var routeGraph map[uuid.UUID]*routeGraphVertex
-		var parents []Parent
+		var parents []domain.Parent
 
 		if _, err := sess.getRouteWithLock(routeID); err != nil {
 			return err
 		}
 
-		var point *Point
+		var point *domain.Point
 		if point, err = sess.getPointWithLock(pointID); err != nil {
 			return err
 		}
@@ -418,7 +408,7 @@ func (sess Session) DetachPoint(routeID uuid.UUID, pointID uuid.UUID) error {
 				return err
 			}
 
-			countersDifference := Counters{}.Substract(point.Counters)
+			countersDifference := domain.Counters{}.Substract(point.Counters)
 			if err := sess.updateCountersForResource(routeID, countersDifference); err != nil {
 				return err
 			}

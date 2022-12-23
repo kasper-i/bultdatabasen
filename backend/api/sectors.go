@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/model"
 	"bultdatabasen/utils"
 	"encoding/json"
@@ -39,7 +40,7 @@ func GetSector(w http.ResponseWriter, r *http.Request) {
 	if sector, err := sess.GetSector(resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		sector.WithAncestors(r)
+		sector.Ancestors = model.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, sector)
 	}
 }
@@ -54,7 +55,7 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var sector model.Sector
+	var sector domain.Sector
 	if err := json.Unmarshal(reqBody, &sector); err != nil {
 		utils.WriteError(w, err)
 		return
