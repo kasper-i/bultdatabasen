@@ -238,15 +238,13 @@ func (sess Session) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
 	return sess.DeleteResource(ctx, imageID)
 }
 
-func (sess Session) PatchImage(ctx context.Context, imageID uuid.UUID, patch ImagePatch) error {
+func (sess Session) RotateImage(ctx context.Context, imageID uuid.UUID, rotation int) error {
 	original, err := sess.getImageWithLock(imageID)
 	if err != nil {
 		return err
 	}
 
-	if patch.Rotation != nil {
-		original.Rotation = *patch.Rotation
-	}
+	original.Rotation = rotation
 
 	return sess.Transaction(func(sess Session) error {
 		if err := sess.TouchResource(ctx, imageID); err != nil {

@@ -11,11 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type InsertPosition struct {
-	PointID uuid.UUID `json:"pointId"`
-	Order   string    `json:"order"`
-}
-
 type routeGraphVertex struct {
 	PointID         uuid.UUID `gorm:"primaryKey"`
 	OutgoingPointID uuid.UUID
@@ -193,7 +188,7 @@ func (sess Session) GetPoints(ctx context.Context, resourceID uuid.UUID) ([]*dom
 	return sess.sortPoints(resourceID, pointsMap)
 }
 
-func (sess Session) AttachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []domain.Bolt) (*domain.Point, error) {
+func (sess Session) AttachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID, position *domain.InsertPosition, anchor bool, bolts []domain.Bolt) (*domain.Point, error) {
 	var err error
 	var point *domain.Point = &domain.Point{}
 	var pointResource *domain.Resource

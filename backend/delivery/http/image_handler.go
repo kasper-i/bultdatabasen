@@ -148,9 +148,9 @@ func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 			utils.WriteResponse(w, http.StatusBadRequest, nil)
 			return
 		}
-	}
 
-	err = sess.PatchImage(r.Context(), imageID, patch)
+		err = sess.RotateImage(r.Context(), imageID, *patch.Rotation)
+	}
 
 	if err != nil {
 		utils.WriteError(w, err)

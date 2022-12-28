@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type Point struct {
 	ResourceBase
@@ -21,4 +25,15 @@ type PointConnection struct {
 
 func (PointConnection) TableName() string {
 	return "connection"
+}
+
+type InsertPosition struct {
+	PointID uuid.UUID `json:"pointId"`
+	Order   string    `json:"order"`
+}
+
+type PointUsecase interface {
+	GetPoints(ctx context.Context, resourceID uuid.UUID) ([]*Point, error)
+	AttachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []Bolt) (*Point, error)
+	DetachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID) error
 }

@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -66,4 +67,12 @@ func (Trash) TableName() string {
 type ResourceWithParents struct {
 	Resource
 	Parents []Parent `json:"parents"`
+}
+
+type ResourceUsecase interface {
+	GetResource(ctx context.Context, resourceID uuid.UUID) (*Resource, error)
+	MoveResource(ctx context.Context, resourceID, newParentID uuid.UUID) error
+	GetAncestors(ctx context.Context, resourceID uuid.UUID) ([]Resource, error)
+	GetChildren(ctx context.Context, resourceID uuid.UUID) ([]Resource, error)
+	Search(ctx context.Context, name string) ([]ResourceWithParents, error)
 }

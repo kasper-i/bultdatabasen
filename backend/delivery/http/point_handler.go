@@ -24,10 +24,10 @@ func NewPointHandler(router *mux.Router) {
 }
 
 type CreatePointRequest struct {
-	PointID  uuid.UUID             `json:"pointId"`
-	Position *usecases.InsertPosition `json:"position"`
-	Anchor   bool                  `json:"anchor"`
-	Bolts    []domain.Bolt         `json:"bolts"`
+	PointID  uuid.UUID              `json:"pointId"`
+	Position *domain.InsertPosition `json:"position"`
+	Anchor   bool                   `json:"anchor"`
+	Bolts    []domain.Bolt          `json:"bolts"`
 }
 
 func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {

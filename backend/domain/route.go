@@ -1,5 +1,11 @@
 package domain
 
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
+
 type Route struct {
 	ResourceBase
 	Name      string  `json:"name"`
@@ -15,4 +21,12 @@ func (Route) TableName() string {
 
 func (route *Route) UpdateCounters() {
 	route.Counters.Routes = 1
+}
+
+type RouteUsecase interface {
+	GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]Route, error)
+	GetRoute(ctx context.Context, resourceID uuid.UUID) (*Route, error)
+	CreateRoute(ctx context.Context, route *Route, parentResourceID uuid.UUID) error
+	DeleteRoute(ctx context.Context, resourceID uuid.UUID) error
+	UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedRoute Route) (*Route, error)
 }

@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Bolt struct {
 	ResourceBase
@@ -28,4 +33,12 @@ func (bolt *Bolt) UpdateCounters() {
 	} else {
 		bolt.Counters.InstalledBolts = 0
 	}
+}
+
+type BoltUsecase interface {
+	GetBolts(ctx context.Context, resourceID uuid.UUID) ([]Bolt, error)
+	GetBolt(ctx context.Context, resourceID uuid.UUID) (*Bolt, error)
+	CreateBolt(ctx context.Context, bolt *Bolt, parentResourceID uuid.UUID) error
+	DeleteBolt(ctx context.Context, resourceID uuid.UUID) error
+	UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBolt Bolt) (*Bolt, error)
 }
