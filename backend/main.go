@@ -6,6 +6,7 @@ import (
 	"bultdatabasen/middleware/authorizer"
 	"bultdatabasen/middleware/cors"
 	"bultdatabasen/middleware/trashbin"
+	"bultdatabasen/usecases"
 	"fmt"
 	"io"
 	"log"
@@ -38,6 +39,9 @@ func main() {
 	authenticator := authenticator.New()
 	authorizer := authorizer.New()
 
+	session := usecases.NewSession(usecases.DB, nil)
+	materialUsecase := usecases.NewMaterialUsecase(&session)
+
 	router.Use(cors.CORSMiddleware)
 	router.Use(trashbin.Middleware)
 	router.Use(authenticator.Middleware)
@@ -66,7 +70,7 @@ func main() {
 	httpdelivery.NewBoltHandler(router)
 	httpdelivery.NewTaskHandler(router)
 	httpdelivery.NewManufacturerHandler(router)
-	httpdelivery.NewMaterialHandler(router)
+	httpdelivery.NewMaterialHandler(router, materialUsecase)
 
 	router.HandleFunc("/trash", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/trash/{resourceID}/restore", nil).Methods(http.MethodPost, http.MethodOptions)

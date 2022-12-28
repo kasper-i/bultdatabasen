@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type Material struct {
 	ID   uuid.UUID `json:"id"`
@@ -9,4 +13,8 @@ type Material struct {
 
 func (Material) TableName() string {
 	return "material"
+}
+
+type MaterialUsecase interface {
+	GetMaterials(ctx context.Context) ([]Material, error)
 }
