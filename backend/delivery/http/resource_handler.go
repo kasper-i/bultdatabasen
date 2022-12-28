@@ -3,7 +3,7 @@ package http
 import (
 	"bultdatabasen/domain"
 	"bultdatabasen/middleware/authorizer"
-	"bultdatabasen/model"
+	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -40,12 +40,12 @@ func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request)
 	if resource, err := sess.GetResource(r.Context(), id); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		resource.Ancestors = model.GetStoredAncestors(r)
+		resource.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, resource)
 	}
 }
 
-func ownsResource(r *http.Request, sess model.Session, resourceID uuid.UUID) bool {
+func ownsResource(r *http.Request, sess usecases.Session, resourceID uuid.UUID) bool {
 	var ancestors []domain.Resource
 	var userID string
 	var err error
@@ -69,7 +69,7 @@ func ownsResource(r *http.Request, sess model.Session, resourceID uuid.UUID) boo
 func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
-	var patch model.ResourcePatch
+	var patch usecases.ResourcePatch
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
 		utils.WriteError(w, err)

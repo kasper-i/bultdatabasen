@@ -1,7 +1,7 @@
 package http
 
 import (
-	"bultdatabasen/model"
+	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -50,7 +50,7 @@ func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) 
 	}
 	version := vars["version"]
 
-	if _, ok := model.ImageSizes[version]; !ok && version != "original" {
+	if _, ok := usecases.ImageSizes[version]; !ok && version != "original" {
 		utils.WriteResponse(w, http.StatusBadRequest, nil)
 		return
 	}
@@ -137,7 +137,7 @@ func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var patch model.ImagePatch
+	var patch usecases.ImagePatch
 	if err := json.Unmarshal(reqBody, &patch); err != nil {
 		utils.WriteError(w, err)
 		return

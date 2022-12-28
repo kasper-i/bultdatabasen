@@ -2,7 +2,7 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
+	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -95,7 +95,7 @@ func (hdlr *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	if task, err := sess.GetTask(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		task.Ancestors = model.GetStoredAncestors(r)
+		task.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, task)
 	}
 }
@@ -146,7 +146,7 @@ func (hdlr *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		task.Ancestors = model.GetStoredAncestors(r)
+		task.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, task)
 	}
 }

@@ -3,7 +3,7 @@ package authorizer
 import (
 	"bultdatabasen/domain"
 	"bultdatabasen/middleware/authenticator"
-	"bultdatabasen/model"
+	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"context"
 	"encoding/json"
@@ -79,7 +79,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 }
 
 func GetMaxRole(ctx context.Context, resourceID uuid.UUID, ancestors []domain.Resource, userID string) *domain.ResourceRole {
-	sess := model.NewSession(model.DB, &userID)
+	sess := usecases.NewSession(usecases.DB, &userID)
 
 	if resourceID.String() == domain.RootID {
 		return nil

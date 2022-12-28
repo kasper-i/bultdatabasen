@@ -2,7 +2,7 @@ package trashbin
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
+	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"context"
 	"encoding/json"
@@ -40,7 +40,7 @@ func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		sess := model.NewSession(model.DB, nil)
+		sess := usecases.NewSession(usecases.DB, nil)
 
 		ancestors, err := sess.GetAncestors(r.Context(), resourceID)
 		if err != nil {

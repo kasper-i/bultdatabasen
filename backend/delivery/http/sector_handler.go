@@ -2,7 +2,7 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
+	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -53,7 +53,7 @@ func (hdlr *SectorHandler) GetSector(w http.ResponseWriter, r *http.Request) {
 	if sector, err := sess.GetSector(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		sector.Ancestors = model.GetStoredAncestors(r)
+		sector.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, sector)
 	}
 }

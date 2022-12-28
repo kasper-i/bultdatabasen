@@ -2,7 +2,7 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
+	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -25,7 +25,7 @@ func NewPointHandler(router *mux.Router) {
 
 type CreatePointRequest struct {
 	PointID  uuid.UUID             `json:"pointId"`
-	Position *model.InsertPosition `json:"position"`
+	Position *usecases.InsertPosition `json:"position"`
 	Anchor   bool                  `json:"anchor"`
 	Bolts    []domain.Bolt         `json:"bolts"`
 }
@@ -96,7 +96,7 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 			status = http.StatusOK
 		}
 
-		point.Ancestors = model.GetStoredAncestors(r)
+		point.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, status, point)
 	}
 }

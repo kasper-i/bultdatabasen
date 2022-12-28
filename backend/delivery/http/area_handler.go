@@ -2,7 +2,7 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
+	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -60,7 +60,7 @@ func (hdlr *AreaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 	if area, err := sess.GetArea(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		area.Ancestors = model.GetStoredAncestors(r)
+		area.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, area)
 	}
 }
