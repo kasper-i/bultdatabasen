@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -12,7 +12,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetAreas(w http.ResponseWriter, r *http.Request) {
+type AreaHandler struct {
+}
+
+func NewAreaHandler(router *mux.Router) {
+	handler := &AreaHandler{}
+
+	router.HandleFunc("/resources/{resourceID}/areas", handler.GetAreas).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/areas", handler.GetAreas).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/areas", handler.CreateArea).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/areas", handler.CreateArea).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/areas/{resourceID}", handler.GetArea).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/areas/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/areas/{resourceID}", handler.DeleteArea).Methods(http.MethodDelete, http.MethodOptions)
+}
+
+func (hdlr *AreaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 
@@ -33,7 +48,7 @@ func GetAreas(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetArea(w http.ResponseWriter, r *http.Request) {
+func (hdlr *AreaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
@@ -50,7 +65,7 @@ func GetArea(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateArea(w http.ResponseWriter, r *http.Request) {
+func (hdlr *AreaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	var resourceID uuid.UUID
@@ -79,7 +94,7 @@ func CreateArea(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteArea(w http.ResponseWriter, r *http.Request) {
+func (hdlr *AreaHandler) DeleteArea(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])

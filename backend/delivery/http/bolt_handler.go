@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -12,7 +12,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetBolts(w http.ResponseWriter, r *http.Request) {
+type BoltHandler struct {
+}
+
+func NewBoltHandler(router *mux.Router) {
+	handler := &BoltHandler{}
+
+	router.HandleFunc("/resources/{resourceID}/bolts", handler.GetBolts).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/bolts", handler.CreateBolt).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/bolts/{resourceID}", handler.GetBolt).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/bolts/{resourceID}", handler.UpdateBolt).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/bolts/{resourceID}", handler.DeleteBolt).Methods(http.MethodDelete, http.MethodOptions)
+}
+
+func (hdlr *BoltHandler) GetBolts(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -28,7 +41,7 @@ func GetBolts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetBolt(w http.ResponseWriter, r *http.Request) {
+func (hdlr *BoltHandler) GetBolt(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
@@ -45,7 +58,7 @@ func GetBolt(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateBolt(w http.ResponseWriter, r *http.Request) {
+func (hdlr *BoltHandler) CreateBolt(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -70,7 +83,7 @@ func CreateBolt(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteBolt(w http.ResponseWriter, r *http.Request) {
+func (hdlr *BoltHandler) DeleteBolt(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
@@ -86,7 +99,7 @@ func DeleteBolt(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateBolt(w http.ResponseWriter, r *http.Request) {
+func (hdlr *BoltHandler) UpdateBolt(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	boltID, err := uuid.Parse(vars["resourceID"])

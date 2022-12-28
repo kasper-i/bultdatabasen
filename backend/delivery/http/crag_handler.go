@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -12,7 +12,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetCrags(w http.ResponseWriter, r *http.Request) {
+type CragHandler struct {
+}
+
+func NewCragHandler(router *mux.Router) {
+	handler := &CragHandler{}
+
+	router.HandleFunc("/resources/{resourceID}/crags", handler.GetCrags).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/crags", handler.CreateCrag).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/crags/{resourceID}", handler.GetCrag).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/crags/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/crags/{resourceID}", handler.DeleteCrag).Methods(http.MethodDelete, http.MethodOptions)
+}
+
+func (hdlr *CragHandler) GetCrags(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -28,7 +41,7 @@ func GetCrags(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetCrag(w http.ResponseWriter, r *http.Request) {
+func (hdlr *CragHandler) GetCrag(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
@@ -45,7 +58,7 @@ func GetCrag(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateCrag(w http.ResponseWriter, r *http.Request) {
+func (hdlr *CragHandler) CreateCrag(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -70,7 +83,7 @@ func CreateCrag(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteCrag(w http.ResponseWriter, r *http.Request) {
+func (hdlr *CragHandler) DeleteCrag(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])

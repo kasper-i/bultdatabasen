@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/model"
@@ -11,7 +11,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetImages(w http.ResponseWriter, r *http.Request) {
+type ImageHandler struct {
+}
+
+func NewImageHandler(router *mux.Router) {
+	handler := &ImageHandler{}
+
+	router.HandleFunc("/resources/{resourceID}/images", handler.UploadImage).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/images", handler.GetImages).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/images/{resourceID}", handler.DeleteImage).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/images/{resourceID}", handler.PatchImage).Methods(http.MethodPatch, http.MethodOptions)
+	router.HandleFunc("/images/{resourceID}/{version}", handler.DownloadImage).Methods(http.MethodGet, http.MethodOptions)
+}
+
+func (hdlr *ImageHandler) GetImages(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -27,7 +40,7 @@ func GetImages(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DownloadImage(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
@@ -50,7 +63,7 @@ func DownloadImage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UploadImage(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -96,7 +109,7 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteImage(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ImageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
@@ -114,7 +127,7 @@ func DeleteImage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PatchImage(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
