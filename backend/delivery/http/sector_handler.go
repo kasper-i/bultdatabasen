@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -12,7 +12,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetSectors(w http.ResponseWriter, r *http.Request) {
+type SectorHandler struct {
+}
+
+func NewSectorHandler(router *mux.Router) {
+	handler := &SectorHandler{}
+
+	router.HandleFunc("/resources/{resourceID}/sectors", handler.GetSectors).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/sectors", handler.CreateSector).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/sectors/{resourceID}", handler.GetSector).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/sectors/{resourceID}", nil).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/sectors/{resourceID}", handler.DeleteSector).Methods(http.MethodDelete, http.MethodOptions)
+}
+
+func (hdlr *SectorHandler) GetSectors(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -28,7 +41,7 @@ func GetSectors(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetSector(w http.ResponseWriter, r *http.Request) {
+func (hdlr *SectorHandler) GetSector(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
@@ -45,7 +58,7 @@ func GetSector(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateSector(w http.ResponseWriter, r *http.Request) {
+func (hdlr *SectorHandler) CreateSector(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -70,7 +83,7 @@ func CreateSector(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteSector(w http.ResponseWriter, r *http.Request) {
+func (hdlr *SectorHandler) DeleteSector(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])

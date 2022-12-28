@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -12,7 +12,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetRoutes(w http.ResponseWriter, r *http.Request) {
+type RouteHandler struct {
+}
+
+func NewRouteHandler(router *mux.Router) {
+	handler := &RouteHandler{}
+
+	router.HandleFunc("/resources/{resourceID}/routes", handler.GetRoutes).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/routes", handler.CreateRoute).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}", handler.GetRoute).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}", handler.UpdateRoute).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}", handler.DeleteRoute).Methods(http.MethodDelete, http.MethodOptions)
+}
+
+func (hdlr *RouteHandler) GetRoutes(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -28,7 +41,7 @@ func GetRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetRoute(w http.ResponseWriter, r *http.Request) {
+func (hdlr *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
@@ -45,7 +58,7 @@ func GetRoute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateRoute(w http.ResponseWriter, r *http.Request) {
+func (hdlr *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -70,7 +83,7 @@ func CreateRoute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteRoute(w http.ResponseWriter, r *http.Request) {
+func (hdlr *RouteHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
@@ -86,7 +99,7 @@ func DeleteRoute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateRoute(w http.ResponseWriter, r *http.Request) {
+func (hdlr *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])

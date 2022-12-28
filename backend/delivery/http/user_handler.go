@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -9,10 +9,27 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
-func GetUserNames(w http.ResponseWriter, r *http.Request) {
+type UserHandler struct {
+}
+
+func NewUserHandler(router *mux.Router) {
+	handler := &UserHandler{}
+
+	router.HandleFunc("/users/names", handler.GetUserNames).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/users/myself", handler.GetMyself).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/users/{userID}", nil).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/users/myself", handler.UpdateMyself).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/users/{userID}", nil).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/users/{userID}/teams", nil).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/users/{userID}/teams/{teamID}", nil).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/users/{userID}/invites", nil).Methods(http.MethodGet, http.MethodOptions)
+}
+
+func (hdlr *UserHandler) GetUserNames(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 
 	if names, err := sess.GetUserNames(r.Context()); err != nil {
@@ -23,7 +40,7 @@ func GetUserNames(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetMyself(w http.ResponseWriter, r *http.Request) {
+func (hdlr *UserHandler) GetMyself(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	userID := r.Context().Value("user_id").(string)
 
@@ -50,7 +67,7 @@ func GetMyself(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateMyself(w http.ResponseWriter, r *http.Request) {
+func (hdlr *UserHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	userID := r.Context().Value("user_id").(string)
 

@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -13,6 +13,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
+
+type TaskHandler struct {
+}
+
+func NewTaskHandler(router *mux.Router) {
+	handler := &TaskHandler{}
+
+	router.HandleFunc("/resources/{resourceID}/tasks", handler.GetTasks).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/tasks", handler.CreateTask).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/tasks/{resourceID}", handler.GetTask).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/tasks/{resourceID}", handler.UpdateTask).Methods(http.MethodPut, http.MethodOptions)
+	router.HandleFunc("/tasks/{resourceID}", handler.DeleteTask).Methods(http.MethodDelete, http.MethodOptions)
+}
 
 type GetTasksResponse struct {
 	Data []domain.Task `json:"data"`
@@ -37,7 +50,7 @@ func parsePaginationQuery(query url.Values) (domain.Pagination, error) {
 	return pagination, nil
 }
 
-func GetTasks(w http.ResponseWriter, r *http.Request) {
+func (hdlr *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	query := r.URL.Query()
@@ -70,7 +83,7 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetTask(w http.ResponseWriter, r *http.Request) {
+func (hdlr *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
@@ -87,7 +100,7 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateTask(w http.ResponseWriter, r *http.Request) {
+func (hdlr *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -112,7 +125,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateTask(w http.ResponseWriter, r *http.Request) {
+func (hdlr *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	taskID, err := uuid.Parse(vars["resourceID"])
@@ -138,7 +151,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteTask(w http.ResponseWriter, r *http.Request) {
+func (hdlr *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])

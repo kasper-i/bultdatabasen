@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -14,7 +14,21 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetResource(w http.ResponseWriter, r *http.Request) {
+type ResourceHandler struct {
+}
+
+func NewResourceHandler(router *mux.Router) {
+	handler := &ResourceHandler{}
+
+	router.HandleFunc("/resources/{resourceID}", handler.GetResource).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}", handler.UpdateResource).Methods(http.MethodPatch, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/ancestors", handler.GetAncestors).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/children", handler.GetChildren).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/role", handler.GetUserRoleForResource).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources", handler.Search).Methods(http.MethodGet, http.MethodOptions)
+}
+
+func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
@@ -52,7 +66,7 @@ func ownsResource(r *http.Request, sess model.Session, resourceID uuid.UUID) boo
 	return role.Role == authorizer.RoleOwner
 }
 
-func UpdateResource(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	var patch model.ResourcePatch
@@ -89,7 +103,7 @@ func UpdateResource(w http.ResponseWriter, r *http.Request) {
 	utils.WriteResponse(w, http.StatusBadRequest, nil)
 }
 
-func GetAncestors(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ResourceHandler) GetAncestors(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
@@ -109,7 +123,7 @@ func GetAncestors(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetChildren(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ResourceHandler) GetChildren(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
@@ -125,7 +139,7 @@ func GetChildren(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ResourceHandler) GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var userID string
 	var ancestors []domain.Resource
@@ -156,7 +170,7 @@ func GetUserRoleForResource(w http.ResponseWriter, r *http.Request) {
 	utils.WriteResponse(w, http.StatusOK, role)
 }
 
-func Search(w http.ResponseWriter, r *http.Request) {
+func (hdlr *ResourceHandler) Search(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	names, ok := r.URL.Query()["name"]
 

@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"bultdatabasen/domain"
@@ -12,6 +12,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type PointHandler struct {
+}
+
+func NewPointHandler(router *mux.Router) {
+	handler := &PointHandler{}
+
+	router.HandleFunc("/routes/{resourceID}/points", handler.GetPoints).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}/points", handler.AttachPoint).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/routes/{resourceID}/points/{pointID}", handler.DetachPoint).Methods(http.MethodDelete, http.MethodOptions)
+}
+
 type CreatePointRequest struct {
 	PointID  uuid.UUID             `json:"pointId"`
 	Position *model.InsertPosition `json:"position"`
@@ -19,7 +30,7 @@ type CreatePointRequest struct {
 	Bolts    []domain.Bolt         `json:"bolts"`
 }
 
-func GetPoints(w http.ResponseWriter, r *http.Request) {
+func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
@@ -43,7 +54,7 @@ func GetPoints(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func AttachPoint(w http.ResponseWriter, r *http.Request) {
+func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
@@ -90,7 +101,7 @@ func AttachPoint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DetachPoint(w http.ResponseWriter, r *http.Request) {
+func (hdlr *PointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
 	sess := createSession(r)
 	vars := mux.Vars(r)
 
