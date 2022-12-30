@@ -25,8 +25,8 @@ func (route *Route) UpdateCounters() {
 
 type RouteUsecase interface {
 	GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]Route, error)
-	GetRoute(ctx context.Context, resourceID uuid.UUID) (*Route, error)
-	CreateRoute(ctx context.Context, route *Route, parentResourceID uuid.UUID) error
+	GetRoute(ctx context.Context, resourceID uuid.UUID) (Route, error)
+	CreateRoute(ctx context.Context, route Route, parentResourceID uuid.UUID) (Route, error)
 	DeleteRoute(ctx context.Context, resourceID uuid.UUID) error
-	UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedRoute Route) (*Route, error)
+	UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedRoute Route) (Route, error)
 }

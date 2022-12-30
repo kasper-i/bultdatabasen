@@ -3,7 +3,6 @@ package authorizer
 import (
 	"bultdatabasen/domain"
 	"bultdatabasen/middleware/authenticator"
-	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"context"
 	"encoding/json"
@@ -19,10 +18,13 @@ const (
 )
 
 type authorizer struct {
+	store domain.Datastore
 }
 
-func New() *authorizer {
-	return &authorizer{}
+func New(store domain.Datastore) *authorizer {
+	return &authorizer{
+		store: store,
+	}
 }
 
 func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
@@ -70,7 +72,7 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if maxRole := GetMaxRole(r.Context(), resourceID, ancestors, userID); maxRole == nil || maxRole.Role != "owner" {
+		if maxRole := GetMaxRole(r.Context(), authorizer.store, resourceID, ancestors, userID); maxRole == nil || maxRole.Role != "owner" {
 			writeForbidden(w, &resourceID)
 		} else {
 			next.ServeHTTP(w, r)
@@ -78,14 +80,12 @@ func (authorizer *authorizer) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-func GetMaxRole(ctx context.Context, resourceID uuid.UUID, ancestors []domain.Resource, userID string) *domain.ResourceRole {
-	sess := usecases.NewSession(usecases.DB, &userID)
-
+func GetMaxRole(ctx context.Context, store domain.Datastore, resourceID uuid.UUID, ancestors []domain.Resource, userID string) *domain.ResourceRole {
 	if resourceID.String() == domain.RootID {
 		return nil
 	}
 
-	roles := sess.GetRoles(ctx, userID)
+	roles := store.GetRoles(ctx, userID)
 
 	if len(roles) == 0 {
 		return nil

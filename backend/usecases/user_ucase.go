@@ -5,31 +5,30 @@ import (
 	"context"
 )
 
-func (sess Session) GetUser(ctx context.Context, userID string) (*domain.User, error) {
-	var user domain.User
+type userUsecase struct {
+	store domain.Datastore
+}
 
-	if err := sess.DB.First(&user, "id = ?", userID).Error; err != nil {
-		return nil, err
+func NewUserUsecase(store domain.Datastore) domain.UserUsecase {
+	return &userUsecase{
+		store: store,
 	}
-
-	return &user, nil
 }
 
-func (sess Session) UpdateUser(ctx context.Context, user *domain.User) error {
-	return sess.DB.Save(&user).Error
+func (uc *userUsecase) GetUser(ctx context.Context, userID string) (domain.User, error) {
+	return uc.store.GetUser(ctx, userID)
 }
 
-func (sess Session) CreateUser(ctx context.Context, user *domain.User) error {
-	return sess.DB.Create(&user).Error
+func (uc *userUsecase) UpdateUser(ctx context.Context, user domain.User) (domain.User, error) {
+	err := uc.store.SaveUser(ctx, user)
+	return user, err
 }
 
-func (sess Session) GetUserNames(ctx context.Context) ([]domain.User, error) {
-	var names []domain.User = make([]domain.User, 0)
+func (uc *userUsecase) CreateUser(ctx context.Context, user domain.User) (domain.User, error) {
+	err := uc.store.InsertUser(ctx, user)
+	return user, err
+}
 
-	if err := sess.DB.Raw(`SELECT id, first_name, SUBSTRING(last_name, 1, 1) AS last_name FROM "user"`).
-		Scan(&names).Error; err != nil {
-		return names, err
-	}
-
-	return names, nil
+func (uc *userUsecase) GetUserNames(ctx context.Context) ([]domain.User, error) {
+	return uc.store.GetUserNames(ctx)
 }

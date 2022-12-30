@@ -37,8 +37,8 @@ func (bolt *Bolt) UpdateCounters() {
 
 type BoltUsecase interface {
 	GetBolts(ctx context.Context, resourceID uuid.UUID) ([]Bolt, error)
-	GetBolt(ctx context.Context, resourceID uuid.UUID) (*Bolt, error)
-	CreateBolt(ctx context.Context, bolt *Bolt, parentResourceID uuid.UUID) error
+	GetBolt(ctx context.Context, resourceID uuid.UUID) (Bolt, error)
+	CreateBolt(ctx context.Context, bolt Bolt, parentResourceID uuid.UUID) (Bolt, error)
 	DeleteBolt(ctx context.Context, resourceID uuid.UUID) error
-	UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBolt Bolt) (*Bolt, error)
+	UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBolt Bolt) (Bolt, error)
 }

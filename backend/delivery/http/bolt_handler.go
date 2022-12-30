@@ -13,10 +13,13 @@ import (
 )
 
 type BoltHandler struct {
+	BoltUsecase domain.BoltUsecase
 }
 
-func NewBoltHandler(router *mux.Router) {
-	handler := &BoltHandler{}
+func NewBoltHandler(router *mux.Router, boltUsecase domain.BoltUsecase) {
+	handler := &BoltHandler{
+		BoltUsecase: boltUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/bolts", handler.GetBolts).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/bolts", handler.CreateBolt).Methods(http.MethodPost, http.MethodOptions)
@@ -26,7 +29,6 @@ func NewBoltHandler(router *mux.Router) {
 }
 
 func (hdlr *BoltHandler) GetBolts(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -34,7 +36,7 @@ func (hdlr *BoltHandler) GetBolts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if bolts, err := sess.GetBolts(r.Context(), parentResourceID); err != nil {
+	if bolts, err := hdlr.BoltUsecase.GetBolts(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, bolts)
@@ -42,7 +44,6 @@ func (hdlr *BoltHandler) GetBolts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *BoltHandler) GetBolt(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -50,7 +51,7 @@ func (hdlr *BoltHandler) GetBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if bolt, err := sess.GetBolt(r.Context(), resourceID); err != nil {
+	if bolt, err := hdlr.BoltUsecase.GetBolt(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		bolt.Ancestors = usecases.GetStoredAncestors(r)
@@ -59,7 +60,6 @@ func (hdlr *BoltHandler) GetBolt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *BoltHandler) CreateBolt(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -74,17 +74,16 @@ func (hdlr *BoltHandler) CreateBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateBolt(r.Context(), &bolt, parentResourceID)
+	createdBolt, err := hdlr.BoltUsecase.CreateBolt(r.Context(), bolt, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, bolt)
+		utils.WriteResponse(w, http.StatusCreated, createdBolt)
 	}
 }
 
 func (hdlr *BoltHandler) DeleteBolt(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -92,7 +91,7 @@ func (hdlr *BoltHandler) DeleteBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteBolt(r.Context(), resourceID); err != nil {
+	if err := hdlr.BoltUsecase.DeleteBolt(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)
@@ -100,7 +99,6 @@ func (hdlr *BoltHandler) DeleteBolt(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *BoltHandler) UpdateBolt(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	boltID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -116,7 +114,7 @@ func (hdlr *BoltHandler) UpdateBolt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedBolt, err := sess.UpdateBolt(r.Context(), boltID, bolt)
+	updatedBolt, err := hdlr.BoltUsecase.UpdateBolt(r.Context(), boltID, bolt)
 
 	if err != nil {
 		utils.WriteError(w, err)

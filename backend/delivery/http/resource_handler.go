@@ -15,10 +15,15 @@ import (
 )
 
 type ResourceHandler struct {
+	ResourceUsecase domain.ResourceUsecase
+	store domain.Datastore
 }
 
-func NewResourceHandler(router *mux.Router) {
-	handler := &ResourceHandler{}
+func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUsecase, store domain.Datastore) {
+	handler := &ResourceHandler{
+		ResourceUsecase: resourceUsecase,
+		store: store,
+	}
 
 	router.HandleFunc("/resources/{resourceID}", handler.GetResource).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}", handler.UpdateResource).Methods(http.MethodPatch, http.MethodOptions)
@@ -29,7 +34,6 @@ func NewResourceHandler(router *mux.Router) {
 }
 
 func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -37,7 +41,7 @@ func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if resource, err := sess.GetResource(r.Context(), id); err != nil {
+	if resource, err := hdlr.ResourceUsecase.GetResource(r.Context(), id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		resource.Ancestors = usecases.GetStoredAncestors(r)
@@ -45,7 +49,7 @@ func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func ownsResource(r *http.Request, sess usecases.Session, resourceID uuid.UUID) bool {
+func (hdlr *ResourceHandler) ownsResource(r *http.Request, resourceID uuid.UUID) bool {
 	var ancestors []domain.Resource
 	var userID string
 	var err error
@@ -54,11 +58,11 @@ func ownsResource(r *http.Request, sess usecases.Session, resourceID uuid.UUID) 
 		userID = value
 	}
 
-	if ancestors, err = sess.GetAncestors(r.Context(), resourceID); err != nil {
+	if ancestors, err = hdlr.ResourceUsecase.GetAncestors(r.Context(), resourceID); err != nil {
 		return false
 	}
 
-	role := authorizer.GetMaxRole(r.Context(), resourceID, ancestors, userID)
+	role := authorizer.GetMaxRole(r.Context(), hdlr.store, resourceID, ancestors, userID)
 	if role == nil {
 		return false
 	}
@@ -67,7 +71,6 @@ func ownsResource(r *http.Request, sess usecases.Session, resourceID uuid.UUID) 
 }
 
 func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	var patch usecases.ResourcePatch
 	id, err := uuid.Parse(vars["resourceID"])
@@ -86,12 +89,12 @@ func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Reque
 	case patch.ParentID != uuid.Nil:
 		newParentID := patch.ParentID
 
-		if newParentID.String() != domain.RootID && !ownsResource(r, sess, newParentID) {
+		if newParentID.String() != domain.RootID && !hdlr.ownsResource(r, newParentID) {
 			utils.WriteResponse(w, http.StatusForbidden, nil)
 			return
 		}
 
-		if err := sess.MoveResource(r.Context(), id, newParentID); err != nil {
+		if err := hdlr.ResourceUsecase.MoveResource(r.Context(), id, newParentID); err != nil {
 			utils.WriteError(w, err)
 		} else {
 			utils.WriteResponse(w, http.StatusNoContent, nil)
@@ -104,7 +107,6 @@ func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Reque
 }
 
 func (hdlr *ResourceHandler) GetAncestors(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -112,7 +114,7 @@ func (hdlr *ResourceHandler) GetAncestors(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if ancestors, err := sess.GetAncestors(r.Context(), id); err != nil {
+	if ancestors, err := hdlr.ResourceUsecase.GetAncestors(r.Context(), id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		for i, j := 0, len(ancestors)-1; i < j; i, j = i+1, j-1 {
@@ -124,7 +126,6 @@ func (hdlr *ResourceHandler) GetAncestors(w http.ResponseWriter, r *http.Request
 }
 
 func (hdlr *ResourceHandler) GetChildren(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -132,7 +133,7 @@ func (hdlr *ResourceHandler) GetChildren(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if children, err := sess.GetChildren(r.Context(), id); err != nil {
+	if children, err := hdlr.ResourceUsecase.GetChildren(r.Context(), id); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, children)
@@ -163,7 +164,7 @@ func (hdlr *ResourceHandler) GetUserRoleForResource(w http.ResponseWriter, r *ht
 		ancestors = value
 	}
 
-	if maxRole := authorizer.GetMaxRole(r.Context(), id, ancestors, userID); maxRole != nil {
+	if maxRole := authorizer.GetMaxRole(r.Context(), hdlr.store, id, ancestors, userID); maxRole != nil {
 		role.Role = maxRole.Role
 	}
 
@@ -171,7 +172,6 @@ func (hdlr *ResourceHandler) GetUserRoleForResource(w http.ResponseWriter, r *ht
 }
 
 func (hdlr *ResourceHandler) Search(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	names, ok := r.URL.Query()["name"]
 
 	if !ok {
@@ -186,7 +186,7 @@ func (hdlr *ResourceHandler) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if results, err := sess.Search(r.Context(), name); err != nil {
+	if results, err := hdlr.ResourceUsecase.Search(r.Context(), name); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, results)

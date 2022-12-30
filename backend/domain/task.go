@@ -37,8 +37,8 @@ func (task *Task) UpdateCounters() {
 
 type TaskUsecase interface {
 	GetTasks(ctx context.Context, resourceID uuid.UUID, pagination Pagination, statuses []string) ([]Task, Meta, error)
-    GetTask(ctx context.Context, resourceID uuid.UUID) (*Task, error)
-	CreateTask(ctx context.Context, task *Task, parentResourceID uuid.UUID) error
-	UpdateTask(ctx context.Context, task *Task, taskID uuid.UUID) error
+    GetTask(ctx context.Context, resourceID uuid.UUID) (Task, error)
+	CreateTask(ctx context.Context, task Task, parentResourceID uuid.UUID) (Task, error)
+	UpdateTask(ctx context.Context, task Task, taskID uuid.UUID) (Task, error)
 	DeleteTask(ctx context.Context, resourceID uuid.UUID) error
 }

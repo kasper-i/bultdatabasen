@@ -12,11 +12,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type AreaHandler struct {
+type areaHandler struct {
+	AreaUsecase domain.AreaUsecase
 }
 
-func NewAreaHandler(router *mux.Router) {
-	handler := &AreaHandler{}
+func NewAreaHandler(router *mux.Router, areaUsecase domain.AreaUsecase) {
+	handler := &areaHandler{
+		AreaUsecase: areaUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/areas", handler.GetAreas).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/areas", handler.GetAreas).Methods(http.MethodGet, http.MethodOptions)
@@ -27,8 +30,7 @@ func NewAreaHandler(router *mux.Router) {
 	router.HandleFunc("/areas/{resourceID}", handler.DeleteArea).Methods(http.MethodDelete, http.MethodOptions)
 }
 
-func (hdlr *AreaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *areaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	var resourceID uuid.UUID
@@ -41,15 +43,14 @@ func (hdlr *AreaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if areas, err := sess.GetAreas(r.Context(), resourceID); err != nil {
+	if areas, err := hdlr.AreaUsecase.GetAreas(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, areas)
 	}
 }
 
-func (hdlr *AreaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *areaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -57,7 +58,7 @@ func (hdlr *AreaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if area, err := sess.GetArea(r.Context(), resourceID); err != nil {
+	if area, err := hdlr.AreaUsecase.GetArea(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		area.Ancestors = usecases.GetStoredAncestors(r)
@@ -65,8 +66,7 @@ func (hdlr *AreaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hdlr *AreaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *areaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var resourceID uuid.UUID
 	var err error
@@ -87,15 +87,14 @@ func (hdlr *AreaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = sess.CreateArea(r.Context(), &area, resourceID, userId); err != nil {
+	if createdArea, err := hdlr.AreaUsecase.CreateArea(r.Context(), area, resourceID, userId); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, area)
+		utils.WriteResponse(w, http.StatusCreated, createdArea)
 	}
 }
 
-func (hdlr *AreaHandler) DeleteArea(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *areaHandler) DeleteArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -103,7 +102,7 @@ func (hdlr *AreaHandler) DeleteArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteArea(r.Context(), resourceID); err != nil {
+	if err := hdlr.AreaUsecase.DeleteArea(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

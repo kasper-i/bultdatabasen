@@ -13,10 +13,15 @@ import (
 )
 
 type PointHandler struct {
+	PointUsecase domain.PointUsecase
+	ResourceUsecase domain.ResourceUsecase
 }
 
-func NewPointHandler(router *mux.Router) {
-	handler := &PointHandler{}
+func NewPointHandler(router *mux.Router, pointUsecase domain.PointUsecase, resourceUsecase domain.ResourceUsecase) {
+	handler := &PointHandler{
+		PointUsecase: pointUsecase,
+		ResourceUsecase: resourceUsecase,
+	}
 
 	router.HandleFunc("/routes/{resourceID}/points", handler.GetPoints).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}/points", handler.AttachPoint).Methods(http.MethodPost, http.MethodOptions)
@@ -31,7 +36,6 @@ type CreatePointRequest struct {
 }
 
 func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -39,7 +43,7 @@ func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if resource, err := sess.GetResource(r.Context(), routeID); err != nil {
+	if resource, err := hdlr.ResourceUsecase.GetResource(r.Context(), routeID); err != nil {
 		utils.WriteError(w, err)
 		return
 	} else if resource.Type != domain.TypeRoute {
@@ -47,7 +51,7 @@ func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if points, err := sess.GetPoints(r.Context(), routeID); err != nil {
+	if points, err := hdlr.PointUsecase.GetPoints(r.Context(), routeID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, points)
@@ -55,7 +59,6 @@ func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -83,7 +86,7 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	point, err := sess.AttachPoint(r.Context(), routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
+	point, err := hdlr.PointUsecase.AttachPoint(r.Context(), routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -102,7 +105,6 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *PointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 
 	routeID, err := uuid.Parse(vars["resourceID"])
@@ -117,7 +119,7 @@ func (hdlr *PointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DetachPoint(r.Context(), routeID, pointID); err != nil {
+	if err := hdlr.PointUsecase.DetachPoint(r.Context(), routeID, pointID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

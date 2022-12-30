@@ -3,80 +3,29 @@ package usecases
 import (
 	"bultdatabasen/domain"
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-func (sess Session) GetBolts(ctx context.Context, resourceID uuid.UUID) ([]domain.Bolt, error) {
-	var bolts []domain.Bolt = make([]domain.Bolt, 0)
-
-	query := fmt.Sprintf(`%s SELECT
-		bolt.*,
-		resource.counters,
-		mf.name AS manufacturer,
-		mo.name AS model,
-		ma.name AS material
-	FROM tree
-	INNER JOIN resource ON tree.resource_id = resource.leaf_of
-	INNER JOIN bolt ON resource.id = bolt.id
-	LEFT JOIN manufacturer mf ON bolt.manufacturer_id = mf.id
-	LEFT JOIN model mo ON bolt.model_id = mo.id
-	LEFT JOIN material ma ON bolt.material_id = ma.id`, withTreeQuery())
-
-	if err := sess.DB.Raw(query, resourceID).Scan(&bolts).Error; err != nil {
-		return nil, err
-	}
-
-	return bolts, nil
+type boltUsecase struct {
+	store domain.Datastore
 }
 
-func (sess Session) GetBolt(ctx context.Context, resourceID uuid.UUID) (*domain.Bolt, error) {
-	var bolt domain.Bolt
-
-	if err := sess.DB.Raw(`SELECT
-			bolt.*,
-			resource.counters,
-			mf.name AS manufacturer,
-			mo.name AS model,
-			ma.name AS material
-		FROM bolt
-		INNER JOIN resource ON bolt.id = resource.id
-		LEFT JOIN manufacturer mf ON bolt.manufacturer_id = mf.id
-		LEFT JOIN model mo ON bolt.model_id = mo.id
-		LEFT JOIN material ma ON bolt.material_id = ma.id
-		WHERE bolt.id = ?`, resourceID).
-		Scan(&bolt).Error; err != nil {
-		return nil, err
+func NewBoltUsecase(store domain.Datastore) domain.BoltUsecase {
+	return &boltUsecase{
+		store: store,
 	}
-
-	if bolt.ID == uuid.Nil {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	return &bolt, nil
 }
 
-func (sess Session) getBoltWithLock(resourceID uuid.UUID) (*domain.Bolt, error) {
-	var bolt domain.Bolt
-
-	if err := sess.DB.Raw(`SELECT * FROM bolt
-		INNER JOIN resource ON bolt.id = resource.id
-		WHERE bolt.id = ?
-		FOR UPDATE`, resourceID).
-		Scan(&bolt).Error; err != nil {
-		return nil, err
-	}
-
-	if bolt.ID == uuid.Nil {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	return &bolt, nil
+func (uc *boltUsecase) GetBolts(ctx context.Context, resourceID uuid.UUID) ([]domain.Bolt, error) {
+	return uc.store.GetBolts(ctx, resourceID)
 }
 
-func (sess Session) CreateBolt(ctx context.Context, bolt *domain.Bolt, parentResourceID uuid.UUID) error {
+func (uc *boltUsecase) GetBolt(ctx context.Context, resourceID uuid.UUID) (domain.Bolt, error) {
+	return uc.store.GetBolt(ctx, resourceID)
+}
+
+func (uc *boltUsecase) CreateBolt(ctx context.Context, bolt domain.Bolt, parentResourceID uuid.UUID) (domain.Bolt, error) {
 	bolt.UpdateCounters()
 
 	resource := domain.Resource{
@@ -84,28 +33,28 @@ func (sess Session) CreateBolt(ctx context.Context, bolt *domain.Bolt, parentRes
 		Type:         domain.TypeBolt,
 	}
 
-	err := sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(ctx, &resource, parentResourceID); err != nil {
-			return err
-		}
-
-		bolt.ID = resource.ID
-
-		if err := sess.DB.Create(&bolt).Error; err != nil {
-			return err
-		}
-
-		if err := sess.UpdateCountersForResourceAndAncestors(ctx, bolt.ID, bolt.Counters); err != nil {
-			return err
-		}
-
-		if refreshedBolt, err := sess.GetBolt(ctx, bolt.ID); err != nil {
+	err := uc.store.Transaction(func(store domain.Datastore) error {
+		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
 			return err
 		} else {
-			*bolt = *refreshedBolt
+			bolt.ID = createdResource.ID
 		}
 
-		if ancestors, err := sess.GetAncestors(ctx, bolt.ID); err != nil {
+		if err := store.InsertBolt(ctx, bolt); err != nil {
+			return err
+		}
+
+		if err := updateCountersForResourceAndAncestors(ctx, store, bolt.ID, bolt.Counters); err != nil {
+			return err
+		}
+
+		if refreshedBolt, err := store.GetBolt(ctx, bolt.ID); err != nil {
+			return err
+		} else {
+			bolt = refreshedBolt
+		}
+
+		if ancestors, err := store.GetAncestors(ctx, bolt.ID); err != nil {
 			return nil
 		} else {
 			bolt.Ancestors = ancestors
@@ -114,18 +63,22 @@ func (sess Session) CreateBolt(ctx context.Context, bolt *domain.Bolt, parentRes
 		return nil
 	})
 
-	return err
+	if err != nil {
+		return domain.Bolt{}, err
+	}
+
+	return bolt, err
 }
 
-func (sess Session) DeleteBolt(ctx context.Context, resourceID uuid.UUID) error {
-	return sess.DeleteResource(ctx, resourceID)
+func (uc *boltUsecase) DeleteBolt(ctx context.Context, resourceID uuid.UUID) error {
+	return deleteResource(ctx, uc.store, resourceID)
 }
 
-func (sess Session) UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBolt domain.Bolt) (*domain.Bolt, error) {
-	var refreshedBolt *domain.Bolt
+func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBolt domain.Bolt) (domain.Bolt, error) {
+	var refreshedBolt domain.Bolt
 
-	err := sess.Transaction(func(sess Session) error {
-		original, err := sess.getBoltWithLock(boltID)
+	err := uc.store.Transaction(func(store domain.Datastore) error {
+		original, err := uc.store.GetBoltWithLock(ctx, boltID)
 		if err != nil {
 			return err
 		}
@@ -136,28 +89,19 @@ func (sess Session) UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBol
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 
-		if err := sess.TouchResource(ctx, boltID); err != nil {
+		if err := store.TouchResource(ctx, boltID, ""); err != nil {
 			return err
 		}
 
-		if err := sess.DB.Select(
-			"Type",
-			"Position",
-			"Installed",
-			"Dismantled",
-			"ManufacturerID",
-			"ModelID",
-			"MaterialID",
-			"Diameter",
-			"DiameterUnit").Updates(updatedBolt).Error; err != nil {
+		if err := store.SaveBolt(ctx, updatedBolt); err != nil {
 			return err
 		}
 
-		if err := sess.UpdateCountersForResourceAndAncestors(ctx, boltID, countersDifference); err != nil {
+		if err := updateCountersForResourceAndAncestors(ctx, store, boltID, countersDifference); err != nil {
 			return err
 		}
 
-		refreshedBolt, err = sess.GetBolt(ctx, boltID)
+		refreshedBolt, err = store.GetBolt(ctx, boltID)
 		if err != nil {
 			return err
 		}
@@ -165,9 +109,5 @@ func (sess Session) UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBol
 		return nil
 	})
 
-	if err != nil {
-		return nil, err
-	}
-
-	return refreshedBolt, nil
+	return refreshedBolt, err
 }

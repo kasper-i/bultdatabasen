@@ -13,10 +13,13 @@ import (
 )
 
 type CragHandler struct {
+	CragUsecase domain.CragUsecase
 }
 
-func NewCragHandler(router *mux.Router) {
-	handler := &CragHandler{}
+func NewCragHandler(router *mux.Router, cragUsecase domain.CragUsecase) {
+	handler := &CragHandler{
+		CragUsecase: cragUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/crags", handler.GetCrags).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/crags", handler.CreateCrag).Methods(http.MethodPost, http.MethodOptions)
@@ -26,7 +29,6 @@ func NewCragHandler(router *mux.Router) {
 }
 
 func (hdlr *CragHandler) GetCrags(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -34,7 +36,7 @@ func (hdlr *CragHandler) GetCrags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if crags, err := sess.GetCrags(r.Context(), parentResourceID); err != nil {
+	if crags, err := hdlr.CragUsecase.GetCrags(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, crags)
@@ -42,7 +44,6 @@ func (hdlr *CragHandler) GetCrags(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *CragHandler) GetCrag(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -50,7 +51,7 @@ func (hdlr *CragHandler) GetCrag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if crag, err := sess.GetCrag(r.Context(), resourceID); err != nil {
+	if crag, err := hdlr.CragUsecase.GetCrag(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		crag.Ancestors = usecases.GetStoredAncestors(r)
@@ -59,7 +60,6 @@ func (hdlr *CragHandler) GetCrag(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *CragHandler) CreateCrag(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -74,17 +74,16 @@ func (hdlr *CragHandler) CreateCrag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateCrag(r.Context(), &crag, parentResourceID)
+	createdCrag, err := hdlr.CragUsecase.CreateCrag(r.Context(), crag, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, crag)
+		utils.WriteResponse(w, http.StatusCreated, createdCrag)
 	}
 }
 
 func (hdlr *CragHandler) DeleteCrag(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -92,7 +91,7 @@ func (hdlr *CragHandler) DeleteCrag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteCrag(r.Context(), resourceID); err != nil {
+	if err := hdlr.CragUsecase.DeleteCrag(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

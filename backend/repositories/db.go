@@ -1,4 +1,4 @@
-package usecases
+package repositories
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var DB *gorm.DB
+var db *gorm.DB
 
 func init() {
 	var err error
@@ -47,14 +47,14 @@ func init() {
 		logLevel = logger.Info
 	}
 
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logLevel),
 	})
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	sqlDB, _ := DB.DB()
+	sqlDB, _ := db.DB()
 
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)

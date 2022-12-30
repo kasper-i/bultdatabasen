@@ -3,62 +3,50 @@ package usecases
 import (
 	"bultdatabasen/domain"
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-func (sess Session) GetAreas(ctx context.Context, resourceID uuid.UUID) ([]domain.Area, error) {
-	var areas []domain.Area = make([]domain.Area, 0)
-
-	if err := sess.DB.Raw(fmt.Sprintf(`%s SELECT * FROM tree
-		INNER JOIN area ON tree.resource_id = area.id
-		INNER JOIN resource ON tree.resource_id = resource.id`,
-		withTreeQuery()), resourceID).Scan(&areas).Error; err != nil {
-		return nil, err
-	}
-
-	return areas, nil
+type areaUsecase struct {
+	store domain.Datastore
 }
 
-func (sess Session) GetArea(ctx context.Context, resourceID uuid.UUID) (*domain.Area, error) {
-	var area domain.Area
-
-	if err := sess.DB.Raw(`SELECT * FROM area INNER JOIN resource ON area.id = resource.id WHERE area.id = ?`, resourceID).
-		Scan(&area).Error; err != nil {
-		return nil, err
+func NewAreaUsecase(store domain.Datastore) domain.AreaUsecase {
+	return &areaUsecase{
+		store: store,
 	}
-
-	if area.ID == uuid.Nil {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	return &area, nil
 }
 
-func (sess Session) CreateArea(ctx context.Context, area *domain.Area, parentResourceID uuid.UUID, userID string) error {
+func (uc *areaUsecase) GetAreas(ctx context.Context, resourceID uuid.UUID) ([]domain.Area, error) {
+	return uc.store.GetAreas(ctx, resourceID)
+}
+
+func (uc *areaUsecase) GetArea(ctx context.Context, resourceID uuid.UUID) (domain.Area, error) {
+	return uc.store.GetArea(ctx, resourceID)
+}
+
+func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentResourceID uuid.UUID, userID string) (domain.Area, error) {
 	resource := domain.Resource{
 		Name: &area.Name,
 		Type: domain.TypeArea,
 	}
 
-	err := sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(ctx, &resource, parentResourceID); err != nil {
+	err := uc.store.Transaction(func(store domain.Datastore) error {
+		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
+			return err
+		} else {
+			area.ID = createdResource.ID
+		}
+
+		if err := store.InsertArea(ctx, area); err != nil {
 			return err
 		}
 
-		area.ID = resource.ID
-
-		if err := sess.DB.Create(&area).Error; err != nil {
+		if err := store.InsertResourceAccess(ctx, area.ID, userID, "owner"); err != nil {
 			return err
 		}
 
-		if err := sess.DB.Exec("INSERT INTO user_role VALUES (?, ?, ?)", userID, area.ID, "owner").Error; err != nil {
-			return err
-		}
-
-		if ancestors, err := sess.GetAncestors(ctx, area.ID); err != nil {
+		if ancestors, err := store.GetAncestors(ctx, area.ID); err != nil {
 			return nil
 		} else {
 			area.Ancestors = ancestors
@@ -67,9 +55,9 @@ func (sess Session) CreateArea(ctx context.Context, area *domain.Area, parentRes
 		return nil
 	})
 
-	return err
+	return area, err
 }
 
-func (sess Session) DeleteArea(ctx context.Context, resourceID uuid.UUID) error {
-	return sess.DeleteResource(ctx, resourceID)
+func (uc *areaUsecase) DeleteArea(ctx context.Context, resourceID uuid.UUID) error {
+	return deleteResource(ctx, uc.store, resourceID)
 }

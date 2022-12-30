@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
@@ -12,10 +13,13 @@ import (
 )
 
 type ImageHandler struct {
+	ImageUsecase domain.ImageUsecase
 }
 
-func NewImageHandler(router *mux.Router) {
-	handler := &ImageHandler{}
+func NewImageHandler(router *mux.Router, imageUsecase domain.ImageUsecase) {
+	handler := &ImageHandler{
+		ImageUsecase: imageUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/images", handler.UploadImage).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/images", handler.GetImages).Methods(http.MethodGet, http.MethodOptions)
@@ -25,7 +29,6 @@ func NewImageHandler(router *mux.Router) {
 }
 
 func (hdlr *ImageHandler) GetImages(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -33,7 +36,7 @@ func (hdlr *ImageHandler) GetImages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if images, err := sess.GetImages(r.Context(), parentResourceID); err != nil {
+	if images, err := hdlr.ImageUsecase.GetImages(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, images)
@@ -41,7 +44,6 @@ func (hdlr *ImageHandler) GetImages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -55,7 +57,7 @@ func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if url, err := sess.GetImageDownloadURL(r.Context(), imageID, version); err != nil {
+	if url, err := hdlr.ImageUsecase.GetImageDownloadURL(r.Context(), imageID, version); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		w.Header().Set("Location", url)
@@ -64,7 +66,6 @@ func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) 
 }
 
 func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -95,7 +96,7 @@ func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	switch mimeType {
 	case "image/jpeg", "image/jpg":
-		image, err := sess.UploadImage(r.Context(), parentResourceID, fileBytes, mimeType)
+		image, err := hdlr.ImageUsecase.UploadImage(r.Context(), parentResourceID, fileBytes, mimeType)
 
 		if err != nil {
 			utils.WriteError(w, err)
@@ -110,7 +111,6 @@ func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *ImageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -118,7 +118,7 @@ func (hdlr *ImageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.DeleteImage(r.Context(), imageID)
+	err = hdlr.ImageUsecase.DeleteImage(r.Context(), imageID)
 
 	if err != nil {
 		utils.WriteError(w, err)
@@ -128,7 +128,6 @@ func (hdlr *ImageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -149,7 +148,7 @@ func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = sess.RotateImage(r.Context(), imageID, *patch.Rotation)
+		err = hdlr.ImageUsecase.RotateImage(r.Context(), imageID, *patch.Rotation)
 	}
 
 	if err != nil {

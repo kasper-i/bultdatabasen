@@ -3,16 +3,24 @@ package usecases
 import (
 	"bultdatabasen/domain"
 	"context"
+
+	"github.com/google/uuid"
 )
 
-func (sess Session) GetManufacturers(ctx context.Context) ([]domain.Manufacturer, error) {
-	var manufacturers []domain.Manufacturer = make([]domain.Manufacturer, 0)
+type manufacturerUsecase struct {
+	store domain.Datastore
+}
 
-	query := "SELECT * FROM manufacturer ORDER BY name ASC"
-
-	if err := sess.DB.Raw(query).Scan(&manufacturers).Error; err != nil {
-		return nil, err
+func NewManufacturerUsecase(store domain.Datastore) domain.ManufacturerUsecase {
+	return &manufacturerUsecase{
+		store: store,
 	}
+}
 
-	return manufacturers, nil
+func (uc *manufacturerUsecase) GetManufacturers(ctx context.Context) ([]domain.Manufacturer, error) {
+	return uc.store.GetManufacturers(ctx)
+}
+
+func (uc *manufacturerUsecase) GetModels(ctx context.Context, manufacturerID uuid.UUID) ([]domain.Model, error) {
+	return uc.store.GetModels(ctx, manufacturerID)
 }

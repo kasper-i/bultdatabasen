@@ -2,7 +2,6 @@ package trashbin
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"context"
 	"encoding/json"
@@ -13,10 +12,13 @@ import (
 )
 
 type trashbin struct {
+	store domain.Datastore
 }
 
-func New() *trashbin {
-	return &trashbin{}
+func New(store domain.Datastore) *trashbin {
+	return &trashbin{
+		store: store,
+	}
 }
 
 func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
@@ -40,9 +42,7 @@ func (authorizer *trashbin) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		sess := usecases.NewSession(usecases.DB, nil)
-
-		ancestors, err := sess.GetAncestors(r.Context(), resourceID)
+		ancestors, err := authorizer.store.GetAncestors(r.Context(), resourceID)
 		if err != nil {
 			panic(err)
 		}

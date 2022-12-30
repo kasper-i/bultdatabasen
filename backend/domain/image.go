@@ -25,9 +25,9 @@ func (Image) TableName() string {
 
 type ImageUsecase interface {
 	GetImages(ctx context.Context, resourceID uuid.UUID) ([]Image, error)
-	GetImage(ctx context.Context, imageID uuid.UUID) (*Image, error)
+	GetImage(ctx context.Context, imageID uuid.UUID) (Image, error)
 	GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error)
-	UploadImage(ctx context.Context, parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (*Image, error)
+	UploadImage(ctx context.Context, parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (Image, error)
 	DeleteImage(ctx context.Context, imageID uuid.UUID) error
 	RotateImage(ctx context.Context, imageID uuid.UUID, rotation int) error
 }

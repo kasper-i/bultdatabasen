@@ -33,7 +33,7 @@ type InsertPosition struct {
 }
 
 type PointUsecase interface {
-	GetPoints(ctx context.Context, resourceID uuid.UUID) ([]*Point, error)
-	AttachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []Bolt) (*Point, error)
+	GetPoints(ctx context.Context, resourceID uuid.UUID) ([]Point, error)
+	AttachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []Bolt) (Point, error)
 	DetachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID) error
 }

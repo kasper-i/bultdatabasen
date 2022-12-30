@@ -17,7 +17,7 @@ func (Crag) TableName() string {
 
 type CragUsecase interface {
 	GetCrags(ctx context.Context, resourceID uuid.UUID) ([]Crag, error)
-	GetCrag(ctx context.Context, resourceID uuid.UUID) (*Crag, error)
-	CreateCrag(ctx context.Context, crag *Crag, parentResourceID uuid.UUID) error
+	GetCrag(ctx context.Context, resourceID uuid.UUID) (Crag, error)
+	CreateCrag(ctx context.Context, crag Crag, parentResourceID uuid.UUID) (Crag, error)
 	DeleteCrag(ctx context.Context, resourceID uuid.UUID) error
 }

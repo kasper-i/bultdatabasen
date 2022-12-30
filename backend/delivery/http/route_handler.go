@@ -13,10 +13,13 @@ import (
 )
 
 type RouteHandler struct {
+	RouteUsecase domain.RouteUsecase
 }
 
-func NewRouteHandler(router *mux.Router) {
-	handler := &RouteHandler{}
+func NewRouteHandler(router *mux.Router, routeUsecase domain.RouteUsecase) {
+	handler := &RouteHandler{
+		RouteUsecase: routeUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/routes", handler.GetRoutes).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/routes", handler.CreateRoute).Methods(http.MethodPost, http.MethodOptions)
@@ -26,7 +29,6 @@ func NewRouteHandler(router *mux.Router) {
 }
 
 func (hdlr *RouteHandler) GetRoutes(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -34,7 +36,7 @@ func (hdlr *RouteHandler) GetRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if routes, err := sess.GetRoutes(r.Context(), parentResourceID); err != nil {
+	if routes, err := hdlr.RouteUsecase.GetRoutes(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, routes)
@@ -42,7 +44,6 @@ func (hdlr *RouteHandler) GetRoutes(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -50,7 +51,7 @@ func (hdlr *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if route, err := sess.GetRoute(r.Context(), resourceID); err != nil {
+	if route, err := hdlr.RouteUsecase.GetRoute(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		route.Ancestors = usecases.GetStoredAncestors(r)
@@ -59,7 +60,6 @@ func (hdlr *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -74,17 +74,16 @@ func (hdlr *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateRoute(r.Context(), &route, parentResourceID)
+	createdRoute, err := hdlr.RouteUsecase.CreateRoute(r.Context(), route, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, route)
+		utils.WriteResponse(w, http.StatusCreated, createdRoute)
 	}
 }
 
 func (hdlr *RouteHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -92,7 +91,7 @@ func (hdlr *RouteHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteRoute(r.Context(), resourceID); err != nil {
+	if err := hdlr.RouteUsecase.DeleteRoute(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)
@@ -100,7 +99,6 @@ func (hdlr *RouteHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -116,7 +114,7 @@ func (hdlr *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedRoute, err := sess.UpdateRoute(r.Context(), routeID, route)
+	updatedRoute, err := hdlr.RouteUsecase.UpdateRoute(r.Context(), routeID, route)
 
 	if err != nil {
 		utils.WriteError(w, err)

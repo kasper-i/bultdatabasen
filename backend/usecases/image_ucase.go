@@ -21,7 +21,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/rwcarlsen/goexif/exif"
 	"gopkg.in/ini.v1"
-	"gorm.io/gorm"
 )
 
 var spacesBucket string
@@ -55,54 +54,29 @@ func init() {
 	spacesBucket = cfg.Section("spaces").Key("bucket").String()
 }
 
+type imageUsecase struct {
+	store domain.Datastore
+}
+
+func NewImageUsecase(store domain.Datastore) domain.ImageUsecase {
+	return &imageUsecase{
+		store: store,
+	}
+}
+
 type ImagePatch struct {
 	Rotation *int `json:"rotation"`
 }
 
-func (sess Session) GetImages(ctx context.Context, resourceID uuid.UUID) ([]domain.Image, error) {
-	var images []domain.Image = make([]domain.Image, 0)
-
-	if err := sess.DB.Raw(fmt.Sprintf(`%s
-		SELECT * FROM tree
-		INNER JOIN resource ON tree.resource_id = resource.leaf_of
-		INNER JOIN image ON resource.id = image.id`, withTreeQuery()), resourceID).Scan(&images).Error; err != nil {
-		return nil, err
-	}
-
-	return images, nil
+func (uc *imageUsecase) GetImages(ctx context.Context, resourceID uuid.UUID) ([]domain.Image, error) {
+	return uc.store.GetImages(ctx, resourceID)
 }
 
-func (sess Session) getImageWithLock(imageID uuid.UUID) (*domain.Image, error) {
-	var image domain.Image
-
-	if err := sess.DB.Raw(`SELECT * FROM image INNER JOIN resource ON image.id = resource.id WHERE image.id = ? FOR UPDATE`, imageID).
-		Scan(&image).Error; err != nil {
-		return nil, err
-	}
-
-	if image.ID == uuid.Nil {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	return &image, nil
+func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain.Image, error) {
+	return uc.store.GetImage(ctx, imageID)
 }
 
-func (sess Session) GetImage(ctx context.Context, imageID uuid.UUID) (*domain.Image, error) {
-	var image domain.Image
-
-	if err := sess.DB.Raw(`SELECT * FROM image WHERE image.id = ?`, imageID).
-		Scan(&image).Error; err != nil {
-		return nil, err
-	}
-
-	if image.ID == uuid.Nil {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	return &image, nil
-}
-
-func (sess Session) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error) {
+func (uc *imageUsecase) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error) {
 	var imageKey string
 
 	if version == "original" {
@@ -129,7 +103,7 @@ func (sess Session) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, 
 	return "", utils.ErrNotFound
 }
 
-func (sess Session) UploadImage(ctx context.Context, parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (*domain.Image, error) {
+func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (domain.Image, error) {
 	img := domain.Image{
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
@@ -142,19 +116,19 @@ func (sess Session) UploadImage(ctx context.Context, parentResourceID uuid.UUID,
 	reader := bytes.NewReader(imageBytes)
 
 	if _, err := reader.Seek(0, io.SeekStart); err != nil {
-		return nil, err
+		return domain.Image{}, err
 	}
 
 	decodedImage, _, err := image.Decode(reader)
 	if err != nil {
-		return nil, err
+		return domain.Image{}, err
 	}
 
 	img.Width = decodedImage.Bounds().Dx()
 	img.Height = decodedImage.Bounds().Dy()
 
 	if _, err := reader.Seek(0, io.SeekStart); err != nil {
-		return nil, err
+		return domain.Image{}, err
 	}
 
 	exifData, err := exif.Decode(reader)
@@ -168,13 +142,13 @@ func (sess Session) UploadImage(ctx context.Context, parentResourceID uuid.UUID,
 		}
 	}
 
-	err = sess.Transaction(func(sess Session) error {
-		if err := sess.CreateResource(ctx, &resource, parentResourceID); err != nil {
+	err = uc.store.Transaction(func(store domain.Datastore) error {
+		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
 			return err
+		} else {
+			img.ID = createdResource.ID
+			img.UserID = createdResource.CreatorID
 		}
-
-		img.ID = resource.ID
-		img.UserID = resource.CreatorID
 
 		object := s3.PutObjectInput{
 			Bucket:      aws.String(spacesBucket),
@@ -193,11 +167,11 @@ func (sess Session) UploadImage(ctx context.Context, parentResourceID uuid.UUID,
 			return err
 		}
 
-		if err := sess.DB.Create(&img).Error; err != nil {
+		if err := store.InsertImage(ctx, img); err != nil {
 			return err
 		}
 
-		if ancestors, err := sess.GetAncestors(ctx, img.ID); err != nil {
+		if ancestors, err := store.GetAncestors(ctx, img.ID); err != nil {
 			return nil
 		} else {
 			img.Ancestors = ancestors
@@ -208,10 +182,10 @@ func (sess Session) UploadImage(ctx context.Context, parentResourceID uuid.UUID,
 
 	if err != nil {
 		rollbackObjectCreations(img.ID)
-		return nil, err
+		return domain.Image{}, err
 	}
 
-	return &img, nil
+	return img, nil
 }
 
 func rollbackObjectCreations(imageID uuid.UUID) {
@@ -234,24 +208,24 @@ func rollbackObjectCreations(imageID uuid.UUID) {
 	}
 }
 
-func (sess Session) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
-	return sess.DeleteResource(ctx, imageID)
+func (uc *imageUsecase) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
+	return deleteResource(ctx, uc.store, imageID)
 }
 
-func (sess Session) RotateImage(ctx context.Context, imageID uuid.UUID, rotation int) error {
-	original, err := sess.getImageWithLock(imageID)
+func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rotation int) error {
+	original, err := uc.store.GetImageWithLock(imageID)
 	if err != nil {
 		return err
 	}
 
 	original.Rotation = rotation
 
-	return sess.Transaction(func(sess Session) error {
-		if err := sess.TouchResource(ctx, imageID); err != nil {
+	return uc.store.Transaction(func(store domain.Datastore) error {
+		if err := store.TouchResource(ctx, imageID, ""); err != nil {
 			return err
 		}
 
-		if err := sess.DB.Select("Rotation").Updates(original).Error; err != nil {
+		if err := store.SaveImage(ctx, original); err != nil {
 			return err
 		}
 

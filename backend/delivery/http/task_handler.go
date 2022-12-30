@@ -15,10 +15,13 @@ import (
 )
 
 type TaskHandler struct {
+	TaskUsecase domain.TaskUsecase
 }
 
-func NewTaskHandler(router *mux.Router) {
-	handler := &TaskHandler{}
+func NewTaskHandler(router *mux.Router, taskUsecase domain.TaskUsecase) {
+	handler := &TaskHandler{
+		TaskUsecase: taskUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/tasks", handler.GetTasks).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/tasks", handler.CreateTask).Methods(http.MethodPost, http.MethodOptions)
@@ -51,7 +54,6 @@ func parsePaginationQuery(query url.Values) (domain.Pagination, error) {
 }
 
 func (hdlr *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	query := r.URL.Query()
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -73,7 +75,7 @@ func (hdlr *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 
 	statuses := query["status"]
 
-	if tasks, meta, err := sess.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {
+	if tasks, meta, err := hdlr.TaskUsecase.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		response := GetTasksResponse{}
@@ -84,7 +86,6 @@ func (hdlr *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -92,7 +93,7 @@ func (hdlr *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if task, err := sess.GetTask(r.Context(), resourceID); err != nil {
+	if task, err := hdlr.TaskUsecase.GetTask(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		task.Ancestors = usecases.GetStoredAncestors(r)
@@ -101,7 +102,6 @@ func (hdlr *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -116,17 +116,16 @@ func (hdlr *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.CreateTask(r.Context(), &task, parentResourceID)
+	createdTask, err := hdlr.TaskUsecase.CreateTask(r.Context(), task, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, task)
+		utils.WriteResponse(w, http.StatusCreated, createdTask)
 	}
 }
 
 func (hdlr *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	taskID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -141,18 +140,17 @@ func (hdlr *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sess.UpdateTask(r.Context(), &task, taskID)
+	updatedTask, err := hdlr.TaskUsecase.UpdateTask(r.Context(), task, taskID)
 
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
 		task.Ancestors = usecases.GetStoredAncestors(r)
-		utils.WriteResponse(w, http.StatusOK, task)
+		utils.WriteResponse(w, http.StatusOK, updatedTask)
 	}
 }
 
 func (hdlr *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -160,7 +158,7 @@ func (hdlr *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := sess.DeleteTask(r.Context(), resourceID); err != nil {
+	if err := hdlr.TaskUsecase.DeleteTask(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)

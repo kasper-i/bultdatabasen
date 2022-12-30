@@ -17,7 +17,7 @@ func (Sector) TableName() string {
 
 type SectorUsecase interface {
 	GetSectors(ctx context.Context, resourceID uuid.UUID) ([]Sector, error)
-	GetSector(ctx context.Context, resourceID uuid.UUID) (*Sector, error)
-	CreateSector(ctx context.Context, sector *Sector, parentResourceID uuid.UUID) error
+	GetSector(ctx context.Context, resourceID uuid.UUID) (Sector, error)
+	CreateSector(ctx context.Context, sector Sector, parentResourceID uuid.UUID) (Sector, error)
 	DeleteSector(ctx context.Context, resourceID uuid.UUID) error
 }

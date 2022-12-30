@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bultdatabasen/domain"
 	"bultdatabasen/utils"
 	"net/http"
 
@@ -9,19 +10,20 @@ import (
 )
 
 type ManufacturerHandler struct {
+	ManufacturerUsecase domain.ManufacturerUsecase
 }
 
-func NewManufacturerHandler(router *mux.Router) {
-	handler := &ManufacturerHandler{}
+func NewManufacturerHandler(router *mux.Router, manufacturerUsecase domain.ManufacturerUsecase) {
+	handler := &ManufacturerHandler{
+		ManufacturerUsecase: manufacturerUsecase,
+	}
 
 	router.HandleFunc("/manufacturers", handler.GetManufacturers).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/manufacturers/{manufacturerID}/models", handler.GetModels).Methods(http.MethodGet, http.MethodOptions)
 }
 
 func (hdlr *ManufacturerHandler) GetManufacturers(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
-
-	if manufacturers, err := sess.GetManufacturers(r.Context()); err != nil {
+	if manufacturers, err := hdlr.ManufacturerUsecase.GetManufacturers(r.Context()); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, manufacturers)
@@ -29,7 +31,6 @@ func (hdlr *ManufacturerHandler) GetManufacturers(w http.ResponseWriter, r *http
 }
 
 func (hdlr *ManufacturerHandler) GetModels(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	manufacturerID, err := uuid.Parse(vars["manufacturerID"])
 	if err != nil {
@@ -37,7 +38,7 @@ func (hdlr *ManufacturerHandler) GetModels(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if models, err := sess.GetModels(r.Context(), manufacturerID); err != nil {
+	if models, err := hdlr.ManufacturerUsecase.GetModels(r.Context(), manufacturerID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, models)

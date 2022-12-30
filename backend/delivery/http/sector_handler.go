@@ -13,10 +13,13 @@ import (
 )
 
 type SectorHandler struct {
+	SectorUsecase domain.SectorUsecase
 }
 
-func NewSectorHandler(router *mux.Router) {
-	handler := &SectorHandler{}
+func NewSectorHandler(router *mux.Router, sectorUsecase domain.SectorUsecase) {
+	handler := &SectorHandler{
+		SectorUsecase: sectorUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/sectors", handler.GetSectors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/sectors", handler.CreateSector).Methods(http.MethodPost, http.MethodOptions)
@@ -26,7 +29,6 @@ func NewSectorHandler(router *mux.Router) {
 }
 
 func (hdlr *SectorHandler) GetSectors(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -34,7 +36,7 @@ func (hdlr *SectorHandler) GetSectors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if sectors, err := sess.GetSectors(r.Context(), parentResourceID); err != nil {
+	if sectors, err := hdlr.SectorUsecase.GetSectors(r.Context(), parentResourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusOK, sectors)
@@ -42,7 +44,6 @@ func (hdlr *SectorHandler) GetSectors(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *SectorHandler) GetSector(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -50,7 +51,7 @@ func (hdlr *SectorHandler) GetSector(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if sector, err := sess.GetSector(r.Context(), resourceID); err != nil {
+	if sector, err := hdlr.SectorUsecase.GetSector(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		sector.Ancestors = usecases.GetStoredAncestors(r)
@@ -59,7 +60,6 @@ func (hdlr *SectorHandler) GetSector(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdlr *SectorHandler) CreateSector(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -74,17 +74,16 @@ func (hdlr *SectorHandler) CreateSector(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = sess.CreateSector(r.Context(), &sector, parentResourceID)
+	createdSector, err := hdlr.SectorUsecase.CreateSector(r.Context(), sector, parentResourceID)
 
 	if err != nil {
 		utils.WriteError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, sector)
+		utils.WriteResponse(w, http.StatusCreated, createdSector)
 	}
 }
 
 func (hdlr *SectorHandler) DeleteSector(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -92,7 +91,7 @@ func (hdlr *SectorHandler) DeleteSector(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := sess.DeleteSector(r.Context(), resourceID); err != nil {
+	if err := hdlr.SectorUsecase.DeleteSector(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusNoContent, nil)
