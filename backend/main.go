@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bultdatabasen/datastores"
 	httpdelivery "bultdatabasen/delivery/http"
 	"bultdatabasen/middleware/authenticator"
 	"bultdatabasen/middleware/authorizer"
 	"bultdatabasen/middleware/cors"
 	"bultdatabasen/middleware/trashbin"
-	"bultdatabasen/repositories"
 	"bultdatabasen/usecases"
 	"fmt"
 	"io"
@@ -36,7 +36,7 @@ func getVersion(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
-	datastore := repositories.NewDatastore()
+	datastore := datastores.NewDatastore()
 
 	userUsecase := usecases.NewUserUsecase(datastore)
 	resourceUseCase := usecases.NewResourceUsecase(datastore)
