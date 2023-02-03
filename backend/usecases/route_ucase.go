@@ -9,11 +9,15 @@ import (
 
 type routeUsecase struct {
 	store domain.Datastore
+	authenticator domain.Authenticator
+	authorizer    domain.Authorizer
 }
 
-func NewRouteUsecase(store domain.Datastore) domain.RouteUsecase {
+func NewRouteUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.RouteUsecase {
 	return &routeUsecase{
 		store: store,
+		authenticator: authenticator,
+		authorizer:    authorizer,
 	}
 }
 

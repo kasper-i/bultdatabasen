@@ -1,4 +1,4 @@
-package cors
+package main
 
 import (
 	"bultdatabasen/utils"

@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -61,7 +60,6 @@ func (hdlr *areaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 	if area, err := hdlr.AreaUsecase.GetArea(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		area.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, area)
 	}
 }
@@ -78,8 +76,6 @@ func (hdlr *areaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := r.Context().Value("user_id").(string)
-
 	reqBody, _ := io.ReadAll(r.Body)
 	var area domain.Area
 	if err := json.Unmarshal(reqBody, &area); err != nil {
@@ -87,7 +83,7 @@ func (hdlr *areaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if createdArea, err := hdlr.AreaUsecase.CreateArea(r.Context(), area, resourceID, userId); err != nil {
+	if createdArea, err := hdlr.AreaUsecase.CreateArea(r.Context(), area, resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
 		utils.WriteResponse(w, http.StatusCreated, createdArea)

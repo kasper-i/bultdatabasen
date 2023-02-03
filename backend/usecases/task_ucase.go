@@ -9,11 +9,15 @@ import (
 
 type taskUsecase struct {
 	store domain.Datastore
+	authenticator domain.Authenticator
+	authorizer    domain.Authorizer
 }
 
-func NewTaskUsecase(store domain.Datastore) domain.TaskUsecase {
+func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.TaskUsecase {
 	return &taskUsecase{
 		store: store,
+		authenticator: authenticator,
+		authorizer:    authorizer,
 	}
 }
 

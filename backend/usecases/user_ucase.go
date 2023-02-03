@@ -6,12 +6,14 @@ import (
 )
 
 type userUsecase struct {
-	store domain.Datastore
+	store         domain.Datastore
+	authenticator domain.Authenticator
 }
 
-func NewUserUsecase(store domain.Datastore) domain.UserUsecase {
+func NewUserUsecase(authenticator domain.Authenticator, store domain.Datastore) domain.UserUsecase {
 	return &userUsecase{
-		store: store,
+		store:         store,
+		authenticator: authenticator,
 	}
 }
 

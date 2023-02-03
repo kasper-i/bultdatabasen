@@ -9,12 +9,16 @@ import (
 )
 
 type resourceUsecase struct {
-	store domain.Datastore
+	store         domain.Datastore
+	authenticator domain.Authenticator
+	authorizer    domain.Authorizer
 }
 
-func NewResourceUsecase(store domain.Datastore) domain.ResourceUsecase {
+func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.ResourceUsecase {
 	return &resourceUsecase{
-		store: store,
+		store:         store,
+		authenticator: authenticator,
+		authorizer:    authorizer,
 	}
 }
 
@@ -31,6 +35,21 @@ func (uc *resourceUsecase) MoveResource(ctx context.Context, resourceID, newPare
 	var subtree domain.Path
 	var err error
 	var oldParentID uuid.UUID
+
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, user, resourceID, domain.WritePermission); err != nil {
+		return err
+	}
+
+	if newParentID.String() != domain.RootID {
+		if err := uc.authorizer.HasPermission(ctx, user, newParentID, domain.WritePermission); err != nil {
+			return err
+		}
+	}
 
 	return uc.store.Transaction(func(store domain.Datastore) error {
 		if err := uc.store.GetSubtreeLock(ctx, resourceID); err != nil {

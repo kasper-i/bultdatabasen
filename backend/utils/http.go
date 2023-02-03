@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bultdatabasen/domain"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -29,7 +30,10 @@ func WriteError(w http.ResponseWriter, err error) {
 	error := Error{}
 	var status int
 
-	if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, ErrNotFound) {
+	if notFoundError, ok := err.(*domain.ErrNotFound); ok {
+		status = http.StatusNotFound
+		error.Message = notFoundError.ResourceID.String()
+	} else if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, ErrNotFound) {
 		status = http.StatusNotFound
 	} else if errors.Is(err, gorm.ErrInvalidData) {
 		status = http.StatusBadRequest
@@ -59,4 +63,27 @@ func WriteError(w http.ResponseWriter, err error) {
 	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(error)
+}
+
+func writeUnauthorized(w http.ResponseWriter) {
+	err := Error{
+		Status:  http.StatusUnauthorized,
+		Message: "Unauthorized",
+	}
+
+	w.WriteHeader(http.StatusUnauthorized)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(err)
+}
+
+func writeForbidden(w http.ResponseWriter, resourceID *uuid.UUID) {
+	err := Error{
+		Status:     http.StatusForbidden,
+		Message:    "Forbidden",
+		ResourceID: resourceID,
+	}
+
+	w.WriteHeader(http.StatusForbidden)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(err)
 }

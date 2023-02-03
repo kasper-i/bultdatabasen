@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -54,7 +53,6 @@ func (hdlr *BoltHandler) GetBolt(w http.ResponseWriter, r *http.Request) {
 	if bolt, err := hdlr.BoltUsecase.GetBolt(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		bolt.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, bolt)
 	}
 }

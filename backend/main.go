@@ -1,12 +1,11 @@
 package main
 
 import (
+	"bultdatabasen/authenticator"
+	"bultdatabasen/authorizer"
 	"bultdatabasen/datastores"
 	httpdelivery "bultdatabasen/delivery/http"
-	"bultdatabasen/middleware/authenticator"
-	"bultdatabasen/middleware/authorizer"
-	"bultdatabasen/middleware/cors"
-	"bultdatabasen/middleware/trashbin"
+	"bultdatabasen/domain"
 	"bultdatabasen/usecases"
 	"fmt"
 	"io"
@@ -38,27 +37,26 @@ func main() {
 
 	datastore := datastores.NewDatastore()
 
-	userUsecase := usecases.NewUserUsecase(datastore)
-	resourceUseCase := usecases.NewResourceUsecase(datastore)
-	areaUsecase := usecases.NewAreaUsecase(datastore)
-	cragUsecase := usecases.NewCragUsecase(datastore)
-	sectorUsecase := usecases.NewSectorUsecase(datastore)
-	routeUsecase := usecases.NewRouteUsecase(datastore)
-	pointUsecase := usecases.NewPointUsecase(datastore)
-	imageUsecase := usecases.NewImageUsecase(datastore)
-	boltUsecase := usecases.NewBoltUsecase(datastore)
-	taskUsecase := usecases.NewTaskUsecase(datastore)
+	authn := authenticator.New()
+	authz := authorizer.New(datastore)
+
+	var rm domain.ResourceManager
+
+	userUsecase := usecases.NewUserUsecase(authn, datastore)
+	resourceUseCase := usecases.NewResourceUsecase(authn, authz, datastore)
+	areaUsecase := usecases.NewAreaUsecase(authn, authz, datastore, rm)
+	cragUsecase := usecases.NewCragUsecase(authn, authz, datastore)
+	sectorUsecase := usecases.NewSectorUsecase(authn, authz, datastore)
+	routeUsecase := usecases.NewRouteUsecase(authn, authz, datastore)
+	pointUsecase := usecases.NewPointUsecase(authn, authz, datastore)
+	imageUsecase := usecases.NewImageUsecase(authn, authz, datastore)
+	boltUsecase := usecases.NewBoltUsecase(authn, authz, datastore)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, datastore)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(datastore)
 	materialUsecase := usecases.NewMaterialUsecase(datastore)
 
-	trashbin := trashbin.New(datastore)
-	authenticator := authenticator.New()
-	authorizer := authorizer.New(datastore)
-
-	router.Use(cors.CORSMiddleware)
-	router.Use(trashbin.Middleware)
-	router.Use(authenticator.Middleware)
-	router.Use(authorizer.Middleware)
+	router.Use(CORSMiddleware)
+	router.Use(authn.Middleware)
 
 	router.HandleFunc("/health", checkHandler)
 	router.HandleFunc("/version", getVersion)

@@ -9,11 +9,15 @@ import (
 
 type sectorUsecase struct {
 	store domain.Datastore
+	authenticator domain.Authenticator
+	authorizer    domain.Authorizer
 }
 
-func NewSectorUsecase(store domain.Datastore) domain.SectorUsecase {
+func NewSectorUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.SectorUsecase {
 	return &sectorUsecase{
 		store: store,
+		authenticator: authenticator,
+		authorizer:    authorizer,
 	}
 }
 

@@ -11,11 +11,15 @@ import (
 
 type pointUsecase struct {
 	store domain.Datastore
+	authenticator domain.Authenticator
+	authorizer    domain.Authorizer
 }
 
-func NewPointUsecase(store domain.Datastore) domain.PointUsecase {
+func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.PointUsecase {
 	return &pointUsecase{
 		store: store,
+		authenticator: authenticator,
+		authorizer:    authorizer,
 	}
 }
 

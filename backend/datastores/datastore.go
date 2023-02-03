@@ -12,6 +12,8 @@ import (
 	"gorm.io/gorm"
 )
 
+type txKey struct{}
+
 type psqlDatastore struct {
 	tx *gorm.DB
 }
@@ -22,12 +24,45 @@ func NewDatastore() domain.Datastore {
 	}
 }
 
-func (store *psqlDatastore) Transaction(fn func(domain.Datastore) error) error {
-	return store.tx.Transaction(func(tx *gorm.DB) error {
-		return fn(&psqlDatastore{
-			tx: tx,
-		})
-	})
+func injectTx(ctx context.Context, tx *gorm.DB) context.Context {
+	return context.WithValue(ctx, txKey{}, tx)
+}
+
+func extractTx(ctx context.Context) *gorm.DB {
+	if tx, ok := ctx.Value(txKey{}).(*gorm.DB); ok {
+		return tx
+	}
+	return nil
+}
+
+func (store *psqlDatastore) model(ctx context.Context, model ...interface{}) *gorm.DB {
+	tx := extractTx(ctx)
+	if tx != nil {
+		return tx
+	}
+
+	return store.tx
+}
+
+func (store *psqlDatastore) WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	err := fn(injectTx(ctx, tx))
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }
 
 func (store *psqlDatastore) GetUser(ctx context.Context, userID string) (domain.User, error) {
@@ -75,17 +110,12 @@ func (store *psqlDatastore) GetRoles(ctx context.Context, userID string) []domai
 	return roles
 }
 
-func (store *psqlDatastore) InsertResourceAccess(ctx context.Context, resourceID uuid.UUID, userID, role string) error {
+func (store *psqlDatastore) InsertResourceAccess(ctx context.Context, resourceID uuid.UUID, userID string, role domain.RoleType) error {
 	return store.tx.Exec("INSERT INTO user_role VALUES (?, ?, ?)", userID, resourceID, role).Error
 }
 
 func (store *psqlDatastore) GetAncestors(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
 	var ancestors []domain.Resource
-
-	store.Transaction(func(ds domain.Datastore) error {
-		ds.GetAncestors(ctx, resourceID)
-		return nil
-	})
 
 	err := store.tx.Raw(`WITH path_list AS (
 		SELECT COALESCE(t1.path, t2.path) AS path FROM resource

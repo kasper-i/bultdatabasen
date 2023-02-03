@@ -8,45 +8,79 @@ import (
 )
 
 type areaUsecase struct {
-	store domain.Datastore
+	repo          domain.Datastore
+	authenticator domain.Authenticator
+	authorizer    domain.Authorizer
+	rm            domain.ResourceManager
 }
 
-func NewAreaUsecase(store domain.Datastore) domain.AreaUsecase {
+func NewAreaUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.AreaUsecase {
 	return &areaUsecase{
-		store: store,
+		repo:          store,
+		authenticator: authenticator,
+		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 
 func (uc *areaUsecase) GetAreas(ctx context.Context, resourceID uuid.UUID) ([]domain.Area, error) {
-	return uc.store.GetAreas(ctx, resourceID)
+	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
+		return nil, err
+	}
+
+	return uc.repo.GetAreas(ctx, resourceID)
 }
 
-func (uc *areaUsecase) GetArea(ctx context.Context, resourceID uuid.UUID) (domain.Area, error) {
-	return uc.store.GetArea(ctx, resourceID)
+func (uc *areaUsecase) GetArea(ctx context.Context, areaID uuid.UUID) (domain.Area, error) {
+	ancestors, err := uc.repo.GetAncestors(ctx, areaID)
+	if err != nil {
+		return domain.Area{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, nil, areaID, domain.ReadPermission); err != nil {
+		return domain.Area{}, err
+	}
+
+	area, err := uc.repo.GetArea(ctx, areaID)
+	if err != nil {
+		return domain.Area{}, err
+	}
+
+	area.Ancestors = ancestors
+	return area, nil
 }
 
-func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentResourceID uuid.UUID, userID string) (domain.Area, error) {
+func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentResourceID uuid.UUID) (domain.Area, error) {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.Area{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, parentResourceID, domain.WritePermission); err != nil {
+		return domain.Area{}, err
+	}
+
 	resource := domain.Resource{
 		Name: &area.Name,
 		Type: domain.TypeArea,
 	}
 
-	err := uc.store.Transaction(func(store domain.Datastore) error {
-		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
+	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			area.ID = createdResource.ID
 		}
 
-		if err := store.InsertArea(ctx, area); err != nil {
+		if err := uc.repo.InsertArea(txCtx, area); err != nil {
 			return err
 		}
 
-		if err := store.InsertResourceAccess(ctx, area.ID, userID, "owner"); err != nil {
+		if err := uc.repo.InsertResourceAccess(txCtx, area.ID, user.ID, domain.RoleOwner); err != nil {
 			return err
 		}
 
-		if ancestors, err := store.GetAncestors(ctx, area.ID); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, area.ID); err != nil {
 			return nil
 		} else {
 			area.Ancestors = ancestors
@@ -59,5 +93,19 @@ func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentR
 }
 
 func (uc *areaUsecase) DeleteArea(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.store, resourceID)
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, resourceID, domain.WritePermission); err != nil {
+		return err
+	}
+
+	_, err = uc.repo.GetArea(ctx, resourceID)
+	if err != nil {
+		return err
+	}
+
+	return deleteResource(ctx, uc.repo, resourceID)
 }

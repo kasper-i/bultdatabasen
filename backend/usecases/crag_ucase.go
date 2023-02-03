@@ -9,11 +9,15 @@ import (
 
 type cragUsecase struct {
 	store domain.Datastore
+	authenticator domain.Authenticator
+	authorizer    domain.Authorizer
 }
 
-func NewCragUsecase(store domain.Datastore) domain.CragUsecase {
+func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.CragUsecase {
 	return &cragUsecase{
 		store: store,
+		authenticator: authenticator,
+		authorizer:    authorizer,
 	}
 }
 

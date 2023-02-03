@@ -56,11 +56,15 @@ func init() {
 
 type imageUsecase struct {
 	store domain.Datastore
+	authenticator domain.Authenticator
+	authorizer    domain.Authorizer
 }
 
-func NewImageUsecase(store domain.Datastore) domain.ImageUsecase {
+func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.ImageUsecase {
 	return &imageUsecase{
 		store: store,
+		authenticator: authenticator,
+		authorizer:    authorizer,
 	}
 }
 
