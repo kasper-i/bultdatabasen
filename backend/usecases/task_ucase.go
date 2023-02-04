@@ -14,11 +14,12 @@ type taskUsecase struct {
 	rm            domain.ResourceManager
 }
 
-func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.TaskUsecase {
+func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.TaskUsecase {
 	return &taskUsecase{
 		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 

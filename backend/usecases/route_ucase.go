@@ -14,11 +14,12 @@ type routeUsecase struct {
 	rm            domain.ResourceManager
 }
 
-func NewRouteUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.RouteUsecase {
+func NewRouteUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.RouteUsecase {
 	return &routeUsecase{
 		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 

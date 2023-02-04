@@ -14,11 +14,12 @@ type boltUsecase struct {
 	rm            domain.ResourceManager
 }
 
-func NewBoltUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.BoltUsecase {
+func NewBoltUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.BoltUsecase {
 	return &boltUsecase{
 		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 

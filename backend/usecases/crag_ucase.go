@@ -14,11 +14,12 @@ type cragUsecase struct {
 	rm            domain.ResourceManager
 }
 
-func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.CragUsecase {
+func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.CragUsecase {
 	return &cragUsecase{
 		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 

@@ -14,11 +14,12 @@ type resourceUsecase struct {
 	rm            domain.ResourceManager
 }
 
-func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.ResourceUsecase {
+func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.ResourceUsecase {
 	return &resourceUsecase{
 		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 

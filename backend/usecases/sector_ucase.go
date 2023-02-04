@@ -14,11 +14,12 @@ type sectorUsecase struct {
 	rm            domain.ResourceManager
 }
 
-func NewSectorUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.SectorUsecase {
+func NewSectorUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.SectorUsecase {
 	return &sectorUsecase{
 		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 

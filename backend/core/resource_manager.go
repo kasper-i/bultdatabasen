@@ -157,8 +157,7 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 			return utils.ErrHierarchyStructureViolation
 		}
 
-		oldParentAncestorIDs := 0
-		if err := rm.UpdateCounters(txCtx, domain.Counters{}.Substract(resource.Counters), append(oldParentAncestorIDs, oldParentID)); err != nil {
+		if err := rm.UpdateCounters(txCtx, domain.Counters{}.Substract(resource.Counters), subtree[0:len(subtree)-1]...); err != nil {
 			return err
 		}
 
@@ -175,8 +174,7 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 			return err
 		}
 
-		newParentAncestorsIDs = 0
-		return rm.UpdateCounters(txCtx, resource.Counters, append(newParentAncetorIDs, newParentID)...)
+		return rm.UpdateCounters(txCtx, resource.Counters, newParentPath...)
 	})
 }
 

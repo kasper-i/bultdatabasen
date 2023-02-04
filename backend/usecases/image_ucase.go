@@ -61,11 +61,12 @@ type imageUsecase struct {
 	rm            domain.ResourceManager
 }
 
-func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.ImageUsecase {
+func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.ImageUsecase {
 	return &imageUsecase{
 		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 

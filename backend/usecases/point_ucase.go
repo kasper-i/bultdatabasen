@@ -16,11 +16,12 @@ type pointUsecase struct {
 	rm            domain.ResourceManager
 }
 
-func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.PointUsecase {
+func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.PointUsecase {
 	return &pointUsecase{
 		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
+		rm:            rm,
 	}
 }
 

@@ -43,15 +43,15 @@ func main() {
 	var rm domain.ResourceManager
 
 	userUsecase := usecases.NewUserUsecase(authn, datastore)
-	resourceUseCase := usecases.NewResourceUsecase(authn, authz, datastore)
+	resourceUseCase := usecases.NewResourceUsecase(authn, authz, datastore, rm)
 	areaUsecase := usecases.NewAreaUsecase(authn, authz, datastore, rm)
-	cragUsecase := usecases.NewCragUsecase(authn, authz, datastore)
-	sectorUsecase := usecases.NewSectorUsecase(authn, authz, datastore)
-	routeUsecase := usecases.NewRouteUsecase(authn, authz, datastore)
-	pointUsecase := usecases.NewPointUsecase(authn, authz, datastore)
-	imageUsecase := usecases.NewImageUsecase(authn, authz, datastore)
-	boltUsecase := usecases.NewBoltUsecase(authn, authz, datastore)
-	taskUsecase := usecases.NewTaskUsecase(authn, authz, datastore)
+	cragUsecase := usecases.NewCragUsecase(authn, authz, datastore, rm)
+	sectorUsecase := usecases.NewSectorUsecase(authn, authz, datastore, rm)
+	routeUsecase := usecases.NewRouteUsecase(authn, authz, datastore, rm)
+	pointUsecase := usecases.NewPointUsecase(authn, authz, datastore, rm)
+	imageUsecase := usecases.NewImageUsecase(authn, authz, datastore, rm)
+	boltUsecase := usecases.NewBoltUsecase(authn, authz, datastore, rm)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, datastore, rm)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(datastore)
 	materialUsecase := usecases.NewMaterialUsecase(datastore)
 
