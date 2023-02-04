@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -54,7 +53,6 @@ func (hdlr *CragHandler) GetCrag(w http.ResponseWriter, r *http.Request) {
 	if crag, err := hdlr.CragUsecase.GetCrag(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		crag.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, crag)
 	}
 }

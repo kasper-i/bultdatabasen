@@ -43,7 +43,6 @@ func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request)
 	if resource, err := hdlr.ResourceUsecase.GetResource(r.Context(), id); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		resource.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, resource)
 	}
 }

@@ -114,7 +114,7 @@ func (store *psqlDatastore) InsertResourceAccess(ctx context.Context, resourceID
 	return store.tx.Exec("INSERT INTO user_role VALUES (?, ?, ?)", userID, resourceID, role).Error
 }
 
-func (store *psqlDatastore) GetAncestors(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
+func (store *psqlDatastore) GetAncestors(ctx context.Context, resourceID uuid.UUID) (domain.Ancestors, error) {
 	var ancestors []domain.Resource
 
 	err := store.tx.Raw(`WITH path_list AS (

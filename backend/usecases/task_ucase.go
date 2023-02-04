@@ -8,25 +8,41 @@ import (
 )
 
 type taskUsecase struct {
-	store domain.Datastore
+	repo          domain.Datastore
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
+	rm            domain.ResourceManager
 }
 
 func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.TaskUsecase {
 	return &taskUsecase{
-		store: store,
+		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 	}
 }
 
 func (uc *taskUsecase) GetTasks(ctx context.Context, resourceID uuid.UUID, pagination domain.Pagination, statuses []string) ([]domain.Task, domain.Meta, error) {
-	return uc.store.GetTasks(ctx, resourceID, pagination, statuses)
+	return uc.repo.GetTasks(ctx, resourceID, pagination, statuses)
 }
 
-func (uc *taskUsecase) GetTask(ctx context.Context, resourceID uuid.UUID) (domain.Task, error) {
-	return uc.store.GetTask(ctx, resourceID)
+func (uc *taskUsecase) GetTask(ctx context.Context, cragID uuid.UUID) (domain.Task, error) {
+	ancestors, err := uc.repo.GetAncestors(ctx, cragID)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, nil, cragID, domain.ReadPermission); err != nil {
+		return domain.Task{}, err
+	}
+
+	crag, err := uc.repo.GetTask(ctx, cragID)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	crag.Ancestors = ancestors
+	return crag, nil
 }
 
 func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentResourceID uuid.UUID) (domain.Task, error) {
@@ -44,7 +60,7 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		Type:         domain.TypeTask,
 	}
 
-	err := uc.store.Transaction(func(store domain.Datastore) error {
+	err := uc.repo.Transaction(func(store domain.Datastore) error {
 		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
 			return err
 		} else {
@@ -53,7 +69,7 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 			task.UserID = createdResource.CreatorID
 		}
 
-		if err := uc.store.InsertTask(ctx, task); err != nil {
+		if err := uc.repo.InsertTask(ctx, task); err != nil {
 			return err
 		}
 
@@ -74,7 +90,7 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 }
 
 func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID uuid.UUID) (domain.Task, error) {
-	err := uc.store.Transaction(func(store domain.Datastore) error {
+	err := uc.repo.Transaction(func(store domain.Datastore) error {
 		original, err := store.GetTaskWithLock(taskID)
 		if err != nil {
 			return err
@@ -103,6 +119,12 @@ func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID 
 			return err
 		}
 
+		if ancestors, err := uc.repo.GetAncestors(ctx, taskID); err != nil {
+			return nil
+		} else {
+			task.Ancestors = ancestors
+		}
+
 		if err := updateCountersForResourceAndAncestors(ctx, store, taskID, countersDifference); err != nil {
 			return err
 		}
@@ -114,5 +136,5 @@ func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID 
 }
 
 func (uc *taskUsecase) DeleteTask(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.store, resourceID)
+	return deleteResource(ctx, uc.repo, resourceID)
 }

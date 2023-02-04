@@ -9,14 +9,15 @@ import (
 )
 
 type resourceUsecase struct {
-	store         domain.Datastore
+	repo          domain.Datastore
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
+	rm            domain.ResourceManager
 }
 
 func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.ResourceUsecase {
 	return &resourceUsecase{
-		store:         store,
+		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 	}
@@ -27,7 +28,22 @@ type ResourcePatch struct {
 }
 
 func (uc *resourceUsecase) GetResource(ctx context.Context, resourceID uuid.UUID) (domain.Resource, error) {
-	return uc.store.GetResource(ctx, resourceID)
+	ancestors, err := uc.repo.GetAncestors(ctx, resourceID)
+	if err != nil {
+		return domain.Resource{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
+		return domain.Resource{}, err
+	}
+
+	resource, err := uc.repo.GetResource(ctx, resourceID)
+	if err != nil {
+		return domain.Resource{}, err
+	}
+
+	resource.Ancestors = ancestors
+	return resource, nil
 }
 
 func (uc *resourceUsecase) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUID) error {
@@ -51,8 +67,8 @@ func (uc *resourceUsecase) MoveResource(ctx context.Context, resourceID, newPare
 		}
 	}
 
-	return uc.store.Transaction(func(store domain.Datastore) error {
-		if err := uc.store.GetSubtreeLock(ctx, resourceID); err != nil {
+	return uc.repo.Transaction(func(store domain.Datastore) error {
+		if err := uc.repo.GetSubtreeLock(ctx, resourceID); err != nil {
 			return err
 		}
 
@@ -103,13 +119,13 @@ func (uc *resourceUsecase) MoveResource(ctx context.Context, resourceID, newPare
 }
 
 func (uc *resourceUsecase) GetAncestors(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
-	return uc.store.GetAncestors(ctx, resourceID)
+	return uc.repo.GetAncestors(ctx, resourceID)
 }
 
 func (uc *resourceUsecase) GetChildren(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
-	return uc.store.GetChildren(ctx, resourceID)
+	return uc.repo.GetChildren(ctx, resourceID)
 }
 
 func (uc *resourceUsecase) Search(ctx context.Context, name string) ([]domain.ResourceWithParents, error) {
-	return uc.store.Search(ctx, name)
+	return uc.repo.Search(ctx, name)
 }

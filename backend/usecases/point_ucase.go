@@ -10,14 +10,15 @@ import (
 )
 
 type pointUsecase struct {
-	store domain.Datastore
+	repo          domain.Datastore
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
+	rm            domain.ResourceManager
 }
 
 func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.PointUsecase {
 	return &pointUsecase{
-		store: store,
+		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 	}
@@ -32,7 +33,7 @@ type routeGraphVertex struct {
 func (uc *pointUsecase) getRouteGraph(ctx context.Context, routeID uuid.UUID) (map[uuid.UUID]*routeGraphVertex, error) {
 	var graph map[uuid.UUID]*routeGraphVertex = make(map[uuid.UUID]*routeGraphVertex)
 
-	connections, err := uc.store.GetPointConnections(ctx, routeID)
+	connections, err := uc.repo.GetPointConnections(ctx, routeID)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,7 @@ func (uc *pointUsecase) getRouteGraph(ctx context.Context, routeID uuid.UUID) (m
 	if len(connections) == 0 {
 		var points []domain.Point
 
-		if points, err = uc.store.GetPoints(ctx, routeID); err != nil {
+		if points, err = uc.repo.GetPoints(ctx, routeID); err != nil {
 			return nil, err
 		}
 
@@ -137,7 +138,7 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, resourceID uuid.UUID) ([]
 	var points []domain.Point
 	var err error
 
-	if points, err = uc.store.GetPoints(ctx, resourceID); err != nil {
+	if points, err = uc.repo.GetPoints(ctx, resourceID); err != nil {
 		return nil, err
 	}
 
@@ -154,7 +155,7 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, resourceID uuid.UUID) ([]
 		index += 1
 	}
 
-	if parents, err := uc.store.GetParents(ctx, pointIDs); err == nil {
+	if parents, err := uc.repo.GetParents(ctx, pointIDs); err == nil {
 		for _, parent := range parents {
 			if point, ok := pointsMap[parent.ChildID]; ok {
 				point.Parents = append(point.Parents, parent)
@@ -175,7 +176,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 	var pointResource domain.Resource
 	var routeGraph map[uuid.UUID]*routeGraphVertex
 
-	if _, err := uc.store.GetRouteWithLock(routeID); err != nil {
+	if _, err := uc.repo.GetRouteWithLock(routeID); err != nil {
 		return domain.Point{}, err
 	}
 
@@ -205,7 +206,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 	if pointID != uuid.Nil {
 		var err error
 
-		if pointResource, err = uc.store.GetResource(ctx, pointID); err != nil {
+		if pointResource, err = uc.repo.GetResource(ctx, pointID); err != nil {
 			return domain.Point{}, err
 		}
 
@@ -214,7 +215,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 	}
 
-	err = uc.store.Transaction(func(store domain.Datastore) error {
+	err = uc.repo.Transaction(func(store domain.Datastore) error {
 		if pointID != uuid.Nil {
 			if details, err := store.GetPointWithLock(ctx, pointID); err != nil {
 				return err
@@ -222,7 +223,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				point = details
 			}
 
-			if err := uc.store.InsertTreePath(ctx, pointID, routeID); err != nil {
+			if err := uc.repo.InsertTreePath(ctx, pointID, routeID); err != nil {
 				return err
 			}
 
@@ -302,6 +303,12 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 			point.Parents = parents
 		}
 
+		if ancestors, err := uc.repo.GetAncestors(ctx, point.ID); err != nil {
+			return nil
+		} else {
+			point.Ancestors = ancestors
+		}
+
 		return nil
 	})
 
@@ -313,7 +320,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 }
 
 func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID) error {
-	return uc.store.Transaction(func(store domain.Datastore) error {
+	return uc.repo.Transaction(func(store domain.Datastore) error {
 		var err error
 		var routeGraph map[uuid.UUID]*routeGraphVertex
 		var parents []domain.Parent

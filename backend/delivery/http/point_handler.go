@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -13,13 +12,13 @@ import (
 )
 
 type PointHandler struct {
-	PointUsecase domain.PointUsecase
+	PointUsecase    domain.PointUsecase
 	ResourceUsecase domain.ResourceUsecase
 }
 
 func NewPointHandler(router *mux.Router, pointUsecase domain.PointUsecase, resourceUsecase domain.ResourceUsecase) {
 	handler := &PointHandler{
-		PointUsecase: pointUsecase,
+		PointUsecase:    pointUsecase,
 		ResourceUsecase: resourceUsecase,
 	}
 
@@ -99,7 +98,6 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 			status = http.StatusOK
 		}
 
-		point.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, status, point)
 	}
 }

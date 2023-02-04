@@ -8,25 +8,41 @@ import (
 )
 
 type routeUsecase struct {
-	store domain.Datastore
+	repo          domain.Datastore
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
+	rm            domain.ResourceManager
 }
 
 func NewRouteUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.RouteUsecase {
 	return &routeUsecase{
-		store: store,
+		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 	}
 }
 
 func (uc *routeUsecase) GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]domain.Route, error) {
-	return uc.store.GetRoutes(ctx, resourceID)
+	return uc.repo.GetRoutes(ctx, resourceID)
 }
 
-func (uc *routeUsecase) GetRoute(ctx context.Context, resourceID uuid.UUID) (domain.Route, error) {
-	return uc.store.GetRoute(ctx, resourceID)
+func (uc *routeUsecase) GetRoute(ctx context.Context, routeID uuid.UUID) (domain.Route, error) {
+	ancestors, err := uc.repo.GetAncestors(ctx, routeID)
+	if err != nil {
+		return domain.Route{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, nil, routeID, domain.ReadPermission); err != nil {
+		return domain.Route{}, err
+	}
+
+	route, err := uc.repo.GetRoute(ctx, routeID)
+	if err != nil {
+		return domain.Route{}, err
+	}
+
+	route.Ancestors = ancestors
+	return route, nil
 }
 
 func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, parentResourceID uuid.UUID) (domain.Route, error) {
@@ -37,7 +53,7 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 		Type: domain.TypeRoute,
 	}
 
-	err := uc.store.Transaction(func(store domain.Datastore) error {
+	err := uc.repo.Transaction(func(store domain.Datastore) error {
 		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
 			return err
 		} else {
@@ -65,12 +81,12 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 }
 
 func (uc *routeUsecase) DeleteRoute(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.store, resourceID)
+	return deleteResource(ctx, uc.repo, resourceID)
 }
 
 func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedRoute domain.Route) (domain.Route, error) {
-	err := uc.store.Transaction(func(store domain.Datastore) error {
-		original, err := uc.store.GetRouteWithLock(routeID)
+	err := uc.repo.Transaction(func(store domain.Datastore) error {
+		original, err := uc.repo.GetRouteWithLock(routeID)
 		if err != nil {
 			return err
 		}
@@ -91,7 +107,7 @@ func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, upda
 			return err
 		}
 
-		if err := uc.store.SaveRoute(ctx, updatedRoute); err != nil {
+		if err := uc.repo.SaveRoute(ctx, updatedRoute); err != nil {
 			return err
 		}
 

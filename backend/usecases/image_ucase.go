@@ -55,14 +55,15 @@ func init() {
 }
 
 type imageUsecase struct {
-	store domain.Datastore
+	repo          domain.Datastore
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
+	rm            domain.ResourceManager
 }
 
 func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.ImageUsecase {
 	return &imageUsecase{
-		store: store,
+		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 	}
@@ -73,11 +74,11 @@ type ImagePatch struct {
 }
 
 func (uc *imageUsecase) GetImages(ctx context.Context, resourceID uuid.UUID) ([]domain.Image, error) {
-	return uc.store.GetImages(ctx, resourceID)
+	return uc.repo.GetImages(ctx, resourceID)
 }
 
 func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain.Image, error) {
-	return uc.store.GetImage(ctx, imageID)
+	return uc.repo.GetImage(ctx, imageID)
 }
 
 func (uc *imageUsecase) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error) {
@@ -146,7 +147,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 		}
 	}
 
-	err = uc.store.Transaction(func(store domain.Datastore) error {
+	err = uc.repo.Transaction(func(store domain.Datastore) error {
 		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
 			return err
 		} else {
@@ -213,18 +214,18 @@ func rollbackObjectCreations(imageID uuid.UUID) {
 }
 
 func (uc *imageUsecase) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
-	return deleteResource(ctx, uc.store, imageID)
+	return deleteResource(ctx, uc.repo, imageID)
 }
 
 func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rotation int) error {
-	original, err := uc.store.GetImageWithLock(imageID)
+	original, err := uc.repo.GetImageWithLock(imageID)
 	if err != nil {
 		return err
 	}
 
 	original.Rotation = rotation
 
-	return uc.store.Transaction(func(store domain.Datastore) error {
+	return uc.repo.Transaction(func(store domain.Datastore) error {
 		if err := store.TouchResource(ctx, imageID, ""); err != nil {
 			return err
 		}

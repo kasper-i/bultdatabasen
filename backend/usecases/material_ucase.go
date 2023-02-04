@@ -6,15 +6,15 @@ import (
 )
 
 type materialUsecase struct {
-	store domain.Datastore
+	repo domain.Datastore
 }
 
 func NewMaterialUsecase(store domain.Datastore) domain.MaterialUsecase {
 	return &materialUsecase{
-		store: store,
+		repo: store,
 	}
 }
 
 func (uc *materialUsecase) GetMaterials(ctx context.Context) ([]domain.Material, error) {
-	return uc.store.GetMaterials(ctx)
+	return uc.repo.GetMaterials(ctx)
 }

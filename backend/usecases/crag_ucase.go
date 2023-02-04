@@ -8,25 +8,41 @@ import (
 )
 
 type cragUsecase struct {
-	store domain.Datastore
+	repo          domain.Datastore
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
+	rm            domain.ResourceManager
 }
 
 func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.CragUsecase {
 	return &cragUsecase{
-		store: store,
+		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 	}
 }
 
 func (uc *cragUsecase) GetCrags(ctx context.Context, resourceID uuid.UUID) ([]domain.Crag, error) {
-	return uc.store.GetCrags(ctx, resourceID)
+	return uc.repo.GetCrags(ctx, resourceID)
 }
 
-func (uc *cragUsecase) GetCrag(ctx context.Context, resourceID uuid.UUID) (domain.Crag, error) {
-	return uc.store.GetCrag(ctx, resourceID)
+func (uc *cragUsecase) GetCrag(ctx context.Context, cragID uuid.UUID) (domain.Crag, error) {
+	ancestors, err := uc.repo.GetAncestors(ctx, cragID)
+	if err != nil {
+		return domain.Crag{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, nil, cragID, domain.ReadPermission); err != nil {
+		return domain.Crag{}, err
+	}
+
+	crag, err := uc.repo.GetCrag(ctx, cragID)
+	if err != nil {
+		return domain.Crag{}, err
+	}
+
+	crag.Ancestors = ancestors
+	return crag, nil
 }
 
 func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentResourceID uuid.UUID) (domain.Crag, error) {
@@ -35,14 +51,14 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 		Type: domain.TypeCrag,
 	}
 
-	err := uc.store.Transaction(func(store domain.Datastore) error {
+	err := uc.repo.Transaction(func(store domain.Datastore) error {
 		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
 			return err
 		} else {
 			crag.ID = createdResource.ID
 		}
 
-		if err := uc.store.InsertCrag(ctx, crag); err != nil {
+		if err := uc.repo.InsertCrag(ctx, crag); err != nil {
 			return err
 		}
 
@@ -59,5 +75,5 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 }
 
 func (uc *cragUsecase) DeleteCrag(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.store, resourceID)
+	return deleteResource(ctx, uc.repo, resourceID)
 }

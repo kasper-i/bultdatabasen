@@ -8,25 +8,41 @@ import (
 )
 
 type sectorUsecase struct {
-	store domain.Datastore
+	repo          domain.Datastore
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
+	rm            domain.ResourceManager
 }
 
 func NewSectorUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore) domain.SectorUsecase {
 	return &sectorUsecase{
-		store: store,
+		repo:          store,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 	}
 }
 
 func (uc *sectorUsecase) GetSectors(ctx context.Context, resourceID uuid.UUID) ([]domain.Sector, error) {
-	return uc.store.GetSectors(ctx, resourceID)
+	return uc.repo.GetSectors(ctx, resourceID)
 }
 
-func (uc *sectorUsecase) GetSector(ctx context.Context, resourceID uuid.UUID) (domain.Sector, error) {
-	return uc.store.GetSector(ctx, resourceID)
+func (uc *sectorUsecase) GetSector(ctx context.Context, cragID uuid.UUID) (domain.Sector, error) {
+	ancestors, err := uc.repo.GetAncestors(ctx, cragID)
+	if err != nil {
+		return domain.Sector{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, nil, cragID, domain.ReadPermission); err != nil {
+		return domain.Sector{}, err
+	}
+
+	crag, err := uc.repo.GetSector(ctx, cragID)
+	if err != nil {
+		return domain.Sector{}, err
+	}
+
+	crag.Ancestors = ancestors
+	return crag, nil
 }
 
 func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector, parentResourceID uuid.UUID) (domain.Sector, error) {
@@ -35,14 +51,14 @@ func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector,
 		Type: domain.TypeSector,
 	}
 
-	err := uc.store.Transaction(func(store domain.Datastore) error {
+	err := uc.repo.Transaction(func(store domain.Datastore) error {
 		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
 			return err
 		} else {
 			sector.ID = createdResource.ID
 		}
 
-		if err := uc.store.InsertSector(ctx, sector); err != nil {
+		if err := uc.repo.InsertSector(ctx, sector); err != nil {
 			return err
 		}
 
@@ -59,5 +75,5 @@ func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector,
 }
 
 func (uc *sectorUsecase) DeleteSector(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.store, resourceID)
+	return deleteResource(ctx, uc.repo, resourceID)
 }

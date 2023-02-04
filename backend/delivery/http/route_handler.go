@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/usecases"
 	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
@@ -54,7 +53,6 @@ func (hdlr *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
 	if route, err := hdlr.RouteUsecase.GetRoute(r.Context(), resourceID); err != nil {
 		utils.WriteError(w, err)
 	} else {
-		route.Ancestors = usecases.GetStoredAncestors(r)
 		utils.WriteResponse(w, http.StatusOK, route)
 	}
 }
