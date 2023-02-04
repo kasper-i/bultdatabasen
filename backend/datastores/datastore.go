@@ -342,10 +342,6 @@ func (store *psqlDatastore) TouchResource(ctx context.Context, resourceID uuid.U
 func (store *psqlDatastore) UpdateCounters(ctx context.Context, resourceID uuid.UUID, delta domain.Counters) error {
 	difference := delta.AsMap()
 
-	if len(difference) == 0 {
-		return nil
-	}
-
 	var param string = "counters"
 
 	for counterType, count := range difference {

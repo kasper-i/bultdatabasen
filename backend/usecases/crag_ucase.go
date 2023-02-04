@@ -51,18 +51,18 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 		Type: domain.TypeCrag,
 	}
 
-	err := uc.repo.Transaction(func(store domain.Datastore) error {
-		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
+	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
 			return err
 		} else {
 			crag.ID = createdResource.ID
 		}
 
-		if err := uc.repo.InsertCrag(ctx, crag); err != nil {
+		if err := uc.repo.InsertCrag(txCtx, crag); err != nil {
 			return err
 		}
 
-		if ancestors, err := store.GetAncestors(ctx, crag.ID); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, crag.ID); err != nil {
 			return nil
 		} else {
 			crag.Ancestors = ancestors
@@ -75,5 +75,5 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 }
 
 func (uc *cragUsecase) DeleteCrag(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.repo, resourceID)
+	return uc.rm.DeleteResource(ctx, resourceID, "")
 }

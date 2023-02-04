@@ -215,19 +215,19 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 	}
 
-	err = uc.repo.Transaction(func(store domain.Datastore) error {
+	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if pointID != uuid.Nil {
-			if details, err := store.GetPointWithLock(ctx, pointID); err != nil {
+			if details, err := uc.repo.GetPointWithLock(txCtx, pointID); err != nil {
 				return err
 			} else {
 				point = details
 			}
 
-			if err := uc.repo.InsertTreePath(ctx, pointID, routeID); err != nil {
+			if err := uc.repo.InsertTreePath(txCtx, pointID, routeID); err != nil {
 				return err
 			}
 
-			if err := store.UpdateCounters(ctx, routeID, point.Counters); err != nil {
+			if err := uc.repo.UpdateCounters(txCtx, routeID, point.Counters); err != nil {
 				return err
 			}
 		} else {
@@ -238,13 +238,13 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				Type:         domain.TypePoint,
 			}
 
-			if createdResource, err := createResource(ctx, store, resource, routeID); err != nil {
+			if createdResource, err := uc.rm.CreateResource(txCtx, resource, routeID, ""); err != nil {
 				return err
 			} else {
 				point.ID = createdResource.ID
 			}
 
-			if err := store.InsertPoint(ctx, point); err != nil {
+			if err := uc.repo.InsertPoint(txCtx, point); err != nil {
 				return err
 			}
 
@@ -268,19 +268,19 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				switch position.Order {
 				case "after":
 					if nextPoint != uuid.Nil {
-						if err := store.DeletePointConnection(ctx, routeID, insertionPoint, nextPoint); err != nil {
+						if err := uc.repo.DeletePointConnection(txCtx, routeID, insertionPoint, nextPoint); err != nil {
 							return err
 						}
-						if err := store.CreatePointConnection(ctx, routeID, newPoint, nextPoint); err != nil {
+						if err := uc.repo.CreatePointConnection(txCtx, routeID, newPoint, nextPoint); err != nil {
 							return err
 						}
 					}
 				case "before":
 					if prevPoint != uuid.Nil {
-						if err := store.DeletePointConnection(ctx, routeID, prevPoint, insertionPoint); err != nil {
+						if err := uc.repo.DeletePointConnection(txCtx, routeID, prevPoint, insertionPoint); err != nil {
 							return err
 						}
-						if err := store.CreatePointConnection(ctx, routeID, prevPoint, newPoint); err != nil {
+						if err := uc.repo.CreatePointConnection(txCtx, routeID, prevPoint, newPoint); err != nil {
 							return err
 						}
 					}
@@ -289,21 +289,21 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 
 			switch position.Order {
 			case "after":
-				if err := store.CreatePointConnection(ctx, routeID, insertionPoint, newPoint); err != nil {
+				if err := uc.repo.CreatePointConnection(txCtx, routeID, insertionPoint, newPoint); err != nil {
 					return err
 				}
 			case "before":
-				if err := store.CreatePointConnection(ctx, routeID, newPoint, insertionPoint); err != nil {
+				if err := uc.repo.CreatePointConnection(txCtx, routeID, newPoint, insertionPoint); err != nil {
 					return err
 				}
 			}
 		}
 
-		if parents, err := store.GetParents(ctx, []uuid.UUID{point.ID}); err == nil {
+		if parents, err := uc.repo.GetParents(txCtx, []uuid.UUID{point.ID}); err == nil {
 			point.Parents = parents
 		}
 
-		if ancestors, err := uc.repo.GetAncestors(ctx, point.ID); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, point.ID); err != nil {
 			return nil
 		} else {
 			point.Ancestors = ancestors
@@ -320,25 +320,25 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 }
 
 func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID) error {
-	return uc.repo.Transaction(func(store domain.Datastore) error {
+	return uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		var err error
 		var routeGraph map[uuid.UUID]*routeGraphVertex
 		var parents []domain.Parent
 
-		if _, err := store.GetRouteWithLock(routeID); err != nil {
+		if _, err := uc.repo.GetRouteWithLock(routeID); err != nil {
 			return err
 		}
 
 		var point domain.Point
-		if point, err = store.GetPointWithLock(ctx, pointID); err != nil {
+		if point, err = uc.repo.GetPointWithLock(txCtx, pointID); err != nil {
 			return err
 		}
 
-		if routeGraph, err = uc.getRouteGraph(ctx, routeID); err != nil {
+		if routeGraph, err = uc.getRouteGraph(txCtx, routeID); err != nil {
 			return err
 		}
 
-		if parents, err = store.GetParents(ctx, []uuid.UUID{pointID}); err != nil {
+		if parents, err = uc.repo.GetParents(txCtx, []uuid.UUID{pointID}); err != nil {
 			return err
 		}
 
@@ -362,33 +362,33 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 			prevPoint := vertex.IncomingPointID
 
 			if prevPoint != uuid.Nil {
-				if err := store.DeletePointConnection(ctx, routeID, prevPoint, pointID); err != nil {
+				if err := uc.repo.DeletePointConnection(txCtx, routeID, prevPoint, pointID); err != nil {
 					return err
 				}
 			}
 
 			if nextPoint != uuid.Nil {
-				if err := store.DeletePointConnection(ctx, routeID, pointID, nextPoint); err != nil {
+				if err := uc.repo.DeletePointConnection(txCtx, routeID, pointID, nextPoint); err != nil {
 					return err
 				}
 			}
 
 			if prevPoint != uuid.Nil && nextPoint != uuid.Nil {
-				if err := store.CreatePointConnection(ctx, routeID, prevPoint, nextPoint); err != nil {
+				if err := uc.repo.CreatePointConnection(txCtx, routeID, prevPoint, nextPoint); err != nil {
 					return err
 				}
 			}
 		}
 
 		if len(parents) == 1 {
-			return deleteResource(ctx, store, pointID)
+			return uc.rm.DeleteResource(txCtx, pointID, "")
 		} else {
-			if err := store.RemoveTreePath(ctx, pointID, routeID); err != nil {
+			if err := uc.repo.RemoveTreePath(txCtx, pointID, routeID); err != nil {
 				return err
 			}
 
 			countersDifference := domain.Counters{}.Substract(point.Counters)
-			if err := store.UpdateCounters(ctx, routeID, countersDifference); err != nil {
+			if err := uc.repo.UpdateCounters(txCtx, routeID, countersDifference); err != nil {
 				return err
 			}
 		}

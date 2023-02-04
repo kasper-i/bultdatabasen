@@ -60,8 +60,8 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		Type:         domain.TypeTask,
 	}
 
-	err := uc.repo.Transaction(func(store domain.Datastore) error {
-		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
+	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
 			return err
 		} else {
 			task.ID = createdResource.ID
@@ -69,18 +69,18 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 			task.UserID = createdResource.CreatorID
 		}
 
-		if err := uc.repo.InsertTask(ctx, task); err != nil {
+		if err := uc.repo.InsertTask(txCtx, task); err != nil {
 			return err
 		}
 
-		if err := updateCountersForResourceAndAncestors(ctx, store, task.ID, task.Counters); err != nil {
-			return err
-		}
-
-		if ancestors, err := store.GetAncestors(ctx, task.ID); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, task.ID); err != nil {
 			return nil
 		} else {
 			task.Ancestors = ancestors
+		}
+
+		if err := uc.rm.UpdateCounters(txCtx, task.Counters, append(task.Ancestors.IDs(), task.ID)...); err != nil {
+			return err
 		}
 
 		return nil
@@ -90,8 +90,8 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 }
 
 func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID uuid.UUID) (domain.Task, error) {
-	err := uc.repo.Transaction(func(store domain.Datastore) error {
-		original, err := store.GetTaskWithLock(taskID)
+	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		original, err := uc.repo.GetTaskWithLock(taskID)
 		if err != nil {
 			return err
 		}
@@ -111,21 +111,21 @@ func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID 
 
 		countersDifference := task.Counters.Substract(original.Counters)
 
-		if err := store.TouchResource(ctx, taskID, ""); err != nil {
+		if err := uc.repo.TouchResource(txCtx, taskID, ""); err != nil {
 			return err
 		}
 
-		if err := store.SaveTask(ctx, task); err != nil {
+		if err := uc.repo.SaveTask(txCtx, task); err != nil {
 			return err
 		}
 
-		if ancestors, err := uc.repo.GetAncestors(ctx, taskID); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, taskID); err != nil {
 			return nil
 		} else {
 			task.Ancestors = ancestors
 		}
 
-		if err := updateCountersForResourceAndAncestors(ctx, store, taskID, countersDifference); err != nil {
+		if err := uc.rm.UpdateCounters(txCtx, countersDifference, append(task.Ancestors.IDs(), taskID)...); err != nil {
 			return err
 		}
 
@@ -136,5 +136,5 @@ func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID 
 }
 
 func (uc *taskUsecase) DeleteTask(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.repo, resourceID)
+	return uc.rm.DeleteResource(ctx, resourceID, "")
 }

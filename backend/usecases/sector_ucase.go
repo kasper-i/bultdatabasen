@@ -51,18 +51,18 @@ func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector,
 		Type: domain.TypeSector,
 	}
 
-	err := uc.repo.Transaction(func(store domain.Datastore) error {
-		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
+	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
 			return err
 		} else {
 			sector.ID = createdResource.ID
 		}
 
-		if err := uc.repo.InsertSector(ctx, sector); err != nil {
+		if err := uc.repo.InsertSector(txCtx, sector); err != nil {
 			return err
 		}
 
-		if ancestors, err := store.GetAncestors(ctx, sector.ID); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, sector.ID); err != nil {
 			return nil
 		} else {
 			sector.Ancestors = ancestors
@@ -75,5 +75,5 @@ func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector,
 }
 
 func (uc *sectorUsecase) DeleteSector(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.repo, resourceID)
+	return uc.rm.DeleteResource(ctx, resourceID, "")
 }

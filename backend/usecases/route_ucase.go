@@ -53,25 +53,25 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 		Type: domain.TypeRoute,
 	}
 
-	err := uc.repo.Transaction(func(store domain.Datastore) error {
-		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
+	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
 			return err
 		} else {
 			route.ID = createdResource.ID
 		}
 
-		if err := store.InsertRoute(ctx, route); err != nil {
+		if err := uc.repo.InsertRoute(txCtx, route); err != nil {
 			return err
 		}
 
-		if err := updateCountersForResourceAndAncestors(ctx, store, route.ID, route.Counters); err != nil {
-			return err
-		}
-
-		if ancestors, err := store.GetAncestors(ctx, route.ID); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, route.ID); err != nil {
 			return nil
 		} else {
 			route.Ancestors = ancestors
+		}
+
+		if err := uc.rm.UpdateCounters(txCtx, route.Counters, append(route.Ancestors.IDs(), route.ID)...); err != nil {
+			return err
 		}
 
 		return nil
@@ -81,11 +81,11 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 }
 
 func (uc *routeUsecase) DeleteRoute(ctx context.Context, resourceID uuid.UUID) error {
-	return deleteResource(ctx, uc.repo, resourceID)
+	return uc.rm.DeleteResource(ctx, resourceID, "")
 }
 
 func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedRoute domain.Route) (domain.Route, error) {
-	err := uc.repo.Transaction(func(store domain.Datastore) error {
+	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		original, err := uc.repo.GetRouteWithLock(routeID)
 		if err != nil {
 			return err
@@ -98,20 +98,26 @@ func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, upda
 		countersDifference := updatedRoute.Counters.Substract(original.Counters)
 
 		if updatedRoute.Name != original.Name {
-			if err := store.RenameResource(ctx, routeID, updatedRoute.Name, ""); err != nil {
+			if err := uc.repo.RenameResource(txCtx, routeID, updatedRoute.Name, ""); err != nil {
 				return err
 			}
 		}
 
-		if err := store.TouchResource(ctx, routeID, ""); err != nil {
+		if err := uc.repo.TouchResource(txCtx, routeID, ""); err != nil {
 			return err
 		}
 
-		if err := uc.repo.SaveRoute(ctx, updatedRoute); err != nil {
+		if err := uc.repo.SaveRoute(txCtx, updatedRoute); err != nil {
 			return err
 		}
 
-		if err := updateCountersForResourceAndAncestors(ctx, store, routeID, countersDifference); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, routeID); err != nil {
+			return nil
+		} else {
+			updatedRoute.Ancestors = ancestors
+		}
+
+		if err := uc.rm.UpdateCounters(txCtx, countersDifference, append(updatedRoute.Ancestors.IDs(), routeID)...); err != nil {
 			return err
 		}
 

@@ -107,5 +107,5 @@ func (uc *areaUsecase) DeleteArea(ctx context.Context, resourceID uuid.UUID) err
 		return err
 	}
 
-	return deleteResource(ctx, uc.repo, resourceID)
+	return uc.rm.DeleteResource(ctx, resourceID, user.ID)
 }

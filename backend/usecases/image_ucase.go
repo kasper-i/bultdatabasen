@@ -147,8 +147,8 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 		}
 	}
 
-	err = uc.repo.Transaction(func(store domain.Datastore) error {
-		if createdResource, err := createResource(ctx, store, resource, parentResourceID); err != nil {
+	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
 			return err
 		} else {
 			img.ID = createdResource.ID
@@ -167,16 +167,16 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 			return err
 		}
 
-		if err = ResizeImage(ctx, img.ID, []string{"sm", "xl"}); err != nil {
+		if err = ResizeImage(txCtx, img.ID, []string{"sm", "xl"}); err != nil {
 			rollbackObjectCreations(img.ID)
 			return err
 		}
 
-		if err := store.InsertImage(ctx, img); err != nil {
+		if err := uc.repo.InsertImage(txCtx, img); err != nil {
 			return err
 		}
 
-		if ancestors, err := store.GetAncestors(ctx, img.ID); err != nil {
+		if ancestors, err := uc.repo.GetAncestors(txCtx, img.ID); err != nil {
 			return nil
 		} else {
 			img.Ancestors = ancestors
@@ -214,7 +214,7 @@ func rollbackObjectCreations(imageID uuid.UUID) {
 }
 
 func (uc *imageUsecase) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
-	return deleteResource(ctx, uc.repo, imageID)
+	return uc.rm.DeleteResource(ctx, imageID, "")
 }
 
 func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rotation int) error {
@@ -225,12 +225,12 @@ func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rota
 
 	original.Rotation = rotation
 
-	return uc.repo.Transaction(func(store domain.Datastore) error {
-		if err := store.TouchResource(ctx, imageID, ""); err != nil {
+	return uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if err := uc.repo.TouchResource(txCtx, imageID, ""); err != nil {
 			return err
 		}
 
-		if err := store.SaveImage(ctx, original); err != nil {
+		if err := uc.repo.SaveImage(txCtx, original); err != nil {
 			return err
 		}
 
