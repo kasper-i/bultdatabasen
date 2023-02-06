@@ -24,20 +24,24 @@ func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Author
 }
 
 func (uc *taskUsecase) GetTasks(ctx context.Context, resourceID uuid.UUID, pagination domain.Pagination, statuses []string) ([]domain.Task, domain.Meta, error) {
+	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
+		return nil, domain.Meta{}, err
+	}
+
 	return uc.repo.GetTasks(ctx, resourceID, pagination, statuses)
 }
 
-func (uc *taskUsecase) GetTask(ctx context.Context, cragID uuid.UUID) (domain.Task, error) {
-	ancestors, err := uc.repo.GetAncestors(ctx, cragID)
+func (uc *taskUsecase) GetTask(ctx context.Context, taskID uuid.UUID) (domain.Task, error) {
+	ancestors, err := uc.repo.GetAncestors(ctx, taskID)
 	if err != nil {
 		return domain.Task{}, err
 	}
 
-	if err := uc.authorizer.HasPermission(ctx, nil, cragID, domain.ReadPermission); err != nil {
+	if err := uc.authorizer.HasPermission(ctx, nil, taskID, domain.ReadPermission); err != nil {
 		return domain.Task{}, err
 	}
 
-	crag, err := uc.repo.GetTask(ctx, cragID)
+	crag, err := uc.repo.GetTask(ctx, taskID)
 	if err != nil {
 		return domain.Task{}, err
 	}
@@ -47,6 +51,15 @@ func (uc *taskUsecase) GetTask(ctx context.Context, cragID uuid.UUID) (domain.Ta
 }
 
 func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentResourceID uuid.UUID) (domain.Task, error) {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, parentResourceID, domain.WritePermission); err != nil {
+		return domain.Task{}, err
+	}
+
 	if task.Assignee != nil {
 		task.Status = "assigned"
 	} else {
@@ -61,7 +74,7 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		Type:         domain.TypeTask,
 	}
 
-	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
 			return err
 		} else {
@@ -91,7 +104,16 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 }
 
 func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID uuid.UUID) (domain.Task, error) {
-	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, taskID, domain.WritePermission); err != nil {
+		return domain.Task{}, err
+	}
+
+	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		original, err := uc.repo.GetTaskWithLock(taskID)
 		if err != nil {
 			return err
@@ -136,6 +158,20 @@ func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID 
 	return task, err
 }
 
-func (uc *taskUsecase) DeleteTask(ctx context.Context, resourceID uuid.UUID) error {
-	return uc.rm.DeleteResource(ctx, resourceID, "")
+func (uc *taskUsecase) DeleteTask(ctx context.Context, taskID uuid.UUID) error {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, taskID, domain.WritePermission); err != nil {
+		return err
+	}
+
+	_, err = uc.repo.GetTask(ctx, taskID)
+	if err != nil {
+		return err
+	}
+
+	return uc.rm.DeleteResource(ctx, taskID, user.ID)
 }

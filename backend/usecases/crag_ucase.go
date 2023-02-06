@@ -24,6 +24,10 @@ func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Author
 }
 
 func (uc *cragUsecase) GetCrags(ctx context.Context, resourceID uuid.UUID) ([]domain.Crag, error) {
+	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
+		return nil, err
+	}
+
 	return uc.repo.GetCrags(ctx, resourceID)
 }
 
@@ -47,12 +51,21 @@ func (uc *cragUsecase) GetCrag(ctx context.Context, cragID uuid.UUID) (domain.Cr
 }
 
 func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentResourceID uuid.UUID) (domain.Crag, error) {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.Crag{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, parentResourceID, domain.WritePermission); err != nil {
+		return domain.Crag{}, err
+	}
+
 	resource := domain.Resource{
 		Name: &crag.Name,
 		Type: domain.TypeCrag,
 	}
 
-	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
 			return err
 		} else {
@@ -75,6 +88,20 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 	return crag, err
 }
 
-func (uc *cragUsecase) DeleteCrag(ctx context.Context, resourceID uuid.UUID) error {
-	return uc.rm.DeleteResource(ctx, resourceID, "")
+func (uc *cragUsecase) DeleteCrag(ctx context.Context, cragID uuid.UUID) error {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, cragID, domain.WritePermission); err != nil {
+		return err
+	}
+
+	_, err = uc.repo.GetCrag(ctx, cragID)
+	if err != nil {
+		return err
+	}
+
+	return uc.rm.DeleteResource(ctx, cragID, user.ID)
 }

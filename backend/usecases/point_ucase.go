@@ -134,12 +134,16 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 	return orderedPoints, nil
 }
 
-func (uc *pointUsecase) GetPoints(ctx context.Context, resourceID uuid.UUID) ([]domain.Point, error) {
+func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]domain.Point, error) {
 	var pointsMap map[uuid.UUID]*domain.Point = make(map[uuid.UUID]*domain.Point)
 	var points []domain.Point
 	var err error
 
-	if points, err = uc.repo.GetPoints(ctx, resourceID); err != nil {
+	if err := uc.authorizer.HasPermission(ctx, nil, routeID, domain.ReadPermission); err != nil {
+		return nil, err
+	}
+
+	if points, err = uc.repo.GetPoints(ctx, routeID); err != nil {
 		return nil, err
 	}
 
@@ -168,7 +172,7 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, resourceID uuid.UUID) ([]
 		return points, nil
 	}
 
-	return uc.sortPoints(ctx, resourceID, pointsMap)
+	return uc.sortPoints(ctx, routeID, pointsMap)
 }
 
 func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID, position *domain.InsertPosition, anchor bool, bolts []domain.Bolt) (domain.Point, error) {
@@ -176,6 +180,21 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 	var point domain.Point = domain.Point{}
 	var pointResource domain.Resource
 	var routeGraph map[uuid.UUID]*routeGraphVertex
+
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.Point{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, routeID, domain.WritePermission); err != nil {
+		return domain.Point{}, err
+	}
+
+	if pointID != uuid.Nil {
+		if err := uc.authorizer.HasPermission(ctx, &user, pointID, domain.WritePermission); err != nil {
+			return domain.Point{}, err
+		}
+	}
 
 	if _, err := uc.repo.GetRouteWithLock(routeID); err != nil {
 		return domain.Point{}, err
@@ -321,6 +340,15 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 }
 
 func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID) error {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, routeID, domain.WritePermission); err != nil {
+		return err
+	}
+
 	return uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		var err error
 		var routeGraph map[uuid.UUID]*routeGraphVertex

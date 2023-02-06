@@ -18,16 +18,31 @@ func NewUserUsecase(authenticator domain.Authenticator, store domain.Datastore) 
 }
 
 func (uc *userUsecase) GetUser(ctx context.Context, userID string) (domain.User, error) {
+	_, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.User{}, err
+	}
+
 	return uc.repo.GetUser(ctx, userID)
 }
 
 func (uc *userUsecase) UpdateUser(ctx context.Context, user domain.User) (domain.User, error) {
-	err := uc.repo.SaveUser(ctx, user)
+	_, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	err = uc.repo.SaveUser(ctx, user)
 	return user, err
 }
 
 func (uc *userUsecase) CreateUser(ctx context.Context, user domain.User) (domain.User, error) {
-	err := uc.repo.InsertUser(ctx, user)
+	_, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	err = uc.repo.InsertUser(ctx, user)
 	return user, err
 }
 

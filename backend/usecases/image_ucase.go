@@ -75,11 +75,30 @@ type ImagePatch struct {
 }
 
 func (uc *imageUsecase) GetImages(ctx context.Context, resourceID uuid.UUID) ([]domain.Image, error) {
+	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
+		return nil, err
+	}
+
 	return uc.repo.GetImages(ctx, resourceID)
 }
 
 func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain.Image, error) {
-	return uc.repo.GetImage(ctx, imageID)
+	ancestors, err := uc.repo.GetAncestors(ctx, imageID)
+	if err != nil {
+		return domain.Image{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, nil, imageID, domain.ReadPermission); err != nil {
+		return domain.Image{}, err
+	}
+
+	image, err := uc.repo.GetImage(ctx, imageID)
+	if err != nil {
+		return domain.Image{}, err
+	}
+
+	image.Ancestors = ancestors
+	return image, nil
 }
 
 func (uc *imageUsecase) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error) {
@@ -110,6 +129,15 @@ func (uc *imageUsecase) GetImageDownloadURL(ctx context.Context, imageID uuid.UU
 }
 
 func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.UUID, imageBytes []byte, mimeType string) (domain.Image, error) {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.Image{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, parentResourceID, domain.WritePermission); err != nil {
+		return domain.Image{}, err
+	}
+
 	img := domain.Image{
 		Timestamp: time.Now(),
 		MimeType:  mimeType,
@@ -168,7 +196,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 			return err
 		}
 
-		if err = ResizeImage(txCtx, img.ID, []string{"sm", "xl"}); err != nil {
+		if err = resizeImage(txCtx, img.ID, []string{"sm", "xl"}); err != nil {
 			rollbackObjectCreations(img.ID)
 			return err
 		}
@@ -215,10 +243,33 @@ func rollbackObjectCreations(imageID uuid.UUID) {
 }
 
 func (uc *imageUsecase) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
-	return uc.rm.DeleteResource(ctx, imageID, "")
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, imageID, domain.WritePermission); err != nil {
+		return err
+	}
+
+	_, err = uc.repo.GetImage(ctx, imageID)
+	if err != nil {
+		return err
+	}
+
+	return uc.rm.DeleteResource(ctx, imageID, user.ID)
 }
 
 func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rotation int) error {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, imageID, domain.WritePermission); err != nil {
+		return err
+	}
+
 	original, err := uc.repo.GetImageWithLock(imageID)
 	if err != nil {
 		return err
@@ -247,7 +298,7 @@ func getResizedImageKey(imageID uuid.UUID, version string) string {
 	return "images/" + imageID.String() + "." + version
 }
 
-func ResizeImage(ctx context.Context, imageID uuid.UUID, versions []string) error {
+func resizeImage(ctx context.Context, imageID uuid.UUID, versions []string) error {
 	var requestedVersions map[string]string = make(map[string]string)
 
 	originalUrl := fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s",

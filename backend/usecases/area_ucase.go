@@ -92,20 +92,20 @@ func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentR
 	return area, err
 }
 
-func (uc *areaUsecase) DeleteArea(ctx context.Context, resourceID uuid.UUID) error {
+func (uc *areaUsecase) DeleteArea(ctx context.Context, areaID uuid.UUID) error {
 	user, err := uc.authenticator.Authenticate(ctx)
 	if err != nil {
 		return err
 	}
 
-	if err := uc.authorizer.HasPermission(ctx, &user, resourceID, domain.WritePermission); err != nil {
+	if err := uc.authorizer.HasPermission(ctx, &user, areaID, domain.WritePermission); err != nil {
 		return err
 	}
 
-	_, err = uc.repo.GetArea(ctx, resourceID)
+	_, err = uc.repo.GetArea(ctx, areaID)
 	if err != nil {
 		return err
 	}
 
-	return uc.rm.DeleteResource(ctx, resourceID, user.ID)
+	return uc.rm.DeleteResource(ctx, areaID, user.ID)
 }

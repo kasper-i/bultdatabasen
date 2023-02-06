@@ -24,6 +24,10 @@ func NewRouteUsecase(authenticator domain.Authenticator, authorizer domain.Autho
 }
 
 func (uc *routeUsecase) GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]domain.Route, error) {
+	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
+		return nil, err
+	}
+
 	return uc.repo.GetRoutes(ctx, resourceID)
 }
 
@@ -47,6 +51,15 @@ func (uc *routeUsecase) GetRoute(ctx context.Context, routeID uuid.UUID) (domain
 }
 
 func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, parentResourceID uuid.UUID) (domain.Route, error) {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.Route{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, parentResourceID, domain.WritePermission); err != nil {
+		return domain.Route{}, err
+	}
+
 	route.UpdateCounters()
 
 	resource := domain.Resource{
@@ -54,7 +67,7 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 		Type: domain.TypeRoute,
 	}
 
-	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
 			return err
 		} else {
@@ -81,12 +94,35 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 	return route, err
 }
 
-func (uc *routeUsecase) DeleteRoute(ctx context.Context, resourceID uuid.UUID) error {
-	return uc.rm.DeleteResource(ctx, resourceID, "")
+func (uc *routeUsecase) DeleteRoute(ctx context.Context, routeID uuid.UUID) error {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, routeID, domain.WritePermission); err != nil {
+		return err
+	}
+
+	_, err = uc.repo.GetRoute(ctx, routeID)
+	if err != nil {
+		return err
+	}
+
+	return uc.rm.DeleteResource(ctx, routeID, user.ID)
 }
 
 func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedRoute domain.Route) (domain.Route, error) {
-	err := uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	user, err := uc.authenticator.Authenticate(ctx)
+	if err != nil {
+		return domain.Route{}, err
+	}
+
+	if err := uc.authorizer.HasPermission(ctx, &user, routeID, domain.WritePermission); err != nil {
+		return domain.Route{}, err
+	}
+
+	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		original, err := uc.repo.GetRouteWithLock(routeID)
 		if err != nil {
 			return err

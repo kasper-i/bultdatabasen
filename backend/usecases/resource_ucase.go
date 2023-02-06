@@ -66,10 +66,18 @@ func (uc *resourceUsecase) MoveResource(ctx context.Context, resourceID, newPare
 }
 
 func (uc *resourceUsecase) GetAncestors(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
+	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
+		return nil, err
+	}
+
 	return uc.repo.GetAncestors(ctx, resourceID)
 }
 
 func (uc *resourceUsecase) GetChildren(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
+	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
+		return nil, err
+	}
+
 	return uc.repo.GetChildren(ctx, resourceID)
 }
 
