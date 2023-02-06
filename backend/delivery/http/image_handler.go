@@ -52,11 +52,6 @@ func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) 
 	}
 	version := vars["version"]
 
-	if _, ok := usecases.ImageSizes[version]; !ok && version != "original" {
-		utils.WriteResponse(w, http.StatusBadRequest, nil)
-		return
-	}
-
 	if url, err := hdlr.ImageUsecase.GetImageDownloadURL(r.Context(), imageID, version); err != nil {
 		utils.WriteError(w, err)
 	} else {
@@ -94,19 +89,11 @@ func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	mimeType := http.DetectContentType(fileBytes)
 
-	switch mimeType {
-	case "image/jpeg", "image/jpg":
-		image, err := hdlr.ImageUsecase.UploadImage(r.Context(), parentResourceID, fileBytes, mimeType)
-
-		if err != nil {
-			utils.WriteError(w, err)
-			return
-		}
-
+	image, err := hdlr.ImageUsecase.UploadImage(r.Context(), parentResourceID, fileBytes, mimeType)
+	if err != nil {
+		utils.WriteError(w, err)
+	} else {
 		utils.WriteResponse(w, http.StatusCreated, image)
-	default:
-		utils.WriteResponse(w, http.StatusBadRequest, nil)
-		return
 	}
 }
 
@@ -142,12 +129,8 @@ func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if patch.Rotation != nil {
-		if *patch.Rotation != 0 && *patch.Rotation != 90 && *patch.Rotation != 180 && *patch.Rotation != 270 {
-			utils.WriteResponse(w, http.StatusBadRequest, nil)
-			return
-		}
-
+	switch {
+	case patch.Rotation != nil:
 		err = hdlr.ImageUsecase.RotateImage(r.Context(), imageID, *patch.Rotation)
 	}
 

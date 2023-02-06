@@ -76,7 +76,7 @@ func main() {
 	httpdelivery.NewCragHandler(router, cragUsecase)
 	httpdelivery.NewSectorHandler(router, sectorUsecase)
 	httpdelivery.NewRouteHandler(router, routeUsecase)
-	httpdelivery.NewPointHandler(router, pointUsecase, resourceUseCase)
+	httpdelivery.NewPointHandler(router, pointUsecase)
 	httpdelivery.NewImageHandler(router, imageUsecase)
 	httpdelivery.NewBoltHandler(router, boltUsecase)
 	httpdelivery.NewTaskHandler(router, taskUsecase)

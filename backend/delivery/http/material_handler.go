@@ -21,7 +21,6 @@ func NewMaterialHandler(router *mux.Router, materialUsecase domain.MaterialUseca
 }
 
 func (hdlr *materialHandler) GetMaterials(w http.ResponseWriter, r *http.Request) {
-
 	if materials, err := hdlr.MaterialUsecase.GetMaterials(r.Context()); err != nil {
 		utils.WriteError(w, err)
 	} else {

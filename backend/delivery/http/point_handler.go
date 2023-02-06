@@ -12,14 +12,12 @@ import (
 )
 
 type PointHandler struct {
-	PointUsecase    domain.PointUsecase
-	ResourceUsecase domain.ResourceUsecase
+	PointUsecase domain.PointUsecase
 }
 
-func NewPointHandler(router *mux.Router, pointUsecase domain.PointUsecase, resourceUsecase domain.ResourceUsecase) {
+func NewPointHandler(router *mux.Router, pointUsecase domain.PointUsecase) {
 	handler := &PointHandler{
-		PointUsecase:    pointUsecase,
-		ResourceUsecase: resourceUsecase,
+		PointUsecase: pointUsecase,
 	}
 
 	router.HandleFunc("/routes/{resourceID}/points", handler.GetPoints).Methods(http.MethodGet, http.MethodOptions)
@@ -42,14 +40,6 @@ func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if resource, err := hdlr.ResourceUsecase.GetResource(r.Context(), routeID); err != nil {
-		utils.WriteError(w, err)
-		return
-	} else if resource.Type != domain.TypeRoute {
-		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
-		return
-	}
-
 	if points, err := hdlr.PointUsecase.GetPoints(r.Context(), routeID); err != nil {
 		utils.WriteError(w, err)
 	} else {
@@ -69,19 +59,6 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 	var request CreatePointRequest
 	if err := json.Unmarshal(reqBody, &request); err != nil {
 		utils.WriteError(w, err)
-		return
-	}
-
-	if request.Position != nil {
-		order := request.Position.Order
-		if order != "before" && order != "after" {
-			utils.WriteResponse(w, http.StatusBadRequest, nil)
-			return
-		}
-	}
-
-	if request.PointID == uuid.Nil && len(request.Bolts) == 0 {
-		utils.WriteResponse(w, http.StatusBadRequest, nil)
 		return
 	}
 

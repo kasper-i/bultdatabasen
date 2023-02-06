@@ -143,6 +143,13 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]dom
 		return nil, err
 	}
 
+	if _, err := uc.repo.GetRoute(ctx, routeID); err != nil {
+		return nil, &domain.ErrNotAuthorized{
+			ResourceID: routeID,
+			Permission: domain.ReadPermission,
+		}
+	}
+
 	if points, err = uc.repo.GetPoints(ctx, routeID); err != nil {
 		return nil, err
 	}
@@ -194,6 +201,18 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		if err := uc.authorizer.HasPermission(ctx, &user, pointID, domain.WritePermission); err != nil {
 			return domain.Point{}, err
 		}
+	}
+
+	if position != nil {
+		switch position.Order {
+		case "before", "after":
+		default:
+			return domain.Point{}, domain.ErrIllegalInsertPosition
+		}
+	}
+
+	if pointID == uuid.Nil && len(bolts) == 0 {
+		return domain.Point{}, domain.ErrPointWithoutBolts
 	}
 
 	if _, err := uc.repo.GetRouteWithLock(routeID); err != nil {

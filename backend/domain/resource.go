@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -213,3 +214,11 @@ type ErrNotFound struct {
 func (err *ErrNotFound) Error() string {
 	return "Not found"
 }
+
+var (
+	ErrIllegalAngle          = errors.New("Illegal image rotation angle")
+	ErrUnknownImageSize      = errors.New("Unknown image size")
+	ErrIllegalInsertPosition = errors.New("Illegal point insert position")
+	ErrPointWithoutBolts     = errors.New("Point without bolts")
+	ErrUnsupportedMimeType   = errors.New("Unsupported MIME type")
+)

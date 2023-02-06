@@ -26,18 +26,17 @@ import (
 var spacesBucket string
 var functionUrl string
 var functionSecret string
-
-var ImageSizes map[string]int
+var imageSizes map[string]int
 
 func init() {
-	ImageSizes = make(map[string]int)
+	imageSizes = make(map[string]int)
 
-	ImageSizes["xs"] = 300
-	ImageSizes["sm"] = 500
-	ImageSizes["md"] = 750
-	ImageSizes["lg"] = 1000
-	ImageSizes["xl"] = 1500
-	ImageSizes["2xl"] = 2500
+	imageSizes["xs"] = 300
+	imageSizes["sm"] = 500
+	imageSizes["md"] = 750
+	imageSizes["lg"] = 1000
+	imageSizes["xl"] = 1500
+	imageSizes["2xl"] = 2500
 
 	cfg, err := ini.Load("/etc/bultdatabasen/config.ini")
 	if err != nil {
@@ -104,6 +103,10 @@ func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain
 func (uc *imageUsecase) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error) {
 	var imageKey string
 
+	if _, ok := imageSizes[version]; !ok && version != "original" {
+		return "", domain.ErrUnknownImageSize
+	}
+
 	if version == "original" {
 		imageKey = getOriginalImageKey(imageID)
 	} else {
@@ -136,6 +139,12 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 
 	if err := uc.authorizer.HasPermission(ctx, &user, parentResourceID, domain.WritePermission); err != nil {
 		return domain.Image{}, err
+	}
+
+	switch mimeType {
+	case "image/jpeg", "image/jpg":
+	default:
+		return domain.Image{}, domain.ErrUnsupportedMimeType
 	}
 
 	img := domain.Image{
@@ -268,6 +277,14 @@ func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rota
 
 	if err := uc.authorizer.HasPermission(ctx, &user, imageID, domain.WritePermission); err != nil {
 		return err
+	}
+
+	rotation = rotation % 360
+
+	switch rotation {
+	case 0, 90, 180, 270:
+	default:
+		return domain.ErrIllegalAngle
 	}
 
 	original, err := uc.repo.GetImageWithLock(imageID)
