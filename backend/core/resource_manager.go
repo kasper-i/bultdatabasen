@@ -66,7 +66,7 @@ func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID s
 	trash := domain.Trash{
 		ResourceID:  resourceID,
 		DeletedTime: time.Now(),
-		DeletedByID: "",
+		DeletedByID: userID,
 	}
 
 	err = rm.repo.WithinTransaction(ctx, func(txCtx context.Context) error {

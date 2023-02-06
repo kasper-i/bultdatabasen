@@ -66,7 +66,7 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 	}
 
 	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			crag.ID = createdResource.ID

@@ -68,7 +68,7 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 	}
 
 	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			route.ID = createdResource.ID
@@ -135,12 +135,12 @@ func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, upda
 		countersDifference := updatedRoute.Counters.Substract(original.Counters)
 
 		if updatedRoute.Name != original.Name {
-			if err := uc.repo.RenameResource(txCtx, routeID, updatedRoute.Name, ""); err != nil {
+			if err := uc.repo.RenameResource(txCtx, routeID, updatedRoute.Name, user.ID); err != nil {
 				return err
 			}
 		}
 
-		if err := uc.repo.TouchResource(txCtx, routeID, ""); err != nil {
+		if err := uc.repo.TouchResource(txCtx, routeID, user.ID); err != nil {
 			return err
 		}
 

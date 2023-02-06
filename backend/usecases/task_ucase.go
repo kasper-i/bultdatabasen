@@ -75,7 +75,7 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 	}
 
 	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			task.ID = createdResource.ID
@@ -134,7 +134,7 @@ func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID 
 
 		countersDifference := task.Counters.Substract(original.Counters)
 
-		if err := uc.repo.TouchResource(txCtx, taskID, ""); err != nil {
+		if err := uc.repo.TouchResource(txCtx, taskID, user.ID); err != nil {
 			return err
 		}
 

@@ -66,7 +66,7 @@ func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector,
 	}
 
 	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			sector.ID = createdResource.ID

@@ -258,7 +258,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				Type:         domain.TypePoint,
 			}
 
-			if createdResource, err := uc.rm.CreateResource(txCtx, resource, routeID, ""); err != nil {
+			if createdResource, err := uc.rm.CreateResource(txCtx, resource, routeID, user.ID); err != nil {
 				return err
 			} else {
 				point.ID = createdResource.ID
@@ -410,7 +410,7 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 
 		if len(parents) == 1 {
-			return uc.rm.DeleteResource(txCtx, pointID, "")
+			return uc.rm.DeleteResource(txCtx, pointID, user.ID)
 		} else {
 			if err := uc.repo.RemoveTreePath(txCtx, pointID, routeID); err != nil {
 				return err

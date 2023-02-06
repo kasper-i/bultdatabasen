@@ -177,7 +177,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 	}
 
 	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, ""); err != nil {
+		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			img.ID = createdResource.ID
@@ -278,7 +278,7 @@ func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rota
 	original.Rotation = rotation
 
 	return uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if err := uc.repo.TouchResource(txCtx, imageID, ""); err != nil {
+		if err := uc.repo.TouchResource(txCtx, imageID, user.ID); err != nil {
 			return err
 		}
 
