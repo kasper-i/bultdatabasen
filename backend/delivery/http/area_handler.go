@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -38,14 +37,14 @@ func (hdlr *areaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
 	if vars["resourceID"] == "" {
 		resourceID, _ = uuid.Parse(domain.RootID)
 	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if areas, err := hdlr.AreaUsecase.GetAreas(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, areas)
+		writeResponse(w, http.StatusOK, areas)
 	}
 }
 
@@ -53,14 +52,14 @@ func (hdlr *areaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if area, err := hdlr.AreaUsecase.GetArea(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, area)
+		writeResponse(w, http.StatusOK, area)
 	}
 }
 
@@ -72,21 +71,21 @@ func (hdlr *areaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 	if vars["resourceID"] == "" {
 		resourceID, _ = uuid.Parse(domain.RootID)
 	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var area domain.Area
 	if err := json.Unmarshal(reqBody, &area); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if createdArea, err := hdlr.AreaUsecase.CreateArea(r.Context(), area, resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, createdArea)
+		writeResponse(w, http.StatusCreated, createdArea)
 	}
 }
 
@@ -94,13 +93,13 @@ func (hdlr *areaHandler) DeleteArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if err := hdlr.AreaUsecase.DeleteArea(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }

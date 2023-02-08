@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -31,14 +30,14 @@ func (hdlr *CragHandler) GetCrags(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if crags, err := hdlr.CragUsecase.GetCrags(r.Context(), parentResourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, crags)
+		writeResponse(w, http.StatusOK, crags)
 	}
 }
 
@@ -46,14 +45,14 @@ func (hdlr *CragHandler) GetCrag(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if crag, err := hdlr.CragUsecase.GetCrag(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, crag)
+		writeResponse(w, http.StatusOK, crag)
 	}
 }
 
@@ -61,23 +60,23 @@ func (hdlr *CragHandler) CreateCrag(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var crag domain.Crag
 	if err := json.Unmarshal(reqBody, &crag); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	createdCrag, err := hdlr.CragUsecase.CreateCrag(r.Context(), crag, parentResourceID)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, createdCrag)
+		writeResponse(w, http.StatusCreated, createdCrag)
 	}
 }
 
@@ -85,13 +84,13 @@ func (hdlr *CragHandler) DeleteCrag(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if err := hdlr.CragUsecase.DeleteCrag(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }

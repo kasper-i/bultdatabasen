@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -36,14 +35,14 @@ func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if points, err := hdlr.PointUsecase.GetPoints(r.Context(), routeID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, points)
+		writeResponse(w, http.StatusOK, points)
 	}
 }
 
@@ -51,21 +50,21 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var request CreatePointRequest
 	if err := json.Unmarshal(reqBody, &request); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	point, err := hdlr.PointUsecase.AttachPoint(r.Context(), routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
 		var status int
 
@@ -75,7 +74,7 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 			status = http.StatusOK
 		}
 
-		utils.WriteResponse(w, status, point)
+		writeResponse(w, status, point)
 	}
 }
 
@@ -84,19 +83,19 @@ func (hdlr *PointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
 
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	pointID, err := uuid.Parse(vars["pointID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if err := hdlr.PointUsecase.DetachPoint(r.Context(), routeID, pointID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }

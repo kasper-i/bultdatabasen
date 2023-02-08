@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"errors"
 	"io"
@@ -34,9 +33,9 @@ func NewUserHandler(router *mux.Router, userUsecase domain.UserUsecase) {
 
 func (hdlr *UserHandler) GetUserNames(w http.ResponseWriter, r *http.Request) {
 	if names, err := hdlr.UserUsecase.GetUserNames(r.Context()); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, names)
+		writeResponse(w, http.StatusOK, names)
 	}
 
 }
@@ -52,18 +51,18 @@ func (hdlr *UserHandler) GetMyself(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if createdUser, err := hdlr.UserUsecase.CreateUser(r.Context(), user); err != nil {
-				utils.WriteError(w, err)
+				writeError(w, err)
 				return
 			} else {
-				utils.WriteResponse(w, http.StatusOK, createdUser)
+				writeResponse(w, http.StatusOK, createdUser)
 				return
 			}
 		} else {
-			utils.WriteError(w, err)
+			writeError(w, err)
 			return
 		}
 	} else {
-		utils.WriteResponse(w, http.StatusOK, user)
+		writeResponse(w, http.StatusOK, user)
 	}
 }
 
@@ -73,7 +72,7 @@ func (hdlr *UserHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := io.ReadAll(r.Body)
 	var desiredUser domain.User
 	if err := json.Unmarshal(reqBody, &desiredUser); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
@@ -87,14 +86,14 @@ func (hdlr *UserHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if createdUser, err := hdlr.UserUsecase.CreateUser(r.Context(), user); err != nil {
-				utils.WriteError(w, err)
+				writeError(w, err)
 				return
 			} else {
-				utils.WriteResponse(w, http.StatusCreated, createdUser)
+				writeResponse(w, http.StatusCreated, createdUser)
 				return
 			}
 		} else {
-			utils.WriteError(w, err)
+			writeError(w, err)
 			return
 		}
 	} else {
@@ -104,9 +103,9 @@ func (hdlr *UserHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
 		updatedUser, err := hdlr.UserUsecase.UpdateUser(r.Context(), user)
 
 		if err != nil {
-			utils.WriteError(w, err)
+			writeError(w, err)
 		} else {
-			utils.WriteResponse(w, http.StatusOK, updatedUser)
+			writeResponse(w, http.StatusOK, updatedUser)
 		}
 	}
 }

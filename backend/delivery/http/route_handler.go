@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -31,14 +30,14 @@ func (hdlr *RouteHandler) GetRoutes(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if routes, err := hdlr.RouteUsecase.GetRoutes(r.Context(), parentResourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, routes)
+		writeResponse(w, http.StatusOK, routes)
 	}
 }
 
@@ -46,14 +45,14 @@ func (hdlr *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if route, err := hdlr.RouteUsecase.GetRoute(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, route)
+		writeResponse(w, http.StatusOK, route)
 	}
 }
 
@@ -61,23 +60,23 @@ func (hdlr *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var route domain.Route
 	if err := json.Unmarshal(reqBody, &route); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	createdRoute, err := hdlr.RouteUsecase.CreateRoute(r.Context(), route, parentResourceID)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, createdRoute)
+		writeResponse(w, http.StatusCreated, createdRoute)
 	}
 }
 
@@ -85,14 +84,14 @@ func (hdlr *RouteHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if err := hdlr.RouteUsecase.DeleteRoute(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }
 
@@ -100,7 +99,7 @@ func (hdlr *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
@@ -108,15 +107,15 @@ func (hdlr *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request) {
 	var route domain.Route
 
 	if err := json.Unmarshal(reqBody, &route); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	updatedRoute, err := hdlr.RouteUsecase.UpdateRoute(r.Context(), routeID, route)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, updatedRoute)
+		writeResponse(w, http.StatusOK, updatedRoute)
 	}
 }

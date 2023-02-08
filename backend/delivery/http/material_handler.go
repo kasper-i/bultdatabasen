@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -22,8 +21,8 @@ func NewMaterialHandler(router *mux.Router, materialUsecase domain.MaterialUseca
 
 func (hdlr *materialHandler) GetMaterials(w http.ResponseWriter, r *http.Request) {
 	if materials, err := hdlr.MaterialUsecase.GetMaterials(r.Context()); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, materials)
+		writeResponse(w, http.StatusOK, materials)
 	}
 }

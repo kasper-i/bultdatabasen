@@ -3,7 +3,6 @@ package http
 import (
 	"bultdatabasen/domain"
 	"bultdatabasen/usecases"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -32,14 +31,14 @@ func (hdlr *ImageHandler) GetImages(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if images, err := hdlr.ImageUsecase.GetImages(r.Context(), parentResourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, images)
+		writeResponse(w, http.StatusOK, images)
 	}
 }
 
@@ -47,16 +46,16 @@ func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 	version := vars["version"]
 
 	if url, err := hdlr.ImageUsecase.GetImageDownloadURL(r.Context(), imageID, version); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
 		w.Header().Set("Location", url)
-		utils.WriteResponse(w, http.StatusTemporaryRedirect, nil)
+		writeResponse(w, http.StatusTemporaryRedirect, nil)
 	}
 }
 
@@ -64,26 +63,26 @@ func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	err = r.ParseMultipartForm(32 << 20)
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 	defer file.Close()
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
@@ -91,9 +90,9 @@ func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	image, err := hdlr.ImageUsecase.UploadImage(r.Context(), parentResourceID, fileBytes, mimeType)
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, image)
+		writeResponse(w, http.StatusCreated, image)
 	}
 }
 
@@ -101,16 +100,16 @@ func (hdlr *ImageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	err = hdlr.ImageUsecase.DeleteImage(r.Context(), imageID)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }
 
@@ -118,14 +117,14 @@ func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var patch usecases.ImagePatch
 	if err := json.Unmarshal(reqBody, &patch); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
@@ -135,8 +134,8 @@ func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }

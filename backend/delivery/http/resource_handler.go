@@ -3,7 +3,6 @@ package http
 import (
 	"bultdatabasen/domain"
 	"bultdatabasen/usecases"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -36,14 +35,14 @@ func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if resource, err := hdlr.ResourceUsecase.GetResource(r.Context(), id); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, resource)
+		writeResponse(w, http.StatusOK, resource)
 	}
 }
 
@@ -52,13 +51,13 @@ func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Reque
 	var patch usecases.ResourcePatch
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	if err := json.Unmarshal(reqBody, &patch); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
@@ -67,29 +66,29 @@ func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Reque
 		newParentID := patch.ParentID
 
 		if err := hdlr.ResourceUsecase.MoveResource(r.Context(), id, newParentID); err != nil {
-			utils.WriteError(w, err)
+			writeError(w, err)
 		} else {
-			utils.WriteResponse(w, http.StatusNoContent, nil)
+			writeResponse(w, http.StatusNoContent, nil)
 		}
 
 		return
 	}
 
-	utils.WriteResponse(w, http.StatusBadRequest, nil)
+	writeResponse(w, http.StatusBadRequest, nil)
 }
 
 func (hdlr *ResourceHandler) GetAncestors(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if ancestors, err := hdlr.ResourceUsecase.GetAncestors(r.Context(), id); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, ancestors)
+		writeResponse(w, http.StatusOK, ancestors)
 	}
 }
 
@@ -97,14 +96,14 @@ func (hdlr *ResourceHandler) GetChildren(w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if children, err := hdlr.ResourceUsecase.GetChildren(r.Context(), id); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, children)
+		writeResponse(w, http.StatusOK, children)
 	}
 }
 
@@ -124,8 +123,8 @@ func (hdlr *ResourceHandler) Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if results, err := hdlr.ResourceUsecase.Search(r.Context(), name); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, results)
+		writeResponse(w, http.StatusOK, results)
 	}
 }

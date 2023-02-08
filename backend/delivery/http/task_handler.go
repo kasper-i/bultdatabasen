@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -57,30 +56,30 @@ func (hdlr *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	var pagination domain.Pagination
 	if pagination, err = parsePaginationQuery(query); err != nil {
-		utils.WriteResponse(w, http.StatusBadRequest, nil)
+		writeResponse(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	if !pagination.Valid() {
-		utils.WriteResponse(w, http.StatusBadRequest, nil)
+		writeResponse(w, http.StatusBadRequest, nil)
 		return
 	}
 
 	statuses := query["status"]
 
 	if tasks, meta, err := hdlr.TaskUsecase.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
 		response := GetTasksResponse{}
 		response.Data = tasks
 		response.Meta = meta
-		utils.WriteResponse(w, http.StatusOK, response)
+		writeResponse(w, http.StatusOK, response)
 	}
 }
 
@@ -88,14 +87,14 @@ func (hdlr *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if task, err := hdlr.TaskUsecase.GetTask(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, task)
+		writeResponse(w, http.StatusOK, task)
 	}
 }
 
@@ -103,23 +102,23 @@ func (hdlr *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var task domain.Task
 	if err := json.Unmarshal(reqBody, &task); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	createdTask, err := hdlr.TaskUsecase.CreateTask(r.Context(), task, parentResourceID)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, createdTask)
+		writeResponse(w, http.StatusCreated, createdTask)
 	}
 }
 
@@ -127,23 +126,23 @@ func (hdlr *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var task domain.Task
 	if err := json.Unmarshal(reqBody, &task); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	updatedTask, err := hdlr.TaskUsecase.UpdateTask(r.Context(), task, taskID)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, updatedTask)
+		writeResponse(w, http.StatusOK, updatedTask)
 	}
 }
 
@@ -151,13 +150,13 @@ func (hdlr *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	if err := hdlr.TaskUsecase.DeleteTask(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }

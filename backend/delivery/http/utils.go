@@ -1,7 +1,8 @@
-package utils
+package http
 
 import (
 	"bultdatabasen/domain"
+	"bultdatabasen/utils"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -11,13 +12,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type Error struct {
+type errorMessage struct {
 	Status     int        `json:"status"`
 	Message    string     `json:"message"`
 	ResourceID *uuid.UUID `json:"resourceId,omitempty"`
 }
 
-func WriteResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
+func writeResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(statusCode)
 
@@ -26,47 +27,46 @@ func WriteResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
 	}
 }
 
-func WriteError(w http.ResponseWriter, err error) {
-	error := Error{}
-	var status int
+func writeError(w http.ResponseWriter, err error) {
+	error := errorMessage{}
 
-	if notFoundError, ok := err.(*domain.ErrNotFound); ok {
-		status = http.StatusNotFound
-		error.Message = notFoundError.ResourceID.String()
-	} else if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, ErrNotFound) {
-		status = http.StatusNotFound
+	var notFoundError *domain.ErrNotFound
+
+	if errors.As(err, &notFoundError) {
+		error.Status = http.StatusNotFound
+		error.ResourceID = &notFoundError.ResourceID
+	} else if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, utils.ErrNotFound) {
+		error.Status = http.StatusNotFound
 	} else if errors.Is(err, gorm.ErrInvalidData) {
-		status = http.StatusBadRequest
+		error.Status = http.StatusBadRequest
 	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
-		status = http.StatusConflict
+		error.Status = http.StatusConflict
 		error.Message = "Conflict"
 	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
-		status = http.StatusConflict
+		error.Status = http.StatusConflict
 		error.Message = "Duplicate entry"
-	} else if errors.Is(err, ErrLoopDetected) {
-		status = http.StatusConflict
+	} else if errors.Is(err, utils.ErrLoopDetected) {
+		error.Status = http.StatusConflict
 		error.Message = err.Error()
-	} else if errors.Is(err, ErrMissingAttachmentPoint) || errors.Is(err, ErrInvalidAttachmentPoint) || errors.Is(err, ErrOrphanedResource) || errors.Is(err, ErrHierarchyStructureViolation) || errors.Is(err, ErrMoveNotPermitted) {
-		status = http.StatusBadRequest
+	} else if errors.Is(err, utils.ErrMissingAttachmentPoint) || errors.Is(err, utils.ErrInvalidAttachmentPoint) || errors.Is(err, utils.ErrOrphanedResource) || errors.Is(err, utils.ErrHierarchyStructureViolation) || errors.Is(err, utils.ErrMoveNotPermitted) {
+		error.Status = http.StatusBadRequest
 		error.Message = err.Error()
-	} else if errors.Is(err, ErrCorruptResource) {
-		status = http.StatusInternalServerError
+	} else if errors.Is(err, utils.ErrCorruptResource) {
+		error.Status = http.StatusInternalServerError
 		error.Message = err.Error()
-	} else if errors.Is(err, ErrNotPermitted) {
-		status = http.StatusForbidden
+	} else if errors.Is(err, utils.ErrNotPermitted) {
+		error.Status = http.StatusForbidden
 	} else {
-		status = http.StatusInternalServerError
+		error.Status = http.StatusInternalServerError
 	}
 
-	error.Status = status
-
-	w.WriteHeader(status)
+	w.WriteHeader(error.Status)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(error)
 }
 
 func writeUnauthorized(w http.ResponseWriter) {
-	err := Error{
+	err := errorMessage{
 		Status:  http.StatusUnauthorized,
 		Message: "Unauthorized",
 	}
@@ -77,7 +77,7 @@ func writeUnauthorized(w http.ResponseWriter) {
 }
 
 func writeForbidden(w http.ResponseWriter, resourceID *uuid.UUID) {
-	err := Error{
+	err := errorMessage{
 		Status:     http.StatusForbidden,
 		Message:    "Forbidden",
 		ResourceID: resourceID,
