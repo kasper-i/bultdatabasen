@@ -13,9 +13,9 @@ type rm struct {
 	repo domain.Datastore
 }
 
-func NewResourceManager() domain.ResourceManager {
+func NewResourceManager(repo domain.Datastore) domain.ResourceManager {
 	return &rm{
-		repo: nil,
+		repo: repo,
 	}
 }
 

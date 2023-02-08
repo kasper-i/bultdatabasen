@@ -3,8 +3,8 @@ package main
 import (
 	"bultdatabasen/authenticator"
 	"bultdatabasen/authorizer"
+	"bultdatabasen/core"
 	httpdelivery "bultdatabasen/delivery/http"
-	"bultdatabasen/domain"
 	"bultdatabasen/images"
 	"bultdatabasen/repositories"
 	"bultdatabasen/usecases"
@@ -42,7 +42,7 @@ func main() {
 	authn := authenticator.New()
 	authz := authorizer.New(datastore)
 
-	var rm domain.ResourceManager
+	rm := core.NewResourceManager(datastore)
 	ib, err := images.NewImageBucket()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
