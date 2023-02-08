@@ -3,10 +3,10 @@ package main
 import (
 	"bultdatabasen/authenticator"
 	"bultdatabasen/authorizer"
-	"bultdatabasen/datastores"
 	httpdelivery "bultdatabasen/delivery/http"
 	"bultdatabasen/domain"
 	"bultdatabasen/images"
+	"bultdatabasen/repositories"
 	"bultdatabasen/usecases"
 	"fmt"
 	"io"
@@ -37,7 +37,7 @@ func getVersion(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
-	datastore := datastores.NewDatastore()
+	datastore := repositories.NewDatastore()
 
 	authn := authenticator.New()
 	authz := authorizer.New(datastore)

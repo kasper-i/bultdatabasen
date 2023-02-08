@@ -1,6 +1,8 @@
-package datastores
+package repositories
 
 import (
+	"bultdatabasen/domain"
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -59,4 +61,57 @@ func init() {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
+}
+
+type txKey struct{}
+
+type psqlDatastore struct {
+	tx *gorm.DB
+}
+
+func NewDatastore() domain.Datastore {
+	return &psqlDatastore{
+		tx: db,
+	}
+}
+
+func injectTx(ctx context.Context, tx *gorm.DB) context.Context {
+	return context.WithValue(ctx, txKey{}, tx)
+}
+
+func extractTx(ctx context.Context) *gorm.DB {
+	if tx, ok := ctx.Value(txKey{}).(*gorm.DB); ok {
+		return tx
+	}
+	return nil
+}
+
+func (store *psqlDatastore) model(ctx context.Context, model ...interface{}) *gorm.DB {
+	tx := extractTx(ctx)
+	if tx != nil {
+		return tx
+	}
+
+	return store.tx
+}
+
+func (store *psqlDatastore) WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	err := fn(injectTx(ctx, tx))
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }

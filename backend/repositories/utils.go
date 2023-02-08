@@ -1,4 +1,4 @@
-package datastores
+package repositories
 
 import (
 	"bultdatabasen/domain"
