@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -53,19 +52,4 @@ type Authenticator interface {
 
 type Authorizer interface {
 	HasPermission(ctx context.Context, user *User, resourceID uuid.UUID, permission PermissionType) error
-}
-
-var (
-	ErrTokenExpired     = errors.New("Token is expired")
-	ErrUnexpectedIssuer = errors.New("Unexpected issuer")
-	ErrNotAuthenticated = errors.New("Not authenticated")
-)
-
-type ErrNotAuthorized struct {
-	ResourceID uuid.UUID
-	Permission PermissionType
-}
-
-func (err *ErrNotAuthorized) Error() string {
-	return "Not authorized"
 }

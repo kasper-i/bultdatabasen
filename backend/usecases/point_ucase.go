@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"context"
 
 	"github.com/google/uuid"
@@ -47,7 +46,7 @@ func (uc *pointUsecase) getRouteGraph(ctx context.Context, routeID uuid.UUID) (m
 		}
 
 		if len(points) > 1 {
-			return graph, utils.ErrCorruptResource
+			return graph, domain.ErrCorruptResource
 		}
 
 		if len(points) == 1 {
@@ -103,7 +102,7 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 	}
 
 	if startPointID == uuid.Nil {
-		return nil, utils.ErrLoopDetected
+		return nil, domain.ErrLoopDetected
 	} else {
 		currentPointID := startPointID
 		index := 0
@@ -116,7 +115,7 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 				orderedPoints = append(orderedPoints, *point)
 				index += 1
 			} else {
-				return nil, utils.ErrCorruptResource
+				return nil, domain.ErrCorruptResource
 			}
 
 			if vertex.OutgoingPointID == uuid.Nil {
@@ -127,7 +126,7 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 		}
 
 		if index != len(pointsMap) {
-			return nil, utils.ErrCorruptResource
+			return nil, domain.ErrCorruptResource
 		}
 	}
 
@@ -225,20 +224,20 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 
 	// Only the first point added to a route can be unattached
 	if len(routeGraph) > 0 && position == nil {
-		return domain.Point{}, utils.ErrMissingAttachmentPoint
+		return domain.Point{}, domain.ErrMissingAttachmentPoint
 	}
 
 	// Check that we are not creating a loop
 	if pointID != uuid.Nil {
 		if _, ok := routeGraph[pointID]; ok {
-			return domain.Point{}, utils.ErrLoopDetected
+			return domain.Point{}, domain.ErrLoopDetected
 		}
 	}
 
 	// Check that the insert position is a valid point in the route
 	if position != nil {
 		if _, ok := routeGraph[position.PointID]; !ok {
-			return domain.Point{}, utils.ErrInvalidAttachmentPoint
+			return domain.Point{}, domain.ErrInvalidAttachmentPoint
 		}
 	}
 
@@ -250,7 +249,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 
 		if pointResource.Type != domain.TypePoint {
-			return domain.Point{}, utils.ErrHierarchyStructureViolation
+			return domain.Point{}, domain.ErrHierarchyStructureViolation
 		}
 	}
 

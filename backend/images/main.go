@@ -2,7 +2,6 @@ package images
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -109,7 +108,10 @@ func (s *spaces) GetDownloadURL(ctx context.Context, imageID uuid.UUID, version 
 		}
 	}
 
-	return "", utils.ErrNotFound
+	return "", &domain.ErrImageSizeNotAvailable{
+		ImageID: imageID,
+		Size:    version,
+	}
 }
 
 func (s *spaces) UploadImage(ctx context.Context, imageID uuid.UUID, imageBytes []byte, mimeType string) error {

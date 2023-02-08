@@ -2,7 +2,6 @@ package core
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"context"
 	"time"
 
@@ -30,7 +29,7 @@ func (rm *rm) CreateResource(ctx context.Context, resource domain.Resource, pare
 
 	switch resource.Type {
 	case domain.TypeRoot:
-		return domain.Resource{}, utils.ErrNotPermitted
+		return domain.Resource{}, domain.ErrNotPermitted
 	case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 		resource.LeafOf = nil
 	default:
@@ -38,7 +37,7 @@ func (rm *rm) CreateResource(ctx context.Context, resource domain.Resource, pare
 	}
 
 	if !rm.checkParentAllowed(ctx, resource, parentResourceID) {
-		return domain.Resource{}, utils.ErrHierarchyStructureViolation
+		return domain.Resource{}, domain.ErrHierarchyStructureViolation
 	}
 
 	err := rm.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
@@ -82,7 +81,7 @@ func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID s
 
 		switch resource.Type {
 		case domain.TypeRoot:
-			return utils.ErrNotPermitted
+			return domain.ErrNotPermitted
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 			subtree, err := rm.repo.GetTreePath(txCtx, resourceID)
 			if err != nil {
@@ -140,7 +139,7 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute:
 			break
 		default:
-			return utils.ErrMoveNotPermitted
+			return domain.ErrMoveNotPermitted
 		}
 
 		if subtree, err = rm.repo.GetTreePath(txCtx, resourceID); err != nil {
@@ -150,11 +149,11 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 		}
 
 		if oldParentID == newParentID {
-			return utils.ErrHierarchyStructureViolation
+			return domain.ErrHierarchyStructureViolation
 		}
 
 		if !rm.checkParentAllowed(txCtx, resource, newParentID) {
-			return utils.ErrHierarchyStructureViolation
+			return domain.ErrHierarchyStructureViolation
 		}
 
 		if err := rm.UpdateCounters(txCtx, domain.Counters{}.Substract(resource.Counters), subtree[0:len(subtree)-1]...); err != nil {
@@ -167,7 +166,10 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 		}
 
 		if newParentPath.Root().String() != domain.RootID {
-			return utils.ErrNotFound
+			return &domain.ErrNotAuthorized{
+				ResourceID: newParentID,
+				Permission: domain.ReadPermission,
+			}
 		}
 
 		if err := rm.repo.MoveSubtree(txCtx, subtree, newParentPath); err != nil {

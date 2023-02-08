@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -30,12 +29,12 @@ func writeResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
 func writeError(w http.ResponseWriter, err error) {
 	error := errorMessage{}
 
-	var notFoundError *domain.ErrNotFound
+	var notFoundError *domain.ErrResourceNotFound
 
 	if errors.As(err, &notFoundError) {
 		error.Status = http.StatusNotFound
 		error.ResourceID = &notFoundError.ResourceID
-	} else if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, utils.ErrNotFound) {
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
 		error.Status = http.StatusNotFound
 	} else if errors.Is(err, gorm.ErrInvalidData) {
 		error.Status = http.StatusBadRequest
@@ -45,16 +44,16 @@ func writeError(w http.ResponseWriter, err error) {
 	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
 		error.Status = http.StatusConflict
 		error.Message = "Duplicate entry"
-	} else if errors.Is(err, utils.ErrLoopDetected) {
+	} else if errors.Is(err, domain.ErrLoopDetected) {
 		error.Status = http.StatusConflict
 		error.Message = err.Error()
-	} else if errors.Is(err, utils.ErrMissingAttachmentPoint) || errors.Is(err, utils.ErrInvalidAttachmentPoint) || errors.Is(err, utils.ErrOrphanedResource) || errors.Is(err, utils.ErrHierarchyStructureViolation) || errors.Is(err, utils.ErrMoveNotPermitted) {
+	} else if errors.Is(err, domain.ErrMissingAttachmentPoint) || errors.Is(err, domain.ErrInvalidAttachmentPoint) || errors.Is(err, domain.ErrOrphanedResource) || errors.Is(err, domain.ErrHierarchyStructureViolation) || errors.Is(err, domain.ErrMoveNotPermitted) {
 		error.Status = http.StatusBadRequest
 		error.Message = err.Error()
-	} else if errors.Is(err, utils.ErrCorruptResource) {
+	} else if errors.Is(err, domain.ErrCorruptResource) {
 		error.Status = http.StatusInternalServerError
 		error.Message = err.Error()
-	} else if errors.Is(err, utils.ErrNotPermitted) {
+	} else if errors.Is(err, domain.ErrNotPermitted) {
 		error.Status = http.StatusForbidden
 	} else {
 		error.Status = http.StatusInternalServerError
