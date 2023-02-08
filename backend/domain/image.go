@@ -41,7 +41,7 @@ type ImageBucket interface {
 
 type ImageRepository interface {
 	GetImages(ctx context.Context, resourceID uuid.UUID) ([]Image, error)
-	GetImageWithLock(imageID uuid.UUID) (Image, error)
+	GetImageWithLock(ctx context.Context, imageID uuid.UUID) (Image, error)
 	GetImage(ctx context.Context, imageID uuid.UUID) (Image, error)
 	InsertImage(ctx context.Context, image Image) error
 	SaveImage(ctx context.Context, image Image) error

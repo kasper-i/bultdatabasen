@@ -12,7 +12,7 @@ import (
 func (store *psqlDatastore) GetSectors(ctx context.Context, resourceID uuid.UUID) ([]domain.Sector, error) {
 	var sectors []domain.Sector = make([]domain.Sector, 0)
 
-	if err := store.tx.Raw(fmt.Sprintf(`%s SELECT * FROM tree
+	if err := store.tx(ctx).Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN sector ON tree.resource_id = sector.id
 		INNER JOIN resource ON tree.resource_id = resource.id`,
 		withTreeQuery()), resourceID).Scan(&sectors).Error; err != nil {
@@ -25,7 +25,7 @@ func (store *psqlDatastore) GetSectors(ctx context.Context, resourceID uuid.UUID
 func (store *psqlDatastore) GetSector(ctx context.Context, resourceID uuid.UUID) (domain.Sector, error) {
 	var sector domain.Sector
 
-	if err := store.tx.Raw(`SELECT * FROM sector INNER JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
+	if err := store.tx(ctx).Raw(`SELECT * FROM sector INNER JOIN resource ON sector.id = resource.id WHERE sector.id = ?`, resourceID).
 		Scan(&sector).Error; err != nil {
 		return domain.Sector{}, err
 	}
@@ -38,5 +38,5 @@ func (store *psqlDatastore) GetSector(ctx context.Context, resourceID uuid.UUID)
 }
 
 func (store *psqlDatastore) InsertSector(ctx context.Context, sector domain.Sector) error {
-	return store.tx.Create(&sector).Error
+	return store.tx(ctx).Create(&sector).Error
 }

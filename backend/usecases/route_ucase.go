@@ -123,7 +123,7 @@ func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, upda
 	}
 
 	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		original, err := uc.repo.GetRouteWithLock(routeID)
+		original, err := uc.repo.GetRouteWithLock(ctx, routeID)
 		if err != nil {
 			return err
 		}

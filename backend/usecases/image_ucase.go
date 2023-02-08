@@ -193,7 +193,7 @@ func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rota
 		return domain.ErrIllegalAngle
 	}
 
-	original, err := uc.repo.GetImageWithLock(imageID)
+	original, err := uc.repo.GetImageWithLock(ctx, imageID)
 	if err != nil {
 		return err
 	}

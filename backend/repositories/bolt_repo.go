@@ -25,7 +25,7 @@ func (store *psqlDatastore) GetBolts(ctx context.Context, resourceID uuid.UUID) 
 	LEFT JOIN model mo ON bolt.model_id = mo.id
 	LEFT JOIN material ma ON bolt.material_id = ma.id`, withTreeQuery())
 
-	if err := store.tx.Raw(query, resourceID).Scan(&bolts).Error; err != nil {
+	if err := store.tx(ctx).Raw(query, resourceID).Scan(&bolts).Error; err != nil {
 		return nil, err
 	}
 
@@ -34,7 +34,7 @@ func (store *psqlDatastore) GetBolts(ctx context.Context, resourceID uuid.UUID) 
 func (store *psqlDatastore) GetBolt(ctx context.Context, resourceID uuid.UUID) (domain.Bolt, error) {
 	var bolt domain.Bolt
 
-	if err := store.tx.Raw(`SELECT
+	if err := store.tx(ctx).Raw(`SELECT
 			bolt.*,
 			resource.counters,
 			mf.name AS manufacturer,
@@ -60,7 +60,7 @@ func (store *psqlDatastore) GetBolt(ctx context.Context, resourceID uuid.UUID) (
 func (store *psqlDatastore) GetBoltWithLock(ctx context.Context, resourceID uuid.UUID) (domain.Bolt, error) {
 	var bolt domain.Bolt
 
-	if err := store.tx.Raw(`SELECT * FROM bolt
+	if err := store.tx(ctx).Raw(`SELECT * FROM bolt
 		INNER JOIN resource ON bolt.id = resource.id
 		WHERE bolt.id = ?
 		FOR UPDATE`, resourceID).
@@ -76,11 +76,11 @@ func (store *psqlDatastore) GetBoltWithLock(ctx context.Context, resourceID uuid
 }
 
 func (store *psqlDatastore) InsertBolt(ctx context.Context, bolt domain.Bolt) error {
-	return store.tx.Create(bolt).Error
+	return store.tx(ctx).Create(bolt).Error
 }
 
 func (store *psqlDatastore) SaveBolt(ctx context.Context, bolt domain.Bolt) error {
-	return store.tx.Select(
+	return store.tx(ctx).Select(
 		"Type",
 		"Position",
 		"Installed",

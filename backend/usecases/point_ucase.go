@@ -215,7 +215,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		return domain.Point{}, domain.ErrPointWithoutBolts
 	}
 
-	if _, err := uc.repo.GetRouteWithLock(routeID); err != nil {
+	if _, err := uc.repo.GetRouteWithLock(ctx, routeID); err != nil {
 		return domain.Point{}, err
 	}
 
@@ -373,7 +373,7 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		var routeGraph map[uuid.UUID]*routeGraphVertex
 		var parents []domain.Parent
 
-		if _, err := uc.repo.GetRouteWithLock(routeID); err != nil {
+		if _, err := uc.repo.GetRouteWithLock(ctx, routeID); err != nil {
 			return err
 		}
 

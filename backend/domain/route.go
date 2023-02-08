@@ -34,7 +34,7 @@ type RouteUsecase interface {
 type RouteRepository interface {
 	GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]Route, error)
 	GetRoute(ctx context.Context, resourceID uuid.UUID) (Route, error)
-	GetRouteWithLock(resourceID uuid.UUID) (Route, error)
+	GetRouteWithLock(ctx context.Context, resourceID uuid.UUID) (Route, error)
 	InsertRoute(ctx context.Context, route Route) error
 	SaveRoute(ctx context.Context, route Route) error
 }

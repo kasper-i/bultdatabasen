@@ -12,7 +12,7 @@ func (store *psqlDatastore) GetManufacturers(ctx context.Context) ([]domain.Manu
 
 	query := "SELECT * FROM manufacturer ORDER BY name ASC"
 
-	if err := store.tx.Raw(query).Scan(&manufacturers).Error; err != nil {
+	if err := store.tx(ctx).Raw(query).Scan(&manufacturers).Error; err != nil {
 		return nil, err
 	}
 
@@ -24,7 +24,7 @@ func (store *psqlDatastore) GetModels(ctx context.Context, manufacturerID uuid.U
 
 	query := "SELECT * FROM model where manufacturer_id = ? ORDER BY name ASC"
 
-	if err := store.tx.Raw(query, manufacturerID).Scan(&models).Error; err != nil {
+	if err := store.tx(ctx).Raw(query, manufacturerID).Scan(&models).Error; err != nil {
 		return nil, err
 	}
 
@@ -36,7 +36,7 @@ func (store *psqlDatastore) GetMaterials(ctx context.Context) ([]domain.Material
 
 	query := "SELECT * FROM material ORDER BY name ASC"
 
-	if err := store.tx.Raw(query).Scan(&materials).Error; err != nil {
+	if err := store.tx(ctx).Raw(query).Scan(&materials).Error; err != nil {
 		return nil, err
 	}
 

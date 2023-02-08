@@ -15,7 +15,7 @@ import (
 func (store *psqlDatastore) GetAncestors(ctx context.Context, resourceID uuid.UUID) (domain.Ancestors, error) {
 	var ancestors []domain.Resource
 
-	err := store.tx.Raw(`WITH path_list AS (
+	err := store.tx(ctx).Raw(`WITH path_list AS (
 		SELECT COALESCE(t1.path, t2.path) AS path FROM resource
 		LEFT JOIN tree t1 ON resource.id = t1.resource_id
 		LEFT JOIN tree t2 ON resource.leaf_of = t2.resource_id
@@ -39,7 +39,7 @@ func (store *psqlDatastore) GetAncestors(ctx context.Context, resourceID uuid.UU
 func (store *psqlDatastore) GetChildren(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
 	var children []domain.Resource = make([]domain.Resource, 0)
 
-	err := store.tx.Raw(`SELECT resource.* 
+	err := store.tx(ctx).Raw(`SELECT resource.* 
 	FROM tree
 	INNER JOIN resource ON tree.resource_id = resource.id
 	WHERE path ~ ?
@@ -55,7 +55,7 @@ func (store *psqlDatastore) GetChildren(ctx context.Context, resourceID uuid.UUI
 func (store *psqlDatastore) GetParents(ctx context.Context, resourceIDs []uuid.UUID) ([]domain.Parent, error) {
 	var parents []domain.Parent = make([]domain.Parent, 0)
 
-	err := store.tx.Raw(`SELECT id, name, type, tree.resource_id as child_id
+	err := store.tx(ctx).Raw(`SELECT id, name, type, tree.resource_id as child_id
 		FROM tree
 		INNER JOIN resource parent ON REPLACE(subpath(tree.path, -2, 1)::text, '_', '-')::uuid = parent.id
 		WHERE resource_id IN ?`, resourceIDs).Scan(&parents).Error
@@ -81,7 +81,7 @@ func (store *psqlDatastore) Search(ctx context.Context, name string) ([]domain.R
 	var results []searchResult
 	var resources []domain.ResourceWithParents = make([]domain.ResourceWithParents, 0)
 
-	err := store.tx.Raw(`SELECT
+	err := store.tx(ctx).Raw(`SELECT
 		r1.*,
 		r2.id as r2_id, r2.name as r2_name, r2.type as r2_type,
 		r3.id as r3_id, r3.name as r3_name, r3.type as r3_type
@@ -138,7 +138,7 @@ func (store *psqlDatastore) Search(ctx context.Context, name string) ([]domain.R
 func (store *psqlDatastore) GetResource(ctx context.Context, resourceID uuid.UUID) (domain.Resource, error) {
 	var resource domain.Resource
 
-	if err := store.tx.Raw(`SELECT * FROM resource WHERE id = ?`, resourceID).Scan(&resource).Error; err != nil {
+	if err := store.tx(ctx).Raw(`SELECT * FROM resource WHERE id = ?`, resourceID).Scan(&resource).Error; err != nil {
 		return resource, err
 	}
 
@@ -152,7 +152,7 @@ func (store *psqlDatastore) GetResource(ctx context.Context, resourceID uuid.UUI
 func (store *psqlDatastore) GetResourceWithLock(ctx context.Context, resourceID uuid.UUID) (domain.Resource, error) {
 	var resource domain.Resource
 
-	if err := store.tx.Raw(`SELECT * FROM resource WHERE id = ? FOR UPDATE`, resourceID).Scan(&resource).Error; err != nil {
+	if err := store.tx(ctx).Raw(`SELECT * FROM resource WHERE id = ? FOR UPDATE`, resourceID).Scan(&resource).Error; err != nil {
 		return resource, err
 	}
 
@@ -164,15 +164,15 @@ func (store *psqlDatastore) GetResourceWithLock(ctx context.Context, resourceID 
 }
 
 func (store *psqlDatastore) InsertResource(ctx context.Context, resource domain.Resource) error {
-	return store.tx.Create(resource).Error
+	return store.tx(ctx).Create(resource).Error
 }
 
 func (store *psqlDatastore) OrphanResource(ctx context.Context, resourceID uuid.UUID) error {
-	return store.tx.Exec(`UPDATE resource SET leaf_of = NULL WHERE id = ?`, resourceID).Error
+	return store.tx(ctx).Exec(`UPDATE resource SET leaf_of = NULL WHERE id = ?`, resourceID).Error
 }
 
 func (store *psqlDatastore) RenameResource(ctx context.Context, resourceID uuid.UUID, name, userID string) error {
-	return store.tx.Exec(`UPDATE resource SET name = ?, mtime = ?, muser_id = ? WHERE id = ?`,
+	return store.tx(ctx).Exec(`UPDATE resource SET name = ?, mtime = ?, muser_id = ? WHERE id = ?`,
 		name, time.Now(), userID, resourceID).Error
 }
 
@@ -181,7 +181,7 @@ func (store *psqlDatastore) GetTreePath(ctx context.Context, resourceID uuid.UUI
 		Path domain.Path `gorm:"column:path"`
 	}
 
-	if err := store.tx.Raw(`SELECT path::text AS path
+	if err := store.tx(ctx).Raw(`SELECT path::text AS path
 		FROM tree
 		WHERE resource_id = ?`, resourceID).Scan(&out).Error; err != nil {
 		return nil, err
@@ -191,26 +191,26 @@ func (store *psqlDatastore) GetTreePath(ctx context.Context, resourceID uuid.UUI
 }
 
 func (store *psqlDatastore) InsertTreePath(ctx context.Context, resourceID, parentID uuid.UUID) error {
-	return store.tx.Exec(`INSERT INTO tree (resource_id, path)
+	return store.tx(ctx).Exec(`INSERT INTO tree (resource_id, path)
 		SELECT @resourceID, path || REPLACE(@resourceID, '-', '_')
 		FROM tree
 		WHERE resource_id = @parentID`, sql.Named("parentID", parentID), sql.Named("resourceID", resourceID)).Error
 }
 
 func (store *psqlDatastore) RemoveTreePath(ctx context.Context, resourceID, parentID uuid.UUID) error {
-	return store.tx.Exec(`DELETE FROM tree
+	return store.tx(ctx).Exec(`DELETE FROM tree
 		WHERE path <@ (SELECT path FROM tree WHERE resource_id = @parentID LIMIT 1) AND resource_id = @resourceID`,
 		sql.Named("parentID", parentID), sql.Named("resourceID", resourceID)).Error
 }
 
 func (store *psqlDatastore) MoveSubtree(ctx context.Context, subtree domain.Path, newAncestralPath domain.Path) error {
-	return store.tx.Exec(`UPDATE tree
+	return store.tx(ctx).Exec(`UPDATE tree
 		SET path = ? || subpath(path, ?)
 		WHERE path <@ ?`, newAncestralPath, len(subtree)-1, subtree).Error
 }
 
 func (store *psqlDatastore) GetSubtreeLock(ctx context.Context, resourceID uuid.UUID) error {
-	if err := store.tx.Exec(fmt.Sprintf(`%s
+	if err := store.tx(ctx).Exec(fmt.Sprintf(`%s
 		SELECT * FROM (
 			SELECT resource_id
 			FROM tree
@@ -229,11 +229,11 @@ func (store *psqlDatastore) GetSubtreeLock(ctx context.Context, resourceID uuid.
 }
 
 func (store *psqlDatastore) InsertTrash(ctx context.Context, trash domain.Trash) error {
-	return store.tx.Create(&trash).Error
+	return store.tx(ctx).Create(&trash).Error
 }
 
 func (store *psqlDatastore) TouchResource(ctx context.Context, resourceID uuid.UUID, userID string) error {
-	return store.tx.Exec(`UPDATE resource SET mtime = ?, muser_id = ? WHERE id = ?`,
+	return store.tx(ctx).Exec(`UPDATE resource SET mtime = ?, muser_id = ? WHERE id = ?`,
 		time.Now(), userID, resourceID).Error
 }
 
@@ -248,5 +248,5 @@ func (store *psqlDatastore) UpdateCounters(ctx context.Context, resourceID uuid.
 
 	query := fmt.Sprintf("UPDATE resource SET counters = %s WHERE id = ?", param)
 
-	return store.tx.Exec(query, resourceID).Error
+	return store.tx(ctx).Exec(query, resourceID).Error
 }

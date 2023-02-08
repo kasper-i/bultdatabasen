@@ -46,7 +46,7 @@ type TaskUsecase interface {
 type TaskRepository interface {
 	GetTasks(ctx context.Context, resourceID uuid.UUID, pagination Pagination, statuses []string) ([]Task, Meta, error)
 	GetTask(ctx context.Context, resourceID uuid.UUID) (Task, error)
-	GetTaskWithLock(resourceID uuid.UUID) (Task, error)
+	GetTaskWithLock(ctx context.Context, resourceID uuid.UUID) (Task, error)
 	InsertTask(ctx context.Context, task Task) error
 	SaveTask(ctx context.Context, task Task) error
 }

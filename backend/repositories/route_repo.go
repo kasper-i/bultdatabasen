@@ -12,7 +12,7 @@ import (
 func (store *psqlDatastore) GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]domain.Route, error) {
 	var routes []domain.Route = make([]domain.Route, 0)
 
-	if err := store.tx.Raw(fmt.Sprintf(`%s SELECT * FROM tree
+	if err := store.tx(ctx).Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN route ON tree.resource_id = route.id
 		INNER JOIN resource ON tree.resource_id = resource.id`,
 		withTreeQuery()), resourceID).Scan(&routes).Error; err != nil {
@@ -25,7 +25,7 @@ func (store *psqlDatastore) GetRoutes(ctx context.Context, resourceID uuid.UUID)
 func (store *psqlDatastore) GetRoute(ctx context.Context, resourceID uuid.UUID) (domain.Route, error) {
 	var route domain.Route
 
-	if err := store.tx.Raw(`SELECT * FROM route INNER JOIN resource ON route.id = resource.id WHERE route.id = ?`, resourceID).
+	if err := store.tx(ctx).Raw(`SELECT * FROM route INNER JOIN resource ON route.id = resource.id WHERE route.id = ?`, resourceID).
 		Scan(&route).Error; err != nil {
 		return domain.Route{}, err
 	}
@@ -37,10 +37,10 @@ func (store *psqlDatastore) GetRoute(ctx context.Context, resourceID uuid.UUID) 
 	return route, nil
 }
 
-func (store *psqlDatastore) GetRouteWithLock(resourceID uuid.UUID) (domain.Route, error) {
+func (store *psqlDatastore) GetRouteWithLock(ctx context.Context, resourceID uuid.UUID) (domain.Route, error) {
 	var route domain.Route
 
-	if err := store.tx.Raw(`SELECT * FROM route INNER JOIN resource ON route.id = resource.id WHERE route.id = ? FOR UPDATE`, resourceID).
+	if err := store.tx(ctx).Raw(`SELECT * FROM route INNER JOIN resource ON route.id = resource.id WHERE route.id = ? FOR UPDATE`, resourceID).
 		Scan(&route).Error; err != nil {
 		return domain.Route{}, err
 	}
@@ -53,10 +53,10 @@ func (store *psqlDatastore) GetRouteWithLock(resourceID uuid.UUID) (domain.Route
 }
 
 func (store *psqlDatastore) InsertRoute(ctx context.Context, route domain.Route) error {
-	return store.tx.Create(route).Error
+	return store.tx(ctx).Create(route).Error
 }
 
 func (store *psqlDatastore) SaveRoute(ctx context.Context, route domain.Route) error {
-	return store.tx.Select(
+	return store.tx(ctx).Select(
 		"Name", "AltName", "Year", "Length", "RouteType").Updates(route).Error
 }

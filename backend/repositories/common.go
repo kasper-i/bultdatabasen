@@ -66,12 +66,12 @@ func init() {
 type txKey struct{}
 
 type psqlDatastore struct {
-	tx *gorm.DB
+	__tx *gorm.DB
 }
 
 func NewDatastore() domain.Datastore {
 	return &psqlDatastore{
-		tx: db,
+		__tx: db,
 	}
 }
 
@@ -83,16 +83,17 @@ func extractTx(ctx context.Context) *gorm.DB {
 	if tx, ok := ctx.Value(txKey{}).(*gorm.DB); ok {
 		return tx
 	}
+
 	return nil
 }
 
-func (store *psqlDatastore) model(ctx context.Context, model ...interface{}) *gorm.DB {
+func (store *psqlDatastore) tx(ctx context.Context) *gorm.DB {
 	tx := extractTx(ctx)
 	if tx != nil {
 		return tx
 	}
 
-	return store.tx
+	return store.__tx
 }
 
 func (store *psqlDatastore) WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
