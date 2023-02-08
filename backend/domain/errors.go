@@ -6,12 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var (
-	ErrTokenExpired     = errors.New("Token is expired")
-	ErrUnexpectedIssuer = errors.New("Unexpected issuer")
-	ErrNotAuthenticated = errors.New("Not authenticated")
-)
-
 type ErrNotAuthorized struct {
 	ResourceID uuid.UUID
 	Permission PermissionType
@@ -39,6 +33,9 @@ func (err *ErrImageSizeNotAvailable) Error() string {
 }
 
 var (
+	ErrTokenExpired                = errors.New("token is expired")
+	ErrUnexpectedIssuer            = errors.New("unexpected issuer")
+	ErrNotAuthenticated            = errors.New("not authenticated")
 	ErrIllegalAngle                = errors.New("illegal image rotation angle")
 	ErrUnknownImageSize            = errors.New("unknown image size")
 	ErrIllegalInsertPosition       = errors.New("illegal point insert position")
