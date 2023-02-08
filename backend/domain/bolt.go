@@ -42,3 +42,11 @@ type BoltUsecase interface {
 	DeleteBolt(ctx context.Context, resourceID uuid.UUID) error
 	UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBolt Bolt) (Bolt, error)
 }
+
+type BoltRepository interface {
+	GetBolts(ctx context.Context, resourceID uuid.UUID) ([]Bolt, error)
+	GetBolt(ctx context.Context, resourceID uuid.UUID) (Bolt, error)
+	GetBoltWithLock(ctx context.Context, resourceID uuid.UUID) (Bolt, error)
+	InsertBolt(ctx context.Context, bolt Bolt) error
+	SaveBolt(ctx context.Context, bolt Bolt) error
+}

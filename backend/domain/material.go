@@ -18,3 +18,9 @@ func (Material) TableName() string {
 type MaterialUsecase interface {
 	GetMaterials(ctx context.Context) ([]Material, error)
 }
+
+type CatalogRepository interface {
+	GetManufacturers(ctx context.Context) ([]Manufacturer, error)
+	GetModels(ctx context.Context, manufacturerID uuid.UUID) ([]Model, error)
+	GetMaterials(ctx context.Context) ([]Material, error)
+}

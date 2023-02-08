@@ -21,3 +21,9 @@ type AreaUsecase interface {
 	CreateArea(ctx context.Context, area Area, parentResourceID uuid.UUID) (Area, error)
 	DeleteArea(ctx context.Context, resourceID uuid.UUID) error
 }
+
+type AreaRepository interface {
+	GetAreas(ctx context.Context, resourceID uuid.UUID) ([]Area, error)
+	GetArea(ctx context.Context, resourceID uuid.UUID) (Area, error)
+	InsertArea(ctx context.Context, area Area) error
+}

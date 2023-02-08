@@ -21,3 +21,9 @@ type SectorUsecase interface {
 	CreateSector(ctx context.Context, sector Sector, parentResourceID uuid.UUID) (Sector, error)
 	DeleteSector(ctx context.Context, resourceID uuid.UUID) error
 }
+
+type SectorRepository interface {
+	GetSectors(ctx context.Context, resourceID uuid.UUID) ([]Sector, error)
+	GetSector(ctx context.Context, resourceID uuid.UUID) (Sector, error)
+	InsertSector(ctx context.Context, sector Sector) error
+}

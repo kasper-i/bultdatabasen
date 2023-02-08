@@ -97,15 +97,6 @@ type ResourceManager interface {
 	UpdateCounters(ctx context.Context, delta Counters, resourceID ...uuid.UUID) error
 }
 
-type UserRepository interface {
-	GetUser(ctx context.Context, userID string) (User, error)
-	SaveUser(ctx context.Context, user User) error
-	InsertUser(ctx context.Context, user User) error
-	GetUserNames(ctx context.Context) ([]User, error)
-	GetRoles(ctx context.Context, userID string) []ResourceRole
-	InsertResourceAccess(ctx context.Context, resourceID uuid.UUID, userID string, role RoleType) error
-}
-
 type ResourceRepository interface {
 	GetAncestors(ctx context.Context, resourceID uuid.UUID) (Ancestors, error)
 	GetChildren(ctx context.Context, resourceID uuid.UUID) ([]Resource, error)
@@ -124,71 +115,6 @@ type ResourceRepository interface {
 	GetSubtreeLock(ctx context.Context, resourceID uuid.UUID) error
 	InsertTrash(ctx context.Context, trash Trash) error
 	UpdateCounters(ctx context.Context, resourceID uuid.UUID, delta Counters) error
-}
-
-type AreaRepository interface {
-	GetAreas(ctx context.Context, resourceID uuid.UUID) ([]Area, error)
-	GetArea(ctx context.Context, resourceID uuid.UUID) (Area, error)
-	InsertArea(ctx context.Context, area Area) error
-}
-
-type BoltRepository interface {
-	GetBolts(ctx context.Context, resourceID uuid.UUID) ([]Bolt, error)
-	GetBolt(ctx context.Context, resourceID uuid.UUID) (Bolt, error)
-	GetBoltWithLock(ctx context.Context, resourceID uuid.UUID) (Bolt, error)
-	InsertBolt(ctx context.Context, bolt Bolt) error
-	SaveBolt(ctx context.Context, bolt Bolt) error
-}
-
-type CragRepository interface {
-	GetCrags(ctx context.Context, resourceID uuid.UUID) ([]Crag, error)
-	GetCrag(ctx context.Context, resourceID uuid.UUID) (Crag, error)
-	InsertCrag(ctx context.Context, crag Crag) error
-}
-
-type RouteRepository interface {
-	GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]Route, error)
-	GetRoute(ctx context.Context, resourceID uuid.UUID) (Route, error)
-	GetRouteWithLock(resourceID uuid.UUID) (Route, error)
-	InsertRoute(ctx context.Context, route Route) error
-	SaveRoute(ctx context.Context, route Route) error
-}
-
-type SectorRepository interface {
-	GetSectors(ctx context.Context, resourceID uuid.UUID) ([]Sector, error)
-	GetSector(ctx context.Context, resourceID uuid.UUID) (Sector, error)
-	InsertSector(ctx context.Context, sector Sector) error
-}
-
-type TaskRepository interface {
-	GetTasks(ctx context.Context, resourceID uuid.UUID, pagination Pagination, statuses []string) ([]Task, Meta, error)
-	GetTask(ctx context.Context, resourceID uuid.UUID) (Task, error)
-	GetTaskWithLock(resourceID uuid.UUID) (Task, error)
-	InsertTask(ctx context.Context, task Task) error
-	SaveTask(ctx context.Context, task Task) error
-}
-
-type ImageRepository interface {
-	GetImages(ctx context.Context, resourceID uuid.UUID) ([]Image, error)
-	GetImageWithLock(imageID uuid.UUID) (Image, error)
-	GetImage(ctx context.Context, imageID uuid.UUID) (Image, error)
-	InsertImage(ctx context.Context, image Image) error
-	SaveImage(ctx context.Context, image Image) error
-}
-
-type PointRepository interface {
-	GetPointConnections(ctx context.Context, routeID uuid.UUID) ([]PointConnection, error)
-	GetPointWithLock(ctx context.Context, pointID uuid.UUID) (Point, error)
-	GetPoints(ctx context.Context, resourceID uuid.UUID) ([]Point, error)
-	InsertPoint(ctx context.Context, point Point) error
-	CreatePointConnection(ctx context.Context, routeID, srcPointID, dstPointID uuid.UUID) error
-	DeletePointConnection(ctx context.Context, routeID, srcPointID, dstPointID uuid.UUID) error
-}
-
-type CatalogRepository interface {
-	GetManufacturers(ctx context.Context) ([]Manufacturer, error)
-	GetModels(ctx context.Context, manufacturerID uuid.UUID) ([]Model, error)
-	GetMaterials(ctx context.Context) ([]Material, error)
 }
 
 type Datastore interface {

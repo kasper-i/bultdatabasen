@@ -37,3 +37,12 @@ type PointUsecase interface {
 	AttachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID, position *InsertPosition, anchor bool, bolts []Bolt) (Point, error)
 	DetachPoint(ctx context.Context, routeID uuid.UUID, pointID uuid.UUID) error
 }
+
+type PointRepository interface {
+	GetPointConnections(ctx context.Context, routeID uuid.UUID) ([]PointConnection, error)
+	GetPointWithLock(ctx context.Context, pointID uuid.UUID) (Point, error)
+	GetPoints(ctx context.Context, resourceID uuid.UUID) ([]Point, error)
+	InsertPoint(ctx context.Context, point Point) error
+	CreatePointConnection(ctx context.Context, routeID, srcPointID, dstPointID uuid.UUID) error
+	DeletePointConnection(ctx context.Context, routeID, srcPointID, dstPointID uuid.UUID) error
+}

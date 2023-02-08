@@ -6,11 +6,13 @@ import (
 	"bultdatabasen/datastores"
 	httpdelivery "bultdatabasen/delivery/http"
 	"bultdatabasen/domain"
+	"bultdatabasen/images"
 	"bultdatabasen/usecases"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -41,6 +43,11 @@ func main() {
 	authz := authorizer.New(datastore)
 
 	var rm domain.ResourceManager
+	ib, err := images.NewImageBucket()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
 
 	userUsecase := usecases.NewUserUsecase(authn, datastore)
 	resourceUseCase := usecases.NewResourceUsecase(authn, authz, datastore, rm)
@@ -49,7 +56,7 @@ func main() {
 	sectorUsecase := usecases.NewSectorUsecase(authn, authz, datastore, rm)
 	routeUsecase := usecases.NewRouteUsecase(authn, authz, datastore, rm)
 	pointUsecase := usecases.NewPointUsecase(authn, authz, datastore, rm)
-	imageUsecase := usecases.NewImageUsecase(authn, authz, datastore, rm)
+	imageUsecase := usecases.NewImageUsecase(authn, authz, datastore, rm, ib)
 	boltUsecase := usecases.NewBoltUsecase(authn, authz, datastore, rm)
 	taskUsecase := usecases.NewTaskUsecase(authn, authz, datastore, rm)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(datastore)
