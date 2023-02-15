@@ -249,7 +249,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 
 		if pointResource.Type != domain.TypePoint {
-			return domain.Point{}, domain.ErrOperationNotPermitted
+			return domain.Point{}, domain.ErrOperationRefused
 		}
 	}
 

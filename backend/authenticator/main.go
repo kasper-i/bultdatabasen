@@ -22,7 +22,7 @@ func New() *authenticator {
 	return &authenticator{}
 }
 
-type Claims struct {
+type claims struct {
 	Username   string `json:"username"`
 	Expiration int64  `json:"exp"`
 	Issuer     string `json:"iss"`
@@ -93,7 +93,7 @@ func (a *authenticator) verifyJWT(jwt string) ([]byte, error) {
 
 func (a *authenticator) decodeJWT(payload []byte) (*domain.User, error) {
 	var user domain.User
-	var claims Claims
+	var claims claims
 
 	if err := json.Unmarshal(payload, &claims); err != nil {
 		return nil, err

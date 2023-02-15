@@ -6,9 +6,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type errorMessage struct {
@@ -30,28 +28,18 @@ func writeError(w http.ResponseWriter, err error) {
 	error := errorMessage{}
 
 	var notFoundError *domain.ErrResourceNotFound
+	var notAuthorizedError *domain.ErrNotAuthorized
 
 	if errors.As(err, &notFoundError) {
 		error.Status = http.StatusNotFound
 		error.ResourceID = &notFoundError.ResourceID
-	} else if errors.Is(err, gorm.ErrRecordNotFound) {
-		error.Status = http.StatusNotFound
-	} else if errors.Is(err, gorm.ErrInvalidData) {
-		error.Status = http.StatusBadRequest
-	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1451 {
-		error.Status = http.StatusConflict
-		error.Message = "Conflict"
-	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
-		error.Status = http.StatusConflict
-		error.Message = "Duplicate entry"
-	} else if errors.Is(err, domain.ErrBadInsertPosition) || errors.Is(err, domain.ErrIllegalParent) || errors.Is(err, domain.ErrUnmovableResource) {
-		error.Status = http.StatusBadRequest
-		error.Message = err.Error()
-	} else if errors.Is(err, domain.ErrInvariantViolation) {
-		error.Status = http.StatusInternalServerError
-		error.Message = err.Error()
-	} else if errors.Is(err, domain.ErrOperationNotPermitted) {
+	} else if errors.Is(err, domain.ErrNotAuthenticated) {
+		error.Status = http.StatusUnauthorized
+	} else if errors.As(err, &notAuthorizedError) {
 		error.Status = http.StatusForbidden
+		error.ResourceID = &notAuthorizedError.ResourceID
+	} else if errors.Is(err, domain.ErrUnsupportedMimeType) || errors.Is(err, domain.ErrNonOrthogonalAngle) || errors.Is(err, domain.ErrUnmovableResource) || errors.Is(err, domain.ErrIllegalParent) || errors.Is(err, domain.ErrVacantPoint) || errors.Is(err, domain.ErrBadInsertPosition) {
+		error.Status = http.StatusBadRequest
 	} else {
 		error.Status = http.StatusInternalServerError
 	}

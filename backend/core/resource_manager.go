@@ -29,7 +29,7 @@ func (rm *rm) CreateResource(ctx context.Context, resource domain.Resource, pare
 
 	switch resource.Type {
 	case domain.TypeRoot:
-		return domain.Resource{}, domain.ErrOperationNotPermitted
+		return domain.Resource{}, domain.ErrOperationRefused
 	case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 		resource.LeafOf = nil
 	default:
@@ -81,7 +81,7 @@ func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID s
 
 		switch resource.Type {
 		case domain.TypeRoot:
-			return domain.ErrOperationNotPermitted
+			return domain.ErrOperationRefused
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 			subtree, err := rm.repo.GetTreePath(txCtx, resourceID)
 			if err != nil {
