@@ -49,7 +49,10 @@ func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) 
 		writeError(w, err)
 		return
 	}
-	version := vars["version"]
+	var version *string
+	if value := vars["version"]; value != "" {
+		version = &value
+	}
 
 	if url, err := hdlr.ImageUsecase.GetImageDownloadURL(r.Context(), imageID, version); err != nil {
 		writeError(w, err)

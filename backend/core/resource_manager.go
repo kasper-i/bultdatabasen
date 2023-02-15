@@ -29,7 +29,7 @@ func (rm *rm) CreateResource(ctx context.Context, resource domain.Resource, pare
 
 	switch resource.Type {
 	case domain.TypeRoot:
-		return domain.Resource{}, domain.ErrNotPermitted
+		return domain.Resource{}, domain.ErrOperationNotPermitted
 	case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 		resource.LeafOf = nil
 	default:
@@ -37,7 +37,7 @@ func (rm *rm) CreateResource(ctx context.Context, resource domain.Resource, pare
 	}
 
 	if !rm.checkParentAllowed(ctx, resource, parentResourceID) {
-		return domain.Resource{}, domain.ErrHierarchyStructureViolation
+		return domain.Resource{}, domain.ErrIllegalParent
 	}
 
 	err := rm.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
@@ -81,7 +81,7 @@ func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID s
 
 		switch resource.Type {
 		case domain.TypeRoot:
-			return domain.ErrNotPermitted
+			return domain.ErrOperationNotPermitted
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
 			subtree, err := rm.repo.GetTreePath(txCtx, resourceID)
 			if err != nil {
@@ -139,7 +139,7 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute:
 			break
 		default:
-			return domain.ErrMoveNotPermitted
+			return domain.ErrUnmovableResource
 		}
 
 		if subtree, err = rm.repo.GetTreePath(txCtx, resourceID); err != nil {
@@ -149,11 +149,11 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 		}
 
 		if oldParentID == newParentID {
-			return domain.ErrHierarchyStructureViolation
+			return nil
 		}
 
 		if !rm.checkParentAllowed(txCtx, resource, newParentID) {
-			return domain.ErrHierarchyStructureViolation
+			return domain.ErrIllegalParent
 		}
 
 		if err := rm.UpdateCounters(txCtx, domain.Counters{}.Substract(resource.Counters), subtree[0:len(subtree)-1]...); err != nil {

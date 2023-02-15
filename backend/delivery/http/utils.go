@@ -44,16 +44,13 @@ func writeError(w http.ResponseWriter, err error) {
 	} else if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
 		error.Status = http.StatusConflict
 		error.Message = "Duplicate entry"
-	} else if errors.Is(err, domain.ErrLoopDetected) {
-		error.Status = http.StatusConflict
-		error.Message = err.Error()
-	} else if errors.Is(err, domain.ErrMissingAttachmentPoint) || errors.Is(err, domain.ErrInvalidAttachmentPoint) || errors.Is(err, domain.ErrOrphanedResource) || errors.Is(err, domain.ErrHierarchyStructureViolation) || errors.Is(err, domain.ErrMoveNotPermitted) {
+	} else if errors.Is(err, domain.ErrBadInsertPosition) || errors.Is(err, domain.ErrIllegalParent) || errors.Is(err, domain.ErrUnmovableResource) {
 		error.Status = http.StatusBadRequest
 		error.Message = err.Error()
-	} else if errors.Is(err, domain.ErrCorruptResource) {
+	} else if errors.Is(err, domain.ErrInvariantViolation) {
 		error.Status = http.StatusInternalServerError
 		error.Message = err.Error()
-	} else if errors.Is(err, domain.ErrNotPermitted) {
+	} else if errors.Is(err, domain.ErrOperationNotPermitted) {
 		error.Status = http.StatusForbidden
 	} else {
 		error.Status = http.StatusInternalServerError

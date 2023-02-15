@@ -62,7 +62,7 @@ func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain
 	return image, nil
 }
 
-func (uc *imageUsecase) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error) {
+func (uc *imageUsecase) GetImageDownloadURL(ctx context.Context, imageID uuid.UUID, version *string) (string, error) {
 	return uc.ib.GetDownloadURL(ctx, imageID, version)
 }
 
@@ -190,7 +190,7 @@ func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rota
 	switch rotation {
 	case 0, 90, 180, 270:
 	default:
-		return domain.ErrIllegalAngle
+		return domain.ErrNonOrthogonalAngle
 	}
 
 	original, err := uc.repo.GetImageWithLock(ctx, imageID)

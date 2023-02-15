@@ -80,38 +80,16 @@ func NewImageBucket() (domain.ImageBucket, error) {
 	}, nil
 }
 
-func (s *spaces) GetDownloadURL(ctx context.Context, imageID uuid.UUID, version string) (string, error) {
+func (s *spaces) GetDownloadURL(ctx context.Context, imageID uuid.UUID, version *string) (string, error) {
 	var imageKey string
 
-	if _, ok := imageSizes[version]; !ok && version != "original" {
-		return "", domain.ErrUnknownImageSize
-	}
-
-	if version == "original" {
+	if version == nil {
 		imageKey = getOriginalImageKey(imageID)
 	} else {
-		imageKey = getResizedImageKey(imageID, version)
+		imageKey = getResizedImageKey(imageID, *version)
 	}
 
-	input := &s3.ListObjectsInput{
-		Bucket: aws.String(spacesBucket),
-		Prefix: aws.String(imageKey),
-	}
-
-	if objects, err := s.client.ListObjectsWithContext(ctx, input); err != nil {
-		return "", err
-	} else {
-		for _, object := range objects.Contents {
-			if *object.Key == imageKey {
-				return fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s", spacesBucket, imageKey), nil
-			}
-		}
-	}
-
-	return "", &domain.ErrImageSizeNotAvailable{
-		ImageID: imageID,
-		Size:    version,
-	}
+	return fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s", spacesBucket, imageKey), nil
 }
 
 func (s *spaces) UploadImage(ctx context.Context, imageID uuid.UUID, imageBytes []byte, mimeType string) error {

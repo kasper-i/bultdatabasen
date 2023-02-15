@@ -46,7 +46,7 @@ func (uc *pointUsecase) getRouteGraph(ctx context.Context, routeID uuid.UUID) (m
 		}
 
 		if len(points) > 1 {
-			return graph, domain.ErrCorruptResource
+			return graph, domain.ErrInvariantViolation
 		}
 
 		if len(points) == 1 {
@@ -102,7 +102,7 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 	}
 
 	if startPointID == uuid.Nil {
-		return nil, domain.ErrLoopDetected
+		return nil, domain.ErrInvariantViolation
 	} else {
 		currentPointID := startPointID
 		index := 0
@@ -115,7 +115,7 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 				orderedPoints = append(orderedPoints, *point)
 				index += 1
 			} else {
-				return nil, domain.ErrCorruptResource
+				return nil, domain.ErrInvariantViolation
 			}
 
 			if vertex.OutgoingPointID == uuid.Nil {
@@ -126,7 +126,7 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 		}
 
 		if index != len(pointsMap) {
-			return nil, domain.ErrCorruptResource
+			return nil, domain.ErrInvariantViolation
 		}
 	}
 
@@ -206,12 +206,12 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		switch position.Order {
 		case "before", "after":
 		default:
-			return domain.Point{}, domain.ErrIllegalInsertPosition
+			return domain.Point{}, domain.ErrBadInsertPosition
 		}
 	}
 
 	if pointID == uuid.Nil && len(bolts) == 0 {
-		return domain.Point{}, domain.ErrPointWithoutBolts
+		return domain.Point{}, domain.ErrVacantPoint
 	}
 
 	if _, err := uc.repo.GetRouteWithLock(ctx, routeID); err != nil {
@@ -224,20 +224,20 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 
 	// Only the first point added to a route can be unattached
 	if len(routeGraph) > 0 && position == nil {
-		return domain.Point{}, domain.ErrMissingAttachmentPoint
+		return domain.Point{}, domain.ErrBadInsertPosition
 	}
 
 	// Check that we are not creating a loop
 	if pointID != uuid.Nil {
 		if _, ok := routeGraph[pointID]; ok {
-			return domain.Point{}, domain.ErrLoopDetected
+			return domain.Point{}, domain.ErrBadInsertPosition
 		}
 	}
 
 	// Check that the insert position is a valid point in the route
 	if position != nil {
 		if _, ok := routeGraph[position.PointID]; !ok {
-			return domain.Point{}, domain.ErrInvalidAttachmentPoint
+			return domain.Point{}, domain.ErrBadInsertPosition
 		}
 	}
 
@@ -249,7 +249,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 
 		if pointResource.Type != domain.TypePoint {
-			return domain.Point{}, domain.ErrHierarchyStructureViolation
+			return domain.Point{}, domain.ErrOperationNotPermitted
 		}
 	}
 
