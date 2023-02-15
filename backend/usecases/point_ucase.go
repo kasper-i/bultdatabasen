@@ -9,15 +9,15 @@ import (
 )
 
 type pointUsecase struct {
-	repo          domain.Datastore
+	pointRepo     domain.PointRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rm            domain.ResourceManager
 }
 
-func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.PointUsecase {
+func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, pointRepo domain.PointRepository, rm domain.ResourceManager) domain.PointUsecase {
 	return &pointUsecase{
-		repo:          store,
+		pointRepo:     pointRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rm:            rm,
@@ -33,7 +33,7 @@ type routeGraphVertex struct {
 func (uc *pointUsecase) getRouteGraph(ctx context.Context, routeID uuid.UUID) (map[uuid.UUID]*routeGraphVertex, error) {
 	var graph map[uuid.UUID]*routeGraphVertex = make(map[uuid.UUID]*routeGraphVertex)
 
-	connections, err := uc.repo.GetPointConnections(ctx, routeID)
+	connections, err := uc.pointRepo.GetPointConnections(ctx, routeID)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (uc *pointUsecase) getRouteGraph(ctx context.Context, routeID uuid.UUID) (m
 	if len(connections) == 0 {
 		var points []domain.Point
 
-		if points, err = uc.repo.GetPoints(ctx, routeID); err != nil {
+		if points, err = uc.pointRepo.GetPoints(ctx, routeID); err != nil {
 			return nil, err
 		}
 
@@ -142,14 +142,14 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]dom
 		return nil, err
 	}
 
-	if _, err := uc.repo.GetRoute(ctx, routeID); err != nil {
+	if _, err := uc.pointRepo.GetRoute(ctx, routeID); err != nil {
 		return nil, &domain.ErrNotAuthorized{
 			ResourceID: routeID,
 			Permission: domain.ReadPermission,
 		}
 	}
 
-	if points, err = uc.repo.GetPoints(ctx, routeID); err != nil {
+	if points, err = uc.pointRepo.GetPoints(ctx, routeID); err != nil {
 		return nil, err
 	}
 
@@ -166,7 +166,7 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]dom
 		index += 1
 	}
 
-	if parents, err := uc.repo.GetParents(ctx, pointIDs); err == nil {
+	if parents, err := uc.pointRepo.GetParents(ctx, pointIDs); err == nil {
 		for _, parent := range parents {
 			if point, ok := pointsMap[parent.ChildID]; ok {
 				point.Parents = append(point.Parents, parent)
@@ -214,7 +214,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		return domain.Point{}, domain.ErrVacantPoint
 	}
 
-	if _, err := uc.repo.GetRouteWithLock(ctx, routeID); err != nil {
+	if _, err := uc.pointRepo.GetRouteWithLock(ctx, routeID); err != nil {
 		return domain.Point{}, err
 	}
 
@@ -244,7 +244,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 	if pointID != uuid.Nil {
 		var err error
 
-		if pointResource, err = uc.repo.GetResource(ctx, pointID); err != nil {
+		if pointResource, err = uc.pointRepo.GetResource(ctx, pointID); err != nil {
 			return domain.Point{}, err
 		}
 
@@ -253,19 +253,19 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 	}
 
-	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	err = uc.pointRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if pointID != uuid.Nil {
-			if details, err := uc.repo.GetPointWithLock(txCtx, pointID); err != nil {
+			if details, err := uc.pointRepo.GetPointWithLock(txCtx, pointID); err != nil {
 				return err
 			} else {
 				point = details
 			}
 
-			if err := uc.repo.InsertTreePath(txCtx, pointID, routeID); err != nil {
+			if err := uc.pointRepo.InsertTreePath(txCtx, pointID, routeID); err != nil {
 				return err
 			}
 
-			if err := uc.repo.UpdateCounters(txCtx, routeID, point.Counters); err != nil {
+			if err := uc.pointRepo.UpdateCounters(txCtx, routeID, point.Counters); err != nil {
 				return err
 			}
 		} else {
@@ -282,7 +282,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				point.ID = createdResource.ID
 			}
 
-			if err := uc.repo.InsertPoint(txCtx, point); err != nil {
+			if err := uc.pointRepo.InsertPoint(txCtx, point); err != nil {
 				return err
 			}
 
@@ -306,19 +306,19 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				switch position.Order {
 				case "after":
 					if nextPoint != uuid.Nil {
-						if err := uc.repo.DeletePointConnection(txCtx, routeID, insertionPoint, nextPoint); err != nil {
+						if err := uc.pointRepo.DeletePointConnection(txCtx, routeID, insertionPoint, nextPoint); err != nil {
 							return err
 						}
-						if err := uc.repo.CreatePointConnection(txCtx, routeID, newPoint, nextPoint); err != nil {
+						if err := uc.pointRepo.CreatePointConnection(txCtx, routeID, newPoint, nextPoint); err != nil {
 							return err
 						}
 					}
 				case "before":
 					if prevPoint != uuid.Nil {
-						if err := uc.repo.DeletePointConnection(txCtx, routeID, prevPoint, insertionPoint); err != nil {
+						if err := uc.pointRepo.DeletePointConnection(txCtx, routeID, prevPoint, insertionPoint); err != nil {
 							return err
 						}
-						if err := uc.repo.CreatePointConnection(txCtx, routeID, prevPoint, newPoint); err != nil {
+						if err := uc.pointRepo.CreatePointConnection(txCtx, routeID, prevPoint, newPoint); err != nil {
 							return err
 						}
 					}
@@ -327,21 +327,21 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 
 			switch position.Order {
 			case "after":
-				if err := uc.repo.CreatePointConnection(txCtx, routeID, insertionPoint, newPoint); err != nil {
+				if err := uc.pointRepo.CreatePointConnection(txCtx, routeID, insertionPoint, newPoint); err != nil {
 					return err
 				}
 			case "before":
-				if err := uc.repo.CreatePointConnection(txCtx, routeID, newPoint, insertionPoint); err != nil {
+				if err := uc.pointRepo.CreatePointConnection(txCtx, routeID, newPoint, insertionPoint); err != nil {
 					return err
 				}
 			}
 		}
 
-		if parents, err := uc.repo.GetParents(txCtx, []uuid.UUID{point.ID}); err == nil {
+		if parents, err := uc.pointRepo.GetParents(txCtx, []uuid.UUID{point.ID}); err == nil {
 			point.Parents = parents
 		}
 
-		if ancestors, err := uc.repo.GetAncestors(txCtx, point.ID); err != nil {
+		if ancestors, err := uc.pointRepo.GetAncestors(txCtx, point.ID); err != nil {
 			return nil
 		} else {
 			point.Ancestors = ancestors
@@ -367,17 +367,17 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		return err
 	}
 
-	return uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	return uc.pointRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		var err error
 		var routeGraph map[uuid.UUID]*routeGraphVertex
 		var parents []domain.Parent
 
-		if _, err := uc.repo.GetRouteWithLock(ctx, routeID); err != nil {
+		if _, err := uc.pointRepo.GetRouteWithLock(ctx, routeID); err != nil {
 			return err
 		}
 
 		var point domain.Point
-		if point, err = uc.repo.GetPointWithLock(txCtx, pointID); err != nil {
+		if point, err = uc.pointRepo.GetPointWithLock(txCtx, pointID); err != nil {
 			return err
 		}
 
@@ -385,7 +385,7 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 			return err
 		}
 
-		if parents, err = uc.repo.GetParents(txCtx, []uuid.UUID{pointID}); err != nil {
+		if parents, err = uc.pointRepo.GetParents(txCtx, []uuid.UUID{pointID}); err != nil {
 			return err
 		}
 
@@ -409,19 +409,19 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 			prevPoint := vertex.IncomingPointID
 
 			if prevPoint != uuid.Nil {
-				if err := uc.repo.DeletePointConnection(txCtx, routeID, prevPoint, pointID); err != nil {
+				if err := uc.pointRepo.DeletePointConnection(txCtx, routeID, prevPoint, pointID); err != nil {
 					return err
 				}
 			}
 
 			if nextPoint != uuid.Nil {
-				if err := uc.repo.DeletePointConnection(txCtx, routeID, pointID, nextPoint); err != nil {
+				if err := uc.pointRepo.DeletePointConnection(txCtx, routeID, pointID, nextPoint); err != nil {
 					return err
 				}
 			}
 
 			if prevPoint != uuid.Nil && nextPoint != uuid.Nil {
-				if err := uc.repo.CreatePointConnection(txCtx, routeID, prevPoint, nextPoint); err != nil {
+				if err := uc.pointRepo.CreatePointConnection(txCtx, routeID, prevPoint, nextPoint); err != nil {
 					return err
 				}
 			}
@@ -430,12 +430,12 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		if len(parents) == 1 {
 			return uc.rm.DeleteResource(txCtx, pointID, user.ID)
 		} else {
-			if err := uc.repo.RemoveTreePath(txCtx, pointID, routeID); err != nil {
+			if err := uc.pointRepo.RemoveTreePath(txCtx, pointID, routeID); err != nil {
 				return err
 			}
 
 			countersDifference := domain.Counters{}.Substract(point.Counters)
-			if err := uc.repo.UpdateCounters(txCtx, routeID, countersDifference); err != nil {
+			if err := uc.pointRepo.UpdateCounters(txCtx, routeID, countersDifference); err != nil {
 				return err
 			}
 		}

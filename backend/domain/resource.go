@@ -97,6 +97,8 @@ type ResourceManager interface {
 }
 
 type ResourceRepository interface {
+	Transactor
+
 	GetAncestors(ctx context.Context, resourceID uuid.UUID) (Ancestors, error)
 	GetChildren(ctx context.Context, resourceID uuid.UUID) ([]Resource, error)
 	GetParents(ctx context.Context, resourceIDs []uuid.UUID) ([]Parent, error)
@@ -116,18 +118,6 @@ type ResourceRepository interface {
 	UpdateCounters(ctx context.Context, resourceID uuid.UUID, delta Counters) error
 }
 
-type Datastore interface {
+type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
-
-	UserRepository
-	ResourceRepository
-	AreaRepository
-	BoltRepository
-	CragRepository
-	RouteRepository
-	SectorRepository
-	TaskRepository
-	ImageRepository
-	PointRepository
-	CatalogRepository
 }

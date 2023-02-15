@@ -78,7 +78,7 @@ func main() {
 
 	router.HandleFunc("/invites", nil).Methods(http.MethodPost, http.MethodOptions)
 
-	httpdelivery.NewResourceHandler(router, resourceUseCase, datastore)
+	httpdelivery.NewResourceHandler(router, resourceUseCase)
 	httpdelivery.NewAreaHandler(router, areaUsecase)
 	httpdelivery.NewCragHandler(router, cragUsecase)
 	httpdelivery.NewSectorHandler(router, sectorUsecase)

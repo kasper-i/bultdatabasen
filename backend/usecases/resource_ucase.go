@@ -8,15 +8,15 @@ import (
 )
 
 type resourceUsecase struct {
-	repo          domain.Datastore
+	resourceRepo  domain.ResourceRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rm            domain.ResourceManager
 }
 
-func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.ResourceUsecase {
+func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, resourceRepo domain.ResourceRepository, rm domain.ResourceManager) domain.ResourceUsecase {
 	return &resourceUsecase{
-		repo:          store,
+		resourceRepo:  resourceRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rm:            rm,
@@ -28,7 +28,7 @@ type ResourcePatch struct {
 }
 
 func (uc *resourceUsecase) GetResource(ctx context.Context, resourceID uuid.UUID) (domain.Resource, error) {
-	ancestors, err := uc.repo.GetAncestors(ctx, resourceID)
+	ancestors, err := uc.resourceRepo.GetAncestors(ctx, resourceID)
 	if err != nil {
 		return domain.Resource{}, err
 	}
@@ -37,7 +37,7 @@ func (uc *resourceUsecase) GetResource(ctx context.Context, resourceID uuid.UUID
 		return domain.Resource{}, err
 	}
 
-	resource, err := uc.repo.GetResource(ctx, resourceID)
+	resource, err := uc.resourceRepo.GetResource(ctx, resourceID)
 	if err != nil {
 		return domain.Resource{}, err
 	}
@@ -70,7 +70,7 @@ func (uc *resourceUsecase) GetAncestors(ctx context.Context, resourceID uuid.UUI
 		return nil, err
 	}
 
-	return uc.repo.GetAncestors(ctx, resourceID)
+	return uc.resourceRepo.GetAncestors(ctx, resourceID)
 }
 
 func (uc *resourceUsecase) GetChildren(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
@@ -78,9 +78,9 @@ func (uc *resourceUsecase) GetChildren(ctx context.Context, resourceID uuid.UUID
 		return nil, err
 	}
 
-	return uc.repo.GetChildren(ctx, resourceID)
+	return uc.resourceRepo.GetChildren(ctx, resourceID)
 }
 
 func (uc *resourceUsecase) Search(ctx context.Context, name string) ([]domain.ResourceWithParents, error) {
-	return uc.repo.Search(ctx, name)
+	return uc.resourceRepo.Search(ctx, name)
 }

@@ -32,6 +32,8 @@ type RouteUsecase interface {
 }
 
 type RouteRepository interface {
+	Transactor
+
 	GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]Route, error)
 	GetRoute(ctx context.Context, resourceID uuid.UUID) (Route, error)
 	GetRouteWithLock(ctx context.Context, resourceID uuid.UUID) (Route, error)

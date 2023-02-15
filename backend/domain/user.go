@@ -7,6 +7,8 @@ import (
 )
 
 type UserRepository interface {
+	Transactor
+
 	GetUser(ctx context.Context, userID string) (User, error)
 	SaveUser(ctx context.Context, user User) error
 	InsertUser(ctx context.Context, user User) error

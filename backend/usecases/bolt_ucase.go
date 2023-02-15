@@ -8,15 +8,15 @@ import (
 )
 
 type boltUsecase struct {
-	repo          domain.Datastore
+	boltRepo      domain.BoltRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rm            domain.ResourceManager
 }
 
-func NewBoltUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.BoltUsecase {
+func NewBoltUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, boltRepo domain.BoltRepository, rm domain.ResourceManager) domain.BoltUsecase {
 	return &boltUsecase{
-		repo:          store,
+		boltRepo:      boltRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rm:            rm,
@@ -28,11 +28,11 @@ func (uc *boltUsecase) GetBolts(ctx context.Context, resourceID uuid.UUID) ([]do
 		return nil, err
 	}
 
-	return uc.repo.GetBolts(ctx, resourceID)
+	return uc.boltRepo.GetBolts(ctx, resourceID)
 }
 
 func (uc *boltUsecase) GetBolt(ctx context.Context, boltID uuid.UUID) (domain.Bolt, error) {
-	ancestors, err := uc.repo.GetAncestors(ctx, boltID)
+	ancestors, err := uc.boltRepo.GetAncestors(ctx, boltID)
 	if err != nil {
 		return domain.Bolt{}, err
 	}
@@ -41,7 +41,7 @@ func (uc *boltUsecase) GetBolt(ctx context.Context, boltID uuid.UUID) (domain.Bo
 		return domain.Bolt{}, err
 	}
 
-	bolt, err := uc.repo.GetBolt(ctx, boltID)
+	bolt, err := uc.boltRepo.GetBolt(ctx, boltID)
 	if err != nil {
 		return domain.Bolt{}, err
 	}
@@ -67,24 +67,24 @@ func (uc *boltUsecase) CreateBolt(ctx context.Context, bolt domain.Bolt, parentR
 		Type:         domain.TypeBolt,
 	}
 
-	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	err = uc.boltRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if createdResource, err := uc.rm.CreateResource(ctx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			bolt.ID = createdResource.ID
 		}
 
-		if err := uc.repo.InsertBolt(txCtx, bolt); err != nil {
+		if err := uc.boltRepo.InsertBolt(txCtx, bolt); err != nil {
 			return err
 		}
 
-		if refreshedBolt, err := uc.repo.GetBolt(txCtx, bolt.ID); err != nil {
+		if refreshedBolt, err := uc.boltRepo.GetBolt(txCtx, bolt.ID); err != nil {
 			return err
 		} else {
 			bolt = refreshedBolt
 		}
 
-		if ancestors, err := uc.repo.GetAncestors(txCtx, bolt.ID); err != nil {
+		if ancestors, err := uc.boltRepo.GetAncestors(txCtx, bolt.ID); err != nil {
 			return nil
 		} else {
 			bolt.Ancestors = ancestors
@@ -114,7 +114,7 @@ func (uc *boltUsecase) DeleteBolt(ctx context.Context, boltID uuid.UUID) error {
 		return err
 	}
 
-	_, err = uc.repo.GetBolt(ctx, boltID)
+	_, err = uc.boltRepo.GetBolt(ctx, boltID)
 	if err != nil {
 		return err
 	}
@@ -134,8 +134,8 @@ func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updated
 
 	var refreshedBolt domain.Bolt
 
-	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		original, err := uc.repo.GetBoltWithLock(txCtx, boltID)
+	err = uc.boltRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		original, err := uc.boltRepo.GetBoltWithLock(txCtx, boltID)
 		if err != nil {
 			return err
 		}
@@ -146,20 +146,20 @@ func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updated
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 
-		if err := uc.repo.TouchResource(txCtx, boltID, user.ID); err != nil {
+		if err := uc.boltRepo.TouchResource(txCtx, boltID, user.ID); err != nil {
 			return err
 		}
 
-		if err := uc.repo.SaveBolt(txCtx, updatedBolt); err != nil {
+		if err := uc.boltRepo.SaveBolt(txCtx, updatedBolt); err != nil {
 			return err
 		}
 
-		refreshedBolt, err = uc.repo.GetBolt(txCtx, boltID)
+		refreshedBolt, err = uc.boltRepo.GetBolt(txCtx, boltID)
 		if err != nil {
 			return err
 		}
 
-		if ancestors, err := uc.repo.GetAncestors(txCtx, boltID); err != nil {
+		if ancestors, err := uc.boltRepo.GetAncestors(txCtx, boltID); err != nil {
 			return nil
 		} else {
 			refreshedBolt.Ancestors = ancestors

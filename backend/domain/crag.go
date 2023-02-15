@@ -23,6 +23,8 @@ type CragUsecase interface {
 }
 
 type CragRepository interface {
+	Transactor
+
 	GetCrags(ctx context.Context, resourceID uuid.UUID) ([]Crag, error)
 	GetCrag(ctx context.Context, resourceID uuid.UUID) (Crag, error)
 	InsertCrag(ctx context.Context, crag Crag) error

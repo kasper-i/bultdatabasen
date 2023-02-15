@@ -39,6 +39,8 @@ type PointUsecase interface {
 }
 
 type PointRepository interface {
+	Transactor
+
 	GetPointConnections(ctx context.Context, routeID uuid.UUID) ([]PointConnection, error)
 	GetPointWithLock(ctx context.Context, pointID uuid.UUID) (Point, error)
 	GetPoints(ctx context.Context, resourceID uuid.UUID) ([]Point, error)

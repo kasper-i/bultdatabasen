@@ -8,15 +8,15 @@ import (
 )
 
 type areaUsecase struct {
-	repo          domain.Datastore
+	areaRepo      domain.AreaRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rm            domain.ResourceManager
 }
 
-func NewAreaUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.AreaUsecase {
+func NewAreaUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, areaRepo domain.AreaRepository, rm domain.ResourceManager) domain.AreaUsecase {
 	return &areaUsecase{
-		repo:          store,
+		areaRepo:      areaRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rm:            rm,
@@ -28,11 +28,11 @@ func (uc *areaUsecase) GetAreas(ctx context.Context, resourceID uuid.UUID) ([]do
 		return nil, err
 	}
 
-	return uc.repo.GetAreas(ctx, resourceID)
+	return uc.areaRepo.GetAreas(ctx, resourceID)
 }
 
 func (uc *areaUsecase) GetArea(ctx context.Context, areaID uuid.UUID) (domain.Area, error) {
-	ancestors, err := uc.repo.GetAncestors(ctx, areaID)
+	ancestors, err := uc.areaRepo.GetAncestors(ctx, areaID)
 	if err != nil {
 		return domain.Area{}, err
 	}
@@ -41,7 +41,7 @@ func (uc *areaUsecase) GetArea(ctx context.Context, areaID uuid.UUID) (domain.Ar
 		return domain.Area{}, err
 	}
 
-	area, err := uc.repo.GetArea(ctx, areaID)
+	area, err := uc.areaRepo.GetArea(ctx, areaID)
 	if err != nil {
 		return domain.Area{}, err
 	}
@@ -65,22 +65,22 @@ func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentR
 		Type: domain.TypeArea,
 	}
 
-	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	err = uc.areaRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			area.ID = createdResource.ID
 		}
 
-		if err := uc.repo.InsertArea(txCtx, area); err != nil {
+		if err := uc.areaRepo.InsertArea(txCtx, area); err != nil {
 			return err
 		}
 
-		if err := uc.repo.InsertResourceAccess(txCtx, area.ID, user.ID, domain.RoleOwner); err != nil {
+		if err := uc.areaRepo.InsertResourceAccess(txCtx, area.ID, user.ID, domain.RoleOwner); err != nil {
 			return err
 		}
 
-		if ancestors, err := uc.repo.GetAncestors(txCtx, area.ID); err != nil {
+		if ancestors, err := uc.areaRepo.GetAncestors(txCtx, area.ID); err != nil {
 			return nil
 		} else {
 			area.Ancestors = ancestors
@@ -102,7 +102,7 @@ func (uc *areaUsecase) DeleteArea(ctx context.Context, areaID uuid.UUID) error {
 		return err
 	}
 
-	_, err = uc.repo.GetArea(ctx, areaID)
+	_, err = uc.areaRepo.GetArea(ctx, areaID)
 	if err != nil {
 		return err
 	}

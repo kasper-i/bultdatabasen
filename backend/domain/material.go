@@ -20,6 +20,8 @@ type MaterialUsecase interface {
 }
 
 type CatalogRepository interface {
+	Transactor
+
 	GetManufacturers(ctx context.Context) ([]Manufacturer, error)
 	GetModels(ctx context.Context, manufacturerID uuid.UUID) ([]Model, error)
 	GetMaterials(ctx context.Context) ([]Material, error)

@@ -40,6 +40,8 @@ type ImageBucket interface {
 }
 
 type ImageRepository interface {
+	Transactor
+
 	GetImages(ctx context.Context, resourceID uuid.UUID) ([]Image, error)
 	GetImageWithLock(ctx context.Context, imageID uuid.UUID) (Image, error)
 	GetImage(ctx context.Context, imageID uuid.UUID) (Image, error)

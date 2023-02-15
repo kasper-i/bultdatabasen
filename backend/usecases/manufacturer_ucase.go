@@ -8,19 +8,19 @@ import (
 )
 
 type manufacturerUsecase struct {
-	repo domain.Datastore
+	catalogRepo domain.CatalogRepository
 }
 
-func NewManufacturerUsecase(store domain.Datastore) domain.ManufacturerUsecase {
+func NewManufacturerUsecase(catalogRepo domain.CatalogRepository) domain.ManufacturerUsecase {
 	return &manufacturerUsecase{
-		repo: store,
+		catalogRepo: catalogRepo,
 	}
 }
 
 func (uc *manufacturerUsecase) GetManufacturers(ctx context.Context) ([]domain.Manufacturer, error) {
-	return uc.repo.GetManufacturers(ctx)
+	return uc.catalogRepo.GetManufacturers(ctx)
 }
 
 func (uc *manufacturerUsecase) GetModels(ctx context.Context, manufacturerID uuid.UUID) ([]domain.Model, error) {
-	return uc.repo.GetModels(ctx, manufacturerID)
+	return uc.catalogRepo.GetModels(ctx, manufacturerID)
 }

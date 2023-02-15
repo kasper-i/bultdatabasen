@@ -8,15 +8,15 @@ import (
 )
 
 type sectorUsecase struct {
-	repo          domain.Datastore
+	sectorRepo    domain.SectorRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rm            domain.ResourceManager
 }
 
-func NewSectorUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.SectorUsecase {
+func NewSectorUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, sectorRepo domain.SectorRepository, rm domain.ResourceManager) domain.SectorUsecase {
 	return &sectorUsecase{
-		repo:          store,
+		sectorRepo:    sectorRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rm:            rm,
@@ -28,11 +28,11 @@ func (uc *sectorUsecase) GetSectors(ctx context.Context, resourceID uuid.UUID) (
 		return nil, err
 	}
 
-	return uc.repo.GetSectors(ctx, resourceID)
+	return uc.sectorRepo.GetSectors(ctx, resourceID)
 }
 
 func (uc *sectorUsecase) GetSector(ctx context.Context, cragID uuid.UUID) (domain.Sector, error) {
-	ancestors, err := uc.repo.GetAncestors(ctx, cragID)
+	ancestors, err := uc.sectorRepo.GetAncestors(ctx, cragID)
 	if err != nil {
 		return domain.Sector{}, err
 	}
@@ -41,7 +41,7 @@ func (uc *sectorUsecase) GetSector(ctx context.Context, cragID uuid.UUID) (domai
 		return domain.Sector{}, err
 	}
 
-	crag, err := uc.repo.GetSector(ctx, cragID)
+	crag, err := uc.sectorRepo.GetSector(ctx, cragID)
 	if err != nil {
 		return domain.Sector{}, err
 	}
@@ -65,18 +65,18 @@ func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector,
 		Type: domain.TypeSector,
 	}
 
-	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	err = uc.sectorRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			sector.ID = createdResource.ID
 		}
 
-		if err := uc.repo.InsertSector(txCtx, sector); err != nil {
+		if err := uc.sectorRepo.InsertSector(txCtx, sector); err != nil {
 			return err
 		}
 
-		if ancestors, err := uc.repo.GetAncestors(txCtx, sector.ID); err != nil {
+		if ancestors, err := uc.sectorRepo.GetAncestors(txCtx, sector.ID); err != nil {
 			return nil
 		} else {
 			sector.Ancestors = ancestors
@@ -98,7 +98,7 @@ func (uc *sectorUsecase) DeleteSector(ctx context.Context, sectorID uuid.UUID) e
 		return err
 	}
 
-	_, err = uc.repo.GetSector(ctx, sectorID)
+	_, err = uc.sectorRepo.GetSector(ctx, sectorID)
 	if err != nil {
 		return err
 	}

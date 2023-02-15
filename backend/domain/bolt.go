@@ -44,6 +44,8 @@ type BoltUsecase interface {
 }
 
 type BoltRepository interface {
+	Transactor
+
 	GetBolts(ctx context.Context, resourceID uuid.UUID) ([]Bolt, error)
 	GetBolt(ctx context.Context, resourceID uuid.UUID) (Bolt, error)
 	GetBoltWithLock(ctx context.Context, resourceID uuid.UUID) (Bolt, error)

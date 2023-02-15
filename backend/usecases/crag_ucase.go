@@ -8,15 +8,15 @@ import (
 )
 
 type cragUsecase struct {
-	repo          domain.Datastore
+	cragRepo      domain.CragRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rm            domain.ResourceManager
 }
 
-func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, store domain.Datastore, rm domain.ResourceManager) domain.CragUsecase {
+func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, cragRepo domain.CragRepository, rm domain.ResourceManager) domain.CragUsecase {
 	return &cragUsecase{
-		repo:          store,
+		cragRepo:      cragRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rm:            rm,
@@ -28,11 +28,11 @@ func (uc *cragUsecase) GetCrags(ctx context.Context, resourceID uuid.UUID) ([]do
 		return nil, err
 	}
 
-	return uc.repo.GetCrags(ctx, resourceID)
+	return uc.cragRepo.GetCrags(ctx, resourceID)
 }
 
 func (uc *cragUsecase) GetCrag(ctx context.Context, cragID uuid.UUID) (domain.Crag, error) {
-	ancestors, err := uc.repo.GetAncestors(ctx, cragID)
+	ancestors, err := uc.cragRepo.GetAncestors(ctx, cragID)
 	if err != nil {
 		return domain.Crag{}, err
 	}
@@ -41,7 +41,7 @@ func (uc *cragUsecase) GetCrag(ctx context.Context, cragID uuid.UUID) (domain.Cr
 		return domain.Crag{}, err
 	}
 
-	crag, err := uc.repo.GetCrag(ctx, cragID)
+	crag, err := uc.cragRepo.GetCrag(ctx, cragID)
 	if err != nil {
 		return domain.Crag{}, err
 	}
@@ -65,18 +65,18 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 		Type: domain.TypeCrag,
 	}
 
-	err = uc.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
+	err = uc.cragRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			crag.ID = createdResource.ID
 		}
 
-		if err := uc.repo.InsertCrag(txCtx, crag); err != nil {
+		if err := uc.cragRepo.InsertCrag(txCtx, crag); err != nil {
 			return err
 		}
 
-		if ancestors, err := uc.repo.GetAncestors(txCtx, crag.ID); err != nil {
+		if ancestors, err := uc.cragRepo.GetAncestors(txCtx, crag.ID); err != nil {
 			return nil
 		} else {
 			crag.Ancestors = ancestors
@@ -98,7 +98,7 @@ func (uc *cragUsecase) DeleteCrag(ctx context.Context, cragID uuid.UUID) error {
 		return err
 	}
 
-	_, err = uc.repo.GetCrag(ctx, cragID)
+	_, err = uc.cragRepo.GetCrag(ctx, cragID)
 	if err != nil {
 		return err
 	}

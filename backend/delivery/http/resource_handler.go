@@ -14,14 +14,12 @@ import (
 
 type ResourceHandler struct {
 	ResourceUsecase domain.ResourceUsecase
-	store           domain.Datastore
 	authorizer      domain.Authorizer
 }
 
-func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUsecase, store domain.Datastore) {
+func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUsecase) {
 	handler := &ResourceHandler{
 		ResourceUsecase: resourceUsecase,
-		store:           store,
 	}
 
 	router.HandleFunc("/resources/{resourceID}", handler.GetResource).Methods(http.MethodGet, http.MethodOptions)

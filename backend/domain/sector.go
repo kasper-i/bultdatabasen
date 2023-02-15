@@ -23,6 +23,8 @@ type SectorUsecase interface {
 }
 
 type SectorRepository interface {
+	Transactor
+
 	GetSectors(ctx context.Context, resourceID uuid.UUID) ([]Sector, error)
 	GetSector(ctx context.Context, resourceID uuid.UUID) (Sector, error)
 	InsertSector(ctx context.Context, sector Sector) error

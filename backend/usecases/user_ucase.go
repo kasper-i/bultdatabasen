@@ -6,13 +6,13 @@ import (
 )
 
 type userUsecase struct {
-	repo          domain.Datastore
+	userRepo      domain.UserRepository
 	authenticator domain.Authenticator
 }
 
-func NewUserUsecase(authenticator domain.Authenticator, store domain.Datastore) domain.UserUsecase {
+func NewUserUsecase(authenticator domain.Authenticator, userRepo domain.UserRepository) domain.UserUsecase {
 	return &userUsecase{
-		repo:          store,
+		userRepo:      userRepo,
 		authenticator: authenticator,
 	}
 }
@@ -23,7 +23,7 @@ func (uc *userUsecase) GetUser(ctx context.Context, userID string) (domain.User,
 		return domain.User{}, err
 	}
 
-	return uc.repo.GetUser(ctx, userID)
+	return uc.userRepo.GetUser(ctx, userID)
 }
 
 func (uc *userUsecase) UpdateUser(ctx context.Context, user domain.User) (domain.User, error) {
@@ -32,7 +32,7 @@ func (uc *userUsecase) UpdateUser(ctx context.Context, user domain.User) (domain
 		return domain.User{}, err
 	}
 
-	err = uc.repo.SaveUser(ctx, user)
+	err = uc.userRepo.SaveUser(ctx, user)
 	return user, err
 }
 
@@ -42,10 +42,10 @@ func (uc *userUsecase) CreateUser(ctx context.Context, user domain.User) (domain
 		return domain.User{}, err
 	}
 
-	err = uc.repo.InsertUser(ctx, user)
+	err = uc.userRepo.InsertUser(ctx, user)
 	return user, err
 }
 
 func (uc *userUsecase) GetUserNames(ctx context.Context) ([]domain.User, error) {
-	return uc.repo.GetUserNames(ctx)
+	return uc.userRepo.GetUserNames(ctx)
 }

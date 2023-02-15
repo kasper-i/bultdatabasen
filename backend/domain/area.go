@@ -23,6 +23,8 @@ type AreaUsecase interface {
 }
 
 type AreaRepository interface {
+	Transactor
+
 	GetAreas(ctx context.Context, resourceID uuid.UUID) ([]Area, error)
 	GetArea(ctx context.Context, resourceID uuid.UUID) (Area, error)
 	InsertArea(ctx context.Context, area Area) error
