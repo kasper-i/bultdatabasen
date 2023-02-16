@@ -94,6 +94,13 @@ type ResourceManager interface {
 	DeleteResource(ctx context.Context, resourceID uuid.UUID, userID string) error
 	MoveResource(ctx context.Context, resourceID, newParentID uuid.UUID) error
 	UpdateCounters(ctx context.Context, delta Counters, resourceID ...uuid.UUID) error
+	GetAncestors(ctx context.Context, resourceID uuid.UUID) (Ancestors, error)
+	TouchResource(ctx context.Context, resourceID uuid.UUID, userID string) error
+	RenameResource(ctx context.Context, resourceID uuid.UUID, name, userID string) error
+}
+
+type Transactor interface {
+	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
 }
 
 type ResourceRepository interface {
@@ -109,15 +116,15 @@ type ResourceRepository interface {
 	InsertResource(ctx context.Context, resource Resource) error
 	OrphanResource(ctx context.Context, resourceID uuid.UUID) error
 	RenameResource(ctx context.Context, resourceID uuid.UUID, name, userID string) error
+	UpdateCounters(ctx context.Context, resourceID uuid.UUID, delta Counters) error
+}
+
+type TreeRepository interface {
+	Transactor
+
 	GetTreePath(ctx context.Context, resourceID uuid.UUID) (Path, error)
 	InsertTreePath(ctx context.Context, resourceID, parentID uuid.UUID) error
 	RemoveTreePath(ctx context.Context, resourceID, parentID uuid.UUID) error
 	MoveSubtree(ctx context.Context, subtree Path, newAncestralPath Path) error
 	GetSubtreeLock(ctx context.Context, resourceID uuid.UUID) error
-	InsertTrash(ctx context.Context, trash Trash) error
-	UpdateCounters(ctx context.Context, resourceID uuid.UUID, delta Counters) error
-}
-
-type Transactor interface {
-	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
 }

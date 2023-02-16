@@ -10,14 +10,20 @@ import (
 
 type pointUsecase struct {
 	pointRepo     domain.PointRepository
+	routeRepo     domain.RouteRepository
+	resourceRepo  domain.ResourceRepository
+	treeRepo      domain.TreeRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rm            domain.ResourceManager
 }
 
-func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, pointRepo domain.PointRepository, rm domain.ResourceManager) domain.PointUsecase {
+func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, pointRepo domain.PointRepository, routeRepo domain.RouteRepository, resourceRepo domain.ResourceRepository, treeRepo domain.TreeRepository, rm domain.ResourceManager) domain.PointUsecase {
 	return &pointUsecase{
 		pointRepo:     pointRepo,
+		routeRepo:     routeRepo,
+		resourceRepo:  resourceRepo,
+		treeRepo:      treeRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rm:            rm,
@@ -142,7 +148,7 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]dom
 		return nil, err
 	}
 
-	if _, err := uc.pointRepo.GetRoute(ctx, routeID); err != nil {
+	if _, err := uc.routeRepo.GetRoute(ctx, routeID); err != nil {
 		return nil, &domain.ErrNotAuthorized{
 			ResourceID: routeID,
 			Permission: domain.ReadPermission,
@@ -166,7 +172,7 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]dom
 		index += 1
 	}
 
-	if parents, err := uc.pointRepo.GetParents(ctx, pointIDs); err == nil {
+	if parents, err := uc.resourceRepo.GetParents(ctx, pointIDs); err == nil {
 		for _, parent := range parents {
 			if point, ok := pointsMap[parent.ChildID]; ok {
 				point.Parents = append(point.Parents, parent)
@@ -214,7 +220,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 		return domain.Point{}, domain.ErrVacantPoint
 	}
 
-	if _, err := uc.pointRepo.GetRouteWithLock(ctx, routeID); err != nil {
+	if _, err := uc.routeRepo.GetRouteWithLock(ctx, routeID); err != nil {
 		return domain.Point{}, err
 	}
 
@@ -244,7 +250,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 	if pointID != uuid.Nil {
 		var err error
 
-		if pointResource, err = uc.pointRepo.GetResource(ctx, pointID); err != nil {
+		if pointResource, err = uc.resourceRepo.GetResource(ctx, pointID); err != nil {
 			return domain.Point{}, err
 		}
 
@@ -261,11 +267,11 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				point = details
 			}
 
-			if err := uc.pointRepo.InsertTreePath(txCtx, pointID, routeID); err != nil {
+			if err := uc.treeRepo.InsertTreePath(txCtx, pointID, routeID); err != nil {
 				return err
 			}
 
-			if err := uc.pointRepo.UpdateCounters(txCtx, routeID, point.Counters); err != nil {
+			if err := uc.resourceRepo.UpdateCounters(txCtx, routeID, point.Counters); err != nil {
 				return err
 			}
 		} else {
@@ -337,14 +343,12 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 			}
 		}
 
-		if parents, err := uc.pointRepo.GetParents(txCtx, []uuid.UUID{point.ID}); err == nil {
+		if parents, err := uc.resourceRepo.GetParents(txCtx, []uuid.UUID{point.ID}); err == nil {
 			point.Parents = parents
 		}
 
-		if ancestors, err := uc.pointRepo.GetAncestors(txCtx, point.ID); err != nil {
+		if point.Ancestors, err = uc.rm.GetAncestors(txCtx, point.ID); err != nil {
 			return nil
-		} else {
-			point.Ancestors = ancestors
 		}
 
 		return nil
@@ -372,7 +376,7 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		var routeGraph map[uuid.UUID]*routeGraphVertex
 		var parents []domain.Parent
 
-		if _, err := uc.pointRepo.GetRouteWithLock(ctx, routeID); err != nil {
+		if _, err := uc.routeRepo.GetRouteWithLock(ctx, routeID); err != nil {
 			return err
 		}
 
@@ -385,7 +389,7 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 			return err
 		}
 
-		if parents, err = uc.pointRepo.GetParents(txCtx, []uuid.UUID{pointID}); err != nil {
+		if parents, err = uc.resourceRepo.GetParents(txCtx, []uuid.UUID{pointID}); err != nil {
 			return err
 		}
 
@@ -430,12 +434,12 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		if len(parents) == 1 {
 			return uc.rm.DeleteResource(txCtx, pointID, user.ID)
 		} else {
-			if err := uc.pointRepo.RemoveTreePath(txCtx, pointID, routeID); err != nil {
+			if err := uc.treeRepo.RemoveTreePath(txCtx, pointID, routeID); err != nil {
 				return err
 			}
 
 			countersDifference := domain.Counters{}.Substract(point.Counters)
-			if err := uc.pointRepo.UpdateCounters(txCtx, routeID, countersDifference); err != nil {
+			if err := uc.resourceRepo.UpdateCounters(txCtx, routeID, countersDifference); err != nil {
 				return err
 			}
 		}

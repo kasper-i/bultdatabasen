@@ -8,12 +8,14 @@ import (
 )
 
 type authorizer struct {
-	store domain.Datastore
+	authRepo     domain.AuthRepository
+	resourceRepo domain.ResourceRepository
 }
 
-func New(store domain.Datastore) domain.Authorizer {
+func New(authRepo domain.AuthRepository, resourceRepo domain.ResourceRepository) domain.Authorizer {
 	return &authorizer{
-		store: store,
+		authRepo:     authRepo,
+		resourceRepo: resourceRepo,
 	}
 }
 
@@ -27,7 +29,7 @@ func (a *authorizer) HasPermission(ctx context.Context, user *domain.User, resou
 		return notAuthorized
 	}
 
-	ancestors, err := a.store.GetAncestors(ctx, resourceID)
+	ancestors, err := a.resourceRepo.GetAncestors(ctx, resourceID)
 	if err != nil {
 		return err
 	}
@@ -47,7 +49,7 @@ func (a *authorizer) HasPermission(ctx context.Context, user *domain.User, resou
 		return nil
 	}
 
-	roles := a.store.GetRoles(ctx, user.ID)
+	roles := a.authRepo.GetUserRoles(ctx, user.ID)
 
 	if len(roles) == 0 {
 		return notAuthorized

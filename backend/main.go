@@ -5,6 +5,7 @@ import (
 	"bultdatabasen/authorizer"
 	"bultdatabasen/core"
 	httpdelivery "bultdatabasen/delivery/http"
+	"bultdatabasen/domain"
 	"bultdatabasen/images"
 	"bultdatabasen/repositories"
 	"bultdatabasen/usecases"
@@ -37,30 +38,44 @@ func getVersion(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
-	datastore := repositories.NewDatastore()
+	ds := repositories.NewDatastore()
+	var areaRepo domain.AreaRepository = ds
+	var boltRepo domain.BoltRepository = ds
+	var cragRepo domain.CragRepository = ds
+	var imageRepo domain.ImageRepository = ds
+	var catalogRepo domain.CatalogRepository = ds
+	var pointRepo domain.PointRepository = ds
+	var resourceRepo domain.ResourceRepository = ds
+	var treeRepo domain.TreeRepository = ds
+	var routeRepo domain.RouteRepository = ds
+	var sectorRepo domain.SectorRepository = ds
+	var taskRepo domain.TaskRepository = ds
+	var trashRepo domain.TrashRepository = ds
+	var userRepo domain.UserRepository = ds
+	var authRepo domain.AuthRepository = ds
 
 	authn := authenticator.New()
-	authz := authorizer.New(datastore)
+	authz := authorizer.New(authRepo, resourceRepo)
 
-	rm := core.NewResourceManager(datastore)
+	rm := core.NewResourceManager(resourceRepo, treeRepo, trashRepo)
 	ib, err := images.NewImageBucket()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 
-	userUsecase := usecases.NewUserUsecase(authn, datastore)
-	resourceUseCase := usecases.NewResourceUsecase(authn, authz, datastore, rm)
-	areaUsecase := usecases.NewAreaUsecase(authn, authz, datastore, rm)
-	cragUsecase := usecases.NewCragUsecase(authn, authz, datastore, rm)
-	sectorUsecase := usecases.NewSectorUsecase(authn, authz, datastore, rm)
-	routeUsecase := usecases.NewRouteUsecase(authn, authz, datastore, rm)
-	pointUsecase := usecases.NewPointUsecase(authn, authz, datastore, rm)
-	imageUsecase := usecases.NewImageUsecase(authn, authz, datastore, rm, ib)
-	boltUsecase := usecases.NewBoltUsecase(authn, authz, datastore, rm)
-	taskUsecase := usecases.NewTaskUsecase(authn, authz, datastore, rm)
-	manufacturerUsecase := usecases.NewManufacturerUsecase(datastore)
-	materialUsecase := usecases.NewMaterialUsecase(datastore)
+	userUsecase := usecases.NewUserUsecase(authn, userRepo)
+	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rm)
+	areaUsecase := usecases.NewAreaUsecase(authn, authz, areaRepo, authRepo, rm)
+	cragUsecase := usecases.NewCragUsecase(authn, authz, cragRepo, rm)
+	sectorUsecase := usecases.NewSectorUsecase(authn, authz, sectorRepo, rm)
+	routeUsecase := usecases.NewRouteUsecase(authn, authz, routeRepo, rm)
+	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, rm)
+	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rm, ib)
+	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rm)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rm)
+	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
+	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
 
 	router.Use(CORSMiddleware)
 	router.Use(authn.Middleware)

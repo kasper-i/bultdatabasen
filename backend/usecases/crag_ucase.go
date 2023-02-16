@@ -32,7 +32,7 @@ func (uc *cragUsecase) GetCrags(ctx context.Context, resourceID uuid.UUID) ([]do
 }
 
 func (uc *cragUsecase) GetCrag(ctx context.Context, cragID uuid.UUID) (domain.Crag, error) {
-	ancestors, err := uc.cragRepo.GetAncestors(ctx, cragID)
+	ancestors, err := uc.rm.GetAncestors(ctx, cragID)
 	if err != nil {
 		return domain.Crag{}, err
 	}
@@ -76,10 +76,8 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 			return err
 		}
 
-		if ancestors, err := uc.cragRepo.GetAncestors(txCtx, crag.ID); err != nil {
+		if crag.Ancestors, err = uc.rm.GetAncestors(txCtx, crag.ID); err != nil {
 			return nil
-		} else {
-			crag.Ancestors = ancestors
 		}
 
 		return nil

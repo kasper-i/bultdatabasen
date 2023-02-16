@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"bultdatabasen/domain"
 	"context"
 	"fmt"
 	"os"
@@ -69,7 +68,7 @@ type psqlDatastore struct {
 	__tx *gorm.DB
 }
 
-func NewDatastore() domain.Datastore {
+func NewDatastore() *psqlDatastore {
 	return &psqlDatastore{
 		__tx: db,
 	}

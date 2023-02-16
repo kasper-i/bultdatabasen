@@ -3,8 +3,6 @@ package repositories
 import (
 	"bultdatabasen/domain"
 	"context"
-
-	"github.com/google/uuid"
 )
 
 func (store *psqlDatastore) GetUser(ctx context.Context, userID string) (domain.User, error) {
@@ -36,7 +34,7 @@ func (store *psqlDatastore) GetUserNames(ctx context.Context) ([]domain.User, er
 	return names, nil
 }
 
-func (store *psqlDatastore) GetRoles(ctx context.Context, userID string) []domain.ResourceRole {
+func (store *psqlDatastore) GetUserRoles(ctx context.Context, userID string) []domain.ResourceRole {
 	var roles []domain.ResourceRole
 
 	store.tx(ctx).Raw(`SELECT resource_id, role
@@ -50,8 +48,4 @@ func (store *psqlDatastore) GetRoles(ctx context.Context, userID string) []domai
 			WHERE user_team.user_id = ?`, userID, userID).Scan(&roles)
 
 	return roles
-}
-
-func (store *psqlDatastore) InsertResourceAccess(ctx context.Context, resourceID uuid.UUID, userID string, role domain.RoleType) error {
-	return store.tx(ctx).Exec("INSERT INTO user_role VALUES (?, ?, ?)", userID, resourceID, role).Error
 }

@@ -32,7 +32,7 @@ func (uc *sectorUsecase) GetSectors(ctx context.Context, resourceID uuid.UUID) (
 }
 
 func (uc *sectorUsecase) GetSector(ctx context.Context, cragID uuid.UUID) (domain.Sector, error) {
-	ancestors, err := uc.sectorRepo.GetAncestors(ctx, cragID)
+	ancestors, err := uc.rm.GetAncestors(ctx, cragID)
 	if err != nil {
 		return domain.Sector{}, err
 	}
@@ -76,10 +76,8 @@ func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector,
 			return err
 		}
 
-		if ancestors, err := uc.sectorRepo.GetAncestors(txCtx, sector.ID); err != nil {
+		if sector.Ancestors, err = uc.rm.GetAncestors(txCtx, sector.ID); err != nil {
 			return nil
-		} else {
-			sector.Ancestors = ancestors
 		}
 
 		return nil

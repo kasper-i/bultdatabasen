@@ -44,7 +44,7 @@ func (uc *imageUsecase) GetImages(ctx context.Context, resourceID uuid.UUID) ([]
 }
 
 func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain.Image, error) {
-	ancestors, err := uc.imageRepo.GetAncestors(ctx, imageID)
+	ancestors, err := uc.rm.GetAncestors(ctx, imageID)
 	if err != nil {
 		return domain.Image{}, err
 	}
@@ -140,10 +140,8 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 			return err
 		}
 
-		if ancestors, err := uc.imageRepo.GetAncestors(txCtx, img.ID); err != nil {
+		if img.Ancestors, err = uc.rm.GetAncestors(txCtx, img.ID); err != nil {
 			return nil
-		} else {
-			img.Ancestors = ancestors
 		}
 
 		return nil
@@ -201,7 +199,7 @@ func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rota
 	original.Rotation = rotation
 
 	return uc.imageRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if err := uc.imageRepo.TouchResource(txCtx, imageID, user.ID); err != nil {
+		if err := uc.rm.TouchResource(txCtx, imageID, user.ID); err != nil {
 			return err
 		}
 

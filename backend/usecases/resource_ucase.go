@@ -28,7 +28,7 @@ type ResourcePatch struct {
 }
 
 func (uc *resourceUsecase) GetResource(ctx context.Context, resourceID uuid.UUID) (domain.Resource, error) {
-	ancestors, err := uc.resourceRepo.GetAncestors(ctx, resourceID)
+	ancestors, err := uc.rm.GetAncestors(ctx, resourceID)
 	if err != nil {
 		return domain.Resource{}, err
 	}
@@ -70,7 +70,7 @@ func (uc *resourceUsecase) GetAncestors(ctx context.Context, resourceID uuid.UUI
 		return nil, err
 	}
 
-	return uc.resourceRepo.GetAncestors(ctx, resourceID)
+	return uc.rm.GetAncestors(ctx, resourceID)
 }
 
 func (uc *resourceUsecase) GetChildren(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {

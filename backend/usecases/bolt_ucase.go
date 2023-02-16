@@ -32,7 +32,7 @@ func (uc *boltUsecase) GetBolts(ctx context.Context, resourceID uuid.UUID) ([]do
 }
 
 func (uc *boltUsecase) GetBolt(ctx context.Context, boltID uuid.UUID) (domain.Bolt, error) {
-	ancestors, err := uc.boltRepo.GetAncestors(ctx, boltID)
+	ancestors, err := uc.rm.GetAncestors(ctx, boltID)
 	if err != nil {
 		return domain.Bolt{}, err
 	}
@@ -84,10 +84,8 @@ func (uc *boltUsecase) CreateBolt(ctx context.Context, bolt domain.Bolt, parentR
 			bolt = refreshedBolt
 		}
 
-		if ancestors, err := uc.boltRepo.GetAncestors(txCtx, bolt.ID); err != nil {
+		if bolt.Ancestors, err = uc.rm.GetAncestors(txCtx, bolt.ID); err != nil {
 			return nil
-		} else {
-			bolt.Ancestors = ancestors
 		}
 
 		if err := uc.rm.UpdateCounters(txCtx, bolt.Counters, append(bolt.Ancestors.IDs(), bolt.ID)...); err != nil {
@@ -146,7 +144,7 @@ func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updated
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 
-		if err := uc.boltRepo.TouchResource(txCtx, boltID, user.ID); err != nil {
+		if err := uc.rm.TouchResource(txCtx, boltID, user.ID); err != nil {
 			return err
 		}
 
@@ -159,10 +157,8 @@ func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updated
 			return err
 		}
 
-		if ancestors, err := uc.boltRepo.GetAncestors(txCtx, boltID); err != nil {
+		if refreshedBolt.Ancestors, err = uc.rm.GetAncestors(txCtx, boltID); err != nil {
 			return nil
-		} else {
-			refreshedBolt.Ancestors = ancestors
 		}
 
 		if err := uc.rm.UpdateCounters(txCtx, countersDifference, append(refreshedBolt.Ancestors.IDs(), boltID)...); err != nil {

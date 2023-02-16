@@ -9,12 +9,16 @@ import (
 )
 
 type rm struct {
-	repo domain.Datastore
+	resourceRepo domain.ResourceRepository
+	treeRepo     domain.TreeRepository
+	trashRepo    domain.TrashRepository
 }
 
-func NewResourceManager(repo domain.Datastore) domain.ResourceManager {
+func NewResourceManager(resourceRepo domain.ResourceRepository, treeRepo domain.TreeRepository, trashRepo domain.TrashRepository) domain.ResourceManager {
 	return &rm{
-		repo: repo,
+		resourceRepo: resourceRepo,
+		treeRepo:     treeRepo,
+		trashRepo:    trashRepo,
 	}
 }
 
@@ -40,14 +44,14 @@ func (rm *rm) CreateResource(ctx context.Context, resource domain.Resource, pare
 		return domain.Resource{}, domain.ErrIllegalParent
 	}
 
-	err := rm.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if err := rm.repo.InsertResource(ctx, resource); err != nil {
+	err := rm.resourceRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if err := rm.resourceRepo.InsertResource(ctx, resource); err != nil {
 			return err
 		}
 
 		switch resource.Type {
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
-			return rm.repo.InsertTreePath(txCtx, resource.ID, parentResourceID)
+			return rm.treeRepo.InsertTreePath(txCtx, resource.ID, parentResourceID)
 		}
 
 		return nil
@@ -57,7 +61,7 @@ func (rm *rm) CreateResource(ctx context.Context, resource domain.Resource, pare
 }
 
 func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID string) error {
-	ancestors, err := rm.repo.GetAncestors(ctx, resourceID)
+	ancestors, err := rm.resourceRepo.GetAncestors(ctx, resourceID)
 	if err != nil {
 		return err
 	}
@@ -68,13 +72,13 @@ func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID s
 		DeletedByID: userID,
 	}
 
-	err = rm.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		err := rm.repo.GetSubtreeLock(txCtx, resourceID)
+	err = rm.resourceRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		err := rm.treeRepo.GetSubtreeLock(txCtx, resourceID)
 		if err != nil {
 			return err
 		}
 
-		resource, err := rm.repo.GetResourceWithLock(txCtx, resourceID)
+		resource, err := rm.resourceRepo.GetResourceWithLock(txCtx, resourceID)
 		if err != nil {
 			return err
 		}
@@ -83,12 +87,12 @@ func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID s
 		case domain.TypeRoot:
 			return domain.ErrOperationRefused
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute, domain.TypePoint:
-			subtree, err := rm.repo.GetTreePath(txCtx, resourceID)
+			subtree, err := rm.treeRepo.GetTreePath(txCtx, resourceID)
 			if err != nil {
 				return err
 			}
 
-			if err := rm.repo.MoveSubtree(txCtx, subtree, make(domain.Path, 0)); err != nil {
+			if err := rm.treeRepo.MoveSubtree(txCtx, subtree, make(domain.Path, 0)); err != nil {
 				return err
 			}
 
@@ -97,7 +101,7 @@ func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID s
 			trash.OrigLeafOf = resource.LeafOf
 			resource.LeafOf = nil
 
-			if err := rm.repo.OrphanResource(txCtx, resourceID); err != nil {
+			if err := rm.resourceRepo.OrphanResource(txCtx, resourceID); err != nil {
 				return err
 			}
 		}
@@ -105,12 +109,12 @@ func (rm *rm) DeleteResource(ctx context.Context, resourceID uuid.UUID, userID s
 		countersDifference := domain.Counters{}.Substract(resource.Counters)
 
 		for _, ancestor := range ancestors {
-			if err := rm.repo.UpdateCounters(txCtx, ancestor.ID, countersDifference); err != nil {
+			if err := rm.resourceRepo.UpdateCounters(txCtx, ancestor.ID, countersDifference); err != nil {
 				return err
 			}
 		}
 
-		return rm.repo.InsertTrash(txCtx, trash)
+		return rm.trashRepo.InsertTrash(txCtx, trash)
 	})
 
 	if err != nil {
@@ -126,12 +130,12 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 	var err error
 	var oldParentID uuid.UUID
 
-	return rm.repo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if err := rm.repo.GetSubtreeLock(txCtx, resourceID); err != nil {
+	return rm.resourceRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
+		if err := rm.treeRepo.GetSubtreeLock(txCtx, resourceID); err != nil {
 			return err
 		}
 
-		if resource, err = rm.repo.GetResourceWithLock(txCtx, resourceID); err != nil {
+		if resource, err = rm.resourceRepo.GetResourceWithLock(txCtx, resourceID); err != nil {
 			return err
 		}
 
@@ -142,7 +146,7 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 			return domain.ErrUnmovableResource
 		}
 
-		if subtree, err = rm.repo.GetTreePath(txCtx, resourceID); err != nil {
+		if subtree, err = rm.treeRepo.GetTreePath(txCtx, resourceID); err != nil {
 			return err
 		} else {
 			oldParentID = subtree.Parent()
@@ -161,7 +165,7 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 		}
 
 		var newParentPath domain.Path
-		if newParentPath, err = rm.repo.GetTreePath(txCtx, newParentID); err != nil {
+		if newParentPath, err = rm.treeRepo.GetTreePath(txCtx, newParentID); err != nil {
 			return err
 		}
 
@@ -172,7 +176,7 @@ func (rm *rm) MoveResource(ctx context.Context, resourceID, newParentID uuid.UUI
 			}
 		}
 
-		if err := rm.repo.MoveSubtree(txCtx, subtree, newParentPath); err != nil {
+		if err := rm.treeRepo.MoveSubtree(txCtx, subtree, newParentPath); err != nil {
 			return err
 		}
 
@@ -188,7 +192,7 @@ func (rm *rm) UpdateCounters(ctx context.Context, delta domain.Counters, resourc
 	}
 
 	for _, resourceID := range resourceIDs {
-		if err := rm.repo.UpdateCounters(ctx, resourceID, delta); err != nil {
+		if err := rm.resourceRepo.UpdateCounters(ctx, resourceID, delta); err != nil {
 			return err
 		}
 	}
@@ -200,7 +204,7 @@ func (rm *rm) checkParentAllowed(ctx context.Context, resource domain.Resource, 
 	var parentResource domain.Resource
 	var err error
 
-	if parentResource, err = rm.repo.GetResource(ctx, parentID); err != nil {
+	if parentResource, err = rm.resourceRepo.GetResource(ctx, parentID); err != nil {
 		return false
 	}
 
@@ -228,4 +232,16 @@ func (rm *rm) checkParentAllowed(ctx context.Context, resource domain.Resource, 
 	default:
 		return false
 	}
+}
+
+func (rm *rm) GetAncestors(ctx context.Context, resourceID uuid.UUID) (domain.Ancestors, error) {
+	return rm.resourceRepo.GetAncestors(ctx, resourceID)
+}
+
+func (rm *rm) TouchResource(ctx context.Context, resourceID uuid.UUID, userID string) error {
+	return rm.resourceRepo.TouchResource(ctx, resourceID, userID)
+}
+
+func (rm *rm) RenameResource(ctx context.Context, resourceID uuid.UUID, name, userID string) error {
+	return rm.resourceRepo.RenameResource(ctx, resourceID, name, userID)
 }

@@ -36,7 +36,7 @@ func (User) TableName() string {
 
 type ResourceRole struct {
 	Role       RoleType  `json:"role"`
-	ResourceID uuid.UUID `json:"resourceID"`
+	ResourceID uuid.UUID `json:"resourceId"`
 }
 
 type UserUsecase interface {

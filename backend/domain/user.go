@@ -2,8 +2,6 @@ package domain
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 type UserRepository interface {
@@ -13,6 +11,9 @@ type UserRepository interface {
 	SaveUser(ctx context.Context, user User) error
 	InsertUser(ctx context.Context, user User) error
 	GetUserNames(ctx context.Context) ([]User, error)
-	GetRoles(ctx context.Context, userID string) []ResourceRole
-	InsertResourceAccess(ctx context.Context, resourceID uuid.UUID, userID string, role RoleType) error
+}
+
+type AuthRepository interface {
+	GetUserRoles(ctx context.Context, userID string) []ResourceRole
+	InsertUserRole(ctx context.Context, userID string, role ResourceRole) error
 }
