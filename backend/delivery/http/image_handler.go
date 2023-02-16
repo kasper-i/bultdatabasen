@@ -11,13 +11,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type ImageHandler struct {
-	ImageUsecase domain.ImageUsecase
+type imageHandler struct {
+	imageUsecase domain.ImageUsecase
 }
 
 func NewImageHandler(router *mux.Router, imageUsecase domain.ImageUsecase) {
-	handler := &ImageHandler{
-		ImageUsecase: imageUsecase,
+	handler := &imageHandler{
+		imageUsecase: imageUsecase,
 	}
 
 	router.HandleFunc("/resources/{resourceID}/images", handler.UploadImage).Methods(http.MethodPost, http.MethodOptions)
@@ -27,7 +27,7 @@ func NewImageHandler(router *mux.Router, imageUsecase domain.ImageUsecase) {
 	router.HandleFunc("/images/{resourceID}/{version}", handler.DownloadImage).Methods(http.MethodGet, http.MethodOptions)
 }
 
-func (hdlr *ImageHandler) GetImages(w http.ResponseWriter, r *http.Request) {
+func (hdlr *imageHandler) GetImages(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -35,14 +35,14 @@ func (hdlr *ImageHandler) GetImages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if images, err := hdlr.ImageUsecase.GetImages(r.Context(), parentResourceID); err != nil {
+	if images, err := hdlr.imageUsecase.GetImages(r.Context(), parentResourceID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, images)
 	}
 }
 
-func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) {
+func (hdlr *imageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -54,7 +54,7 @@ func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) 
 		version = &value
 	}
 
-	if url, err := hdlr.ImageUsecase.GetImageDownloadURL(r.Context(), imageID, version); err != nil {
+	if url, err := hdlr.imageUsecase.GetImageDownloadURL(r.Context(), imageID, version); err != nil {
 		writeError(w, err)
 	} else {
 		w.Header().Set("Location", url)
@@ -62,7 +62,7 @@ func (hdlr *ImageHandler) DownloadImage(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
+func (hdlr *imageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -91,7 +91,7 @@ func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 
 	mimeType := http.DetectContentType(fileBytes)
 
-	image, err := hdlr.ImageUsecase.UploadImage(r.Context(), parentResourceID, fileBytes, mimeType)
+	image, err := hdlr.imageUsecase.UploadImage(r.Context(), parentResourceID, fileBytes, mimeType)
 	if err != nil {
 		writeError(w, err)
 	} else {
@@ -99,7 +99,7 @@ func (hdlr *ImageHandler) UploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hdlr *ImageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
+func (hdlr *imageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -107,7 +107,7 @@ func (hdlr *ImageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = hdlr.ImageUsecase.DeleteImage(r.Context(), imageID)
+	err = hdlr.imageUsecase.DeleteImage(r.Context(), imageID)
 
 	if err != nil {
 		writeError(w, err)
@@ -116,7 +116,7 @@ func (hdlr *ImageHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
+func (hdlr *imageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	imageID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -133,7 +133,7 @@ func (hdlr *ImageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case patch.Rotation != nil:
-		err = hdlr.ImageUsecase.RotateImage(r.Context(), imageID, *patch.Rotation)
+		err = hdlr.imageUsecase.RotateImage(r.Context(), imageID, *patch.Rotation)
 	}
 
 	if err != nil {

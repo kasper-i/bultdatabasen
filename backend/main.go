@@ -3,9 +3,9 @@ package main
 import (
 	"bultdatabasen/authenticator"
 	"bultdatabasen/authorizer"
-	"bultdatabasen/core"
 	httpdelivery "bultdatabasen/delivery/http"
 	"bultdatabasen/domain"
+	"bultdatabasen/helpers"
 	"bultdatabasen/images"
 	"bultdatabasen/repositories"
 	"bultdatabasen/usecases"
@@ -57,7 +57,7 @@ func main() {
 	authn := authenticator.New()
 	authz := authorizer.New(authRepo, resourceRepo)
 
-	rm := core.NewResourceManager(resourceRepo, treeRepo, trashRepo)
+	rh := helpers.NewResourceHelper(resourceRepo, treeRepo, trashRepo)
 	ib, err := images.NewImageBucket()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
@@ -65,15 +65,15 @@ func main() {
 	}
 
 	userUsecase := usecases.NewUserUsecase(authn, userRepo)
-	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rm)
-	areaUsecase := usecases.NewAreaUsecase(authn, authz, areaRepo, authRepo, rm)
-	cragUsecase := usecases.NewCragUsecase(authn, authz, cragRepo, rm)
-	sectorUsecase := usecases.NewSectorUsecase(authn, authz, sectorRepo, rm)
-	routeUsecase := usecases.NewRouteUsecase(authn, authz, routeRepo, rm)
-	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, rm)
-	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rm, ib)
-	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rm)
-	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rm)
+	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rh)
+	areaUsecase := usecases.NewAreaUsecase(authn, authz, areaRepo, authRepo, rh)
+	cragUsecase := usecases.NewCragUsecase(authn, authz, cragRepo, rh)
+	sectorUsecase := usecases.NewSectorUsecase(authn, authz, sectorRepo, rh)
+	routeUsecase := usecases.NewRouteUsecase(authn, authz, routeRepo, rh)
+	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, rh)
+	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib)
+	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rh)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
 	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
 

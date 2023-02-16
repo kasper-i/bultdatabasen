@@ -8,19 +8,19 @@ import (
 )
 
 type materialHandler struct {
-	MaterialUsecase domain.MaterialUsecase
+	materialUsecase domain.MaterialUsecase
 }
 
 func NewMaterialHandler(router *mux.Router, materialUsecase domain.MaterialUsecase) {
 	handler := &materialHandler{
-		MaterialUsecase: materialUsecase,
+		materialUsecase: materialUsecase,
 	}
 
 	router.HandleFunc("/materials", handler.GetMaterials).Methods(http.MethodGet, http.MethodOptions)
 }
 
 func (hdlr *materialHandler) GetMaterials(w http.ResponseWriter, r *http.Request) {
-	if materials, err := hdlr.MaterialUsecase.GetMaterials(r.Context()); err != nil {
+	if materials, err := hdlr.materialUsecase.GetMaterials(r.Context()); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, materials)

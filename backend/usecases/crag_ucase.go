@@ -11,15 +11,15 @@ type cragUsecase struct {
 	cragRepo      domain.CragRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
-	rm            domain.ResourceManager
+	rh            domain.ResourceHelper
 }
 
-func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, cragRepo domain.CragRepository, rm domain.ResourceManager) domain.CragUsecase {
+func NewCragUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, cragRepo domain.CragRepository, rh domain.ResourceHelper) domain.CragUsecase {
 	return &cragUsecase{
 		cragRepo:      cragRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
-		rm:            rm,
+		rh:            rh,
 	}
 }
 
@@ -32,7 +32,7 @@ func (uc *cragUsecase) GetCrags(ctx context.Context, resourceID uuid.UUID) ([]do
 }
 
 func (uc *cragUsecase) GetCrag(ctx context.Context, cragID uuid.UUID) (domain.Crag, error) {
-	ancestors, err := uc.rm.GetAncestors(ctx, cragID)
+	ancestors, err := uc.rh.GetAncestors(ctx, cragID)
 	if err != nil {
 		return domain.Crag{}, err
 	}
@@ -66,7 +66,7 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 	}
 
 	err = uc.cragRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
+		if createdResource, err := uc.rh.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			crag.ID = createdResource.ID
@@ -76,7 +76,7 @@ func (uc *cragUsecase) CreateCrag(ctx context.Context, crag domain.Crag, parentR
 			return err
 		}
 
-		if crag.Ancestors, err = uc.rm.GetAncestors(txCtx, crag.ID); err != nil {
+		if crag.Ancestors, err = uc.rh.GetAncestors(txCtx, crag.ID); err != nil {
 			return nil
 		}
 
@@ -101,5 +101,5 @@ func (uc *cragUsecase) DeleteCrag(ctx context.Context, cragID uuid.UUID) error {
 		return err
 	}
 
-	return uc.rm.DeleteResource(ctx, cragID, user.ID)
+	return uc.rh.DeleteResource(ctx, cragID, user.ID)
 }

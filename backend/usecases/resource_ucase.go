@@ -11,15 +11,15 @@ type resourceUsecase struct {
 	resourceRepo  domain.ResourceRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
-	rm            domain.ResourceManager
+	rh            domain.ResourceHelper
 }
 
-func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, resourceRepo domain.ResourceRepository, rm domain.ResourceManager) domain.ResourceUsecase {
+func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, resourceRepo domain.ResourceRepository, rh domain.ResourceHelper) domain.ResourceUsecase {
 	return &resourceUsecase{
 		resourceRepo:  resourceRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
-		rm:            rm,
+		rh:            rh,
 	}
 }
 
@@ -28,7 +28,7 @@ type ResourcePatch struct {
 }
 
 func (uc *resourceUsecase) GetResource(ctx context.Context, resourceID uuid.UUID) (domain.Resource, error) {
-	ancestors, err := uc.rm.GetAncestors(ctx, resourceID)
+	ancestors, err := uc.rh.GetAncestors(ctx, resourceID)
 	if err != nil {
 		return domain.Resource{}, err
 	}
@@ -62,7 +62,7 @@ func (uc *resourceUsecase) MoveResource(ctx context.Context, resourceID, newPare
 		}
 	}
 
-	return uc.rm.MoveResource(ctx, resourceID, newParentID)
+	return uc.rh.MoveResource(ctx, resourceID, newParentID)
 }
 
 func (uc *resourceUsecase) GetAncestors(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {
@@ -70,7 +70,7 @@ func (uc *resourceUsecase) GetAncestors(ctx context.Context, resourceID uuid.UUI
 		return nil, err
 	}
 
-	return uc.rm.GetAncestors(ctx, resourceID)
+	return uc.rh.GetAncestors(ctx, resourceID)
 }
 
 func (uc *resourceUsecase) GetChildren(ctx context.Context, resourceID uuid.UUID) ([]domain.Resource, error) {

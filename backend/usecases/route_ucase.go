@@ -11,15 +11,15 @@ type routeUsecase struct {
 	routeRepo     domain.RouteRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
-	rm            domain.ResourceManager
+	rh            domain.ResourceHelper
 }
 
-func NewRouteUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, routeRepo domain.RouteRepository, rm domain.ResourceManager) domain.RouteUsecase {
+func NewRouteUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, routeRepo domain.RouteRepository, rh domain.ResourceHelper) domain.RouteUsecase {
 	return &routeUsecase{
 		routeRepo:     routeRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
-		rm:            rm,
+		rh:            rh,
 	}
 }
 
@@ -32,7 +32,7 @@ func (uc *routeUsecase) GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]
 }
 
 func (uc *routeUsecase) GetRoute(ctx context.Context, routeID uuid.UUID) (domain.Route, error) {
-	ancestors, err := uc.rm.GetAncestors(ctx, routeID)
+	ancestors, err := uc.rh.GetAncestors(ctx, routeID)
 	if err != nil {
 		return domain.Route{}, err
 	}
@@ -68,7 +68,7 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 	}
 
 	err = uc.routeRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
+		if createdResource, err := uc.rh.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			route.ID = createdResource.ID
@@ -78,11 +78,11 @@ func (uc *routeUsecase) CreateRoute(ctx context.Context, route domain.Route, par
 			return err
 		}
 
-		if route.Ancestors, err = uc.rm.GetAncestors(txCtx, route.ID); err != nil {
+		if route.Ancestors, err = uc.rh.GetAncestors(txCtx, route.ID); err != nil {
 			return nil
 		}
 
-		if err := uc.rm.UpdateCounters(txCtx, route.Counters, append(route.Ancestors.IDs(), route.ID)...); err != nil {
+		if err := uc.rh.UpdateCounters(txCtx, route.Counters, append(route.Ancestors.IDs(), route.ID)...); err != nil {
 			return err
 		}
 
@@ -107,7 +107,7 @@ func (uc *routeUsecase) DeleteRoute(ctx context.Context, routeID uuid.UUID) erro
 		return err
 	}
 
-	return uc.rm.DeleteResource(ctx, routeID, user.ID)
+	return uc.rh.DeleteResource(ctx, routeID, user.ID)
 }
 
 func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedRoute domain.Route) (domain.Route, error) {
@@ -133,12 +133,12 @@ func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, upda
 		countersDifference := updatedRoute.Counters.Substract(original.Counters)
 
 		if updatedRoute.Name != original.Name {
-			if err := uc.rm.RenameResource(txCtx, routeID, updatedRoute.Name, user.ID); err != nil {
+			if err := uc.rh.RenameResource(txCtx, routeID, updatedRoute.Name, user.ID); err != nil {
 				return err
 			}
 		}
 
-		if err := uc.rm.TouchResource(txCtx, routeID, user.ID); err != nil {
+		if err := uc.rh.TouchResource(txCtx, routeID, user.ID); err != nil {
 			return err
 		}
 
@@ -146,11 +146,11 @@ func (uc *routeUsecase) UpdateRoute(ctx context.Context, routeID uuid.UUID, upda
 			return err
 		}
 
-		if updatedRoute.Ancestors, err = uc.rm.GetAncestors(txCtx, routeID); err != nil {
+		if updatedRoute.Ancestors, err = uc.rh.GetAncestors(txCtx, routeID); err != nil {
 			return nil
 		}
 
-		if err := uc.rm.UpdateCounters(txCtx, countersDifference, append(updatedRoute.Ancestors.IDs(), routeID)...); err != nil {
+		if err := uc.rh.UpdateCounters(txCtx, countersDifference, append(updatedRoute.Ancestors.IDs(), routeID)...); err != nil {
 			return err
 		}
 

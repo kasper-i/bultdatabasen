@@ -12,13 +12,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type TaskHandler struct {
-	TaskUsecase domain.TaskUsecase
+type taskHandler struct {
+	taskUsecase domain.TaskUsecase
 }
 
 func NewTaskHandler(router *mux.Router, taskUsecase domain.TaskUsecase) {
-	handler := &TaskHandler{
-		TaskUsecase: taskUsecase,
+	handler := &taskHandler{
+		taskUsecase: taskUsecase,
 	}
 
 	router.HandleFunc("/resources/{resourceID}/tasks", handler.GetTasks).Methods(http.MethodGet, http.MethodOptions)
@@ -51,7 +51,7 @@ func parsePaginationQuery(query url.Values) (domain.Pagination, error) {
 	return pagination, nil
 }
 
-func (hdlr *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
+func (hdlr *taskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	query := r.URL.Query()
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
@@ -73,7 +73,7 @@ func (hdlr *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 
 	statuses := query["status"]
 
-	if tasks, meta, err := hdlr.TaskUsecase.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {
+	if tasks, meta, err := hdlr.taskUsecase.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {
 		writeError(w, err)
 	} else {
 		response := GetTasksResponse{}
@@ -83,7 +83,7 @@ func (hdlr *TaskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hdlr *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
+func (hdlr *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -91,14 +91,14 @@ func (hdlr *TaskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if task, err := hdlr.TaskUsecase.GetTask(r.Context(), resourceID); err != nil {
+	if task, err := hdlr.taskUsecase.GetTask(r.Context(), resourceID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, task)
 	}
 }
 
-func (hdlr *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
+func (hdlr *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -113,7 +113,7 @@ func (hdlr *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdTask, err := hdlr.TaskUsecase.CreateTask(r.Context(), task, parentResourceID)
+	createdTask, err := hdlr.taskUsecase.CreateTask(r.Context(), task, parentResourceID)
 
 	if err != nil {
 		writeError(w, err)
@@ -122,7 +122,7 @@ func (hdlr *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hdlr *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
+func (hdlr *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	taskID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -137,7 +137,7 @@ func (hdlr *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedTask, err := hdlr.TaskUsecase.UpdateTask(r.Context(), task, taskID)
+	updatedTask, err := hdlr.taskUsecase.UpdateTask(r.Context(), task, taskID)
 
 	if err != nil {
 		writeError(w, err)
@@ -146,7 +146,7 @@ func (hdlr *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hdlr *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
+func (hdlr *taskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -154,7 +154,7 @@ func (hdlr *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := hdlr.TaskUsecase.DeleteTask(r.Context(), resourceID); err != nil {
+	if err := hdlr.taskUsecase.DeleteTask(r.Context(), resourceID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusNoContent, nil)

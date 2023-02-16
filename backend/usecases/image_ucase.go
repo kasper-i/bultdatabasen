@@ -17,16 +17,16 @@ type imageUsecase struct {
 	imageRepo     domain.ImageRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
-	rm            domain.ResourceManager
+	rh            domain.ResourceHelper
 	ib            domain.ImageBucket
 }
 
-func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, imageRepo domain.ImageRepository, rm domain.ResourceManager, ib domain.ImageBucket) domain.ImageUsecase {
+func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, imageRepo domain.ImageRepository, rh domain.ResourceHelper, ib domain.ImageBucket) domain.ImageUsecase {
 	return &imageUsecase{
 		imageRepo:     imageRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
-		rm:            rm,
+		rh:            rh,
 		ib:            ib,
 	}
 }
@@ -44,7 +44,7 @@ func (uc *imageUsecase) GetImages(ctx context.Context, resourceID uuid.UUID) ([]
 }
 
 func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain.Image, error) {
-	ancestors, err := uc.rm.GetAncestors(ctx, imageID)
+	ancestors, err := uc.rh.GetAncestors(ctx, imageID)
 	if err != nil {
 		return domain.Image{}, err
 	}
@@ -121,7 +121,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 	}
 
 	err = uc.imageRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
+		if createdResource, err := uc.rh.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			img.ID = createdResource.ID
@@ -140,7 +140,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 			return err
 		}
 
-		if img.Ancestors, err = uc.rm.GetAncestors(txCtx, img.ID); err != nil {
+		if img.Ancestors, err = uc.rh.GetAncestors(txCtx, img.ID); err != nil {
 			return nil
 		}
 
@@ -170,7 +170,7 @@ func (uc *imageUsecase) DeleteImage(ctx context.Context, imageID uuid.UUID) erro
 		return err
 	}
 
-	return uc.rm.DeleteResource(ctx, imageID, user.ID)
+	return uc.rh.DeleteResource(ctx, imageID, user.ID)
 }
 
 func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rotation int) error {
@@ -199,7 +199,7 @@ func (uc *imageUsecase) RotateImage(ctx context.Context, imageID uuid.UUID, rota
 	original.Rotation = rotation
 
 	return uc.imageRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if err := uc.rm.TouchResource(txCtx, imageID, user.ID); err != nil {
+		if err := uc.rh.TouchResource(txCtx, imageID, user.ID); err != nil {
 			return err
 		}
 

@@ -12,14 +12,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type ResourceHandler struct {
-	ResourceUsecase domain.ResourceUsecase
+type resourceHandler struct {
+	resourceUsecase domain.ResourceUsecase
 	authorizer      domain.Authorizer
 }
 
 func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUsecase) {
-	handler := &ResourceHandler{
-		ResourceUsecase: resourceUsecase,
+	handler := &resourceHandler{
+		resourceUsecase: resourceUsecase,
 	}
 
 	router.HandleFunc("/resources/{resourceID}", handler.GetResource).Methods(http.MethodGet, http.MethodOptions)
@@ -29,7 +29,7 @@ func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUseca
 	router.HandleFunc("/resources", handler.Search).Methods(http.MethodGet, http.MethodOptions)
 }
 
-func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request) {
+func (hdlr *resourceHandler) GetResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -37,14 +37,14 @@ func (hdlr *ResourceHandler) GetResource(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if resource, err := hdlr.ResourceUsecase.GetResource(r.Context(), id); err != nil {
+	if resource, err := hdlr.resourceUsecase.GetResource(r.Context(), id); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, resource)
 	}
 }
 
-func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Request) {
+func (hdlr *resourceHandler) UpdateResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var patch usecases.ResourcePatch
 	id, err := uuid.Parse(vars["resourceID"])
@@ -63,7 +63,7 @@ func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Reque
 	case patch.ParentID != uuid.Nil:
 		newParentID := patch.ParentID
 
-		if err := hdlr.ResourceUsecase.MoveResource(r.Context(), id, newParentID); err != nil {
+		if err := hdlr.resourceUsecase.MoveResource(r.Context(), id, newParentID); err != nil {
 			writeError(w, err)
 		} else {
 			writeResponse(w, http.StatusNoContent, nil)
@@ -75,7 +75,7 @@ func (hdlr *ResourceHandler) UpdateResource(w http.ResponseWriter, r *http.Reque
 	writeResponse(w, http.StatusBadRequest, nil)
 }
 
-func (hdlr *ResourceHandler) GetAncestors(w http.ResponseWriter, r *http.Request) {
+func (hdlr *resourceHandler) GetAncestors(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -83,14 +83,14 @@ func (hdlr *ResourceHandler) GetAncestors(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if ancestors, err := hdlr.ResourceUsecase.GetAncestors(r.Context(), id); err != nil {
+	if ancestors, err := hdlr.resourceUsecase.GetAncestors(r.Context(), id); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, ancestors)
 	}
 }
 
-func (hdlr *ResourceHandler) GetChildren(w http.ResponseWriter, r *http.Request) {
+func (hdlr *resourceHandler) GetChildren(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -98,14 +98,14 @@ func (hdlr *ResourceHandler) GetChildren(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if children, err := hdlr.ResourceUsecase.GetChildren(r.Context(), id); err != nil {
+	if children, err := hdlr.resourceUsecase.GetChildren(r.Context(), id); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, children)
 	}
 }
 
-func (hdlr *ResourceHandler) Search(w http.ResponseWriter, r *http.Request) {
+func (hdlr *resourceHandler) Search(w http.ResponseWriter, r *http.Request) {
 	names, ok := r.URL.Query()["name"]
 
 	if !ok {
@@ -120,7 +120,7 @@ func (hdlr *ResourceHandler) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if results, err := hdlr.ResourceUsecase.Search(r.Context(), name); err != nil {
+	if results, err := hdlr.resourceUsecase.Search(r.Context(), name); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, results)

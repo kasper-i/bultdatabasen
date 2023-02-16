@@ -15,10 +15,10 @@ type pointUsecase struct {
 	treeRepo      domain.TreeRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
-	rm            domain.ResourceManager
+	rh            domain.ResourceHelper
 }
 
-func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, pointRepo domain.PointRepository, routeRepo domain.RouteRepository, resourceRepo domain.ResourceRepository, treeRepo domain.TreeRepository, rm domain.ResourceManager) domain.PointUsecase {
+func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, pointRepo domain.PointRepository, routeRepo domain.RouteRepository, resourceRepo domain.ResourceRepository, treeRepo domain.TreeRepository, rh domain.ResourceHelper) domain.PointUsecase {
 	return &pointUsecase{
 		pointRepo:     pointRepo,
 		routeRepo:     routeRepo,
@@ -26,7 +26,7 @@ func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Autho
 		treeRepo:      treeRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
-		rm:            rm,
+		rh:            rh,
 	}
 }
 
@@ -282,7 +282,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				Type:         domain.TypePoint,
 			}
 
-			if createdResource, err := uc.rm.CreateResource(txCtx, resource, routeID, user.ID); err != nil {
+			if createdResource, err := uc.rh.CreateResource(txCtx, resource, routeID, user.ID); err != nil {
 				return err
 			} else {
 				point.ID = createdResource.ID
@@ -347,7 +347,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 			point.Parents = parents
 		}
 
-		if point.Ancestors, err = uc.rm.GetAncestors(txCtx, point.ID); err != nil {
+		if point.Ancestors, err = uc.rh.GetAncestors(txCtx, point.ID); err != nil {
 			return nil
 		}
 
@@ -432,7 +432,7 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 
 		if len(parents) == 1 {
-			return uc.rm.DeleteResource(txCtx, pointID, user.ID)
+			return uc.rh.DeleteResource(txCtx, pointID, user.ID)
 		} else {
 			if err := uc.treeRepo.RemoveTreePath(txCtx, pointID, routeID); err != nil {
 				return err

@@ -12,16 +12,16 @@ type areaUsecase struct {
 	authRepo      domain.AuthRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
-	rm            domain.ResourceManager
+	rh            domain.ResourceHelper
 }
 
-func NewAreaUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, areaRepo domain.AreaRepository, authRepo domain.AuthRepository, rm domain.ResourceManager) domain.AreaUsecase {
+func NewAreaUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, areaRepo domain.AreaRepository, authRepo domain.AuthRepository, rh domain.ResourceHelper) domain.AreaUsecase {
 	return &areaUsecase{
 		areaRepo:      areaRepo,
 		authRepo:      authRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
-		rm:            rm,
+		rh:            rh,
 	}
 }
 
@@ -34,7 +34,7 @@ func (uc *areaUsecase) GetAreas(ctx context.Context, resourceID uuid.UUID) ([]do
 }
 
 func (uc *areaUsecase) GetArea(ctx context.Context, areaID uuid.UUID) (domain.Area, error) {
-	ancestors, err := uc.rm.GetAncestors(ctx, areaID)
+	ancestors, err := uc.rh.GetAncestors(ctx, areaID)
 	if err != nil {
 		return domain.Area{}, err
 	}
@@ -68,7 +68,7 @@ func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentR
 	}
 
 	err = uc.areaRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
+		if createdResource, err := uc.rh.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			area.ID = createdResource.ID
@@ -86,7 +86,7 @@ func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentR
 			return err
 		}
 
-		if area.Ancestors, err = uc.rm.GetAncestors(txCtx, area.ID); err != nil {
+		if area.Ancestors, err = uc.rh.GetAncestors(txCtx, area.ID); err != nil {
 			return nil
 		}
 
@@ -111,5 +111,5 @@ func (uc *areaUsecase) DeleteArea(ctx context.Context, areaID uuid.UUID) error {
 		return err
 	}
 
-	return uc.rm.DeleteResource(ctx, areaID, user.ID)
+	return uc.rh.DeleteResource(ctx, areaID, user.ID)
 }

@@ -11,12 +11,12 @@ import (
 )
 
 type areaHandler struct {
-	AreaUsecase domain.AreaUsecase
+	areaUsecase domain.AreaUsecase
 }
 
 func NewAreaHandler(router *mux.Router, areaUsecase domain.AreaUsecase) {
 	handler := &areaHandler{
-		AreaUsecase: areaUsecase,
+		areaUsecase: areaUsecase,
 	}
 
 	router.HandleFunc("/resources/{resourceID}/areas", handler.GetAreas).Methods(http.MethodGet, http.MethodOptions)
@@ -41,7 +41,7 @@ func (hdlr *areaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if areas, err := hdlr.AreaUsecase.GetAreas(r.Context(), resourceID); err != nil {
+	if areas, err := hdlr.areaUsecase.GetAreas(r.Context(), resourceID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, areas)
@@ -56,7 +56,7 @@ func (hdlr *areaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if area, err := hdlr.AreaUsecase.GetArea(r.Context(), resourceID); err != nil {
+	if area, err := hdlr.areaUsecase.GetArea(r.Context(), resourceID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, area)
@@ -82,7 +82,7 @@ func (hdlr *areaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if createdArea, err := hdlr.AreaUsecase.CreateArea(r.Context(), area, resourceID); err != nil {
+	if createdArea, err := hdlr.areaUsecase.CreateArea(r.Context(), area, resourceID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusCreated, createdArea)
@@ -97,7 +97,7 @@ func (hdlr *areaHandler) DeleteArea(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := hdlr.AreaUsecase.DeleteArea(r.Context(), resourceID); err != nil {
+	if err := hdlr.areaUsecase.DeleteArea(r.Context(), resourceID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusNoContent, nil)

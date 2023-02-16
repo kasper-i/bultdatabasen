@@ -10,13 +10,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type PointHandler struct {
-	PointUsecase domain.PointUsecase
+type pointHandler struct {
+	pointUsecase domain.PointUsecase
 }
 
 func NewPointHandler(router *mux.Router, pointUsecase domain.PointUsecase) {
-	handler := &PointHandler{
-		PointUsecase: pointUsecase,
+	handler := &pointHandler{
+		pointUsecase: pointUsecase,
 	}
 
 	router.HandleFunc("/routes/{resourceID}/points", handler.GetPoints).Methods(http.MethodGet, http.MethodOptions)
@@ -31,7 +31,7 @@ type CreatePointRequest struct {
 	Bolts    []domain.Bolt          `json:"bolts"`
 }
 
-func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
+func (hdlr *pointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -39,14 +39,14 @@ func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if points, err := hdlr.PointUsecase.GetPoints(r.Context(), routeID); err != nil {
+	if points, err := hdlr.pointUsecase.GetPoints(r.Context(), routeID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, points)
 	}
 }
 
-func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
+func (hdlr *pointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
@@ -61,7 +61,7 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	point, err := hdlr.PointUsecase.AttachPoint(r.Context(), routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
+	point, err := hdlr.pointUsecase.AttachPoint(r.Context(), routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
 
 	if err != nil {
 		writeError(w, err)
@@ -78,7 +78,7 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hdlr *PointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
+func (hdlr *pointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	routeID, err := uuid.Parse(vars["resourceID"])
@@ -93,7 +93,7 @@ func (hdlr *PointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := hdlr.PointUsecase.DetachPoint(r.Context(), routeID, pointID); err != nil {
+	if err := hdlr.pointUsecase.DetachPoint(r.Context(), routeID, pointID); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusNoContent, nil)

@@ -89,7 +89,7 @@ type ResourceUsecase interface {
 	Search(ctx context.Context, name string) ([]ResourceWithParents, error)
 }
 
-type ResourceManager interface {
+type ResourceHelper interface {
 	CreateResource(ctx context.Context, resource Resource, parentResourceID uuid.UUID, userID string) (Resource, error)
 	DeleteResource(ctx context.Context, resourceID uuid.UUID, userID string) error
 	MoveResource(ctx context.Context, resourceID, newParentID uuid.UUID) error
@@ -117,14 +117,4 @@ type ResourceRepository interface {
 	OrphanResource(ctx context.Context, resourceID uuid.UUID) error
 	RenameResource(ctx context.Context, resourceID uuid.UUID, name, userID string) error
 	UpdateCounters(ctx context.Context, resourceID uuid.UUID, delta Counters) error
-}
-
-type TreeRepository interface {
-	Transactor
-
-	GetTreePath(ctx context.Context, resourceID uuid.UUID) (Path, error)
-	InsertTreePath(ctx context.Context, resourceID, parentID uuid.UUID) error
-	RemoveTreePath(ctx context.Context, resourceID, parentID uuid.UUID) error
-	MoveSubtree(ctx context.Context, subtree Path, newAncestralPath Path) error
-	GetSubtreeLock(ctx context.Context, resourceID uuid.UUID) error
 }

@@ -12,13 +12,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserHandler struct {
-	UserUsecase domain.UserUsecase
+type userHandler struct {
+	userUsecase domain.UserUsecase
 }
 
 func NewUserHandler(router *mux.Router, userUsecase domain.UserUsecase) {
-	handler := &UserHandler{
-		UserUsecase: userUsecase,
+	handler := &userHandler{
+		userUsecase: userUsecase,
 	}
 
 	router.HandleFunc("/users/names", handler.GetUserNames).Methods(http.MethodGet, http.MethodOptions)
@@ -31,8 +31,8 @@ func NewUserHandler(router *mux.Router, userUsecase domain.UserUsecase) {
 	router.HandleFunc("/users/{userID}/invites", nil).Methods(http.MethodGet, http.MethodOptions)
 }
 
-func (hdlr *UserHandler) GetUserNames(w http.ResponseWriter, r *http.Request) {
-	if names, err := hdlr.UserUsecase.GetUserNames(r.Context()); err != nil {
+func (hdlr *userHandler) GetUserNames(w http.ResponseWriter, r *http.Request) {
+	if names, err := hdlr.userUsecase.GetUserNames(r.Context()); err != nil {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, names)
@@ -40,17 +40,17 @@ func (hdlr *UserHandler) GetUserNames(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (hdlr *UserHandler) GetMyself(w http.ResponseWriter, r *http.Request) {
+func (hdlr *userHandler) GetMyself(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id").(string)
 
-	if user, err := hdlr.UserUsecase.GetUser(r.Context(), userID); err != nil {
+	if user, err := hdlr.userUsecase.GetUser(r.Context(), userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			user = domain.User{
 				ID:        userID,
 				FirstSeen: time.Now(),
 			}
 
-			if createdUser, err := hdlr.UserUsecase.CreateUser(r.Context(), user); err != nil {
+			if createdUser, err := hdlr.userUsecase.CreateUser(r.Context(), user); err != nil {
 				writeError(w, err)
 				return
 			} else {
@@ -66,7 +66,7 @@ func (hdlr *UserHandler) GetMyself(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hdlr *UserHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
+func (hdlr *userHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user_id").(string)
 
 	reqBody, _ := io.ReadAll(r.Body)
@@ -76,7 +76,7 @@ func (hdlr *UserHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user, err := hdlr.UserUsecase.GetUser(r.Context(), userID); err != nil {
+	if user, err := hdlr.userUsecase.GetUser(r.Context(), userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			user = domain.User{
 				ID:        userID,
@@ -85,7 +85,7 @@ func (hdlr *UserHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
 				FirstSeen: time.Now(),
 			}
 
-			if createdUser, err := hdlr.UserUsecase.CreateUser(r.Context(), user); err != nil {
+			if createdUser, err := hdlr.userUsecase.CreateUser(r.Context(), user); err != nil {
 				writeError(w, err)
 				return
 			} else {
@@ -100,7 +100,7 @@ func (hdlr *UserHandler) UpdateMyself(w http.ResponseWriter, r *http.Request) {
 		user.FirstName = desiredUser.FirstName
 		user.LastName = desiredUser.LastName
 
-		updatedUser, err := hdlr.UserUsecase.UpdateUser(r.Context(), user)
+		updatedUser, err := hdlr.userUsecase.UpdateUser(r.Context(), user)
 
 		if err != nil {
 			writeError(w, err)

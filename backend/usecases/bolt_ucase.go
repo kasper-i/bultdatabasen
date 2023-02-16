@@ -11,15 +11,15 @@ type boltUsecase struct {
 	boltRepo      domain.BoltRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
-	rm            domain.ResourceManager
+	rh            domain.ResourceHelper
 }
 
-func NewBoltUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, boltRepo domain.BoltRepository, rm domain.ResourceManager) domain.BoltUsecase {
+func NewBoltUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, boltRepo domain.BoltRepository, rh domain.ResourceHelper) domain.BoltUsecase {
 	return &boltUsecase{
 		boltRepo:      boltRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
-		rm:            rm,
+		rh:            rh,
 	}
 }
 
@@ -32,7 +32,7 @@ func (uc *boltUsecase) GetBolts(ctx context.Context, resourceID uuid.UUID) ([]do
 }
 
 func (uc *boltUsecase) GetBolt(ctx context.Context, boltID uuid.UUID) (domain.Bolt, error) {
-	ancestors, err := uc.rm.GetAncestors(ctx, boltID)
+	ancestors, err := uc.rh.GetAncestors(ctx, boltID)
 	if err != nil {
 		return domain.Bolt{}, err
 	}
@@ -68,7 +68,7 @@ func (uc *boltUsecase) CreateBolt(ctx context.Context, bolt domain.Bolt, parentR
 	}
 
 	err = uc.boltRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rm.CreateResource(ctx, resource, parentResourceID, user.ID); err != nil {
+		if createdResource, err := uc.rh.CreateResource(ctx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			bolt.ID = createdResource.ID
@@ -84,11 +84,11 @@ func (uc *boltUsecase) CreateBolt(ctx context.Context, bolt domain.Bolt, parentR
 			bolt = refreshedBolt
 		}
 
-		if bolt.Ancestors, err = uc.rm.GetAncestors(txCtx, bolt.ID); err != nil {
+		if bolt.Ancestors, err = uc.rh.GetAncestors(txCtx, bolt.ID); err != nil {
 			return nil
 		}
 
-		if err := uc.rm.UpdateCounters(txCtx, bolt.Counters, append(bolt.Ancestors.IDs(), bolt.ID)...); err != nil {
+		if err := uc.rh.UpdateCounters(txCtx, bolt.Counters, append(bolt.Ancestors.IDs(), bolt.ID)...); err != nil {
 			return err
 		}
 
@@ -117,7 +117,7 @@ func (uc *boltUsecase) DeleteBolt(ctx context.Context, boltID uuid.UUID) error {
 		return err
 	}
 
-	return uc.rm.DeleteResource(ctx, boltID, user.ID)
+	return uc.rh.DeleteResource(ctx, boltID, user.ID)
 }
 
 func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updatedBolt domain.Bolt) (domain.Bolt, error) {
@@ -144,7 +144,7 @@ func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updated
 
 		countersDifference := updatedBolt.Counters.Substract(original.Counters)
 
-		if err := uc.rm.TouchResource(txCtx, boltID, user.ID); err != nil {
+		if err := uc.rh.TouchResource(txCtx, boltID, user.ID); err != nil {
 			return err
 		}
 
@@ -157,11 +157,11 @@ func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updated
 			return err
 		}
 
-		if refreshedBolt.Ancestors, err = uc.rm.GetAncestors(txCtx, boltID); err != nil {
+		if refreshedBolt.Ancestors, err = uc.rh.GetAncestors(txCtx, boltID); err != nil {
 			return nil
 		}
 
-		if err := uc.rm.UpdateCounters(txCtx, countersDifference, append(refreshedBolt.Ancestors.IDs(), boltID)...); err != nil {
+		if err := uc.rh.UpdateCounters(txCtx, countersDifference, append(refreshedBolt.Ancestors.IDs(), boltID)...); err != nil {
 			return err
 		}
 
