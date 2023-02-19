@@ -16,7 +16,6 @@ import {
   signin as cognitoSignin,
   translateCognitoError,
 } from "@/utils/cognito";
-import { isEqual } from "lodash-es";
 import { useState } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 
@@ -40,19 +39,6 @@ export const handleLogin = async (
 
   Api.setTokens(idToken, accessToken, refreshToken);
   const { given_name: firstName, family_name: lastName } = parseJwt(idToken);
-
-  (async () => {
-    const info = await Api.getMyself();
-    const updatedInfo = {
-      ...info,
-      firstName,
-      lastName,
-    };
-
-    if (!isEqual(info, updatedInfo)) {
-      await Api.updateMyself(updatedInfo);
-    }
-  })();
 
   const returnPath = localStorage.getItem("returnPath");
   localStorage.removeItem("returnPath");

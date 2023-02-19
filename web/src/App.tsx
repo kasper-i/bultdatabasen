@@ -21,6 +21,7 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import RestorePasswordPage from "./pages/RestorePasswordPage";
 import RegisterPage from "./pages/RegisterPage";
 import Auth from "./layouts/Auth";
+import { parseJwt } from "./utils/cognito";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -47,8 +48,14 @@ const App = () => {
         await Api.refreshTokens();
       }
 
-      const info = await Api.getMyself();
-      dispatch(login({ firstName: info.firstName, lastName: info.lastName }));
+      if (!Api.idToken) {
+        return;
+      }
+
+      const { given_name: firstName, family_name: lastName } = parseJwt(
+        Api.idToken
+      );
+      dispatch(login({ firstName, lastName }));
     };
 
     initialize().finally(() => setInitialized(true));

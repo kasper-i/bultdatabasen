@@ -159,26 +159,12 @@ export class Api {
     Authorization: `Bearer ${Api.accessToken}`,
   });
 
-  static getUserNames = async () => {
+  static getUsers = async () => {
     const result = await axios.get<
-      Pick<User, "id" | "firstName" | "lastName">[]
-    >(`${Api.baseUrl}/users/names`, { headers: Api.getDefaultHeaders() });
+     User[]
+    >(`${Api.baseUrl}/users`, { headers: Api.getDefaultHeaders() });
 
     return result.data;
-  };
-
-  static getMyself = async () => {
-    const result = await axios.get<User>(`${Api.baseUrl}/users/myself`, {
-      headers: Api.getDefaultHeaders(),
-    });
-
-    return result.data;
-  };
-
-  static updateMyself = async (user: Omit<User, "id" | "firstSeen">) => {
-    await axios.put(`${Api.baseUrl}/users/myself`, user, {
-      headers: Api.getDefaultHeaders(),
-    });
   };
 
   static getUserRoleForResource = async (

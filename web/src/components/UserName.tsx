@@ -1,10 +1,10 @@
-import { useUserNames } from "@/queries/userQueries";
+import { useUsers } from "@/queries/userQueries";
 import React, { FC } from "react";
 
 const UserName: FC<{ userId: string }> = ({ userId }) => {
-  const { data: userNames } = useUserNames();
+  const { data: users } = useUsers();
 
-  const userInfo = userNames?.get(userId);
+  const userInfo = users?.get(userId);
 
   return (
     <span className="text-primary-500">

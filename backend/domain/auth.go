@@ -40,10 +40,7 @@ type ResourceRole struct {
 }
 
 type UserUsecase interface {
-	GetUser(ctx context.Context, userID string) (User, error)
-	UpdateUser(ctx context.Context, user User) (User, error)
-	CreateUser(ctx context.Context, user User) (User, error)
-	GetUserNames(ctx context.Context) ([]User, error)
+	GetUsers(ctx context.Context) ([]User, error)
 }
 
 type Authenticator interface {

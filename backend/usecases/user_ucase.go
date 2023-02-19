@@ -6,46 +6,24 @@ import (
 )
 
 type userUsecase struct {
-	userRepo      domain.UserRepository
-	authenticator domain.Authenticator
+	userRepo domain.UserRepository
 }
 
 func NewUserUsecase(authenticator domain.Authenticator, userRepo domain.UserRepository) domain.UserUsecase {
 	return &userUsecase{
-		userRepo:      userRepo,
-		authenticator: authenticator,
+		userRepo: userRepo,
 	}
 }
 
-func (uc *userUsecase) GetUser(ctx context.Context, userID string) (domain.User, error) {
-	_, err := uc.authenticator.Authenticate(ctx)
+func (uc *userUsecase) GetUsers(ctx context.Context) ([]domain.User, error) {
+	users, err := uc.userRepo.GetUsers(ctx)
 	if err != nil {
-		return domain.User{}, err
+		return nil, err
 	}
 
-	return uc.userRepo.GetUser(ctx, userID)
-}
-
-func (uc *userUsecase) UpdateUser(ctx context.Context, user domain.User) (domain.User, error) {
-	_, err := uc.authenticator.Authenticate(ctx)
-	if err != nil {
-		return domain.User{}, err
+	for _, user := range users {
+		user.Email = nil
 	}
 
-	err = uc.userRepo.SaveUser(ctx, user)
-	return user, err
-}
-
-func (uc *userUsecase) CreateUser(ctx context.Context, user domain.User) (domain.User, error) {
-	_, err := uc.authenticator.Authenticate(ctx)
-	if err != nil {
-		return domain.User{}, err
-	}
-
-	err = uc.userRepo.InsertUser(ctx, user)
-	return user, err
-}
-
-func (uc *userUsecase) GetUserNames(ctx context.Context) ([]domain.User, error) {
-	return uc.userRepo.GetUserNames(ctx)
+	return users, nil
 }

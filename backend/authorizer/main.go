@@ -26,7 +26,11 @@ func (a *authorizer) HasPermission(ctx context.Context, user *domain.User, resou
 	}
 
 	if resourceID.String() == domain.RootID {
-		return notAuthorized
+		if permission == domain.ReadPermission {
+			return nil
+		} else {
+			return notAuthorized
+		}
 	}
 
 	ancestors, err := a.resourceRepo.GetAncestors(ctx, resourceID)
