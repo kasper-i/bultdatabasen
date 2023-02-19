@@ -13,17 +13,19 @@ type pointUsecase struct {
 	routeRepo     domain.RouteRepository
 	resourceRepo  domain.ResourceRepository
 	treeRepo      domain.TreeRepository
+	boltRepo      domain.BoltRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rh            domain.ResourceHelper
 }
 
-func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, pointRepo domain.PointRepository, routeRepo domain.RouteRepository, resourceRepo domain.ResourceRepository, treeRepo domain.TreeRepository, rh domain.ResourceHelper) domain.PointUsecase {
+func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, pointRepo domain.PointRepository, routeRepo domain.RouteRepository, resourceRepo domain.ResourceRepository, treeRepo domain.TreeRepository, boltRepo domain.BoltRepository, rh domain.ResourceHelper) domain.PointUsecase {
 	return &pointUsecase{
 		pointRepo:     pointRepo,
 		routeRepo:     routeRepo,
 		resourceRepo:  resourceRepo,
 		treeRepo:      treeRepo,
+		boltRepo:      boltRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rh:            rh,
@@ -292,11 +294,30 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 				return err
 			}
 
-			//for _, bolt := range bolts {
-			//	if err := sess.CreateBolt(ctx, &bolt, point.ID); err != nil {
-			//		return err
-			//	}
-			//}
+			for _, bolt := range bolts {
+				bolt.UpdateCounters()
+
+				boltResource := domain.Resource{
+					ResourceBase: bolt.ResourceBase,
+					Type:         domain.TypeBolt,
+				}
+
+				if createdResource, err := uc.rh.CreateResource(ctx, boltResource, point.ID, user.ID); err != nil {
+					return err
+				} else {
+					bolt.ID = createdResource.ID
+				}
+
+				if err := uc.boltRepo.InsertBolt(txCtx, bolt); err != nil {
+					return err
+				}
+
+				if err := uc.rh.UpdateCounters(txCtx, bolt.Counters, bolt.ID); err != nil {
+					return err
+				}
+
+				point.Counters = point.Counters.Add(bolt.Counters)
+			}
 		}
 
 		if position != nil {
@@ -349,6 +370,10 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 
 		if point.Ancestors, err = uc.rh.GetAncestors(txCtx, point.ID); err != nil {
 			return nil
+		}
+
+		if err := uc.rh.UpdateCounters(txCtx, point.Counters, append(point.Ancestors.IDs(), point.ID)...); err != nil {
+			return err
 		}
 
 		return nil

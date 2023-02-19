@@ -70,7 +70,7 @@ func main() {
 	cragUsecase := usecases.NewCragUsecase(authn, authz, cragRepo, rh)
 	sectorUsecase := usecases.NewSectorUsecase(authn, authz, sectorRepo, rh)
 	routeUsecase := usecases.NewRouteUsecase(authn, authz, routeRepo, rh)
-	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, rh)
+	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, boltRepo, rh)
 	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib)
 	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rh)
 	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh)
