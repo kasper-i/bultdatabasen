@@ -38,12 +38,16 @@ export const handleLogin = async (
   const refreshToken = session.getRefreshToken().getToken();
 
   Api.setTokens(idToken, accessToken, refreshToken);
-  const { given_name: firstName, family_name: lastName } = parseJwt(idToken);
+  const {
+    sub: userId,
+    given_name: firstName,
+    family_name: lastName,
+  } = parseJwt(idToken);
 
   const returnPath = localStorage.getItem("returnPath");
   localStorage.removeItem("returnPath");
 
-  dispatch(login({ firstName, lastName }));
+  dispatch(login({ userId, firstName, lastName }));
 
   navigate(returnPath != null ? returnPath : "/");
 };

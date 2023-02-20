@@ -92,7 +92,7 @@ func (uc *pointUsecase) getRouteGraph(ctx context.Context, routeID uuid.UUID) (m
 	return graph, err
 }
 
-func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, pointsMap map[uuid.UUID]*domain.Point) ([]domain.Point, error) {
+func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, pointsMap map[uuid.UUID]domain.Point) ([]domain.Point, error) {
 	var routeGraph map[uuid.UUID]*routeGraphVertex
 	var orderedPoints []domain.Point = make([]domain.Point, 0)
 	var err error
@@ -120,7 +120,7 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 
 			if point, ok := pointsMap[currentPointID]; ok {
 				point.Number = index + 1
-				orderedPoints = append(orderedPoints, *point)
+				orderedPoints = append(orderedPoints, point)
 				index += 1
 			} else {
 				return nil, domain.ErrInvariantViolation
@@ -142,7 +142,7 @@ func (uc *pointUsecase) sortPoints(ctx context.Context, routeID uuid.UUID, point
 }
 
 func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]domain.Point, error) {
-	var pointsMap map[uuid.UUID]*domain.Point = make(map[uuid.UUID]*domain.Point)
+	var pointsMap map[uuid.UUID]domain.Point = make(map[uuid.UUID]domain.Point)
 	var points []domain.Point
 	var err error
 
@@ -164,7 +164,7 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]dom
 	for _, point := range points {
 		point.Parents = make([]domain.Parent, 0)
 		point.Number = 1
-		pointsMap[point.ID] = &point
+		pointsMap[point.ID] = point
 	}
 
 	var pointIDs []uuid.UUID = make([]uuid.UUID, len(points))

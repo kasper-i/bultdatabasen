@@ -1,17 +1,12 @@
 import { Api } from "@/Api";
-import { selectAuthenticated } from "@/slices/authSlice";
-import { useAppSelector } from "@/store";
-import { AxiosError } from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
-export const useRole = (resourceId: string) => {
-  const isAuthenticated = useAppSelector(selectAuthenticated);
-
-  const { data } = useQuery(
-    ["role", { resourceId }],
-    async () => Api.getUserRoleForResource(resourceId),
+export const useRoles = (userId?: string) => {
+  const { data: roles } = useQuery(
+    ["roles"],
+    async () => Api.getUserRoles(userId ?? ''),
     {
-      select: (role) => role.role,
       retry: (failureCount, error: AxiosError) => {
         if (error.response?.status === 401 || error.response?.status === 403) {
           return false;
@@ -19,11 +14,11 @@ export const useRole = (resourceId: string) => {
 
         return failureCount <= 2;
       },
-      enabled: isAuthenticated,
-      staleTime: 1000 * 60 * 60 * 6,
+      enabled: !!userId,
+      staleTime: 1000 * 60 * 60 * 12,
       cacheTime: 1000 * 60 * 60 * 12,
     }
   );
 
-  return { role: data ?? "guest" };
+  return { roles };
 };

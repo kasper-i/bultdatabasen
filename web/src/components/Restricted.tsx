@@ -1,14 +1,14 @@
 import { RoleContext } from "@/contexts/RoleContext";
-import React, { Fragment, ReactNode, useContext } from "react";
+import { Fragment, ReactNode, useContext } from "react";
 
 interface Props {
   children: ReactNode;
 }
 
 const Restricted = ({ children }: Props) => {
-  const { role } = useContext(RoleContext);
+  const { isOwner } = useContext(RoleContext);
 
-  if (role !== "owner") {
+  if (!isOwner) {
     return <Fragment />;
   }
 

@@ -52,10 +52,12 @@ const App = () => {
         return;
       }
 
-      const { given_name: firstName, family_name: lastName } = parseJwt(
-        Api.idToken
-      );
-      dispatch(login({ firstName, lastName }));
+      const {
+        sub: userId,
+        given_name: firstName,
+        family_name: lastName,
+      } = parseJwt(Api.idToken);
+      dispatch(login({ userId, firstName, lastName }));
     };
 
     initialize().finally(() => setInitialized(true));

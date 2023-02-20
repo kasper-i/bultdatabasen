@@ -167,12 +167,12 @@ export class Api {
     return result.data;
   };
 
-  static getUserRoleForResource = async (
-    resourceId: string
-  ): Promise<ResourceRole> => {
-    const endpoint = `/resources/${resourceId}/role`;
+  static getUserRoles = async (
+    userId: string
+  ): Promise<ResourceRole[]> => {
+    const endpoint = `/users/${userId}/roles`;
 
-    const result = await axios.get<ResourceRole>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get<ResourceRole[]>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 

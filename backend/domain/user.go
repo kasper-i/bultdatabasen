@@ -11,6 +11,6 @@ type UserRepository interface {
 }
 
 type AuthRepository interface {
-	GetUserRoles(ctx context.Context, userID string) []ResourceRole
+	GetUserRoles(ctx context.Context, userID string) ([]ResourceRole, error)
 	InsertUserRole(ctx context.Context, userID string, role ResourceRole) error
 }

@@ -53,7 +53,10 @@ func (a *authorizer) HasPermission(ctx context.Context, user *domain.User, resou
 		return nil
 	}
 
-	roles := a.authRepo.GetUserRoles(ctx, user.ID)
+	roles, err := a.authRepo.GetUserRoles(ctx, user.ID)
+	if err != nil {
+		return err
+	}
 
 	if len(roles) == 0 {
 		return notAuthorized

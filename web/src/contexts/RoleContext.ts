@@ -1,8 +1,7 @@
-import { UserRole } from "@/models/role";
 import { createContext } from "react";
 
 interface RoleContextProps {
-  role?: UserRole;
+  isOwner: boolean;
 }
 
-export const RoleContext = createContext<RoleContextProps>({});
+export const RoleContext = createContext<RoleContextProps>({isOwner: false});

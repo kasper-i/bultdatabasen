@@ -64,7 +64,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	userUsecase := usecases.NewUserUsecase(authn, userRepo)
+	userUsecase := usecases.NewUserUsecase(authn, authRepo, userRepo)
 	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rh)
 	areaUsecase := usecases.NewAreaUsecase(authn, authz, areaRepo, authRepo, rh)
 	cragUsecase := usecases.NewCragUsecase(authn, authz, cragRepo, rh)

@@ -135,7 +135,7 @@ func (a *authenticator) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), contextKey("user"), user)
+		ctx := context.WithValue(r.Context(), contextKey("user"), *user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
