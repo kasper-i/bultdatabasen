@@ -91,51 +91,53 @@ func (a *authenticator) verifyJWT(jwt string) ([]byte, error) {
 	return payload, nil
 }
 
-func (a *authenticator) decodeJWT(payload []byte) (*domain.User, error) {
+func (a *authenticator) decodeJWT(payload []byte) (domain.User, error) {
 	var user domain.User
 	var claims claims
 
 	if err := json.Unmarshal(payload, &claims); err != nil {
-		return nil, err
+		return domain.User{}, err
 	}
 
 	if time.Unix(claims.Expiration, 0).Before(time.Now()) {
-		return nil, domain.ErrTokenExpired
+		return domain.User{}, domain.ErrTokenExpired
 	}
 
 	user.ID = claims.Username
 
-	return &user, nil
+	return user, nil
 }
 
 func (a *authenticator) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var bearer string
-
 		header := r.Header.Get("Authorization")
-		if header == "" {
-			next.ServeHTTP(w, r)
+
+		for {
+			if header == "" {
+				break
+			}
+
+			if n, err := fmt.Sscanf(header, "Bearer %s", &bearer); err != nil || n != 1 {
+				break
+			}
+
+			payload, err := a.verifyJWT(bearer)
+			if err != nil {
+				break
+			}
+
+			user, err := a.decodeJWT(payload)
+			if err != nil {
+				break
+			}
+
+			ctx := context.WithValue(r.Context(), contextKey("user"), user)
+			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
 
-		if n, err := fmt.Sscanf(header, "Bearer %s", &bearer); err != nil || n != 1 {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		payload, err := a.verifyJWT(bearer)
-		if err != nil {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		user, err := a.decodeJWT(payload)
-		if err != nil {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), contextKey("user"), *user)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		next.ServeHTTP(w, r)
+		return
 	})
 }
