@@ -17,9 +17,9 @@ func (Area) TableName() string {
 
 type AreaUsecase interface {
 	GetAreas(ctx context.Context, resourceID uuid.UUID) ([]Area, error)
-	GetArea(ctx context.Context, resourceID uuid.UUID) (Area, error)
+	GetArea(ctx context.Context, areaID uuid.UUID) (Area, error)
 	CreateArea(ctx context.Context, area Area, parentResourceID uuid.UUID) (Area, error)
-	DeleteArea(ctx context.Context, resourceID uuid.UUID) error
+	DeleteArea(ctx context.Context, areaID uuid.UUID) error
 }
 
 type AreaRepository interface {
