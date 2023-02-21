@@ -84,7 +84,7 @@ type ResourceHelper interface {
 	UpdateCounters(ctx context.Context, delta Counters, resourceIDs ...uuid.UUID) error
 	GetAncestors(ctx context.Context, resourceID uuid.UUID) (Ancestors, error)
 	TouchResource(ctx context.Context, resourceID uuid.UUID, userID string) error
-	RenameResource(ctx context.Context, resourceID uuid.UUID, name, userID string) error
+	RenameResource(ctx context.Context, resourceID uuid.UUID, newName, userID string) error
 }
 
 type Transactor interface {
