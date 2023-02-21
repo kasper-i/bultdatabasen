@@ -81,7 +81,7 @@ type ResourceHelper interface {
 	CreateResource(ctx context.Context, resource Resource, parentResourceID uuid.UUID, userID string) (Resource, error)
 	DeleteResource(ctx context.Context, resourceID uuid.UUID, userID string) error
 	MoveResource(ctx context.Context, resourceID, newParentID uuid.UUID) error
-	UpdateCounters(ctx context.Context, delta Counters, resourceID ...uuid.UUID) error
+	UpdateCounters(ctx context.Context, delta Counters, resourceIDs ...uuid.UUID) error
 	GetAncestors(ctx context.Context, resourceID uuid.UUID) (Ancestors, error)
 	TouchResource(ctx context.Context, resourceID uuid.UUID, userID string) error
 	RenameResource(ctx context.Context, resourceID uuid.UUID, name, userID string) error
