@@ -101,7 +101,7 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 	return task, err
 }
 
-func (uc *taskUsecase) UpdateTask(ctx context.Context, task domain.Task, taskID uuid.UUID) (domain.Task, error) {
+func (uc *taskUsecase) UpdateTask(ctx context.Context, taskID uuid.UUID, task domain.Task) (domain.Task, error) {
 	user, err := uc.authenticator.Authenticate(ctx)
 	if err != nil {
 		return domain.Task{}, err

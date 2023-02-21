@@ -25,9 +25,9 @@ func (route *Route) UpdateCounters() {
 
 type RouteUsecase interface {
 	GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]Route, error)
-	GetRoute(ctx context.Context, resourceID uuid.UUID) (Route, error)
+	GetRoute(ctx context.Context, routeID uuid.UUID) (Route, error)
 	CreateRoute(ctx context.Context, route Route, parentResourceID uuid.UUID) (Route, error)
-	DeleteRoute(ctx context.Context, resourceID uuid.UUID) error
+	DeleteRoute(ctx context.Context, routeID uuid.UUID) error
 	UpdateRoute(ctx context.Context, routeID uuid.UUID, updatedRoute Route) (Route, error)
 }
 
@@ -35,8 +35,8 @@ type RouteRepository interface {
 	Transactor
 
 	GetRoutes(ctx context.Context, resourceID uuid.UUID) ([]Route, error)
-	GetRoute(ctx context.Context, resourceID uuid.UUID) (Route, error)
-	GetRouteWithLock(ctx context.Context, resourceID uuid.UUID) (Route, error)
+	GetRoute(ctx context.Context, routeID uuid.UUID) (Route, error)
+	GetRouteWithLock(ctx context.Context, routeID uuid.UUID) (Route, error)
 	InsertRoute(ctx context.Context, route Route) error
 	SaveRoute(ctx context.Context, route Route) error
 }

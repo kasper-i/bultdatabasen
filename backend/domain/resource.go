@@ -52,18 +52,6 @@ type Parent struct {
 	ChildID uuid.UUID    `json:"-"`
 }
 
-type Trash struct {
-	ResourceID  uuid.UUID `gorm:"primaryKey"`
-	DeletedTime time.Time `gorm:"column:dtime"`
-	DeletedByID string    `gorm:"column:duser_id"`
-	OrigPath    *Path
-	OrigLeafOf  *uuid.UUID
-}
-
-func (Trash) TableName() string {
-	return "trash"
-}
-
 type ResourceWithParents struct {
 	Resource
 	Parents []Parent `json:"parents"`

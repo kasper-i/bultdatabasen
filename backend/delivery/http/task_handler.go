@@ -137,7 +137,7 @@ func (hdlr *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedTask, err := hdlr.taskUsecase.UpdateTask(r.Context(), task, taskID)
+	updatedTask, err := hdlr.taskUsecase.UpdateTask(r.Context(), taskID, task)
 
 	if err != nil {
 		writeError(w, err)
