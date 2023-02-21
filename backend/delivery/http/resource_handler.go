@@ -14,7 +14,6 @@ import (
 
 type resourceHandler struct {
 	resourceUsecase domain.ResourceUsecase
-	authorizer      domain.Authorizer
 }
 
 func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUsecase) {
