@@ -169,9 +169,8 @@ func (hlpr *resourceHelper) MoveResource(ctx context.Context, resourceID, newPar
 		}
 
 		if newParentPath.Root().String() != domain.RootID {
-			return &domain.ErrNotAuthorized{
+			return &domain.ErrResourceNotFound{
 				ResourceID: newParentID,
-				Permission: domain.ReadPermission,
 			}
 		}
 
