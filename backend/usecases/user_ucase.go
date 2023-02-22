@@ -33,14 +33,14 @@ func (uc *userUsecase) GetUsers(ctx context.Context) ([]domain.User, error) {
 }
 
 func (uc *userUsecase) GetUserRoles(ctx context.Context, userID string) ([]domain.ResourceRole, error) {
-	user, err := uc.authenticator.Authenticate(ctx)
+	authenticatedUser, err := uc.authenticator.Authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if userID != user.ID {
+	if userID != authenticatedUser.ID {
 		return nil, &domain.ErrNotAuthorized{}
 	}
 
-	return uc.authRepo.GetUserRoles(ctx, user.ID)
+	return uc.authRepo.GetUserRoles(ctx, authenticatedUser.ID)
 }
