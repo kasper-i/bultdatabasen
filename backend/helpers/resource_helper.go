@@ -107,11 +107,8 @@ func (hlpr *resourceHelper) DeleteResource(ctx context.Context, resourceID uuid.
 		}
 
 		countersDifference := domain.Counters{}.Substract(resource.Counters)
-
-		for _, ancestor := range ancestors {
-			if err := hlpr.resourceRepo.UpdateCounters(txCtx, ancestor.ID, countersDifference); err != nil {
-				return err
-			}
+		if err := hlpr.UpdateCounters(txCtx, countersDifference, ancestors.IDs()...); err != nil {
+			return err
 		}
 
 		return hlpr.trashRepo.InsertTrash(txCtx, trash)
