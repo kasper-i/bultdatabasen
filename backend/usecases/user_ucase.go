@@ -42,5 +42,5 @@ func (uc *userUsecase) GetUserRoles(ctx context.Context, userID string) ([]domai
 		return nil, &domain.ErrNotAuthorized{}
 	}
 
-	return uc.authRepo.GetUserRoles(ctx, authenticatedUser.ID)
+	return uc.authRepo.GetUserRoles(ctx, userID)
 }
