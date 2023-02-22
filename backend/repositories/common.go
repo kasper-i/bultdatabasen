@@ -12,6 +12,12 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+type txKey struct{}
+
+type psqlDatastore struct {
+	tx func(ctx context.Context) *gorm.DB
+}
+
 var database string
 var schema string
 var host string
@@ -37,12 +43,6 @@ func init() {
 	password = cfg.Section("database").Key("password").String()
 	debug = cfg.Section("database").Key("debug").MustBool()
 }
-
-type psqlDatastore struct {
-	tx func(ctx context.Context) *gorm.DB
-}
-
-type txKey struct{}
 
 func NewDatastore() *psqlDatastore {
 	var db *gorm.DB
