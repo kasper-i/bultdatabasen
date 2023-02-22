@@ -13,7 +13,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -58,11 +57,7 @@ func main() {
 	authz := authorizer.New(authRepo, resourceRepo)
 
 	rh := helpers.NewResourceHelper(resourceRepo, treeRepo, trashRepo)
-	ib, err := images.NewImageBucket()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
+	ib := images.NewImageBucket()
 
 	userUsecase := usecases.NewUserUsecase(authn, authRepo, userRepo)
 	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rh)

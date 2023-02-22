@@ -60,7 +60,7 @@ type spaces struct {
 	client *s3.S3
 }
 
-func NewImageBucket() (domain.ImageBucket, error) {
+func NewImageBucket() domain.ImageBucket {
 	s3Config := &aws.Config{
 		Credentials: credentials.NewStaticCredentials(spacesKey, spacesSecret, ""),
 		Endpoint:    aws.String("https://ams3.digitaloceanspaces.com"),
@@ -77,7 +77,7 @@ func NewImageBucket() (domain.ImageBucket, error) {
 
 	return &spaces{
 		client: s3Client,
-	}, nil
+	}
 }
 
 func (s *spaces) GetDownloadURL(ctx context.Context, imageID uuid.UUID, version *string) (string, error) {
