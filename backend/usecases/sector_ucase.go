@@ -31,23 +31,23 @@ func (uc *sectorUsecase) GetSectors(ctx context.Context, resourceID uuid.UUID) (
 	return uc.sectorRepo.GetSectors(ctx, resourceID)
 }
 
-func (uc *sectorUsecase) GetSector(ctx context.Context, cragID uuid.UUID) (domain.Sector, error) {
-	ancestors, err := uc.rh.GetAncestors(ctx, cragID)
+func (uc *sectorUsecase) GetSector(ctx context.Context, sectorID uuid.UUID) (domain.Sector, error) {
+	ancestors, err := uc.rh.GetAncestors(ctx, sectorID)
 	if err != nil {
 		return domain.Sector{}, err
 	}
 
-	if err := uc.authorizer.HasPermission(ctx, nil, cragID, domain.ReadPermission); err != nil {
+	if err := uc.authorizer.HasPermission(ctx, nil, sectorID, domain.ReadPermission); err != nil {
 		return domain.Sector{}, err
 	}
 
-	crag, err := uc.sectorRepo.GetSector(ctx, cragID)
+	sector, err := uc.sectorRepo.GetSector(ctx, sectorID)
 	if err != nil {
 		return domain.Sector{}, err
 	}
 
-	crag.Ancestors = ancestors
-	return crag, nil
+	sector.Ancestors = ancestors
+	return sector, nil
 }
 
 func (uc *sectorUsecase) CreateSector(ctx context.Context, sector domain.Sector, parentResourceID uuid.UUID) (domain.Sector, error) {
