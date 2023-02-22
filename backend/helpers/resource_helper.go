@@ -141,7 +141,6 @@ func (hlpr *resourceHelper) MoveResource(ctx context.Context, resourceID, newPar
 
 		switch resource.Type {
 		case domain.TypeArea, domain.TypeCrag, domain.TypeSector, domain.TypeRoute:
-			break
 		default:
 			return domain.ErrUnmovableResource
 		}
