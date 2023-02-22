@@ -68,7 +68,7 @@ func (uc *boltUsecase) CreateBolt(ctx context.Context, bolt domain.Bolt, parentR
 	}
 
 	err = uc.boltRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if createdResource, err := uc.rh.CreateResource(ctx, resource, parentResourceID, user.ID); err != nil {
+		if createdResource, err := uc.rh.CreateResource(txCtx, resource, parentResourceID, user.ID); err != nil {
 			return err
 		} else {
 			bolt.ID = createdResource.ID
