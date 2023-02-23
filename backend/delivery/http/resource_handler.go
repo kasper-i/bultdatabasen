@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/usecases"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -14,6 +13,10 @@ import (
 
 type resourceHandler struct {
 	resourceUsecase domain.ResourceUsecase
+}
+
+type resourcePatch struct {
+	ParentID uuid.UUID `json:"parentId"`
 }
 
 func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUsecase) {
@@ -45,7 +48,7 @@ func (hdlr *resourceHandler) GetResource(w http.ResponseWriter, r *http.Request)
 
 func (hdlr *resourceHandler) UpdateResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	var patch usecases.ResourcePatch
+	var patch resourcePatch
 	id, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
 		writeError(w, err)

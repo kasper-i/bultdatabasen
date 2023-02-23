@@ -2,7 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/usecases"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -13,6 +12,10 @@ import (
 
 type imageHandler struct {
 	imageUsecase domain.ImageUsecase
+}
+
+type imagePatch struct {
+	Rotation *int `json:"rotation"`
 }
 
 func NewImageHandler(router *mux.Router, imageUsecase domain.ImageUsecase) {
@@ -125,7 +128,7 @@ func (hdlr *imageHandler) PatchImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
-	var patch usecases.ImagePatch
+	var patch imagePatch
 	if err := json.Unmarshal(reqBody, &patch); err != nil {
 		writeError(w, err)
 		return

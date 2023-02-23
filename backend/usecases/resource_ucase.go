@@ -23,10 +23,6 @@ func NewResourceUsecase(authenticator domain.Authenticator, authorizer domain.Au
 	}
 }
 
-type ResourcePatch struct {
-	ParentID uuid.UUID `json:"parentId"`
-}
-
 func (uc *resourceUsecase) GetResource(ctx context.Context, resourceID uuid.UUID) (domain.Resource, error) {
 	ancestors, err := uc.rh.GetAncestors(ctx, resourceID)
 	if err != nil {

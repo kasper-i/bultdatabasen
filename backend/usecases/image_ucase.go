@@ -31,10 +31,6 @@ func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Autho
 	}
 }
 
-type ImagePatch struct {
-	Rotation *int `json:"rotation"`
-}
-
 func (uc *imageUsecase) GetImages(ctx context.Context, resourceID uuid.UUID) ([]domain.Image, error) {
 	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
 		return nil, err
@@ -148,7 +144,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 	})
 
 	if err != nil && img.ID != uuid.Nil {
-		uc.ib.PurgeImage(ctx, img.ID)
+		_ = uc.ib.PurgeImage(ctx, img.ID)
 		return domain.Image{}, err
 	}
 

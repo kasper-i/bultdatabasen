@@ -5,7 +5,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type pointUsecase struct {
@@ -33,7 +32,7 @@ func NewPointUsecase(authenticator domain.Authenticator, authorizer domain.Autho
 }
 
 type routeGraphVertex struct {
-	PointID         uuid.UUID `gorm:"primaryKey"`
+	PointID         uuid.UUID
 	OutgoingPointID uuid.UUID
 	IncomingPointID uuid.UUID
 }
@@ -151,9 +150,8 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]dom
 	}
 
 	if _, err := uc.routeRepo.GetRoute(ctx, routeID); err != nil {
-		return nil, &domain.ErrNotAuthorized{
+		return nil, &domain.ErrResourceNotFound{
 			ResourceID: routeID,
-			Permission: domain.ReadPermission,
 		}
 	}
 
@@ -427,7 +425,9 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		}
 
 		if !belongsToRoute {
-			return gorm.ErrRecordNotFound
+			return &domain.ErrResourceNotFound{
+				ResourceID: pointID,
+			}
 		}
 
 		vertex := routeGraph[pointID]
