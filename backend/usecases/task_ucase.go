@@ -112,7 +112,7 @@ func (uc *taskUsecase) UpdateTask(ctx context.Context, taskID uuid.UUID, task do
 	}
 
 	err = uc.taskRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		original, err := uc.taskRepo.GetTaskWithLock(ctx, taskID)
+		original, err := uc.taskRepo.GetTaskWithLock(txCtx, taskID)
 		if err != nil {
 			return err
 		}
