@@ -45,7 +45,7 @@ func (hlpr *resourceHelper) CreateResource(ctx context.Context, resource domain.
 	}
 
 	err := hlpr.resourceRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
-		if err := hlpr.resourceRepo.InsertResource(ctx, resource); err != nil {
+		if err := hlpr.resourceRepo.InsertResource(txCtx, resource); err != nil {
 			return err
 		}
 
