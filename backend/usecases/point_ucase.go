@@ -302,7 +302,7 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 					Type:         domain.TypeBolt,
 				}
 
-				if createdResource, err := uc.rh.CreateResource(ctx, boltResource, point.ID, user.ID); err != nil {
+				if createdResource, err := uc.rh.CreateResource(txCtx, boltResource, point.ID, user.ID); err != nil {
 					return err
 				} else {
 					bolt.ID = createdResource.ID
