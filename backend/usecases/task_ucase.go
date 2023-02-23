@@ -41,13 +41,13 @@ func (uc *taskUsecase) GetTask(ctx context.Context, taskID uuid.UUID) (domain.Ta
 		return domain.Task{}, err
 	}
 
-	crag, err := uc.taskRepo.GetTask(ctx, taskID)
+	task, err := uc.taskRepo.GetTask(ctx, taskID)
 	if err != nil {
 		return domain.Task{}, err
 	}
 
-	crag.Ancestors = ancestors
-	return crag, nil
+	task.Ancestors = ancestors
+	return task, nil
 }
 
 func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentResourceID uuid.UUID) (domain.Task, error) {
