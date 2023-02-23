@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Task struct {
 	ResourceBase
@@ -28,4 +33,22 @@ func (task *Task) UpdateCounters() {
 	} else {
 		task.Counters.OpenTasks = 0
 	}
+}
+
+type TaskUsecase interface {
+	GetTasks(ctx context.Context, resourceID uuid.UUID, pagination Pagination, statuses []string) ([]Task, Meta, error)
+	GetTask(ctx context.Context, taskID uuid.UUID) (Task, error)
+	CreateTask(ctx context.Context, task Task, parentResourceID uuid.UUID) (Task, error)
+	UpdateTask(ctx context.Context, taskID uuid.UUID, task Task) (Task, error)
+	DeleteTask(ctx context.Context, taskID uuid.UUID) error
+}
+
+type TaskRepository interface {
+	Transactor
+
+	GetTasks(ctx context.Context, resourceID uuid.UUID, pagination Pagination, statuses []string) ([]Task, Meta, error)
+	GetTask(ctx context.Context, taskID uuid.UUID) (Task, error)
+	GetTaskWithLock(ctx context.Context, taskID uuid.UUID) (Task, error)
+	InsertTask(ctx context.Context, task Task) error
+	SaveTask(ctx context.Context, task Task) error
 }

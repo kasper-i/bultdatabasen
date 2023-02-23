@@ -2,8 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,11 +10,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type AreaHandler struct {
+type areaHandler struct {
+	areaUsecase domain.AreaUsecase
 }
 
-func NewAreaHandler(router *mux.Router) {
-	handler := &AreaHandler{}
+func NewAreaHandler(router *mux.Router, areaUsecase domain.AreaUsecase) {
+	handler := &areaHandler{
+		areaUsecase: areaUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/areas", handler.GetAreas).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/areas", handler.GetAreas).Methods(http.MethodGet, http.MethodOptions)
@@ -27,8 +28,7 @@ func NewAreaHandler(router *mux.Router) {
 	router.HandleFunc("/areas/{resourceID}", handler.DeleteArea).Methods(http.MethodDelete, http.MethodOptions)
 }
 
-func (hdlr *AreaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *areaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	var resourceID uuid.UUID
@@ -37,36 +37,33 @@ func (hdlr *AreaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
 	if vars["resourceID"] == "" {
 		resourceID, _ = uuid.Parse(domain.RootID)
 	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if areas, err := sess.GetAreas(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+	if areas, err := hdlr.areaUsecase.GetAreas(r.Context(), resourceID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, areas)
+		writeResponse(w, http.StatusOK, areas)
 	}
 }
 
-func (hdlr *AreaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *areaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if area, err := sess.GetArea(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+	if area, err := hdlr.areaUsecase.GetArea(r.Context(), resourceID); err != nil {
+		writeError(w, err)
 	} else {
-		area.Ancestors = model.GetStoredAncestors(r)
-		utils.WriteResponse(w, http.StatusOK, area)
+		writeResponse(w, http.StatusOK, area)
 	}
 }
 
-func (hdlr *AreaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *areaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var resourceID uuid.UUID
 	var err error
@@ -74,38 +71,35 @@ func (hdlr *AreaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 	if vars["resourceID"] == "" {
 		resourceID, _ = uuid.Parse(domain.RootID)
 	} else if resourceID, err = uuid.Parse(vars["resourceID"]); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
-
-	userId := r.Context().Value("user_id").(string)
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var area domain.Area
 	if err := json.Unmarshal(reqBody, &area); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if err = sess.CreateArea(r.Context(), &area, resourceID, userId); err != nil {
-		utils.WriteError(w, err)
+	if createdArea, err := hdlr.areaUsecase.CreateArea(r.Context(), area, resourceID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, area)
+		writeResponse(w, http.StatusCreated, createdArea)
 	}
 }
 
-func (hdlr *AreaHandler) DeleteArea(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *areaHandler) DeleteArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if err := sess.DeleteArea(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+	if err := hdlr.areaUsecase.DeleteArea(r.Context(), resourceID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }

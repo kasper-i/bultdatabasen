@@ -2,8 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,11 +10,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type RouteHandler struct {
+type routeHandler struct {
+	routeUsecase domain.RouteUsecase
 }
 
-func NewRouteHandler(router *mux.Router) {
-	handler := &RouteHandler{}
+func NewRouteHandler(router *mux.Router, routeUsecase domain.RouteUsecase) {
+	handler := &routeHandler{
+		routeUsecase: routeUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/routes", handler.GetRoutes).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/routes", handler.CreateRoute).Methods(http.MethodPost, http.MethodOptions)
@@ -25,86 +26,80 @@ func NewRouteHandler(router *mux.Router) {
 	router.HandleFunc("/routes/{resourceID}", handler.DeleteRoute).Methods(http.MethodDelete, http.MethodOptions)
 }
 
-func (hdlr *RouteHandler) GetRoutes(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *routeHandler) GetRoutes(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if routes, err := sess.GetRoutes(r.Context(), parentResourceID); err != nil {
-		utils.WriteError(w, err)
+	if routes, err := hdlr.routeUsecase.GetRoutes(r.Context(), parentResourceID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, routes)
+		writeResponse(w, http.StatusOK, routes)
 	}
 }
 
-func (hdlr *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *routeHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if route, err := sess.GetRoute(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+	if route, err := hdlr.routeUsecase.GetRoute(r.Context(), resourceID); err != nil {
+		writeError(w, err)
 	} else {
-		route.Ancestors = model.GetStoredAncestors(r)
-		utils.WriteResponse(w, http.StatusOK, route)
+		writeResponse(w, http.StatusOK, route)
 	}
 }
 
-func (hdlr *RouteHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *routeHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var route domain.Route
 	if err := json.Unmarshal(reqBody, &route); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	err = sess.CreateRoute(r.Context(), &route, parentResourceID)
+	createdRoute, err := hdlr.routeUsecase.CreateRoute(r.Context(), route, parentResourceID)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, route)
+		writeResponse(w, http.StatusCreated, createdRoute)
 	}
 }
 
-func (hdlr *RouteHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *routeHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if err := sess.DeleteRoute(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+	if err := hdlr.routeUsecase.DeleteRoute(r.Context(), resourceID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }
 
-func (hdlr *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *routeHandler) UpdateRoute(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
@@ -112,15 +107,15 @@ func (hdlr *RouteHandler) UpdateRoute(w http.ResponseWriter, r *http.Request) {
 	var route domain.Route
 
 	if err := json.Unmarshal(reqBody, &route); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	updatedRoute, err := sess.UpdateRoute(r.Context(), routeID, route)
+	updatedRoute, err := hdlr.routeUsecase.UpdateRoute(r.Context(), routeID, route)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, updatedRoute)
+		writeResponse(w, http.StatusOK, updatedRoute)
 	}
 }

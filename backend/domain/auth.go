@@ -1,9 +1,25 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
+)
+
+type RoleType string
+
+const (
+	RoleGuest RoleType = "guest"
+	RoleOwner RoleType = "owner"
+	RoleAdmin RoleType = "admin"
+)
+
+type PermissionType string
+
+const (
+	ReadPermission  PermissionType = "read"
+	WritePermission PermissionType = "write"
 )
 
 type User struct {
@@ -19,6 +35,19 @@ func (User) TableName() string {
 }
 
 type ResourceRole struct {
-	Role       string    `json:"role"`
-	ResourceID uuid.UUID `json:"resourceID"`
+	Role       RoleType  `json:"role"`
+	ResourceID uuid.UUID `json:"resourceId"`
+}
+
+type UserUsecase interface {
+	GetUsers(ctx context.Context) ([]User, error)
+	GetUserRoles(ctx context.Context, userID string) ([]ResourceRole, error)
+}
+
+type Authenticator interface {
+	Authenticate(ctx context.Context) (User, error)
+}
+
+type Authorizer interface {
+	HasPermission(ctx context.Context, user *User, resourceID uuid.UUID, permission PermissionType) error
 }

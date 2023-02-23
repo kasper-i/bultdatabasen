@@ -2,8 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,11 +10,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type SectorHandler struct {
+type sectorHandler struct {
+	sectorUsecase domain.SectorUsecase
 }
 
-func NewSectorHandler(router *mux.Router) {
-	handler := &SectorHandler{}
+func NewSectorHandler(router *mux.Router, sectorUsecase domain.SectorUsecase) {
+	handler := &sectorHandler{
+		sectorUsecase: sectorUsecase,
+	}
 
 	router.HandleFunc("/resources/{resourceID}/sectors", handler.GetSectors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/sectors", handler.CreateSector).Methods(http.MethodPost, http.MethodOptions)
@@ -25,76 +26,71 @@ func NewSectorHandler(router *mux.Router) {
 	router.HandleFunc("/sectors/{resourceID}", handler.DeleteSector).Methods(http.MethodDelete, http.MethodOptions)
 }
 
-func (hdlr *SectorHandler) GetSectors(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *sectorHandler) GetSectors(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if sectors, err := sess.GetSectors(r.Context(), parentResourceID); err != nil {
-		utils.WriteError(w, err)
+	if sectors, err := hdlr.sectorUsecase.GetSectors(r.Context(), parentResourceID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, sectors)
+		writeResponse(w, http.StatusOK, sectors)
 	}
 }
 
-func (hdlr *SectorHandler) GetSector(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *sectorHandler) GetSector(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if sector, err := sess.GetSector(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+	if sector, err := hdlr.sectorUsecase.GetSector(r.Context(), resourceID); err != nil {
+		writeError(w, err)
 	} else {
-		sector.Ancestors = model.GetStoredAncestors(r)
-		utils.WriteResponse(w, http.StatusOK, sector)
+		writeResponse(w, http.StatusOK, sector)
 	}
 }
 
-func (hdlr *SectorHandler) CreateSector(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *sectorHandler) CreateSector(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	parentResourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var sector domain.Sector
 	if err := json.Unmarshal(reqBody, &sector); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	err = sess.CreateSector(r.Context(), &sector, parentResourceID)
+	createdSector, err := hdlr.sectorUsecase.CreateSector(r.Context(), sector, parentResourceID)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusCreated, sector)
+		writeResponse(w, http.StatusCreated, createdSector)
 	}
 }
 
-func (hdlr *SectorHandler) DeleteSector(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *sectorHandler) DeleteSector(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	resourceID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if err := sess.DeleteSector(r.Context(), resourceID); err != nil {
-		utils.WriteError(w, err)
+	if err := hdlr.sectorUsecase.DeleteSector(r.Context(), resourceID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }

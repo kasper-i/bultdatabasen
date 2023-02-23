@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bultdatabasen/authenticator"
+	"bultdatabasen/authorizer"
 	httpdelivery "bultdatabasen/delivery/http"
-	"bultdatabasen/middleware/authenticator"
-	"bultdatabasen/middleware/authorizer"
-	"bultdatabasen/middleware/cors"
-	"bultdatabasen/middleware/trashbin"
+	"bultdatabasen/domain"
+	"bultdatabasen/helpers"
+	"bultdatabasen/images"
+	"bultdatabasen/repositories"
+	"bultdatabasen/usecases"
 	"fmt"
 	"io"
 	"log"
@@ -34,19 +37,48 @@ func getVersion(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
-	trashbin := trashbin.New()
-	authenticator := authenticator.New()
-	authorizer := authorizer.New()
+	ds := repositories.NewDatastore()
+	var areaRepo domain.AreaRepository = ds
+	var boltRepo domain.BoltRepository = ds
+	var cragRepo domain.CragRepository = ds
+	var imageRepo domain.ImageRepository = ds
+	var catalogRepo domain.CatalogRepository = ds
+	var pointRepo domain.PointRepository = ds
+	var resourceRepo domain.ResourceRepository = ds
+	var treeRepo domain.TreeRepository = ds
+	var routeRepo domain.RouteRepository = ds
+	var sectorRepo domain.SectorRepository = ds
+	var taskRepo domain.TaskRepository = ds
+	var trashRepo domain.TrashRepository = ds
+	var userRepo domain.UserRepository = ds
+	var authRepo domain.AuthRepository = ds
 
-	router.Use(cors.CORSMiddleware)
-	router.Use(trashbin.Middleware)
-	router.Use(authenticator.Middleware)
-	router.Use(authorizer.Middleware)
+	authn := authenticator.New()
+	authz := authorizer.New(authRepo, resourceRepo)
+
+	rh := helpers.NewResourceHelper(resourceRepo, treeRepo, trashRepo)
+	ib := images.NewImageBucket()
+
+	userUsecase := usecases.NewUserUsecase(authn, authRepo, userRepo)
+	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rh)
+	areaUsecase := usecases.NewAreaUsecase(authn, authz, areaRepo, authRepo, rh)
+	cragUsecase := usecases.NewCragUsecase(authn, authz, cragRepo, rh)
+	sectorUsecase := usecases.NewSectorUsecase(authn, authz, sectorRepo, rh)
+	routeUsecase := usecases.NewRouteUsecase(authn, authz, routeRepo, rh)
+	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, boltRepo, rh)
+	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib)
+	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rh)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh)
+	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
+	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
+
+	router.Use(CORSMiddleware)
+	router.Use(authn.Middleware)
 
 	router.HandleFunc("/health", checkHandler)
 	router.HandleFunc("/version", getVersion)
 
-	httpdelivery.NewUserHandler(router)
+	httpdelivery.NewUserHandler(router, userUsecase)
 
 	router.HandleFunc("/teams/{teamID}", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/teams/{teamID}", nil).Methods(http.MethodPut, http.MethodOptions)
@@ -56,17 +88,17 @@ func main() {
 
 	router.HandleFunc("/invites", nil).Methods(http.MethodPost, http.MethodOptions)
 
-	httpdelivery.NewResourceHandler(router)
-	httpdelivery.NewAreaHandler(router)
-	httpdelivery.NewCragHandler(router)
-	httpdelivery.NewSectorHandler(router)
-	httpdelivery.NewRouteHandler(router)
-	httpdelivery.NewPointHandler(router)
-	httpdelivery.NewImageHandler(router)
-	httpdelivery.NewBoltHandler(router)
-	httpdelivery.NewTaskHandler(router)
-	httpdelivery.NewManufacturerHandler(router)
-	httpdelivery.NewMaterialHandler(router)
+	httpdelivery.NewResourceHandler(router, resourceUseCase)
+	httpdelivery.NewAreaHandler(router, areaUsecase)
+	httpdelivery.NewCragHandler(router, cragUsecase)
+	httpdelivery.NewSectorHandler(router, sectorUsecase)
+	httpdelivery.NewRouteHandler(router, routeUsecase)
+	httpdelivery.NewPointHandler(router, pointUsecase)
+	httpdelivery.NewImageHandler(router, imageUsecase)
+	httpdelivery.NewBoltHandler(router, boltUsecase)
+	httpdelivery.NewTaskHandler(router, taskUsecase)
+	httpdelivery.NewManufacturerHandler(router, manufacturerUsecase)
+	httpdelivery.NewMaterialHandler(router, materialUsecase)
 
 	router.HandleFunc("/trash", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/trash/{resourceID}/restore", nil).Methods(http.MethodPost, http.MethodOptions)

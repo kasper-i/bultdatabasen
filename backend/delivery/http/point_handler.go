@@ -2,8 +2,6 @@ package http
 
 import (
 	"bultdatabasen/domain"
-	"bultdatabasen/model"
-	"bultdatabasen/utils"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,11 +10,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type PointHandler struct {
+type pointHandler struct {
+	pointUsecase domain.PointUsecase
 }
 
-func NewPointHandler(router *mux.Router) {
-	handler := &PointHandler{}
+func NewPointHandler(router *mux.Router, pointUsecase domain.PointUsecase) {
+	handler := &pointHandler{
+		pointUsecase: pointUsecase,
+	}
 
 	router.HandleFunc("/routes/{resourceID}/points", handler.GetPoints).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/routes/{resourceID}/points", handler.AttachPoint).Methods(http.MethodPost, http.MethodOptions)
@@ -24,69 +25,46 @@ func NewPointHandler(router *mux.Router) {
 }
 
 type CreatePointRequest struct {
-	PointID  uuid.UUID             `json:"pointId"`
-	Position *model.InsertPosition `json:"position"`
-	Anchor   bool                  `json:"anchor"`
-	Bolts    []domain.Bolt         `json:"bolts"`
+	PointID  uuid.UUID              `json:"pointId"`
+	Position *domain.InsertPosition `json:"position"`
+	Anchor   bool                   `json:"anchor"`
+	Bolts    []domain.Bolt          `json:"bolts"`
 }
 
-func (hdlr *PointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *pointHandler) GetPoints(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if resource, err := sess.GetResource(r.Context(), routeID); err != nil {
-		utils.WriteError(w, err)
-		return
-	} else if resource.Type != domain.TypeRoute {
-		utils.WriteResponse(w, http.StatusMethodNotAllowed, nil)
-		return
-	}
-
-	if points, err := sess.GetPoints(r.Context(), routeID); err != nil {
-		utils.WriteError(w, err)
+	if points, err := hdlr.pointUsecase.GetPoints(r.Context(), routeID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, points)
+		writeResponse(w, http.StatusOK, points)
 	}
 }
 
-func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *pointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	reqBody, _ := io.ReadAll(r.Body)
 	var request CreatePointRequest
 	if err := json.Unmarshal(reqBody, &request); err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if request.Position != nil {
-		order := request.Position.Order
-		if order != "before" && order != "after" {
-			utils.WriteResponse(w, http.StatusBadRequest, nil)
-			return
-		}
-	}
-
-	if request.PointID == uuid.Nil && len(request.Bolts) == 0 {
-		utils.WriteResponse(w, http.StatusBadRequest, nil)
-		return
-	}
-
-	point, err := sess.AttachPoint(r.Context(), routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
+	point, err := hdlr.pointUsecase.AttachPoint(r.Context(), routeID, request.PointID, request.Position, request.Anchor, request.Bolts)
 
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 	} else {
 		var status int
 
@@ -96,30 +74,28 @@ func (hdlr *PointHandler) AttachPoint(w http.ResponseWriter, r *http.Request) {
 			status = http.StatusOK
 		}
 
-		point.Ancestors = model.GetStoredAncestors(r)
-		utils.WriteResponse(w, status, point)
+		writeResponse(w, status, point)
 	}
 }
 
-func (hdlr *PointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *pointHandler) DetachPoint(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	routeID, err := uuid.Parse(vars["resourceID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
 	pointID, err := uuid.Parse(vars["pointID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if err := sess.DetachPoint(r.Context(), routeID, pointID); err != nil {
-		utils.WriteError(w, err)
+	if err := hdlr.pointUsecase.DetachPoint(r.Context(), routeID, pointID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusNoContent, nil)
+		writeResponse(w, http.StatusNoContent, nil)
 	}
 }

@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,9 +25,9 @@ const (
 )
 
 type ResourceBase struct {
-	ID        uuid.UUID  `gorm:"primaryKey" json:"id"`
-	Ancestors []Resource `gorm:"-" json:"ancestors,omitempty"`
-	Counters  Counters   `gorm:"->" json:"counters"`
+	ID        uuid.UUID `gorm:"primaryKey" json:"id"`
+	Ancestors Ancestors `gorm:"-" json:"ancestors,omitempty"`
+	Counters  Counters  `gorm:"->" json:"counters"`
 }
 
 type Resource struct {
@@ -51,19 +52,57 @@ type Parent struct {
 	ChildID uuid.UUID    `json:"-"`
 }
 
-type Trash struct {
-	ResourceID  uuid.UUID `gorm:"primaryKey"`
-	DeletedTime time.Time `gorm:"column:dtime"`
-	DeletedByID string    `gorm:"column:duser_id"`
-	OrigPath    *Path
-	OrigLeafOf  *uuid.UUID
-}
-
-func (Trash) TableName() string {
-	return "trash"
-}
-
 type ResourceWithParents struct {
 	Resource
 	Parents []Parent `json:"parents"`
+}
+
+type Ancestors []Resource
+
+func (ancestors Ancestors) IDs() []uuid.UUID {
+	identifiers := make([]uuid.UUID, len(ancestors))
+
+	for idx, ancestors := range ancestors {
+		identifiers[idx] = ancestors.ID
+	}
+
+	return identifiers
+}
+
+type ResourceUsecase interface {
+	GetResource(ctx context.Context, resourceID uuid.UUID) (Resource, error)
+	MoveResource(ctx context.Context, resourceID, newParentID uuid.UUID) error
+	GetAncestors(ctx context.Context, resourceID uuid.UUID) ([]Resource, error)
+	GetChildren(ctx context.Context, resourceID uuid.UUID) ([]Resource, error)
+	Search(ctx context.Context, name string) ([]ResourceWithParents, error)
+}
+
+type ResourceHelper interface {
+	CreateResource(ctx context.Context, resource Resource, parentResourceID uuid.UUID, userID string) (Resource, error)
+	DeleteResource(ctx context.Context, resourceID uuid.UUID, userID string) error
+	MoveResource(ctx context.Context, resourceID, newParentID uuid.UUID) error
+	UpdateCounters(ctx context.Context, delta Counters, resourceIDs ...uuid.UUID) error
+	GetAncestors(ctx context.Context, resourceID uuid.UUID) (Ancestors, error)
+	TouchResource(ctx context.Context, resourceID uuid.UUID, userID string) error
+	RenameResource(ctx context.Context, resourceID uuid.UUID, newName, userID string) error
+}
+
+type Transactor interface {
+	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
+type ResourceRepository interface {
+	Transactor
+
+	GetAncestors(ctx context.Context, resourceID uuid.UUID) (Ancestors, error)
+	GetChildren(ctx context.Context, resourceID uuid.UUID) ([]Resource, error)
+	GetParents(ctx context.Context, resourceIDs []uuid.UUID) ([]Parent, error)
+	Search(ctx context.Context, name string) ([]ResourceWithParents, error)
+	TouchResource(ctx context.Context, resourceID uuid.UUID, userID string) error
+	GetResource(ctx context.Context, resourceID uuid.UUID) (Resource, error)
+	GetResourceWithLock(ctx context.Context, resourceID uuid.UUID) (Resource, error)
+	InsertResource(ctx context.Context, resource Resource) error
+	OrphanResource(ctx context.Context, resourceID uuid.UUID) error
+	RenameResource(ctx context.Context, resourceID uuid.UUID, name, userID string) error
+	UpdateCounters(ctx context.Context, resourceID uuid.UUID, delta Counters) error
 }

@@ -1,45 +1,45 @@
 package http
 
 import (
-	"bultdatabasen/utils"
+	"bultdatabasen/domain"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
-type ManufacturerHandler struct {
+type manufacturerHandler struct {
+	manufacturerUsecase domain.ManufacturerUsecase
 }
 
-func NewManufacturerHandler(router *mux.Router) {
-	handler := &ManufacturerHandler{}
+func NewManufacturerHandler(router *mux.Router, manufacturerUsecase domain.ManufacturerUsecase) {
+	handler := &manufacturerHandler{
+		manufacturerUsecase: manufacturerUsecase,
+	}
 
 	router.HandleFunc("/manufacturers", handler.GetManufacturers).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/manufacturers/{manufacturerID}/models", handler.GetModels).Methods(http.MethodGet, http.MethodOptions)
 }
 
-func (hdlr *ManufacturerHandler) GetManufacturers(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
-
-	if manufacturers, err := sess.GetManufacturers(r.Context()); err != nil {
-		utils.WriteError(w, err)
+func (hdlr *manufacturerHandler) GetManufacturers(w http.ResponseWriter, r *http.Request) {
+	if manufacturers, err := hdlr.manufacturerUsecase.GetManufacturers(r.Context()); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, manufacturers)
+		writeResponse(w, http.StatusOK, manufacturers)
 	}
 }
 
-func (hdlr *ManufacturerHandler) GetModels(w http.ResponseWriter, r *http.Request) {
-	sess := createSession(r)
+func (hdlr *manufacturerHandler) GetModels(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	manufacturerID, err := uuid.Parse(vars["manufacturerID"])
 	if err != nil {
-		utils.WriteError(w, err)
+		writeError(w, err)
 		return
 	}
 
-	if models, err := sess.GetModels(r.Context(), manufacturerID); err != nil {
-		utils.WriteError(w, err)
+	if models, err := hdlr.manufacturerUsecase.GetModels(r.Context(), manufacturerID); err != nil {
+		writeError(w, err)
 	} else {
-		utils.WriteResponse(w, http.StatusOK, models)
+		writeResponse(w, http.StatusOK, models)
 	}
 }
