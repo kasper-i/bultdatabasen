@@ -138,6 +138,5 @@ func (a *authenticator) Middleware(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
-		return
 	})
 }

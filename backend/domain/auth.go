@@ -19,7 +19,7 @@ type PermissionType string
 
 const (
 	ReadPermission  PermissionType = "read"
-	WritePermission                = "write"
+	WritePermission PermissionType = "write"
 )
 
 type User struct {
