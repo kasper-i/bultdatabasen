@@ -399,7 +399,7 @@ func (uc *pointUsecase) DetachPoint(ctx context.Context, routeID uuid.UUID, poin
 		var routeGraph map[uuid.UUID]*routeGraphVertex
 		var parents []domain.Parent
 
-		if _, err := uc.routeRepo.GetRouteWithLock(ctx, routeID); err != nil {
+		if _, err := uc.routeRepo.GetRouteWithLock(txCtx, routeID); err != nil {
 			return err
 		}
 
