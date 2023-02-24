@@ -58,8 +58,10 @@ func (uc *areaUsecase) CreateArea(ctx context.Context, area domain.Area, parentR
 		return domain.Area{}, err
 	}
 
-	if err := uc.authorizer.HasPermission(ctx, &user, parentResourceID, domain.WritePermission); err != nil {
-		return domain.Area{}, err
+	if parentResourceID.String() != domain.RootID {
+		if err := uc.authorizer.HasPermission(ctx, &user, parentResourceID, domain.WritePermission); err != nil {
+			return domain.Area{}, err
+		}
 	}
 
 	resource := domain.Resource{

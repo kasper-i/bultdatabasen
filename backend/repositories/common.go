@@ -82,8 +82,19 @@ func NewDatastore() *psqlDatastore {
 	}
 }
 
+func isNestedTransaction(tx *gorm.DB) bool {
+	committer, ok := tx.Statement.ConnPool.(gorm.TxCommitter)
+	return ok && committer != nil
+}
+
 func (store *psqlDatastore) WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
-	tx := store.tx(ctx).Begin()
+	tx := store.tx(ctx)
+	if isNestedTransaction(tx) {
+		return fn(ctx)
+	} else {
+		tx = tx.Begin()
+	}
+
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()

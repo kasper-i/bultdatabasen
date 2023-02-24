@@ -11,7 +11,7 @@ import (
 
 type errorMessage struct {
 	Status     int        `json:"status"`
-	Message    string     `json:"message"`
+	Message    string     `json:"message,omitempty"`
 	ResourceID *uuid.UUID `json:"resourceId,omitempty"`
 }
 
@@ -32,12 +32,16 @@ func writeError(w http.ResponseWriter, err error) {
 
 	if errors.As(err, &notFoundError) {
 		details.Status = http.StatusNotFound
-		details.ResourceID = &notFoundError.ResourceID
+		if notFoundError.ResourceID != uuid.Nil {
+			details.ResourceID = &notFoundError.ResourceID
+		}
 	} else if errors.Is(err, domain.ErrNotAuthenticated) {
 		details.Status = http.StatusUnauthorized
 	} else if errors.As(err, &notAuthorizedError) {
 		details.Status = http.StatusForbidden
-		details.ResourceID = &notAuthorizedError.ResourceID
+		if notAuthorizedError.ResourceID != uuid.Nil {
+			details.ResourceID = &notAuthorizedError.ResourceID
+		}
 	} else if errors.Is(err, domain.ErrUnsupportedMimeType) || errors.Is(err, domain.ErrNonOrthogonalAngle) || errors.Is(err, domain.ErrUnmovableResource) || errors.Is(err, domain.ErrIllegalParent) || errors.Is(err, domain.ErrVacantPoint) || errors.Is(err, domain.ErrBadInsertPosition) {
 		details.Status = http.StatusBadRequest
 	} else {
