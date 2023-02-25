@@ -372,8 +372,10 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 			return nil
 		}
 
-		if err := uc.rh.UpdateCounters(txCtx, point.Counters, append(point.Ancestors.IDs(), point.ID)...); err != nil {
-			return err
+		if pointID == uuid.Nil {
+			if err := uc.rh.UpdateCounters(txCtx, point.Counters, append(point.Ancestors.IDs(), point.ID)...); err != nil {
+				return err
+			}
 		}
 
 		return nil
