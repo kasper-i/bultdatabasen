@@ -78,18 +78,20 @@ func (uc *boltUsecase) CreateBolt(ctx context.Context, bolt domain.Bolt, parentR
 			return err
 		}
 
-		if refreshedBolt, err := uc.boltRepo.GetBolt(txCtx, bolt.ID); err != nil {
-			return err
-		} else {
-			bolt = refreshedBolt
-		}
-
 		if bolt.Ancestors, err = uc.rh.GetAncestors(txCtx, bolt.ID); err != nil {
 			return nil
 		}
 
 		if err := uc.rh.UpdateCounters(txCtx, bolt.Counters, append(bolt.Ancestors.IDs(), bolt.ID)...); err != nil {
 			return err
+		}
+
+		if refreshedBolt, err := uc.boltRepo.GetBolt(txCtx, bolt.ID); err != nil {
+			return err
+		} else {
+			bolt.Manufacturer = refreshedBolt.Manufacturer
+			bolt.Model = refreshedBolt.Model
+			bolt.Material = refreshedBolt.Material
 		}
 
 		return nil
@@ -130,8 +132,6 @@ func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updated
 		return domain.Bolt{}, err
 	}
 
-	var refreshedBolt domain.Bolt
-
 	err = uc.boltRepo.WithinTransaction(ctx, func(txCtx context.Context) error {
 		original, err := uc.boltRepo.GetBoltWithLock(txCtx, boltID)
 		if err != nil {
@@ -152,21 +152,24 @@ func (uc *boltUsecase) UpdateBolt(ctx context.Context, boltID uuid.UUID, updated
 			return err
 		}
 
-		refreshedBolt, err = uc.boltRepo.GetBolt(txCtx, boltID)
-		if err != nil {
-			return err
-		}
-
-		if refreshedBolt.Ancestors, err = uc.rh.GetAncestors(txCtx, boltID); err != nil {
+		if updatedBolt.Ancestors, err = uc.rh.GetAncestors(txCtx, boltID); err != nil {
 			return nil
 		}
 
-		if err := uc.rh.UpdateCounters(txCtx, countersDifference, append(refreshedBolt.Ancestors.IDs(), boltID)...); err != nil {
+		if err := uc.rh.UpdateCounters(txCtx, countersDifference, append(updatedBolt.Ancestors.IDs(), boltID)...); err != nil {
 			return err
+		}
+
+		if refreshedBolt, err := uc.boltRepo.GetBolt(txCtx, boltID); err != nil {
+			return err
+		} else {
+			updatedBolt.Manufacturer = refreshedBolt.Manufacturer
+			updatedBolt.Model = refreshedBolt.Model
+			updatedBolt.Material = refreshedBolt.Material
 		}
 
 		return nil
 	})
 
-	return refreshedBolt, err
+	return updatedBolt, err
 }

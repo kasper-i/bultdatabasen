@@ -27,6 +27,7 @@ func NewImageHandler(router *mux.Router, imageUsecase domain.ImageUsecase) {
 	router.HandleFunc("/resources/{resourceID}/images", handler.GetImages).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/images/{resourceID}", handler.DeleteImage).Methods(http.MethodDelete, http.MethodOptions)
 	router.HandleFunc("/images/{resourceID}", handler.PatchImage).Methods(http.MethodPatch, http.MethodOptions)
+	router.HandleFunc("/images/{resourceID}", handler.DownloadImage).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/images/{resourceID}/{version}", handler.DownloadImage).Methods(http.MethodGet, http.MethodOptions)
 }
 
