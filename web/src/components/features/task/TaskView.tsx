@@ -98,9 +98,9 @@ const TaskView: FC<{
   let route: Resource | undefined;
 
   if (pointId) {
-    route = ancestors
-      ?.filter(({ type }) => type === "route")
-      .find((route) => route.id === parentResourceId);
+    route = ancestors?.find(
+      ({ id, type }) => type === "route" && id === parentResourceId
+    );
     if (route) {
       parent = route;
     }
