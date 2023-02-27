@@ -13,6 +13,25 @@ const cognitoUserPool = new CognitoUserPool({
   ClientId: configData.COGNITO_CLIENT_ID,
 });
 
+export type CognitoExceptions =
+  | "NotAuthorizedException"
+  | "CodeMismatchException"
+  | "ExpiredCodeException"
+  | "UserNotConfirmedException"
+  | "LimitExceededException"
+  | "InvalidPasswordException"
+  | "UsernameExistsException"
+  | "InvalidParameterException";
+
+export interface CognitoError {
+  name: CognitoExceptions | string;
+}
+
+export const isCognitoError = (error: unknown): error is CognitoError => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return "name" in (error as any);
+};
+
 const makeCognitoUser = (username: string) => {
   const userData = {
     Username: username,
@@ -37,8 +56,7 @@ export const parseJwt = (token: string) => {
   return JSON.parse(jsonPayload);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const translateCognitoError = (cognitoError: any) => {
+export const translateCognitoError = (cognitoError: CognitoError) => {
   switch (cognitoError.name) {
     case "NotAuthorizedException":
       return "Fel e-postadress eller lösenord";

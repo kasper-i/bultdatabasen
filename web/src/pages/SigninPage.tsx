@@ -11,12 +11,12 @@ import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
+  isCognitoError,
   parseJwt,
   resendConfirmationCode,
   signin as cognitoSignin,
   translateCognitoError,
 } from "@/utils/cognito";
-import { isEqual } from "lodash-es";
 import { useState } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 
@@ -39,25 +39,16 @@ export const handleLogin = async (
   const refreshToken = session.getRefreshToken().getToken();
 
   Api.setTokens(idToken, accessToken, refreshToken);
-  const { given_name: firstName, family_name: lastName } = parseJwt(idToken);
-
-  (async () => {
-    const info = await Api.getMyself();
-    const updatedInfo = {
-      ...info,
-      firstName,
-      lastName,
-    };
-
-    if (!isEqual(info, updatedInfo)) {
-      await Api.updateMyself(updatedInfo);
-    }
-  })();
+  const {
+    sub: userId,
+    given_name: firstName,
+    family_name: lastName,
+  } = parseJwt(idToken);
 
   const returnPath = localStorage.getItem("returnPath");
   localStorage.removeItem("returnPath");
 
-  dispatch(login({ firstName, lastName }));
+  dispatch(login({ userId, firstName, lastName }));
 
   navigate(returnPath != null ? returnPath : "/");
 };
@@ -108,14 +99,16 @@ const SigninPage = () => {
 
       const session = await cognitoSignin(authenticationDetails);
       handleLogin(session, navigate, dispatch);
-    } catch (err: any) {
-      updateState({ errorMessage: translateCognitoError(err) });
+    } catch (err: unknown) {
+      if (isCognitoError(err)) {
+        updateState({ errorMessage: translateCognitoError(err) });
 
-      switch (err.name) {
-        case "UserNotConfirmedException":
-          updateState({ requireConfirmationCode: true });
-          await resendConfirmationCode(email.trim());
-          break;
+        switch (err.name) {
+          case "UserNotConfirmedException":
+            updateState({ requireConfirmationCode: true });
+            await resendConfirmationCode(email.trim());
+            break;
+        }
       }
     } finally {
       updateState({ inProgress: false });

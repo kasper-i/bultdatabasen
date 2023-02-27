@@ -8,7 +8,6 @@ export type Task = ResourceBase & {
   priority: number;
   assignee?: string;
   comment?: string;
-  parentId: string;
   createdAt: string;
   userId: string;
   closedAt?: string;

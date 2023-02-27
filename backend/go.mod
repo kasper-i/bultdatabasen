@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/aws/aws-sdk-go v1.44.51
-	github.com/go-sql-driver/mysql v1.5.0
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
@@ -17,7 +16,7 @@ require (
 
 require (
 	github.com/felixge/httpsnoop v1.0.1 // indirect
-	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -31,5 +30,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
+	golang.org/x/exp v0.0.0-20230224173230-c95f2b4c22f2 // indirect
 	golang.org/x/text v0.3.8 // indirect
 )

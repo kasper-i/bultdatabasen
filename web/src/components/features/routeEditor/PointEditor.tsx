@@ -2,9 +2,9 @@ import { InsertPosition } from "@/Api";
 import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
 import Restricted from "@/components/Restricted";
+import { useIsOwner } from "@/hooks/authHooks";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
-import { useRole } from "@/queries/roleQueries";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { FC, ReactElement, Suspense, useEffect, useState } from "react";
@@ -31,7 +31,7 @@ const PointEditor = ({
   const [openInitialWizard, setOpenInitialWizard] = useState(false);
   const createPoint = useAttachPoint(routeId);
 
-  const { role } = useRole(routeId);
+  const editable = useIsOwner(routeId);
 
   const selectedPointId = searchParams.get("p");
 
@@ -117,7 +117,6 @@ const PointEditor = ({
   }
 
   const selectedPoint = points.find((point) => point.id === selectedPointId);
-  const editable = role === "owner";
   const navigable = insertPosition === undefined;
 
   const AddPointButton: FC<{ insertPosition: InsertPosition }> = ({

@@ -1,6 +1,6 @@
 export type UserRole = "owner" | "guest";
 
 export interface ResourceRole {
-  resourceID: string;
+  resourceId: string;
   role: UserRole;
 }
