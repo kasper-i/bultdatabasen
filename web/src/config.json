@@ -1,6 +1,6 @@
 {
-  "API_URL": "http://localhost:8080",
-  "COGNITO_URL": "https://bultdatabasen-test.auth.eu-west-1.amazoncognito.com",
-  "COGNITO_CLIENT_ID": "2lnodlocb4poce8o3rlut10gl2",
-  "COGNITO_POOL_ID": "eu-west-1_d1eMD1FK1"
+  "API_URL": "https://api.bultdatabasen.se",
+  "COGNITO_URL": "https://bultdatabasen.auth.eu-west-1.amazoncognito.com",
+  "COGNITO_CLIENT_ID": "4bc4eb6q54d9poodouksahhk86",
+  "COGNITO_POOL_ID": "eu-west-1_bo9kHBKxM"
 }
