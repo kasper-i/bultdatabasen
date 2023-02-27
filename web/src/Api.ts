@@ -12,7 +12,7 @@ import { User } from "@/models/user";
 import axios, { AxiosRequestHeaders } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { Manufacturer } from "./models/manufacturer";
-import { Material } from "./models/material";
+import { Material, materialSchema } from "./models/material";
 import { Model } from "./models/model";
 import { ResourceRole } from "./models/role";
 
@@ -160,21 +160,22 @@ export class Api {
   });
 
   static getUsers = async () => {
-    const result = await axios.get<
-     User[]
-    >(`${Api.baseUrl}/users`, { headers: Api.getDefaultHeaders() });
+    const result = await axios.get<User[]>(`${Api.baseUrl}/users`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
 
-  static getUserRoles = async (
-    userId: string
-  ): Promise<ResourceRole[]> => {
+  static getUserRoles = async (userId: string): Promise<ResourceRole[]> => {
     const endpoint = `/users/${userId}/roles`;
 
-    const result = await axios.get<ResourceRole[]>(`${Api.baseUrl}${endpoint}`, {
-      headers: Api.getDefaultHeaders(),
-    });
+    const result = await axios.get<ResourceRole[]>(
+      `${Api.baseUrl}${endpoint}`,
+      {
+        headers: Api.getDefaultHeaders(),
+      }
+    );
 
     return result.data;
   };
@@ -485,11 +486,11 @@ export class Api {
   static getMaterials = async () => {
     const endpoint = `/materials`;
 
-    const result = await axios.get<Material[]>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get<object[]>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return result.data.map((data) => materialSchema.parse(data));
   };
 
   static getManufacturers = async () => {
