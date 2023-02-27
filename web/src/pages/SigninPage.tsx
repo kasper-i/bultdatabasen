@@ -11,6 +11,7 @@ import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
+  isCognitoError,
   parseJwt,
   resendConfirmationCode,
   signin as cognitoSignin,
@@ -98,14 +99,16 @@ const SigninPage = () => {
 
       const session = await cognitoSignin(authenticationDetails);
       handleLogin(session, navigate, dispatch);
-    } catch (err: any) {
-      updateState({ errorMessage: translateCognitoError(err) });
+    } catch (err: unknown) {
+      if (isCognitoError(err)) {
+        updateState({ errorMessage: translateCognitoError(err) });
 
-      switch (err.name) {
-        case "UserNotConfirmedException":
-          updateState({ requireConfirmationCode: true });
-          await resendConfirmationCode(email.trim());
-          break;
+        switch (err.name) {
+          case "UserNotConfirmedException":
+            updateState({ requireConfirmationCode: true });
+            await resendConfirmationCode(email.trim());
+            break;
+        }
       }
     } finally {
       updateState({ inProgress: false });

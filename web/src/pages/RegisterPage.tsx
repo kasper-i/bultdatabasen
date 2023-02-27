@@ -4,6 +4,7 @@ import Input from "@/components/atoms/Input";
 import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
+  isCognitoError,
   signin,
   signUp,
   translateCognitoError,
@@ -84,7 +85,8 @@ const RegisterPage = () => {
 
       updateState({ phase: 2 });
     } catch (err) {
-      updateState({ errorMessage: translateCognitoError(err) });
+      isCognitoError(err) &&
+        updateState({ errorMessage: translateCognitoError(err) });
     } finally {
       updateState({ inProgress: false });
     }
@@ -104,7 +106,8 @@ const RegisterPage = () => {
       const session = await signin(authenticationDetails);
       handleLogin(session, navigate, dispatch);
     } catch (err) {
-      updateState({ errorMessage: translateCognitoError(err) });
+      isCognitoError(err) &&
+        updateState({ errorMessage: translateCognitoError(err) });
     } finally {
       updateState({ inProgress: false });
     }

@@ -14,6 +14,7 @@ func (store *psqlDatastore) GetBolts(ctx context.Context, resourceID uuid.UUID) 
 
 	query := fmt.Sprintf(`%s SELECT
 		bolt.*,
+		resource.leaf_of AS parent_id,
 		resource.counters,
 		mf.name AS manufacturer,
 		mo.name AS model,
@@ -36,6 +37,7 @@ func (store *psqlDatastore) GetBolt(ctx context.Context, resourceID uuid.UUID) (
 
 	if err := store.tx(ctx).Raw(`SELECT
 			bolt.*,
+			resource.leaf_of AS parent_id,
 			resource.counters,
 			mf.name AS manufacturer,
 			mo.name AS model,

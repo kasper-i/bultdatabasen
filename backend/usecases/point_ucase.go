@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"golang.org/x/exp/maps"
 )
 
 type pointUsecase struct {
@@ -176,12 +177,13 @@ func (uc *pointUsecase) GetPoints(ctx context.Context, routeID uuid.UUID) ([]dom
 		for _, parent := range parents {
 			if point, ok := pointsMap[parent.ChildID]; ok {
 				point.Parents = append(point.Parents, parent)
+				pointsMap[parent.ChildID] = point
 			}
 		}
 	}
 
-	if len(points) <= 1 {
-		return points, nil
+	if len(pointsMap) <= 1 {
+		return maps.Values(pointsMap), nil
 	}
 
 	return uc.sortPoints(ctx, routeID, pointsMap)
@@ -370,8 +372,10 @@ func (uc *pointUsecase) AttachPoint(ctx context.Context, routeID uuid.UUID, poin
 			return nil
 		}
 
-		if err := uc.rh.UpdateCounters(txCtx, point.Counters, append(point.Ancestors.IDs(), point.ID)...); err != nil {
-			return err
+		if pointID == uuid.Nil {
+			if err := uc.rh.UpdateCounters(txCtx, point.Counters, append(point.Ancestors.IDs(), point.ID)...); err != nil {
+				return err
+			}
 		}
 
 		return nil

@@ -14,8 +14,9 @@ func (store *psqlDatastore) GetAreas(ctx context.Context, resourceID uuid.UUID) 
 
 	if err := store.tx(ctx).Raw(fmt.Sprintf(`%s SELECT * FROM tree
 		INNER JOIN area ON tree.resource_id = area.id
-		INNER JOIN resource ON tree.resource_id = resource.id`,
-		withTreeQuery()), resourceID).Scan(&areas).Error; err != nil {
+		INNER JOIN resource ON tree.resource_id = resource.id
+		WHERE resource.id <> ?`,
+		withTreeQuery()), resourceID, resourceID).Scan(&areas).Error; err != nil {
 		return nil, err
 	}
 

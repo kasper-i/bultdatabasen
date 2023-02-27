@@ -6,12 +6,11 @@ export const useCrag = (cragId: string) => {
   const queryClient = useQueryClient();
 
   return useQuery(["crag", { cragId }], () => Api.getCrag(cragId), {
-    onSuccess: ({ id, name, parentId, ancestors, counters }) => {
+    onSuccess: ({ id, name, ancestors, counters }) => {
       queryClient.setQueryData<Resource>(["resource", { resourceId: cragId }], {
         id,
         name,
         type: "crag",
-        parentId,
         ancestors,
         counters,
       });
