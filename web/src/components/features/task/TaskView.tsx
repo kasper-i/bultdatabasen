@@ -79,7 +79,7 @@ const CompleteButton: FC<{
 const TaskView: FC<{
   taskId: string;
   parentResourceId: string;
-}> = ({ taskId, parentResourceId: hint }): ReactElement => {
+}> = ({ taskId, parentResourceId }): ReactElement => {
   const { data: task } = useTask(taskId);
 
   const ancestors = task?.ancestors;
@@ -100,7 +100,7 @@ const TaskView: FC<{
   if (pointId) {
     route = ancestors
       ?.filter(({ type }) => type === "route")
-      .find((route) => route.id === hint);
+      .find((route) => route.id === parentResourceId);
     if (route) {
       parent = route;
     }
