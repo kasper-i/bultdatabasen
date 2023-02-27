@@ -11,12 +11,11 @@ export const useArea = (areaId: string) => {
   const queryClient = useQueryClient();
 
   return useQuery(["area", { areaId }], () => Api.getArea(areaId), {
-    onSuccess: ({ id, name, parentId, ancestors, counters }) => {
+    onSuccess: ({ id, name, ancestors, counters }) => {
       queryClient.setQueryData<Resource>(["resource", { resourceId: areaId }], {
         id,
         name,
         type: "area",
-        parentId,
         ancestors,
         counters,
       });

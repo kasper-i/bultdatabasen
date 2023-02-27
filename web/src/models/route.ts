@@ -15,5 +15,4 @@ export type Route = Omit<ResourceBase, "name"> & {
   length?: number;
   routeType: RouteType;
   externalLink: string;
-  parentId: string;
 };

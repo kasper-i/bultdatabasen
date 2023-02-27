@@ -5,6 +5,7 @@ import { useAppDispatch } from "@/store";
 import {
   confirmPassword,
   forgotPassword,
+  isCognitoError,
   signin,
   translateCognitoError,
 } from "@/utils/cognito";
@@ -50,7 +51,8 @@ const RestorePasswordPage = () => {
       forgotPassword(email.trim());
       updateState({ phase: 2 });
     } catch (err) {
-      updateState({ errorMessage: translateCognitoError(err) });
+      isCognitoError(err) &&
+        updateState({ errorMessage: translateCognitoError(err) });
     } finally {
       updateState({ inProgress: false });
     }
@@ -74,7 +76,8 @@ const RestorePasswordPage = () => {
       const session = await signin(authenticationDetails);
       handleLogin(session, navigate, dispatch);
     } catch (err) {
-      updateState({ errorMessage: translateCognitoError(err) });
+      isCognitoError(err) &&
+        updateState({ errorMessage: translateCognitoError(err) });
     } finally {
       updateState({ inProgress: false });
     }

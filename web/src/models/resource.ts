@@ -25,7 +25,6 @@ export interface ResourceBase {
 
 export type Resource = ResourceBase & {
   type: ResourceType;
-  parentId?: string;
 };
 
 export interface Parent {
