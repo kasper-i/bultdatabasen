@@ -9,7 +9,7 @@ import (
 
 type Bolt struct {
 	ResourceBase
-	ParentID       string     `json:"parentId"`
+	ParentID       string     `gorm:"->" json:"parentId"`
 	Type           *string    `json:"type,omitempty"`
 	Position       *string    `json:"position,omitempty"`
 	Installed      *time.Time `json:"installed,omitempty"`
