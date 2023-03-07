@@ -160,21 +160,22 @@ export class Api {
   });
 
   static getUsers = async () => {
-    const result = await axios.get<
-     User[]
-    >(`${Api.baseUrl}/users`, { headers: Api.getDefaultHeaders() });
+    const result = await axios.get<User[]>(`${Api.baseUrl}/users`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
     return result.data;
   };
 
-  static getUserRoles = async (
-    userId: string
-  ): Promise<ResourceRole[]> => {
+  static getUserRoles = async (userId: string): Promise<ResourceRole[]> => {
     const endpoint = `/users/${userId}/roles`;
 
-    const result = await axios.get<ResourceRole[]>(`${Api.baseUrl}${endpoint}`, {
-      headers: Api.getDefaultHeaders(),
-    });
+    const result = await axios.get<ResourceRole[]>(
+      `${Api.baseUrl}${endpoint}`,
+      {
+        headers: Api.getDefaultHeaders(),
+      }
+    );
 
     return result.data;
   };

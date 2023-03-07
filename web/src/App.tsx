@@ -54,10 +54,11 @@ const App = () => {
 
       const {
         sub: userId,
+        email,
         given_name: firstName,
         family_name: lastName,
       } = parseJwt(Api.idToken);
-      dispatch(login({ userId, firstName, lastName }));
+      dispatch(login({ userId, email, firstName, lastName }));
     };
 
     initialize().finally(() => setInitialized(true));
@@ -89,7 +90,7 @@ const App = () => {
               />
               <Route path="/auth/register" element={<RegisterPage />} />
             </Route>
-            <Route path="/signout" element={<SignoutPage />} />
+            <Route path="/auth/signout" element={<SignoutPage />} />
             <Route
               path="/"
               element={

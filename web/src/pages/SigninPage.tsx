@@ -14,7 +14,7 @@ import {
   isCognitoError,
   parseJwt,
   resendConfirmationCode,
-  signin as cognitoSignin,
+  signIn as cognitoSignin,
   translateCognitoError,
 } from "@/utils/cognito";
 import { useState } from "react";
@@ -41,16 +41,13 @@ export const handleLogin = async (
   Api.setTokens(idToken, accessToken, refreshToken);
   const {
     sub: userId,
+    email,
     given_name: firstName,
     family_name: lastName,
   } = parseJwt(idToken);
 
-  const returnPath = localStorage.getItem("returnPath");
-  localStorage.removeItem("returnPath");
-
-  dispatch(login({ userId, firstName, lastName }));
-
-  navigate(returnPath != null ? returnPath : "/");
+  dispatch(login({ userId, email, firstName, lastName }));
+  navigate(-1);
 };
 
 const SigninPage = () => {
@@ -142,6 +139,7 @@ const SigninPage = () => {
       ) : (
         <Link
           to={`/auth/forgot-password?email=${email}`}
+          replace
           className="text-sm text-purple-600 self-start"
         >
           Glömt lösenord?
@@ -154,7 +152,7 @@ const SigninPage = () => {
       <Button onClick={signin} disabled={!canSubmit} loading={inProgress} full>
         Logga in
       </Button>
-      <Link to="/auth/register">
+      <Link to="/auth/register" replace>
         <span className="text-sm text-purple-600">Skapa nytt konto</span>
       </Link>
     </div>

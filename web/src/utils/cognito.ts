@@ -79,7 +79,7 @@ export const translateCognitoError = (cognitoError: CognitoError) => {
   }
 };
 
-export const signin = (authenticationDetails: AuthenticationDetails) => {
+export const signIn = (authenticationDetails: AuthenticationDetails) => {
   const cognitoUser = makeCognitoUser(authenticationDetails.getUsername());
 
   return new Promise<CognitoUserSession>((resolve, reject) => {
@@ -91,6 +91,16 @@ export const signin = (authenticationDetails: AuthenticationDetails) => {
       onFailure: function (err) {
         reject(err);
       },
+    });
+  });
+};
+
+export const signOut = (username: string) => {
+  const cognitoUser = makeCognitoUser(username);
+
+  return new Promise<void>((resolve) => {
+    cognitoUser.signOut(() => {
+      resolve();
     });
   });
 };
