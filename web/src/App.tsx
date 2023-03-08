@@ -34,7 +34,7 @@ const App = () => {
     try {
       const accessToken = await refreshSession();
 
-      if (accessToken !== null) {
+      if (accessToken) {
         Api.setAccessToken(accessToken);
       }
 

@@ -75,7 +75,7 @@ export const refreshSession = (force?: boolean) => {
   return new Promise<string | null>((resolve, reject) => {
     cognitoUser.getSession((err: null, session: CognitoUserSession) => {
       if (err) {
-        return reject();
+        return reject(err);
       }
 
       const accessToken = session.getAccessToken();
@@ -88,7 +88,7 @@ export const refreshSession = (force?: boolean) => {
       cognitoUser.refreshSession(
         session.getRefreshToken(),
         (err, result: { accessToken: { jwtToken: string } }) => {
-          err ? reject() : resolve(result.accessToken.jwtToken);
+          err ? reject(err) : resolve(result.accessToken.jwtToken);
         }
       );
     });

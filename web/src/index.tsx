@@ -31,7 +31,9 @@ if (!import.meta.env.DEV) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const refreshAuthLogic = async (failedRequest?: any) => {
   const accessToken = await refreshSession(true);
-  Api.setAccessToken(accessToken);
+  if (accessToken) {
+    Api.setAccessToken(accessToken);
+  }
 
   failedRequest.response.config.headers["Authorization"] =
     "Bearer " + accessToken;
