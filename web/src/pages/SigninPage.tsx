@@ -12,9 +12,8 @@ import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
   isCognitoError,
-  parseJwt,
   resendConfirmationCode,
-  signin as cognitoSignin,
+  signIn as cognitoSignin,
   translateCognitoError,
 } from "@/utils/cognito";
 import { useState } from "react";
@@ -35,22 +34,18 @@ export const handleLogin = async (
   dispatch: ReturnType<typeof useAppDispatch>
 ) => {
   const accessToken = session.getAccessToken().getJwtToken();
-  const idToken = session.getIdToken().getJwtToken();
-  const refreshToken = session.getRefreshToken().getToken();
+  const idToken = session.getIdToken();
 
-  Api.setTokens(idToken, accessToken, refreshToken);
+  Api.setAccessToken(accessToken);
   const {
     sub: userId,
+    email,
     given_name: firstName,
     family_name: lastName,
-  } = parseJwt(idToken);
+  } = idToken.decodePayload();
 
-  const returnPath = localStorage.getItem("returnPath");
-  localStorage.removeItem("returnPath");
-
-  dispatch(login({ userId, firstName, lastName }));
-
-  navigate(returnPath != null ? returnPath : "/");
+  dispatch(login({ userId, email, firstName, lastName }));
+  navigate(-1);
 };
 
 const SigninPage = () => {
@@ -142,6 +137,7 @@ const SigninPage = () => {
       ) : (
         <Link
           to={`/auth/forgot-password?email=${email}`}
+          replace
           className="text-sm text-purple-600 self-start"
         >
           Glömt lösenord?
@@ -154,7 +150,7 @@ const SigninPage = () => {
       <Button onClick={signin} disabled={!canSubmit} loading={inProgress} full>
         Logga in
       </Button>
-      <Link to="/auth/register">
+      <Link to="/auth/register" replace>
         <span className="text-sm text-purple-600">Skapa nytt konto</span>
       </Link>
     </div>

@@ -4,8 +4,8 @@ import { AxiosError } from "axios";
 
 export const useRoles = (userId?: string) => {
   const { data: roles } = useQuery(
-    ["roles"],
-    async () => Api.getUserRoles(userId ?? ''),
+    ["roles", { userId }],
+    () => Api.getUserRoles(userId ?? ""),
     {
       retry: (failureCount, error: AxiosError) => {
         if (error.response?.status === 401 || error.response?.status === 403) {

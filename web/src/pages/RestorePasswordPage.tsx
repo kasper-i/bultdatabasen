@@ -6,7 +6,7 @@ import {
   confirmPassword,
   forgotPassword,
   isCognitoError,
-  signin,
+  signIn,
   translateCognitoError,
 } from "@/utils/cognito";
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
@@ -73,7 +73,7 @@ const RestorePasswordPage = () => {
         Password: newPassword.trim(),
       });
 
-      const session = await signin(authenticationDetails);
+      const session = await signIn(authenticationDetails);
       handleLogin(session, navigate, dispatch);
     } catch (err) {
       isCognitoError(err) &&
@@ -115,6 +115,7 @@ const RestorePasswordPage = () => {
             password
             onChange={(e) => updateState({ newPassword: e.target.value })}
             tabIndex={2}
+            autoComplete="new-password"
           />
 
           <hr />

@@ -5,7 +5,7 @@ import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
   isCognitoError,
-  signin,
+  signIn,
   signUp,
   translateCognitoError,
 } from "@/utils/cognito";
@@ -103,7 +103,7 @@ const RegisterPage = () => {
         Password: password.trim(),
       });
 
-      const session = await signin(authenticationDetails);
+      const session = await signIn(authenticationDetails);
       handleLogin(session, navigate, dispatch);
     } catch (err) {
       isCognitoError(err) &&
@@ -131,6 +131,7 @@ const RegisterPage = () => {
             password
             onChange={(e) => updateState({ password: e.target.value })}
             tabIndex={2}
+            autoComplete="new-password"
           />
           <div className="flex gap-2.5">
             <Input
