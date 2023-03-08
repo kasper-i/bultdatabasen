@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import React, { FC, LegacyRef, useId } from "react";
+import React, { FC, InputHTMLAttributes, LegacyRef, useId } from "react";
 
 const Input: FC<{
   label: string;
@@ -12,6 +12,7 @@ const Input: FC<{
   password?: boolean;
   tabIndex?: number;
   disabled?: boolean;
+  autoComplete?: InputHTMLAttributes<HTMLInputElement>["autoComplete"];
 }> = ({
   label,
   placeholder,
@@ -23,6 +24,7 @@ const Input: FC<{
   password,
   tabIndex,
   disabled,
+  autoComplete,
 }) => {
   const id = useId();
 
@@ -35,6 +37,7 @@ const Input: FC<{
       </label>
       <div className="relative">
         <input
+          autoComplete={autoComplete}
           disabled={disabled}
           tabIndex={tabIndex ?? -1}
           ref={inputRef}

@@ -131,6 +131,7 @@ const RegisterPage = () => {
             password
             onChange={(e) => updateState({ password: e.target.value })}
             tabIndex={2}
+            autoComplete="new-password"
           />
           <div className="flex gap-2.5">
             <Input

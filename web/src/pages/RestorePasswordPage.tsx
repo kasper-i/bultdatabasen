@@ -115,6 +115,7 @@ const RestorePasswordPage = () => {
             password
             onChange={(e) => updateState({ newPassword: e.target.value })}
             tabIndex={2}
+            autoComplete="new-password"
           />
 
           <hr />
