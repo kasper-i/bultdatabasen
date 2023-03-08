@@ -4,15 +4,21 @@ import { Bolt } from "@/models/bolt";
 import { Crag } from "@/models/crag";
 import { Image } from "@/models/image";
 import { Point } from "@/models/point";
-import { Resource, ResourceCount, SearchResult } from "@/models/resource";
+import {
+  ancestorSchema,
+  Resource,
+  resourceSchema,
+  SearchResult,
+} from "@/models/resource";
 import { Route } from "@/models/route";
 import { Sector } from "@/models/sector";
 import { Task } from "@/models/task";
 import { User } from "@/models/user";
 import axios, { AxiosRequestHeaders } from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
+import { z } from "zod";
 import { Manufacturer } from "./models/manufacturer";
-import { Material, materialSchema } from "./models/material";
+import { materialSchema } from "./models/material";
 import { Model } from "./models/model";
 import { ResourceRole } from "./models/role";
 
@@ -228,42 +234,31 @@ export class Api {
   static getResource = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}`;
 
-    const result = await axios.get<Resource>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return resourceSchema.parse(result.data);
   };
 
   static getAncestors = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/ancestors`;
 
-    const result = await axios.get<Resource[]>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return z.array(ancestorSchema).parse(result.data);
   };
 
   static getChildren = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/children`;
 
-    const result = await axios.get<Resource[]>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
-  };
-
-  static getCounts = async (resourceId: string) => {
-    const endpoint = `/resources/${resourceId}/counts`;
-
-    const result = await axios.get<ResourceCount[]>(
-      `${Api.baseUrl}${endpoint}`,
-      { headers: Api.getDefaultHeaders() }
-    );
-
-    return result.data;
+    return z.array(resourceSchema).parse(result.data);
   };
 
   static getRoute = async (routeId: string) => {
