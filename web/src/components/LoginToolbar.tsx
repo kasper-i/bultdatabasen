@@ -17,7 +17,7 @@ function LoginToolbar(): ReactElement {
     );
   } else {
     return (
-      <Link to="/auth/signin" state={{ returnPath: window.location.pathname }}>
+      <Link to="/auth/signin">
         <Button outlined color="white" className="ring-offset-primary-300">
           Logga In
         </Button>
