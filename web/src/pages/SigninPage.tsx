@@ -12,7 +12,6 @@ import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
   isCognitoError,
-  parseJwt,
   resendConfirmationCode,
   signIn as cognitoSignin,
   translateCognitoError,
@@ -35,16 +34,15 @@ export const handleLogin = async (
   dispatch: ReturnType<typeof useAppDispatch>
 ) => {
   const accessToken = session.getAccessToken().getJwtToken();
-  const idToken = session.getIdToken().getJwtToken();
-  const refreshToken = session.getRefreshToken().getToken();
+  const idToken = session.getIdToken();
 
-  Api.setTokens(idToken, accessToken, refreshToken);
+  Api.setAccessToken(accessToken);
   const {
     sub: userId,
     email,
     given_name: firstName,
     family_name: lastName,
-  } = parseJwt(idToken);
+  } = idToken.decodePayload();
 
   dispatch(login({ userId, email, firstName, lastName }));
   navigate(-1);

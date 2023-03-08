@@ -1,27 +1,28 @@
 import SigninPage from "@/pages/SigninPage";
-import React, { Suspense, useEffect, useState } from "react";
-import "react-activity/dist/Digital.css";
 import { useQueryClient } from "@tanstack/react-query";
+import { CognitoUserSession } from "amazon-cognito-identity-js";
+import { Suspense, useEffect, useState } from "react";
+import "react-activity/dist/Digital.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Api } from "./Api";
 import Loader from "./components/atoms/Loader";
+import { ErrorBoundary } from "./ErrorBoundary";
+import Auth from "./layouts/Auth";
 import Main from "./layouts/Main";
 import Page from "./layouts/Page";
 import AreaPage from "./pages/AreaPage";
 import CragPage from "./pages/CragPage";
+import RegisterPage from "./pages/RegisterPage";
+import RestorePasswordPage from "./pages/RestorePasswordPage";
 import RootPage from "./pages/RootPage";
 import RoutePage from "./pages/RoutePage";
 import SectorPage from "./pages/SectorPage";
+import { ShowcasePage } from "./pages/ShowcasePage";
 import SignoutPage from "./pages/SignoutPage";
 import TasksPage from "./pages/TasksPage";
 import { login } from "./slices/authSlice";
 import { useAppDispatch } from "./store";
-import { ShowcasePage } from "./pages/ShowcasePage";
-import { ErrorBoundary } from "./ErrorBoundary";
-import RestorePasswordPage from "./pages/RestorePasswordPage";
-import RegisterPage from "./pages/RegisterPage";
-import Auth from "./layouts/Auth";
-import { parseJwt } from "./utils/cognito";
+import { getCurrentUser, refreshSession } from "./utils/cognito";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -29,36 +30,46 @@ const App = () => {
 
   const queryClient = useQueryClient();
 
-  const onFocus = () => {
-    if (Api.isExpired()) {
-      Api.refreshTokens();
+  const onFocus = async () => {
+    try {
+      const accessToken = await refreshSession();
+
+      if (accessToken !== null) {
+        Api.setAccessToken(accessToken);
+      }
+
       queryClient.refetchQueries({ type: "active" });
-    }
+      // eslint-disable-next-line no-empty
+    } catch {}
   };
 
   useEffect(() => {
     window.addEventListener("focus", onFocus);
 
     const initialize = async () => {
-      if (!Api.authValid()) {
-        return;
-      }
+      const cognitoUser = getCurrentUser();
 
-      if (Api.isExpired()) {
-        await Api.refreshTokens();
-      }
+      if (cognitoUser) {
+        cognitoUser.getSession((err: null, session: CognitoUserSession) => {
+          if (err) {
+            return;
+          }
 
-      if (!Api.idToken) {
-        return;
-      }
+          const idToken = session.getIdToken();
+          const accessToken = session.getAccessToken();
 
-      const {
-        sub: userId,
-        email,
-        given_name: firstName,
-        family_name: lastName,
-      } = parseJwt(Api.idToken);
-      dispatch(login({ userId, email, firstName, lastName }));
+          Api.setAccessToken(accessToken.getJwtToken());
+
+          const {
+            sub: userId,
+            email,
+            given_name: firstName,
+            family_name: lastName,
+          } = idToken.decodePayload();
+
+          dispatch(login({ userId, email, firstName, lastName }));
+        });
+      }
     };
 
     initialize().finally(() => setInitialized(true));

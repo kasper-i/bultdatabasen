@@ -1,3 +1,4 @@
+import configData from "@/config.json";
 import {
   AuthenticationDetails,
   CognitoUser,
@@ -6,7 +7,6 @@ import {
   CognitoUserSession,
   ISignUpResult,
 } from "amazon-cognito-identity-js";
-import configData from "@/config.json";
 
 const cognitoUserPool = new CognitoUserPool({
   UserPoolId: configData.COGNITO_POOL_ID,
@@ -41,21 +41,6 @@ const makeCognitoUser = (username: string) => {
   return new CognitoUser(userData);
 };
 
-export const parseJwt = (token: string) => {
-  const base64Url = token.split(".")[1];
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(function (c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join("")
-  );
-
-  return JSON.parse(jsonPayload);
-};
-
 export const translateCognitoError = (cognitoError: CognitoError) => {
   switch (cognitoError.name) {
     case "NotAuthorizedException":
@@ -79,6 +64,37 @@ export const translateCognitoError = (cognitoError: CognitoError) => {
   }
 };
 
+export const getCurrentUser = () => cognitoUserPool.getCurrentUser();
+
+export const refreshSession = (force?: boolean) => {
+  const cognitoUser = getCurrentUser();
+  if (!cognitoUser) {
+    return Promise.reject();
+  }
+
+  return new Promise<string | null>((resolve, reject) => {
+    cognitoUser.getSession((err: null, session: CognitoUserSession) => {
+      if (err) {
+        return reject();
+      }
+
+      const accessToken = session.getAccessToken();
+      const expired = accessToken.getExpiration() < new Date().getTime() / 1000;
+
+      if (!expired && force !== true) {
+        return resolve(null);
+      }
+
+      cognitoUser.refreshSession(
+        session.getRefreshToken(),
+        (err, result: { accessToken: { jwtToken: string } }) => {
+          err ? reject() : resolve(result.accessToken.jwtToken);
+        }
+      );
+    });
+  });
+};
+
 export const signIn = (authenticationDetails: AuthenticationDetails) => {
   const cognitoUser = makeCognitoUser(authenticationDetails.getUsername());
 
@@ -95,8 +111,11 @@ export const signIn = (authenticationDetails: AuthenticationDetails) => {
   });
 };
 
-export const signOut = (username: string) => {
-  const cognitoUser = makeCognitoUser(username);
+export const signOut = () => {
+  const cognitoUser = getCurrentUser();
+  if (!cognitoUser) {
+    return Promise.resolve();
+  }
 
   return new Promise<void>((resolve) => {
     cognitoUser.signOut(() => {

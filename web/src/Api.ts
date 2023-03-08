@@ -10,19 +10,10 @@ import { Sector } from "@/models/sector";
 import { Task } from "@/models/task";
 import { User } from "@/models/user";
 import axios, { AxiosRequestHeaders } from "axios";
-import jwtDecode, { JwtPayload } from "jwt-decode";
 import { Manufacturer } from "./models/manufacturer";
 import { Material } from "./models/material";
 import { Model } from "./models/model";
 import { ResourceRole } from "./models/role";
-
-interface OAuthTokenResponse {
-  id_token: string;
-  access_token: string;
-  refresh_token: string;
-  expires_id: number;
-  token_type: string;
-}
 
 export interface Pagination {
   page: number;
@@ -56,103 +47,14 @@ export interface InsertPosition {
 
 export class Api {
   private static baseUrl: string = configData.API_URL;
-  static idToken: string | null;
   static accessToken: string | null;
-  static refreshToken: string | null;
-  private static expirationTime?: number;
 
-  static setTokens = (
-    idToken: string,
-    accessToken: string,
-    refreshToken?: string
-  ) => {
-    Api.idToken = idToken;
+  static setAccessToken = (accessToken: string) => {
     Api.accessToken = accessToken;
-    if (refreshToken !== undefined) {
-      Api.refreshToken = refreshToken;
-    }
-
-    Api.extractExpirationTime();
-
-    localStorage.setItem("idToken", Api.idToken);
-    localStorage.setItem("accessToken", Api.accessToken);
-
-    if (Api.refreshToken !== null) {
-      localStorage.setItem("refreshToken", Api.refreshToken);
-    } else {
-      localStorage.removeItem("refreshToken");
-    }
   };
 
-  static restoreTokens = () => {
-    Api.idToken = localStorage.getItem("idToken");
-    Api.accessToken = localStorage.getItem("accessToken");
-    Api.refreshToken = localStorage.getItem("refreshToken");
-
-    Api.extractExpirationTime();
-  };
-
-  static clearTokens = () => {
-    Api.idToken = null;
+  static clearAccessToken = () => {
     Api.accessToken = null;
-    Api.refreshToken = null;
-
-    localStorage.removeItem("idToken");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-
-    Api.expirationTime = undefined;
-  };
-
-  static extractExpirationTime = () => {
-    if (Api.accessToken === null) {
-      return;
-    }
-
-    const { exp } = jwtDecode<JwtPayload>(Api.accessToken);
-
-    if (exp !== undefined) {
-      Api.expirationTime = exp;
-    }
-  };
-
-  static isExpired = () => {
-    if (Api.expirationTime === undefined) {
-      return false;
-    }
-
-    const currentTime = new Date().getTime() / 1000;
-
-    return currentTime > Api.expirationTime;
-  };
-
-  static authValid = () => {
-    return Api.accessToken !== null;
-  };
-
-  static refreshTokens = async () => {
-    if (Api.refreshToken === null) {
-      return Promise.reject();
-    }
-
-    const instance = axios.create({
-      baseURL: configData.COGNITO_URL,
-      timeout: 10000,
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
-
-    const params = new URLSearchParams();
-    params.append("grant_type", "refresh_token");
-    params.append("client_id", configData.COGNITO_CLIENT_ID);
-    params.append("refresh_token", Api.refreshToken);
-
-    await instance.post("/oauth2/token", params).then((response) => {
-      const { id_token, access_token }: OAuthTokenResponse = response.data;
-
-      Api.setTokens(id_token, access_token);
-    });
-
-    return Promise.resolve();
   };
 
   private static getDefaultHeaders = (): AxiosRequestHeaders => ({
