@@ -36,7 +36,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   const [action, setAction] = useState<"delete" | "add_bolt">();
   const [newBolt, setNewBolt] = useState<Omit<Bolt, "id" | "parentId">>({
     type: "expansion",
-    installed: new Date().toISOString(),
+    installed: new Date(),
   });
   const createBolt = useCreateBolt(point.id);
 

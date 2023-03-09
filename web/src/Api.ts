@@ -1,6 +1,6 @@
 import configData from "@/config.json";
 import { Area } from "@/models/area";
-import { Bolt } from "@/models/bolt";
+import { Bolt, boltSchema } from "@/models/bolt";
 import { Crag } from "@/models/crag";
 import { Image } from "@/models/image";
 import { Point } from "@/models/point";
@@ -199,11 +199,11 @@ export class Api {
   static getBolts = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/bolts`;
 
-    const result = await axios.get<Bolt[]>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return z.array(boltSchema).parse(result.data);
   };
 
   static getPoints = async (routeId: string) => {
