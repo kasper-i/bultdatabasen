@@ -23,6 +23,7 @@ import TasksPage from "./pages/TasksPage";
 import { login } from "./slices/authSlice";
 import { useAppDispatch } from "./store";
 import { getCurrentUser, refreshSession } from "./utils/cognito";
+import configData from "@/config.json";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -78,6 +79,17 @@ const App = () => {
       window.removeEventListener("focus", onFocus);
     };
   }, [setInitialized]);
+
+  if (
+    import.meta.env.DEV &&
+    configData.API_URL === "https://api.bultdatabasen.se"
+  ) {
+    return (
+      <pre className="text-red-500 h-screen w-screen flex justify-center items-center">
+        Production environment is blocked in DEV mode!
+      </pre>
+    );
+  }
 
   if (!initialized) {
     return (
