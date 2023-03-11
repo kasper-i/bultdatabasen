@@ -1,4 +1,10 @@
-import { BoltType, DiameterUnit } from "./bolt";
+import { z } from "zod";
+import {
+  BoltType,
+  boltTypeSchema,
+  DiameterUnit,
+  diameterUnitSchema,
+} from "./bolt";
 
 export interface Model {
   id: string;
@@ -9,3 +15,13 @@ export interface Model {
   diameter?: number;
   diameterUnit?: DiameterUnit;
 }
+
+export const modelSchema: z.ZodType<Model> = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  manufacturerId: z.string().uuid(),
+  type: boltTypeSchema.optional(),
+  materialId: z.string().uuid().optional(),
+  diameter: z.number().optional(),
+  diameterUnit: diameterUnitSchema.optional(),
+});

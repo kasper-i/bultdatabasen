@@ -9,9 +9,9 @@ import {
   resourceSchema,
   SearchResult,
 } from "@/models/resource";
-import { Route } from "@/models/route";
+import { Route, routeSchema } from "@/models/route";
 import { Sector } from "@/models/sector";
-import { Task } from "@/models/task";
+import { Task, taskSchema } from "@/models/task";
 import { User } from "@/models/user";
 import axios, { AxiosRequestHeaders } from "axios";
 import { z } from "zod";
@@ -165,11 +165,11 @@ export class Api {
   static getRoute = async (routeId: string) => {
     const endpoint = `/routes/${routeId}`;
 
-    const result = await axios.get<Route>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return routeSchema.parse(result.data);
   };
 
   static getRoutes = async (resourceId: string) => {
@@ -327,7 +327,9 @@ export class Api {
       searchParams.append("itemsPerPage", pagination.itemsPerPage.toString());
     }
 
-    const result = await axios.get<{ data: Task[]; meta: Meta }>(
+    const {
+      data: { data, meta },
+    } = await axios.get<{ data: object; meta: Meta }>(
       `${Api.baseUrl}${endpoint}`,
       {
         headers: Api.getDefaultHeaders(),
@@ -335,17 +337,20 @@ export class Api {
       }
     );
 
-    return result.data;
+    return {
+      data: z.array(taskSchema).parse(data),
+      meta,
+    };
   };
 
   static getTask = async (taskId: string) => {
     const endpoint = `/tasks/${taskId}`;
 
-    const result = await axios.get<Task>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return taskSchema.parse(result.data);
   };
 
   static deleteTask = async (taskId: string) => {
@@ -359,24 +364,24 @@ export class Api {
   static updateTask = async (taskId: string, task: Task) => {
     const endpoint = `/tasks/${taskId}`;
 
-    const result = await axios.put<Task>(`${Api.baseUrl}${endpoint}`, task, {
+    const result = await axios.put<object>(`${Api.baseUrl}${endpoint}`, task, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return taskSchema.parse(result.data);
   };
 
   static createTask = async (
     parentId: string,
-    task: Pick<Task, "description">
+    task: Pick<Task, "description" | "priority">
   ) => {
     const endpoint = `/resources/${parentId}/tasks`;
 
-    const result = await axios.post<Task>(`${Api.baseUrl}${endpoint}`, task, {
+    const result = await axios.post<object>(`${Api.baseUrl}${endpoint}`, task, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return taskSchema.parse(result.data);
   };
 
   static getMaterials = async () => {

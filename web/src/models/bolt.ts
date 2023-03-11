@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ResourceBase, resourceBaseSchema } from "./resource";
 
-const boltTypeSchema = z.union([
+export const boltTypeSchema = z.union([
   z.literal("glue"),
   z.literal("expansion"),
   z.literal("piton"),
@@ -13,7 +13,7 @@ const boltPositionSchema = z.union([z.literal("left"), z.literal("right")]);
 
 export type BoltPosition = z.infer<typeof boltPositionSchema>;
 
-const diameterUnitSchema = z.union([z.literal("mm"), z.literal("inch")]);
+export const diameterUnitSchema = z.union([z.literal("mm"), z.literal("inch")]);
 
 export type DiameterUnit = z.infer<typeof diameterUnitSchema>;
 

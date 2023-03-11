@@ -61,7 +61,7 @@ const CompleteButton: FC<{
               ? setPhase(2)
               : onComplete({
                   comment: comment.trim(),
-                  closedAt: closedAt.toISOString(),
+                  closedAt: closedAt,
                 })
           }
           icon="check badge"
