@@ -1,7 +1,7 @@
 import configData from "@/config.json";
-import { Area } from "@/models/area";
+import { areaSchema } from "@/models/area";
 import { Bolt, boltSchema } from "@/models/bolt";
-import { Crag } from "@/models/crag";
+import { cragSchema } from "@/models/crag";
 import { Image } from "@/models/image";
 import { Point } from "@/models/point";
 import {
@@ -10,15 +10,15 @@ import {
   SearchResult,
 } from "@/models/resource";
 import { Route, routeSchema } from "@/models/route";
-import { Sector } from "@/models/sector";
+import { sectorSchema } from "@/models/sector";
 import { Task, taskSchema } from "@/models/task";
-import { User } from "@/models/user";
+import { userSchema } from "@/models/user";
 import axios, { AxiosRequestHeaders } from "axios";
 import { z } from "zod";
 import { Manufacturer } from "./models/manufacturer";
 import { materialSchema } from "./models/material";
 import { Model } from "./models/model";
-import { ResourceRole } from "./models/role";
+import { ResourceRole, resourceRoleSchema } from "./models/role";
 
 export interface Pagination {
   page: number;
@@ -67,24 +67,21 @@ export class Api {
   });
 
   static getUsers = async () => {
-    const result = await axios.get<User[]>(`${Api.baseUrl}/users`, {
+    const result = await axios.get(`${Api.baseUrl}/users`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return z.array(userSchema).parse(result.data);
   };
 
   static getUserRoles = async (userId: string): Promise<ResourceRole[]> => {
     const endpoint = `/users/${userId}/roles`;
 
-    const result = await axios.get<ResourceRole[]>(
-      `${Api.baseUrl}${endpoint}`,
-      {
-        headers: Api.getDefaultHeaders(),
-      }
-    );
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
 
-    return result.data;
+    return z.array(resourceRoleSchema).parse(result.data);
   };
 
   static getAreas = async (resourceId?: string) => {
@@ -95,47 +92,47 @@ export class Api {
       endpoint = "/areas";
     }
 
-    const result = await axios.get<Area[]>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return z.array(areaSchema).parse(result.data);
   };
 
   static getArea = async (areaId: string) => {
     const endpoint = `/areas/${areaId}`;
 
-    const result = await axios.get<Area>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return areaSchema.parse(result.data);
   };
 
   static getCrag = async (cragId: string) => {
     const endpoint = `/crags/${cragId}`;
 
-    const result = await axios.get<Crag>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return cragSchema.parse(result.data);
   };
 
   static getSector = async (sectorId: string) => {
     const endpoint = `/sectors/${sectorId}`;
 
-    const result = await axios.get<Sector>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return sectorSchema.parse(result.data);
   };
 
   static getResource = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}`;
 
-    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
@@ -145,7 +142,7 @@ export class Api {
   static getAncestors = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/ancestors`;
 
-    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
@@ -155,7 +152,7 @@ export class Api {
   static getChildren = async (resourceId: string) => {
     const endpoint = `/resources/${resourceId}/children`;
 
-    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
@@ -165,7 +162,7 @@ export class Api {
   static getRoute = async (routeId: string) => {
     const endpoint = `/routes/${routeId}`;
 
-    const result = await axios.get<object>(`${Api.baseUrl}${endpoint}`, {
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
       headers: Api.getDefaultHeaders(),
     });
 
@@ -219,11 +216,11 @@ export class Api {
   static createBolt = async (pointId: string, bolt: Pick<Bolt, "type">) => {
     const endpoint = `/resources/${pointId}/bolts`;
 
-    const result = await axios.post<Bolt>(`${Api.baseUrl}${endpoint}`, bolt, {
+    const result = await axios.post<object>(`${Api.baseUrl}${endpoint}`, bolt, {
       headers: Api.getDefaultHeaders(),
     });
 
-    return result.data;
+    return boltSchema.parse(result.data);
   };
 
   static updateBolt = async (boltId: string, updates: Partial<Bolt>) => {

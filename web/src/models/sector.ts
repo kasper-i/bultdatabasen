@@ -5,7 +5,7 @@ export type Sector = Omit<ResourceBase, "name"> & {
   name: string;
 };
 
-export const cragSchema: z.ZodType<Sector> = resourceBaseSchema
+export const sectorSchema: z.ZodType<Sector> = resourceBaseSchema
   .omit({ name: true })
   .extend({
     name: z.string(),
