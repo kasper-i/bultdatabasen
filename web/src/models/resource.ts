@@ -69,3 +69,10 @@ export interface SearchResult {
   type: ResourceType;
   parents: Parent[];
 }
+
+export const searchResultSchema: z.ZodType<SearchResult> = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  type: resourceTypeSchema,
+  parents: z.array(ancestorSchema),
+});
