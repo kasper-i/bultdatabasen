@@ -266,13 +266,15 @@ export class Api {
     const fd = new FormData();
     fd.append("image", file);
 
-    await axios.post(`${Api.baseUrl}${endpoint}`, fd, {
+    const result = await axios.post(`${Api.baseUrl}${endpoint}`, fd, {
       headers: Api.getDefaultHeaders(),
       onUploadProgress: (progressEvent) =>
         onProgress?.(
           Math.round((progressEvent.loaded * 100) / progressEvent.total)
         ),
     });
+
+    return imageSchema.parse(result.data);
   };
 
   static getImages = async (pointId: string) => {
