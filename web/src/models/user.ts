@@ -9,7 +9,7 @@ export interface User {
 }
 
 export const userSchema: z.ZodType<User> = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   email: z.string().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
