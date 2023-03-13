@@ -27,7 +27,7 @@ const (
 type ResourceBase struct {
 	ID        uuid.UUID `gorm:"primaryKey" json:"id"`
 	Ancestors Ancestors `gorm:"-" json:"ancestors,omitempty"`
-	Counters  Counters  `gorm:"->" json:"counters"`
+	Counters  Counters  `gorm:"<-:false" json:"counters"`
 }
 
 type Resource struct {

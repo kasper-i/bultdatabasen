@@ -15,11 +15,11 @@ type Bolt struct {
 	Installed      *time.Time `json:"installed,omitempty"`
 	Dismantled     *time.Time `json:"dismantled,omitempty"`
 	ManufacturerID *uuid.UUID `json:"manufacturerId,omitempty"`
-	Manufacturer   *string    `gorm:"->" json:"manufacturer,omitempty"`
+	Manufacturer   *string    `gorm:"<-:false" json:"manufacturer,omitempty"`
 	ModelID        *uuid.UUID `json:"modelId,omitempty"`
-	Model          *string    `gorm:"->" json:"model,omitempty"`
+	Model          *string    `gorm:"<-:false" json:"model,omitempty"`
 	MaterialID     *uuid.UUID `json:"materialId,omitempty"`
-	Material       *string    `gorm:"->" json:"material,omitempty"`
+	Material       *string    `gorm:"<-:false" json:"material,omitempty"`
 	Diameter       *float32   `json:"diameter,omitempty"`
 	DiameterUnit   *string    `json:"diameterUnit,omitempty"`
 }
