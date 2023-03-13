@@ -6,7 +6,7 @@ import (
 )
 
 func (store *psqlDatastore) GetUserRoles(ctx context.Context, userID string) ([]domain.ResourceRole, error) {
-	var roles []domain.ResourceRole
+	roles := make([]domain.ResourceRole, 0)
 
 	err := store.tx(ctx).Raw(`SELECT resource_id, role
 			FROM "user" u
