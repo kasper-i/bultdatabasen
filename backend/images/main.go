@@ -1,14 +1,14 @@
 package images
 
 import (
+	"bultdatabasen/config"
 	"bultdatabasen/domain"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -16,20 +16,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/google/uuid"
-	"gopkg.in/ini.v1"
 )
-
-var spacesBucket string
-var spacesSecret string
-var spacesKey string
-
-var functionUrl string
-var functionSecret string
 
 var imageSizes map[string]int
 
 func init() {
-	var err error
 	imageSizes = make(map[string]int)
 
 	imageSizes["xs"] = 300
@@ -39,44 +30,44 @@ func init() {
 	imageSizes["xl"] = 1500
 	imageSizes["2xl"] = 2500
 
-	cfg, err := ini.Load("/etc/bultdatabasen/config.ini")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
-
-	f := strings.Split(cfg.Section("functions").Key("images/resize").String(), " ")
-	functionUrl = f[0]
-	if len(f) == 2 {
-		functionSecret = f[1]
-	}
-
-	spacesBucket = cfg.Section("spaces").Key("bucket").String()
-	spacesKey = cfg.Section("spaces").Key("key").String()
-	spacesSecret = cfg.Section("spaces").Key("secret").String()
 }
 
 type spaces struct {
-	client *s3.S3
+	client         *s3.S3
+	spacesBucket   string
+	functionUrl    string
+	functionSecret string
 }
 
-func NewImageBucket() domain.ImageBucket {
+func NewImageBucket(config config.Config) domain.ImageBucket {
+	var functionUrl string
+	var functionSecret string
+
+	for _, function := range config.Functions {
+		if function.Name == "images/resize" {
+			functionUrl = function.URL
+			functionSecret = function.Secret
+		}
+	}
+
 	s3Config := &aws.Config{
-		Credentials: credentials.NewStaticCredentials(spacesKey, spacesSecret, ""),
+		Credentials: credentials.NewStaticCredentials(config.Spaces.Key, config.Spaces.Secret, ""),
 		Endpoint:    aws.String("https://ams3.digitaloceanspaces.com"),
 		Region:      aws.String("us-east-1"),
 	}
 
 	newSession, err := session.NewSession(s3Config)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
+		log.Fatalf("%v\n", err)
 	}
 
 	s3Client := s3.New(newSession)
 
 	return &spaces{
-		client: s3Client,
+		client:         s3Client,
+		spacesBucket:   config.Spaces.Bucket,
+		functionUrl:    functionUrl,
+		functionSecret: functionSecret,
 	}
 }
 
@@ -89,12 +80,12 @@ func (s *spaces) GetDownloadURL(ctx context.Context, imageID uuid.UUID, version 
 		imageKey = getResizedImageKey(imageID, *version)
 	}
 
-	return fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s", spacesBucket, imageKey), nil
+	return fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s", s.spacesBucket, imageKey), nil
 }
 
 func (s *spaces) UploadImage(ctx context.Context, imageID uuid.UUID, imageBytes []byte, mimeType string) error {
 	object := s3.PutObjectInput{
-		Bucket:      aws.String(spacesBucket),
+		Bucket:      aws.String(s.spacesBucket),
 		Key:         aws.String("images/" + imageID.String()),
 		Body:        bytes.NewReader(imageBytes),
 		ACL:         aws.String("public-read"),
@@ -112,11 +103,11 @@ func (s *spaces) ResizeImage(ctx context.Context, imageID uuid.UUID, versions ..
 	var requestedVersions map[string]string = make(map[string]string)
 
 	originalUrl := fmt.Sprintf("https://%s.ams3.digitaloceanspaces.com/%s",
-		spacesBucket, getOriginalImageKey(imageID))
+		s.spacesBucket, getOriginalImageKey(imageID))
 
 	for _, version := range versions {
 		req, _ := s.client.PutObjectRequest(&s3.PutObjectInput{
-			Bucket:      &spacesBucket,
+			Bucket:      &s.spacesBucket,
 			Key:         aws.String(getResizedImageKey(imageID, version)),
 			ACL:         aws.String("public-read"),
 			ContentType: aws.String("image/jpeg"),
@@ -142,11 +133,11 @@ func (s *spaces) ResizeImage(ctx context.Context, imageID uuid.UUID, versions ..
 
 	httpReq, _ := http.NewRequest(
 		"POST",
-		functionUrl,
+		s.functionUrl,
 		bytes.NewReader(jsonData))
 
 	httpReq.Header.Add("Content-Type", "application/json")
-	httpReq.Header.Add("X-Require-Whisk-Auth", functionSecret)
+	httpReq.Header.Add("X-Require-Whisk-Auth", s.functionSecret)
 
 	if resp, err := http.DefaultClient.Do(httpReq); err != nil {
 		return err
@@ -159,7 +150,7 @@ func (s *spaces) ResizeImage(ctx context.Context, imageID uuid.UUID, versions ..
 
 func (s *spaces) PurgeImage(ctx context.Context, imageID uuid.UUID) error {
 	listInput := &s3.ListObjectsInput{
-		Bucket: aws.String(spacesBucket),
+		Bucket: aws.String(s.spacesBucket),
 		Prefix: aws.String("images/" + imageID.String()),
 	}
 
@@ -168,7 +159,7 @@ func (s *spaces) PurgeImage(ctx context.Context, imageID uuid.UUID) error {
 	} else {
 		for _, object := range objects.Contents {
 			deleteInput := s3.DeleteObjectInput{
-				Bucket: aws.String(spacesBucket),
+				Bucket: aws.String(s.spacesBucket),
 				Key:    aws.String(*object.Key),
 			}
 
