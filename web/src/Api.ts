@@ -323,7 +323,7 @@ export class Api {
       params: searchParams,
     });
 
-    return pageSchema(taskSchema).parse(result);
+    return pageSchema(taskSchema).parse(result.data);
   };
 
   static getTask = async (taskId: string) => {
