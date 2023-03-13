@@ -12,7 +12,7 @@ type Task struct {
 	Status      string     `json:"status"`
 	Description string     `json:"description"`
 	Priority    int        `json:"priority"`
-	Assignee    *string    `gorm:"->" json:"assignee,omitempty"`
+	Assignee    *string    `gorm:"<-:false" json:"assignee,omitempty"`
 	Comment     *string    `json:"comment,omitempty"`
 	BirthTime   time.Time  `gorm:"->;column:btime" json:"createdAt"`
 	UserID      string     `gorm:"->;column:buser_id" json:"userId"`

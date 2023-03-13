@@ -13,7 +13,7 @@ import (
 )
 
 func (store *psqlDatastore) GetAncestors(ctx context.Context, resourceID uuid.UUID) (domain.Ancestors, error) {
-	var ancestors []domain.Resource
+	ancestors := make([]domain.Resource, 0)
 
 	err := store.tx(ctx).Raw(`WITH path_list AS (
 		SELECT COALESCE(t1.path, t2.path) AS path FROM resource
