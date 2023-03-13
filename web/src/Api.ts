@@ -15,6 +15,7 @@ import { Task, taskSchema } from "@/models/task";
 import { userSchema } from "@/models/user";
 import axios, { AxiosRequestHeaders } from "axios";
 import { z } from "zod";
+import { pageSchema } from "./models/common";
 import { manufacturerSchema } from "./models/manufacturer";
 import { materialSchema } from "./models/material";
 import { modelSchema } from "./models/model";
@@ -23,10 +24,6 @@ import { ResourceRole, resourceRoleSchema } from "./models/role";
 export interface Pagination {
   page: number;
   itemsPerPage: number;
-}
-
-export interface Meta {
-  totalItems: number;
 }
 
 export interface GetTasksOptions {
@@ -321,20 +318,12 @@ export class Api {
       searchParams.append("itemsPerPage", pagination.itemsPerPage.toString());
     }
 
-    const {
-      data: { data, meta },
-    } = await axios.get<{ data: object; meta: Meta }>(
-      `${Api.baseUrl}${endpoint}`,
-      {
-        headers: Api.getDefaultHeaders(),
-        params: searchParams,
-      }
-    );
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+      params: searchParams,
+    });
 
-    return {
-      data: z.array(taskSchema).parse(data),
-      meta,
-    };
+    return pageSchema(taskSchema).parse(result.data);
   };
 
   static getTask = async (taskId: string) => {

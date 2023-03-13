@@ -28,11 +28,6 @@ func NewTaskHandler(router *mux.Router, taskUsecase domain.TaskUsecase) {
 	router.HandleFunc("/tasks/{resourceID}", handler.DeleteTask).Methods(http.MethodDelete, http.MethodOptions)
 }
 
-type GetTasksResponse struct {
-	Data []domain.Task `json:"data"`
-	Meta domain.Meta   `json:"meta"`
-}
-
 func parsePaginationQuery(query url.Values) (domain.Pagination, error) {
 	var pagination domain.Pagination
 
@@ -66,20 +61,12 @@ func (hdlr *taskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !pagination.Valid() {
-		writeResponse(w, http.StatusBadRequest, nil)
-		return
-	}
-
 	statuses := query["status"]
 
-	if tasks, meta, err := hdlr.taskUsecase.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {
+	if page, err := hdlr.taskUsecase.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {
 		writeError(w, err)
 	} else {
-		response := GetTasksResponse{}
-		response.Data = tasks
-		response.Meta = meta
-		writeResponse(w, http.StatusOK, response)
+		writeResponse(w, http.StatusOK, page)
 	}
 }
 

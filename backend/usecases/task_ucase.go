@@ -23,9 +23,9 @@ func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Author
 	}
 }
 
-func (uc *taskUsecase) GetTasks(ctx context.Context, resourceID uuid.UUID, pagination domain.Pagination, statuses []string) ([]domain.Task, domain.Meta, error) {
+func (uc *taskUsecase) GetTasks(ctx context.Context, resourceID uuid.UUID, pagination domain.Pagination, statuses []string) (domain.Page[domain.Task], error) {
 	if err := uc.authorizer.HasPermission(ctx, nil, resourceID, domain.ReadPermission); err != nil {
-		return nil, domain.Meta{}, err
+		return domain.EmptyPage[domain.Task](), err
 	}
 
 	return uc.taskRepo.GetTasks(ctx, resourceID, pagination, statuses)

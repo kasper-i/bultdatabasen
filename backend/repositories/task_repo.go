@@ -10,9 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func (store *psqlDatastore) GetTasks(ctx context.Context, resourceID uuid.UUID, pagination domain.Pagination, statuses []string) ([]domain.Task, domain.Meta, error) {
-	var tasks []domain.Task = make([]domain.Task, 0)
-	var meta domain.Meta = domain.Meta{}
+func (store *psqlDatastore) GetTasks(ctx context.Context, resourceID uuid.UUID, pagination domain.Pagination, statuses []string) (domain.Page[domain.Task], error) {
+	page := domain.EmptyPage[domain.Task]()
 
 	params := make([]interface{}, 1)
 	params[0] = resourceID
@@ -33,15 +32,15 @@ func (store *psqlDatastore) GetTasks(ctx context.Context, resourceID uuid.UUID, 
 
 	dataQuery := fmt.Sprintf("%s SELECT * FROM tree INNER JOIN resource ON tree.resource_id = resource.leaf_of INNER JOIN task ON resource.id = task.id WHERE %s ORDER BY priority ASC %s", withTreeQuery(), where, paginationToSql(&pagination))
 
-	if err := store.tx(ctx).Raw(dataQuery, params...).Scan(&tasks).Error; err != nil {
-		return nil, meta, err
+	if err := store.tx(ctx).Raw(dataQuery, params...).Scan(&page.Data).Error; err != nil {
+		return page, err
 	}
 
-	if err := store.tx(ctx).Raw(countQuery, params...).Scan(&meta).Error; err != nil {
-		return nil, meta, err
+	if err := store.tx(ctx).Raw(countQuery, params...).Scan(&page.Meta).Error; err != nil {
+		return page, err
 	}
 
-	return tasks, meta, nil
+	return page, nil
 }
 
 func (store *psqlDatastore) GetTask(ctx context.Context, resourceID uuid.UUID) (domain.Task, error) {
