@@ -9,16 +9,16 @@ import (
 
 type Bolt struct {
 	ResourceBase
-	ParentID       string     `gorm:"->" json:"parentId"`
+	ParentID       uuid.UUID  `gorm:"<-:false" json:"parentId"`
 	Type           *string    `json:"type,omitempty"`
 	Position       *string    `json:"position,omitempty"`
 	Installed      *time.Time `json:"installed,omitempty"`
 	Dismantled     *time.Time `json:"dismantled,omitempty"`
-	ManufacturerID *string    `json:"manufacturerId,omitempty"`
+	ManufacturerID *uuid.UUID `json:"manufacturerId,omitempty"`
 	Manufacturer   *string    `gorm:"->" json:"manufacturer,omitempty"`
-	ModelID        *string    `json:"modelId,omitempty"`
+	ModelID        *uuid.UUID `json:"modelId,omitempty"`
 	Model          *string    `gorm:"->" json:"model,omitempty"`
-	MaterialID     *string    `json:"materialId,omitempty"`
+	MaterialID     *uuid.UUID `json:"materialId,omitempty"`
 	Material       *string    `gorm:"->" json:"material,omitempty"`
 	Diameter       *float32   `json:"diameter,omitempty"`
 	DiameterUnit   *string    `json:"diameterUnit,omitempty"`

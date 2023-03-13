@@ -72,6 +72,7 @@ func (uc *boltUsecase) CreateBolt(ctx context.Context, bolt domain.Bolt, parentR
 			return err
 		} else {
 			bolt.ID = createdResource.ID
+			bolt.ParentID = parentResourceID
 		}
 
 		if err := uc.boltRepo.InsertBolt(txCtx, bolt); err != nil {
