@@ -61,11 +61,6 @@ func (hdlr *taskHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !pagination.Valid() {
-		writeResponse(w, http.StatusBadRequest, nil)
-		return
-	}
-
 	statuses := query["status"]
 
 	if page, err := hdlr.taskUsecase.GetTasks(r.Context(), parentResourceID, pagination, statuses); err != nil {

@@ -5,17 +5,13 @@ type Pagination struct {
 	ItemsPerPage int
 }
 
-func (pagination *Pagination) Valid() bool {
-	return pagination.Page > 0 && pagination.ItemsPerPage <= 25
-}
-
-type Meta struct {
+type meta struct {
 	TotalItems int64 `gorm:"column:total_items" json:"totalItems"`
 }
 
 type Page[T any] struct {
 	Data []T  `json:"data"`
-	Meta Meta `json:"meta"`
+	Meta meta `json:"meta"`
 }
 
 func EmptyPage[T any]() Page[T] {
