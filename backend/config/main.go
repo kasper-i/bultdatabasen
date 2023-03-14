@@ -31,7 +31,7 @@ type Config struct {
 func Read() (Config, error) {
 	var cfg Config
 
-	doc, err := os.ReadFile("/etc/bultdatabasen/config.ini")
+	doc, err := os.ReadFile("/etc/bultdatabasen/config.toml")
 	if err != nil {
 		return cfg, err
 	}
