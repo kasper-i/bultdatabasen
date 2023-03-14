@@ -18,6 +18,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const functionName = "images/resize"
+
 var imageSizes map[string]int
 
 func init() {
@@ -44,10 +46,14 @@ func NewImageBucket(config config.Config) domain.ImageBucket {
 	var functionSecret string
 
 	for _, function := range config.Functions {
-		if function.Name == "images/resize" {
+		if function.Name == functionName {
 			functionUrl = function.URL
 			functionSecret = function.Secret
 		}
+	}
+
+	if functionUrl == "" {
+		log.Fatalf("missing function config: %s\n", functionName)
 	}
 
 	s3Config := &aws.Config{

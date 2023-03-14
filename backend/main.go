@@ -36,6 +36,8 @@ func getVersion(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	config, err := config.Read()
 	if err != nil {
 		log.Fatalf("%v\n", err)
