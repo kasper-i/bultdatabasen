@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -33,8 +34,7 @@ var keys jose.JSONWebKeySet
 func init() {
 	keysFile, err := os.Open("/etc/bultdatabasen/keys.json")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
+		log.Fatalf("%v\n", err)
 	}
 	byteValue, _ := io.ReadAll(keysFile)
 
@@ -44,8 +44,7 @@ func init() {
 
 	err = json.Unmarshal(byteValue, &keyList)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
+		log.Fatalf("%v\n", err)
 	}
 
 	for _, jsonKey := range keyList.Keys {
@@ -53,8 +52,7 @@ func init() {
 
 		k := jose.JSONWebKey{}
 		if err := k.UnmarshalJSON(bytes); err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
+			log.Fatalf("%v\n", err)
 		}
 
 		keys.Keys = append(keys.Keys, k)

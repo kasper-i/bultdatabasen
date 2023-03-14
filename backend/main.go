@@ -3,6 +3,7 @@ package main
 import (
 	"bultdatabasen/authenticator"
 	"bultdatabasen/authorizer"
+	"bultdatabasen/config"
 	httpdelivery "bultdatabasen/delivery/http"
 	"bultdatabasen/domain"
 	"bultdatabasen/helpers"
@@ -35,9 +36,16 @@ func getVersion(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	config, err := config.Read()
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
+
 	router := mux.NewRouter().StrictSlash(true)
 
-	ds := repositories.NewDatastore()
+	ds := repositories.NewDatastore(config)
 	var areaRepo domain.AreaRepository = ds
 	var boltRepo domain.BoltRepository = ds
 	var cragRepo domain.CragRepository = ds
@@ -57,7 +65,7 @@ func main() {
 	authz := authorizer.New(authRepo, resourceRepo)
 
 	rh := helpers.NewResourceHelper(resourceRepo, treeRepo, trashRepo)
-	ib := images.NewImageBucket()
+	ib := images.NewImageBucket(config)
 
 	userUsecase := usecases.NewUserUsecase(authn, authRepo, userRepo)
 	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rh)

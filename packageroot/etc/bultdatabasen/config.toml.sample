@@ -1,0 +1,17 @@
+[database]
+database = "bultdatabasen"
+schema = "bultdatabasen"
+host = "127.0.0.1"
+port = 5432
+username = "bultdatabasen"
+password = "bultdatabasen"
+
+[spaces]
+bucket = "bultdatabasen"
+key = "mykey"
+secret = "mysecret"
+
+[[functions]]
+name = "images/resize"
+url = "https://.doserverless.co/api/v1/web/fn-/images/resize"
+secret = "mysecret"
