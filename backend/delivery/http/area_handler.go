@@ -28,6 +28,12 @@ func NewAreaHandler(router *mux.Router, areaUsecase domain.AreaUsecase) {
 	router.HandleFunc("/areas/{resourceID}", handler.DeleteArea).Methods(http.MethodDelete, http.MethodOptions)
 }
 
+// @Summary List areas
+// @Tags Areas
+// @Produce json
+// @Param resource path string true "Resource ID"
+// @Success 200 {array} domain.Area
+// @Router /resources/{resource}/areas [get]
 func (hdlr *areaHandler) GetAreas(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -63,6 +69,14 @@ func (hdlr *areaHandler) GetArea(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Create area
+// @Tags Areas
+// @Accept json
+// @Produce json
+// @Param resource path string true "Parent resource ID"
+// @Param body body domain.Area true "Area object"
+// @Success 201 {object} domain.Area
+// @Router /resources/{resource}/areas [post]
 func (hdlr *areaHandler) CreateArea(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var resourceID uuid.UUID

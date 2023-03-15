@@ -10,13 +10,18 @@ import (
 	"bultdatabasen/images"
 	"bultdatabasen/repositories"
 	"bultdatabasen/usecases"
+	_ "embed"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 
+	_ "bultdatabasen/docs"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/swaggo/swag"
 )
 
 var Version = "devel"
@@ -35,6 +40,27 @@ func getVersion(w http.ResponseWriter, r *http.Request) {
 	_, _ = io.WriteString(w, fmt.Sprintf(`{"version": "%s"}`, Version))
 }
 
+func getSwaggerDocs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	doc, err := swag.ReadDoc()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = io.WriteString(w, doc)
+}
+
+// @title Bultdatabasen API
+// @version 1.0
+
+// @host localhost:8080
+// @BasePath /
+
+// @securitydefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -85,6 +111,9 @@ func main() {
 
 	router.HandleFunc("/health", checkHandler)
 	router.HandleFunc("/version", getVersion)
+
+	router.PathPrefix("/swagger/").Handler(httpSwagger.Handler(httpSwagger.URL("/swagger.json")))
+	router.HandleFunc("/swagger.json", getSwaggerDocs)
 
 	httpdelivery.NewUserHandler(router, userUsecase)
 

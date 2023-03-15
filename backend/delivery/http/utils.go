@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type errorMessage struct {
+type ErrorMessage struct {
 	Status     int        `json:"status"`
 	Message    string     `json:"message,omitempty"`
 	ResourceID *uuid.UUID `json:"resourceId,omitempty"`
@@ -25,7 +25,7 @@ func writeResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
 }
 
 func writeError(w http.ResponseWriter, err error) {
-	details := errorMessage{}
+	details := ErrorMessage{}
 
 	var notFoundError *domain.ErrResourceNotFound
 	var notAuthorizedError *domain.ErrNotAuthorized
