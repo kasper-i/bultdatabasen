@@ -14,7 +14,12 @@ import (
 	"gopkg.in/square/go-jose.v2"
 )
 
-type contextKey string
+type contextKey struct{}
+
+type authenticationResult struct {
+	user domain.User
+	err  error
+}
 
 type authenticator struct {
 }
@@ -60,8 +65,8 @@ func init() {
 }
 
 func (a *authenticator) Authenticate(ctx context.Context) (domain.User, error) {
-	if user, ok := ctx.Value(contextKey("user")).(domain.User); ok {
-		return user, nil
+	if result, ok := ctx.Value(contextKey(contextKey{})).(authenticationResult); ok {
+		return result.user, result.err
 	} else {
 		return domain.User{}, domain.ErrNotAuthenticated
 	}
@@ -109,32 +114,31 @@ func (a *authenticator) decodeJWT(payload []byte) (domain.User, error) {
 func (a *authenticator) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var bearer string
+		var payload []byte
+		var user domain.User
+		var err error
 		header := r.Header.Get("Authorization")
 
-		for {
-			if header == "" {
-				break
-			}
+		ctx := r.Context()
 
-			if n, err := fmt.Sscanf(header, "Bearer %s", &bearer); err != nil || n != 1 {
-				break
-			}
-
-			payload, err := a.verifyJWT(bearer)
-			if err != nil {
-				break
-			}
-
-			user, err := a.decodeJWT(payload)
-			if err != nil {
-				break
-			}
-
-			ctx := context.WithValue(r.Context(), contextKey("user"), user)
-			next.ServeHTTP(w, r.WithContext(ctx))
-			return
+		if header == "" {
+			goto done
 		}
 
-		next.ServeHTTP(w, r)
+		if n, err := fmt.Sscanf(header, "Bearer %s", &bearer); err != nil || n != 1 {
+			goto done
+		}
+
+		payload, err = a.verifyJWT(bearer)
+		if err != nil {
+			ctx = context.WithValue(ctx, contextKey{}, authenticationResult{user: domain.User{}, err: err})
+			goto done
+		}
+
+		user, err = a.decodeJWT(payload)
+		ctx = context.WithValue(ctx, contextKey{}, authenticationResult{user: user, err: err})
+
+	done:
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

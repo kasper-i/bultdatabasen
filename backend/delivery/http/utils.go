@@ -37,6 +37,9 @@ func writeError(w http.ResponseWriter, err error) {
 		}
 	} else if errors.Is(err, domain.ErrNotAuthenticated) {
 		details.Status = http.StatusUnauthorized
+	} else if errors.Is(err, domain.ErrTokenExpired) {
+		details.Status = http.StatusUnauthorized
+		details.Message = err.Error()
 	} else if errors.As(err, &notAuthorizedError) {
 		details.Status = http.StatusForbidden
 		if notAuthorizedError.ResourceID != uuid.Nil {
