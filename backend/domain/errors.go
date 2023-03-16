@@ -32,7 +32,6 @@ func (err *ErrResourceNotFound) Error() string {
 }
 
 var (
-	ErrTokenExpired        = errors.New("token expired")
 	ErrUnexpectedIssuer    = errors.New("unexpected issuer")
 	ErrUnsupportedMimeType = errors.New("unsupported MIME type")
 	ErrNonOrthogonalAngle  = errors.New("non-orthogonal angle")
