@@ -68,7 +68,7 @@ func (a *authenticator) Authenticate(ctx context.Context) (domain.User, error) {
 	if result, ok := ctx.Value(contextKey(contextKey{})).(authenticationResult); ok {
 		return result.user, result.err
 	} else {
-		return domain.User{}, domain.ErrNotAuthenticated
+		return domain.User{}, &domain.ErrNotAuthenticated{}
 	}
 }
 
@@ -103,7 +103,9 @@ func (a *authenticator) decodeJWT(payload []byte) (domain.User, error) {
 	}
 
 	if time.Unix(claims.Expiration, 0).Before(time.Now()) {
-		return domain.User{}, domain.ErrTokenExpired
+		return domain.User{}, &domain.ErrNotAuthenticated{
+			Reason: "token expired",
+		}
 	}
 
 	user.ID = claims.Username

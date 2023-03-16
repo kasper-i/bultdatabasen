@@ -6,6 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type ErrNotAuthenticated struct {
+	Reason string
+}
+
+func (err *ErrNotAuthenticated) Error() string {
+	return "not authenticated"
+}
+
 type ErrNotAuthorized struct {
 	ResourceID uuid.UUID
 	Permission PermissionType
@@ -26,7 +34,6 @@ func (err *ErrResourceNotFound) Error() string {
 var (
 	ErrTokenExpired        = errors.New("token expired")
 	ErrUnexpectedIssuer    = errors.New("unexpected issuer")
-	ErrNotAuthenticated    = errors.New("not authenticated")
 	ErrUnsupportedMimeType = errors.New("unsupported MIME type")
 	ErrNonOrthogonalAngle  = errors.New("non-orthogonal angle")
 	ErrUnmovableResource   = errors.New("unmovable resource")

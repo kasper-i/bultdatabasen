@@ -28,6 +28,7 @@ func writeError(w http.ResponseWriter, err error) {
 	details := errorMessage{}
 
 	var notFoundError *domain.ErrResourceNotFound
+	var notAuthenticatedError *domain.ErrNotAuthenticated
 	var notAuthorizedError *domain.ErrNotAuthorized
 
 	if errors.As(err, &notFoundError) {
@@ -35,11 +36,9 @@ func writeError(w http.ResponseWriter, err error) {
 		if notFoundError.ResourceID != uuid.Nil {
 			details.ResourceID = &notFoundError.ResourceID
 		}
-	} else if errors.Is(err, domain.ErrNotAuthenticated) {
+	} else if errors.As(err, &notAuthenticatedError) {
 		details.Status = http.StatusUnauthorized
-	} else if errors.Is(err, domain.ErrTokenExpired) {
-		details.Status = http.StatusUnauthorized
-		details.Message = err.Error()
+		details.Message = notAuthenticatedError.Reason
 	} else if errors.As(err, &notAuthorizedError) {
 		details.Status = http.StatusForbidden
 		if notAuthorizedError.ResourceID != uuid.Nil {
