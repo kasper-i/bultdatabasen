@@ -119,8 +119,8 @@ func (a *authenticator) Middleware(next http.Handler) http.Handler {
 		var payload []byte
 		var user domain.User
 		var err error
-		header := r.Header.Get("Authorization")
 
+		header := r.Header.Get("Authorization")
 		ctx := r.Context()
 
 		if header == "" {
