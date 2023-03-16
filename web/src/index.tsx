@@ -5,7 +5,7 @@ import axios from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
-import { z, ZodError } from "zod";
+import { ZodError } from "zod";
 import { Api } from "./Api";
 import App from "./App";
 import "./index.css";
