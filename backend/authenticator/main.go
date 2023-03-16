@@ -65,7 +65,7 @@ func init() {
 }
 
 func (a *authenticator) Authenticate(ctx context.Context) (domain.User, error) {
-	if result, ok := ctx.Value(contextKey(contextKey{})).(authenticationResult); ok {
+	if result, ok := ctx.Value(contextKey{}).(authenticationResult); ok {
 		return result.user, result.err
 	} else {
 		return domain.User{}, &domain.ErrNotAuthenticated{}
