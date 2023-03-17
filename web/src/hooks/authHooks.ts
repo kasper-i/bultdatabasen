@@ -1,10 +1,10 @@
-import { useResource } from "@/queries/resourceQueries";
+import { useLazyResource } from "@/queries/resourceQueries";
 import { useRoles } from "@/queries/roleQueries";
 import { selectUserId } from "@/slices/authSlice";
 import { useSelector } from "react-redux";
 
 export const useIsOwner = (resourceId: string): boolean => {
-  const { data: resource } = useResource(resourceId);
+  const { data: resource } = useLazyResource(resourceId);
   const userId = useSelector(selectUserId);
   const { roles } = useRoles(userId);
   const ancestors = resource?.ancestors ?? [];

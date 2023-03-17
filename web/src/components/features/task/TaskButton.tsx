@@ -1,14 +1,14 @@
 import IconButton from "@/components/atoms/IconButton";
 import Pill from "@/components/Pill";
-import { useResource } from "@/queries/resourceQueries";
-import React, { ReactElement } from "react";
+import { useLazyResource } from "@/queries/resourceQueries";
+import { ReactElement } from "react";
 
 interface Props {
   resourceId: string;
 }
 
 function TaskButton({ resourceId }: Props): ReactElement {
-  const { data: resource } = useResource(resourceId);
+  const { data: resource } = useLazyResource(resourceId);
 
   const taskCount = resource?.counters?.openTasks ?? 0;
 
