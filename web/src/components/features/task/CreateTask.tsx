@@ -51,7 +51,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
   if (!showForm) {
     return (
       <div className="sm:w-96">
-        <Button onClick={() => openForm()} full>
+        <Button icon="plus" onClick={() => openForm()}>
           Nytt uppdrag
         </Button>
       </div>
