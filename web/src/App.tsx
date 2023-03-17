@@ -39,7 +39,9 @@ const App = () => {
         Api.setAccessToken(accessToken);
       }
 
-      queryClient.refetchQueries({ type: "active" });
+      if (import.meta.env.PROD) {
+        queryClient.refetchQueries({ type: "active" });
+      }
       // eslint-disable-next-line no-empty
     } catch {}
   };
