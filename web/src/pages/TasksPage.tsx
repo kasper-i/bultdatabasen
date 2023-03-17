@@ -2,6 +2,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import CreateTask from "@/components/features/task/CreateTask";
 import TaskList from "@/components/features/task/TaskList";
 import Pill from "@/components/Pill";
+import Restricted from "@/components/Restricted";
 import { useUnsafeParams } from "@/hooks/common";
 import { ResourceType } from "@/models/resource";
 import { useResource } from "@/queries/resourceQueries";
@@ -51,7 +52,9 @@ const TasksPage = (): ReactElement => {
           </span>
         )}
       </div>
-      {resource.type === "route" && <CreateTask routeId={resourceId} />}
+      <Restricted>
+        {resource.type === "route" && <CreateTask routeId={resourceId} />}
+      </Restricted>
       <TaskList resourceId={resourceId} />
     </div>
   );
