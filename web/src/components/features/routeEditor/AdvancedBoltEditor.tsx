@@ -34,6 +34,11 @@ interface DiameterAndUnit {
 
 const diameterOptions: Option<DiameterAndUnit>[] = [
   {
+    key: "8mm",
+    label: "8mm",
+    value: { diameter: 8, unit: "mm" },
+  },
+  {
     key: "10mm",
     label: "10mm",
     value: { diameter: 10, unit: "mm" },
