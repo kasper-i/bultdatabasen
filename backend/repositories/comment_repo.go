@@ -12,11 +12,12 @@ import (
 func (store *psqlDatastore) GetComments(ctx context.Context, resourceID uuid.UUID) ([]domain.Comment, error) {
 	var comments []domain.Comment = make([]domain.Comment, 0)
 
-	if err := store.tx(ctx).Raw(fmt.Sprintf(`%s SELECT * FROM tree
-		INNER JOIN comment ON tree.resource_id = comment.id
-		INNER JOIN resource ON tree.resource_id = resource.id
-		WHERE resource.id <> ?`,
-		withTreeQuery()), resourceID, resourceID).Scan(&comments).Error; err != nil {
+	query := fmt.Sprintf(`%s SELECT *
+		FROM tree
+		INNER JOIN resource ON tree.resource_id = resource.leaf_of
+		INNER JOIN comment ON resource.id = comment.id`, withTreeQuery())
+
+	if err := store.tx(ctx).Raw(query, resourceID).Scan(&comments).Error; err != nil {
 		return nil, err
 	}
 

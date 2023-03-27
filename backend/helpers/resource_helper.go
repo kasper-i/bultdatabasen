@@ -221,7 +221,7 @@ func (hlpr *resourceHelper) checkParentAllowed(ctx context.Context, resource dom
 	case domain.TypeImage:
 		return pt == domain.TypePoint
 	case domain.TypeComment:
-		return pt == domain.TypePoint
+		return pt == domain.TypeRoute || pt == domain.TypePoint
 	case domain.TypeTask:
 		return pt == domain.TypeRoute || pt == domain.TypePoint
 	default:

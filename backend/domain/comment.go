@@ -2,14 +2,16 @@ package domain
 
 import (
 	"context"
+	"database/sql/driver"
+	"encoding/json"
 
 	"github.com/google/uuid"
 )
 
 type Comment struct {
 	ResourceBase
-	Text string            `json:"text"`
-	Tags map[string]string `json:"tags"`
+	Text string `json:"text"`
+	Tags Tags  `json:"tags"`
 }
 
 func (Comment) TableName() string {
@@ -32,4 +34,16 @@ type CommentRepository interface {
 	GetCommentWithLock(ctx context.Context, commentID uuid.UUID) (Comment, error)
 	InsertComment(ctx context.Context, comment Comment) error
 	SaveComment(ctx context.Context, comment Comment) error
+}
+
+type Tags []uuid.UUID
+
+func (tags *Tags) Scan(value interface{}) error {
+	bytes := value.([]byte)
+	err := json.Unmarshal(bytes, tags)
+	return err
+}
+
+func (tags Tags) Value() (driver.Value, error) {
+	return json.Marshal(tags)
 }
