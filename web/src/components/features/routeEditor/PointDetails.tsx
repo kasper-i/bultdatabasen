@@ -188,7 +188,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           ))}
 
         <Restricted>
-          <div className="flex flex-row gap-2 w-full mt-3">
+          <div className="flex flex-row gap-2 w-full mt-1">
             <PostComment parentResourceId={point.id} />
             <ImageUploadButton pointId={point.id} />
           </div>
