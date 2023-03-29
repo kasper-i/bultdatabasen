@@ -2,6 +2,7 @@ import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Menu } from "@/components/molecules/Menu";
+import Restricted from "@/components/Restricted";
 import { Comment } from "@/models/comment";
 import { useDeleteComment, useUpdateComment } from "@/queries/commentQueries";
 import { FC, useEffect, useState } from "react";
@@ -46,24 +47,26 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
         <div className="flex-grow w-0 text-sm italic">{comment.text}</div>
       )}
       {action === undefined && (
-        <Menu
-          items={[
-            {
-              label: "Redigera",
-              onClick: () => {
-                setAction("edit");
-                setText(comment.text);
+        <Restricted>
+          <Menu
+            items={[
+              {
+                label: "Redigera",
+                onClick: () => {
+                  setAction("edit");
+                  setText(comment.text);
+                },
+                icon: "edit",
               },
-              icon: "edit",
-            },
-            {
-              label: "Radera",
-              onClick: () => setAction("delete"),
-              icon: "trash",
-              className: "text-red-500",
-            },
-          ]}
-        />
+              {
+                label: "Radera",
+                onClick: () => setAction("delete"),
+                icon: "trash",
+                className: "text-red-500",
+              },
+            ]}
+          />
+        </Restricted>
       )}
       {action === "delete" && (
         <DeleteDialog
