@@ -13,6 +13,7 @@ const Input: FC<{
   tabIndex?: number;
   disabled?: boolean;
   autoComplete?: InputHTMLAttributes<HTMLInputElement>["autoComplete"];
+  labelStyle?: "above" | "none";
 }> = ({
   label,
   placeholder,
@@ -25,6 +26,7 @@ const Input: FC<{
   tabIndex,
   disabled,
   autoComplete,
+  labelStyle = "above",
 }) => {
   const id = useId();
 
@@ -32,7 +34,13 @@ const Input: FC<{
 
   return (
     <div className="w-full">
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+      <label
+        htmlFor={id}
+        className={clsx(
+          "block text-sm font-medium text-gray-700 mb-1",
+          labelStyle === "none" ? "hidden" : "block"
+        )}
+      >
         {label}
       </label>
       <div className="relative">
@@ -50,7 +58,7 @@ const Input: FC<{
           placeholder={placeholder}
           value={value}
           className={clsx(
-            "mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-md h-[2.125rem]",
+            "focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm text-sm border-gray-300 rounded-md h-[2.125rem]",
             password && "text-xl tracking-wide"
           )}
         />

@@ -9,7 +9,8 @@ export const useCreateComment = (resourceId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    (comment: Comment) => Api.createComment(resourceId, comment),
+    (comment: Pick<Comment, "text" | "tags">) =>
+      Api.createComment(resourceId, comment),
     {
       onSuccess: (data) => {
         queryClient.setQueryData<Comment[]>(
