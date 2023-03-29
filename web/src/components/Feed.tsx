@@ -59,7 +59,7 @@ const Feed = ({ items }: Props) => {
                     <div className="border-l border border-gray-300"></div>
                   </div>
 
-                  <div className="p-2 flex-grow mb-2">{value}</div>
+                  <div className="p-2 flex-grow mb-1">{value}</div>
                 </div>
               </div>
             </li>
