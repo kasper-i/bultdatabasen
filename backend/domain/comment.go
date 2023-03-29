@@ -4,14 +4,17 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/json"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 type Comment struct {
 	ResourceBase
-	Text string `json:"text"`
-	Tags Tags  `json:"tags"`
+	Text      string    `json:"text"`
+	Tags      Tags      `json:"tags"`
+	BirthTime time.Time `gorm:"->;column:btime" json:"createdAt"`
+	UserID    string    `gorm:"->;column:buser_id" json:"userId"`
 }
 
 func (Comment) TableName() string {

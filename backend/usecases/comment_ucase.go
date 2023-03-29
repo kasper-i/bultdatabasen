@@ -70,6 +70,8 @@ func (uc *commentUsecase) CreateComment(ctx context.Context, comment domain.Comm
 			return err
 		} else {
 			comment.ID = createdResource.ID
+			comment.UserID = createdResource.CreatorID
+			comment.BirthTime = createdResource.BirthTime
 		}
 
 		if err := uc.commentRepo.InsertComment(txCtx, comment); err != nil {
