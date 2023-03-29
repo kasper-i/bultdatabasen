@@ -21,7 +21,7 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
   }, [updateComment.isSuccess]);
 
   return (
-    <div className="rounded-sm cursor-pointer ring-2 ring-gray-200 ring-offset-2 p-2 flex flex-row justify-between gap-x-2">
+    <div className="rounded-sm cursor-pointer flex flex-row justify-between gap-x-2">
       {action === "edit" ? (
         <div className="flex-grow flex flex-col gap-2">
           <Input
@@ -43,7 +43,7 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
           </div>
         </div>
       ) : (
-        <div className="flex-grow w-0 text-sm">{comment.text}</div>
+        <div className="flex-grow w-0 text-sm italic">{comment.text}</div>
       )}
       {action === undefined && (
         <Menu
