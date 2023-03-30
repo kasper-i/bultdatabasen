@@ -11,7 +11,7 @@ function LoginToolbar(): ReactElement {
     return (
       <Link to="/auth/signout">
         <Button outlined color="white" className="ring-offset-primary-300">
-          Logga Ut
+          Logga ut
         </Button>
       </Link>
     );
@@ -19,7 +19,7 @@ function LoginToolbar(): ReactElement {
     return (
       <Link to="/auth/signin">
         <Button outlined color="white" className="ring-offset-primary-300">
-          Logga In
+          Logga in
         </Button>
       </Link>
     );
