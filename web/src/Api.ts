@@ -15,6 +15,7 @@ import { Task, taskSchema } from "@/models/task";
 import { userSchema } from "@/models/user";
 import axios, { AxiosRequestHeaders } from "axios";
 import { z } from "zod";
+import { Comment, commentSchema } from "./models/comment";
 import { pageSchema } from "./models/common";
 import { manufacturerSchema } from "./models/manufacturer";
 import { materialSchema } from "./models/material";
@@ -395,5 +396,46 @@ export class Api {
     });
 
     return z.array(modelSchema).parse(result.data);
+  };
+
+  static getComments = async (resourceId: string) => {
+    const endpoint = `/resources/${resourceId}/comments`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return z.array(commentSchema).parse(result.data);
+  };
+
+  static createComment = async (
+    resourceId: string,
+    comment: Pick<Comment, "text" | "tags">
+  ) => {
+    const endpoint = `/resources/${resourceId}/comments`;
+
+    const result = await axios.post(`${Api.baseUrl}${endpoint}`, comment, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return commentSchema.parse(result.data);
+  };
+
+  static updateComment = async (commentId: string, comment: Comment) => {
+    const endpoint = `/comments/${commentId}`;
+
+    const result = await axios.put(`${Api.baseUrl}${endpoint}`, comment, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return commentSchema.parse(result.data);
+  };
+
+  static deleteComment = async (commentId: string) => {
+    const endpoint = `/comments/${commentId}`;
+
+    await axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
   };
 }

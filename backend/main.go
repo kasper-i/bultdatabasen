@@ -60,6 +60,7 @@ func main() {
 	var trashRepo domain.TrashRepository = ds
 	var userRepo domain.UserRepository = ds
 	var authRepo domain.AuthRepository = ds
+	var commentRepo domain.CommentRepository = ds
 
 	authn := authenticator.New()
 	authz := authorizer.New(authRepo, resourceRepo)
@@ -79,6 +80,7 @@ func main() {
 	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
 	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
+	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh)
 
 	router.Use(CORSMiddleware)
 	router.Use(authn.Middleware)
@@ -107,6 +109,7 @@ func main() {
 	httpdelivery.NewTaskHandler(router, taskUsecase)
 	httpdelivery.NewManufacturerHandler(router, manufacturerUsecase)
 	httpdelivery.NewMaterialHandler(router, materialUsecase)
+	httpdelivery.NewCommentHandler(router, commentUsecase)
 
 	router.HandleFunc("/trash", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/trash/{resourceID}/restore", nil).Methods(http.MethodPost, http.MethodOptions)

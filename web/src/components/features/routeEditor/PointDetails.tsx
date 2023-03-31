@@ -1,17 +1,16 @@
 import Button from "@/components/atoms/Button";
-import Loader from "@/components/atoms/Loader";
 import { Concatenator } from "@/components/Concatenator";
-import Feed from "@/components/Feed";
+import Feed, { FeedItem } from "@/components/Feed";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import ImageThumbnail from "@/components/ImageThumbnail";
 import ImageUploadButton from "@/components/ImageUploadButton";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
-import UserName from "@/components/UserName";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
 import { useBolts, useCreateBolt } from "@/queries/boltQueries";
+import { useComments } from "@/queries/commentQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
 import { compareDesc } from "date-fns";
@@ -19,7 +18,9 @@ import { ReactElement, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import AdvancedBoltEditor from "./AdvancedBoltEditor";
 import BoltDetails from "./BoltDetails";
+import { CommentView } from "./CommentView";
 import { PointLabel } from "./hooks";
+import { PostComment } from "./PostComment";
 
 interface Props {
   point: Point;
@@ -31,6 +32,7 @@ interface Props {
 function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   const deletePoint = useDetachPoint(routeId, point.id);
   const { data: images } = useImages(point.id);
+  const { data: comments } = useComments(point.id);
   const bolts = useBolts(point.id);
   const [currImg, setCurrImg] = useState<string>();
   const [action, setAction] = useState<"delete" | "add_bolt">();
@@ -45,17 +47,45 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
 
   const sharedParents = point.parents.filter((parent) => parent.id !== routeId);
 
-  const sortedImages = useMemo(() => {
-    return images
-      ?.slice()
-      .sort((i1, i2) =>
-        compareDesc(new Date(i1.timestamp), new Date(i2.timestamp))
-      );
-  }, [images]);
-
   useEffect(() => {
     createBolt.isSuccess && setAction(undefined);
   }, [createBolt.isSuccess]);
+
+  const feedItems = useMemo(() => {
+    const feedItems: FeedItem[] = [];
+
+    images?.forEach((image) => {
+      feedItems.push({
+        key: image.id,
+        icon: "image",
+        timestamp: image.timestamp,
+        description: "Laddade upp foto",
+        userId: image.userId,
+        value: (
+          <ImageThumbnail
+            image={image}
+            key={image.id}
+            onClick={() => setCurrImg(image.id)}
+          />
+        ),
+      });
+    });
+
+    comments?.forEach((comment) => {
+      feedItems.push({
+        key: comment.id,
+        icon: "comment",
+        timestamp: comment.createdAt,
+        description: "Lämnade kommentar",
+        userId: comment.userId,
+        value: <CommentView comment={comment} />,
+      });
+    });
+
+    feedItems.sort((i1, i2) => compareDesc(i1.timestamp, i2.timestamp));
+
+    return feedItems;
+  }, [comments, images]);
 
   return (
     <div>
@@ -99,7 +129,6 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
 
         <div className="flex gap-2">
           <Restricted>
-            <ImageUploadButton pointId={point.id} />
             <Menu
               items={[
                 {
@@ -157,47 +186,23 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
               totalNumberOfBolts={numInstalledBolts}
             />
           ))}
+
+        <Restricted>
+          <div className="flex flex-row gap-2 w-full mt-1">
+            <PostComment parentResourceId={point.id} />
+            <ImageUploadButton pointId={point.id} />
+          </div>
+        </Restricted>
       </div>
 
-      {!sortedImages ? (
-        <Loader />
-      ) : (
-        <>
-          <Feed
-            items={sortedImages.map((image, index) => {
-              return {
-                key: index,
-                header: (
-                  <p className="text-xs">
-                    <UserName userId={image.userId} />
-                    <br />
-                    <span>
-                      Laddade upp foto{" "}
-                      <span className="font-bold">
-                        {new Date(image.timestamp).getFullYear()}
-                      </span>
-                    </span>
-                  </p>
-                ),
-                value: (
-                  <ImageThumbnail
-                    image={image}
-                    key={image.id}
-                    onClick={() => setCurrImg(image.id)}
-                  />
-                ),
-              };
-            })}
-          />
-          {currImg !== undefined && (
-            <ImageCarousel
-              pointId={point.id}
-              selectedImageId={currImg}
-              images={sortedImages ?? []}
-              onClose={() => setCurrImg(undefined)}
-            />
-          )}
-        </>
+      <Feed items={feedItems} />
+      {currImg !== undefined && (
+        <ImageCarousel
+          pointId={point.id}
+          selectedImageId={currImg}
+          images={images ?? []}
+          onClose={() => setCurrImg(undefined)}
+        />
       )}
     </div>
   );

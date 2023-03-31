@@ -39,7 +39,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
   const [description, setDescription] = useState("");
   const [selectedPointId, setSelectedPointId] = useState<string>();
   const [priority, setPriority] = useState(2);
-  const [showForm, openForm] = useReducer((_) => true, false);
+  const [showForm, openForm] = useReducer(() => true, false);
 
   const createTask = useCreateTask(routeId, selectedPointId ?? routeId);
 
