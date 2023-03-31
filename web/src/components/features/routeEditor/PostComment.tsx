@@ -30,7 +30,7 @@ export const PostComment: FC<{ parentResourceId: string }> = ({
         onClick={() => postComment.mutate({ text: comment, tags: [] })}
         disabled={!comment}
       >
-        Skicka
+        Posta
       </Button>
     </div>
   );

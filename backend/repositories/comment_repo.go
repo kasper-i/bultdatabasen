@@ -60,5 +60,6 @@ func (store *psqlDatastore) InsertComment(ctx context.Context, comment domain.Co
 
 func (store *psqlDatastore) SaveComment(ctx context.Context, comment domain.Comment) error {
 	return store.tx(ctx).Select(
-		"Text").Updates(comment).Error
+		"Text",
+		"Tags").Updates(comment).Error
 }

@@ -22,7 +22,7 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
   }, [updateComment.isSuccess]);
 
   return (
-    <div className="rounded-sm cursor-pointer flex flex-row justify-between gap-x-2">
+    <div className="flex flex-row justify-between gap-x-2">
       {action === "edit" ? (
         <div className="flex-grow flex flex-col gap-2">
           <Input

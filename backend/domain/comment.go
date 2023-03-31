@@ -13,8 +13,8 @@ type Comment struct {
 	ResourceBase
 	Text      string    `json:"text"`
 	Tags      Tags      `json:"tags"`
-	BirthTime time.Time `gorm:"->;column:btime" json:"createdAt"`
-	UserID    string    `gorm:"->;column:buser_id" json:"userId"`
+	BirthTime time.Time `gorm:"<-:false;column:btime" json:"createdAt"`
+	UserID    string    `gorm:"<-:false;column:buser_id" json:"userId"`
 }
 
 func (Comment) TableName() string {
