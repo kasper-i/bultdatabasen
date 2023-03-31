@@ -17,7 +17,7 @@ type psqlDatastore struct {
 	tx func(ctx context.Context) *gorm.DB
 }
 
-func NewDatastore(config config.Config) *psqlDatastore {
+func NewDatastore(config config.Config) (*psqlDatastore, error) {
 	var db *gorm.DB
 
 	dsn := fmt.Sprintf(
@@ -38,7 +38,7 @@ func NewDatastore(config config.Config) *psqlDatastore {
 		Logger: logger.Default.LogMode(logLevel),
 	})
 	if err != nil {
-		panic("failed to connect database")
+		return nil, err
 	}
 
 	sqlDB, _ := db.DB()
@@ -57,7 +57,7 @@ func NewDatastore(config config.Config) *psqlDatastore {
 
 	return &psqlDatastore{
 		tx: tx,
-	}
+	}, nil
 }
 
 func isNestedTransaction(tx *gorm.DB) bool {

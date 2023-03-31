@@ -45,7 +45,11 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	ds := repositories.NewDatastore(config)
+	ds, err := repositories.NewDatastore(config)
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
+
 	var areaRepo domain.AreaRepository = ds
 	var boltRepo domain.BoltRepository = ds
 	var cragRepo domain.CragRepository = ds
