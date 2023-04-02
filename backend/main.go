@@ -50,8 +50,6 @@ func main() {
 		log.Fatalf("%v\n", err)
 	}
 
-	userPool := authenticator.NewUserPool(config)
-
 	var areaRepo domain.AreaRepository = ds
 	var boltRepo domain.BoltRepository = ds
 	var cragRepo domain.CragRepository = ds
@@ -67,6 +65,8 @@ func main() {
 	var userRepo domain.UserRepository = ds
 	var authRepo domain.AuthRepository = ds
 	var commentRepo domain.CommentRepository = ds
+	
+	userPool := authenticator.NewUserPool(config, userRepo)
 
 	authn := authenticator.New(userPool)
 	authz := authorizer.New(authRepo, resourceRepo)

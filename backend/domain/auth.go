@@ -39,11 +39,6 @@ type ResourceRole struct {
 	ResourceID uuid.UUID `json:"resourceId"`
 }
 
-type UserUsecase interface {
-	GetUsers(ctx context.Context) ([]User, error)
-	GetUserRoles(ctx context.Context, userID string) ([]ResourceRole, error)
-}
-
 type Authenticator interface {
 	Authenticate(ctx context.Context) (User, error)
 }

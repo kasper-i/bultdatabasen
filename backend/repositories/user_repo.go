@@ -5,12 +5,6 @@ import (
 	"context"
 )
 
-func (store *psqlDatastore) GetUsers(ctx context.Context) ([]domain.User, error) {
-	var users []domain.User = make([]domain.User, 0)
-
-	if err := store.tx(ctx).Raw(`SELECT * FROM "user"`).Scan(&users).Error; err != nil {
-		return users, err
-	}
-
-	return users, nil
+func (store *psqlDatastore) InsertUser(ctx context.Context, user domain.User) error {
+	return store.tx(ctx).Create(user).Error
 }

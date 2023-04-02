@@ -4,10 +4,14 @@ import (
 	"context"
 )
 
+type UserUsecase interface {
+	GetUserRoles(ctx context.Context, userID string) ([]ResourceRole, error)
+}
+
 type UserRepository interface {
 	Transactor
 
-	GetUsers(ctx context.Context) ([]User, error)
+	InsertUser(ctx context.Context, user User) error
 }
 
 type AuthRepository interface {

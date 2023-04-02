@@ -17,6 +17,7 @@ type pool struct {
 	comm       chan any
 	provider   *cognitoidentityprovider.CognitoIdentityProvider
 	userPoolID string
+	userRepo   domain.UserRepository
 }
 
 type getUserRequest struct {
@@ -39,7 +40,7 @@ type userObservers struct {
 	notificationChannels []chan getUserResponse
 }
 
-func NewUserPool(config config.Config) domain.UserPool {
+func NewUserPool(config config.Config, userRepo domain.UserRepository) domain.UserPool {
 	session := session.Must(session.NewSession(&aws.Config{
 		Region:      aws.String(config.Cognito.Region),
 		Credentials: credentials.NewStaticCredentials(config.Cognito.AccessKey, config.Cognito.SecretAccessKey, ""),
@@ -50,6 +51,7 @@ func NewUserPool(config config.Config) domain.UserPool {
 		comm:       make(chan any),
 		provider:   provider,
 		userPoolID: config.Cognito.UserPoolID,
+		userRepo:   userRepo,
 	}
 
 	go pool.main()
@@ -149,6 +151,14 @@ func (pool *pool) fetchUser(userID string) {
 		case "family_name":
 			user.LastName = attribute.Value
 		}
+	}
+
+	if err := pool.userRepo.InsertUser(context.Background(), user); err != nil {
+		pool.comm <- fetchUserResult{
+			userID: userID,
+			err:    err,
+		}
+		return
 	}
 
 	pool.comm <- fetchUserResult{
