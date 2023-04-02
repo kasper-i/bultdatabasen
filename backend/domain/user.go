@@ -11,7 +11,7 @@ type UserUsecase interface {
 type UserRepository interface {
 	Transactor
 
-	InsertUser(ctx context.Context, user User) error
+	SaveUser(ctx context.Context, user User) error
 }
 
 type AuthRepository interface {

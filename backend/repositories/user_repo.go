@@ -5,6 +5,6 @@ import (
 	"context"
 )
 
-func (store *psqlDatastore) InsertUser(ctx context.Context, user domain.User) error {
-	return store.tx(ctx).Create(user).Error
+func (store *psqlDatastore) SaveUser(ctx context.Context, user domain.User) error {
+	return store.tx(ctx).Save(user).Error
 }

@@ -153,7 +153,7 @@ func (pool *pool) fetchUser(userID string) {
 		}
 	}
 
-	if err := pool.userRepo.InsertUser(context.Background(), user); err != nil {
+	if err := pool.userRepo.SaveUser(context.Background(), user); err != nil {
 		pool.comm <- fetchUserResult{
 			userID: userID,
 			err:    err,
