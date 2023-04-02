@@ -175,7 +175,7 @@ const TaskView: FC<{
             <span className="font-medium">
               <Time time={task.createdAt} />
             </span>{" "}
-            av <UserName userId={task.userId} />
+            av <UserName user={{ id: task.userId }} />
           </div>
         </Link>
         <Restricted>
