@@ -8,10 +8,16 @@ password = "bultdatabasen"
 
 [spaces]
 bucket = "bultdatabasen"
-key = "mykey"
-secret = "mysecret"
+key = ""
+secret = ""
+
+[cognito]
+access_key = ""
+secret_access_key = ""
+region = "eu-west-1"
+user_pool_id = ""
 
 [[functions]]
 name = "images/resize"
 url = "https://.doserverless.co/api/v1/web/fn-/images/resize"
-secret = "mysecret"
+secret = ""

@@ -15,6 +15,7 @@ type Comment struct {
 	Tags      Tags      `json:"tags"`
 	BirthTime time.Time `gorm:"<-:false;column:btime" json:"createdAt"`
 	UserID    string    `gorm:"<-:false;column:buser_id" json:"userId"`
+	User      *User     `json:"user"`
 }
 
 func (Comment) TableName() string {

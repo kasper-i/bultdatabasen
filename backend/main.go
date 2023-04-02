@@ -50,6 +50,8 @@ func main() {
 		log.Fatalf("%v\n", err)
 	}
 
+	userPool := authenticator.NewUserPool(config)
+
 	var areaRepo domain.AreaRepository = ds
 	var boltRepo domain.BoltRepository = ds
 	var cragRepo domain.CragRepository = ds
@@ -84,7 +86,7 @@ func main() {
 	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
 	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
-	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh)
+	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh, userPool)
 
 	router.Use(CORSMiddleware)
 	router.Use(authn.Middleware)

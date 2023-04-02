@@ -14,3 +14,7 @@ type AuthRepository interface {
 	GetUserRoles(ctx context.Context, userID string) ([]ResourceRole, error)
 	InsertUserRole(ctx context.Context, userID string, role ResourceRole) error
 }
+
+type UserPool interface {
+	GetUser(ctx context.Context, userID string) (User, error)
+}

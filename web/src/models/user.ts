@@ -5,7 +5,7 @@ export interface User {
   email?: string;
   firstName?: string;
   lastName?: string;
-  firstSeen: Date;
+  firstSeen?: Date;
 }
 
 export const userSchema: z.ZodType<User> = z.object({

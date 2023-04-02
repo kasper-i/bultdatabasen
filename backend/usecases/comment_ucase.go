@@ -12,14 +12,16 @@ type commentUsecase struct {
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rh            domain.ResourceHelper
+	userPool      domain.UserPool
 }
 
-func NewCommentUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, commentRepo domain.CommentRepository, rh domain.ResourceHelper) domain.CommentUsecase {
+func NewCommentUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, commentRepo domain.CommentRepository, rh domain.ResourceHelper, userPool domain.UserPool) domain.CommentUsecase {
 	return &commentUsecase{
 		commentRepo:   commentRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rh:            rh,
+		userPool:      userPool,
 	}
 }
 
@@ -28,7 +30,15 @@ func (uc *commentUsecase) GetComments(ctx context.Context, resourceID uuid.UUID)
 		return nil, err
 	}
 
-	return uc.commentRepo.GetComments(ctx, resourceID)
+	comments, err := uc.commentRepo.GetComments(ctx, resourceID)
+
+	for idx := range comments {
+		comment := &comments[idx]
+		user, _ := uc.userPool.GetUser(ctx, comment.UserID)
+		comment.User = &user
+	}
+
+	return comments, err
 }
 
 func (uc *commentUsecase) GetComment(ctx context.Context, commentID uuid.UUID) (domain.Comment, error) {
