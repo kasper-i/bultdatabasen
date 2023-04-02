@@ -68,7 +68,7 @@ func main() {
 	var authRepo domain.AuthRepository = ds
 	var commentRepo domain.CommentRepository = ds
 
-	authn := authenticator.New()
+	authn := authenticator.New(userPool)
 	authz := authorizer.New(authRepo, resourceRepo)
 
 	rh := helpers.NewResourceHelper(resourceRepo, treeRepo, trashRepo)

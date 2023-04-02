@@ -17,15 +17,18 @@ import (
 type contextKey struct{}
 
 type authenticationResult struct {
-	user domain.User
-	err  error
+	userID string
+	err    error
 }
 
 type authenticator struct {
+	userPool domain.UserPool
 }
 
-func New() *authenticator {
-	return &authenticator{}
+func New(userPool domain.UserPool) *authenticator {
+	return &authenticator{
+		userPool: userPool,
+	}
 }
 
 type claims struct {
@@ -66,7 +69,7 @@ func init() {
 
 func (a *authenticator) Authenticate(ctx context.Context) (domain.User, error) {
 	if result, ok := ctx.Value(contextKey{}).(authenticationResult); ok {
-		return result.user, result.err
+		return a.userPool.GetUser(ctx, result.userID)
 	} else {
 		return domain.User{}, &domain.ErrNotAuthenticated{}
 	}
@@ -94,31 +97,28 @@ func (a *authenticator) verifyJWT(jwt string) ([]byte, error) {
 	return payload, nil
 }
 
-func (a *authenticator) decodeJWT(payload []byte) (domain.User, error) {
-	var user domain.User
+func (a *authenticator) decodeJWT(payload []byte) (string, error) {
 	var claims claims
 
 	if err := json.Unmarshal(payload, &claims); err != nil {
-		return domain.User{}, err
+		return "", err
 	}
 
 	if time.Unix(claims.Expiration, 0).Before(time.Now()) {
-		return domain.User{}, &domain.ErrNotAuthenticated{
+		return "", &domain.ErrNotAuthenticated{
 			Reason: "token expired",
 		}
 	}
 
-	user.ID = claims.Username
-
-	return user, nil
+	return claims.Username, nil
 }
 
 func (a *authenticator) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var bearer string
 		var payload []byte
-		var user domain.User
 		var err error
+		var userID string
 
 		header := r.Header.Get("Authorization")
 		ctx := r.Context()
@@ -133,12 +133,12 @@ func (a *authenticator) Middleware(next http.Handler) http.Handler {
 
 		payload, err = a.verifyJWT(bearer)
 		if err != nil {
-			ctx = context.WithValue(ctx, contextKey{}, authenticationResult{user: domain.User{}, err: err})
+			ctx = context.WithValue(ctx, contextKey{}, authenticationResult{err: err})
 			goto done
 		}
 
-		user, err = a.decodeJWT(payload)
-		ctx = context.WithValue(ctx, contextKey{}, authenticationResult{user: user, err: err})
+		userID, err = a.decodeJWT(payload)
+		ctx = context.WithValue(ctx, contextKey{}, authenticationResult{userID: userID, err: err})
 
 	done:
 		next.ServeHTTP(w, r.WithContext(ctx))
