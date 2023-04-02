@@ -18,6 +18,8 @@ type pool struct {
 	provider   *cognitoidentityprovider.CognitoIdentityProvider
 	userPoolID string
 	userRepo   domain.UserRepository
+	users      map[string]domain.User
+	observers  map[string]*userObservers
 }
 
 type getUserRequest struct {
@@ -52,6 +54,8 @@ func NewUserPool(config config.Config, userRepo domain.UserRepository) domain.Us
 		provider:   provider,
 		userPoolID: config.Cognito.UserPoolID,
 		userRepo:   userRepo,
+		users:      make(map[string]domain.User),
+		observers:  make(map[string]*userObservers),
 	}
 
 	go pool.main()
@@ -75,39 +79,45 @@ func (pool *pool) GetUser(ctx context.Context, userID string) (domain.User, erro
 }
 
 func (pool *pool) main() {
-	users := make(map[string]domain.User)
-	observers := make(map[string]*userObservers)
-
 	for msg := range pool.comm {
 		switch msg := msg.(type) {
 		case fetchUserResult:
-			if msg.err == nil {
-				users[msg.userID] = msg.user
-			}
-			if p, exist := observers[msg.userID]; exist {
-				for _, c := range p.notificationChannels {
-					c <- getUserResponse{
-						user: msg.user,
-						err:  msg.err,
-					}
-				}
-
-				delete(observers, msg.userID)
-			}
+			pool.handleFetchUserResult(msg)
 		case getUserRequest:
-			if user, ok := users[msg.userID]; ok {
-				msg.replyChannel <- getUserResponse{
-					user: user,
-				}
-			} else if p, exist := observers[msg.userID]; exist {
-				p.notificationChannels = append(p.notificationChannels, msg.replyChannel)
-			} else {
-				observers[msg.userID] = &userObservers{
-					notificationChannels: []chan getUserResponse{msg.replyChannel},
-				}
-				go pool.fetchUser(msg.userID)
+			pool.handleGetUserRequest(msg)
+		}
+	}
+}
+
+func (pool *pool) handleFetchUserResult(msg fetchUserResult) {
+	if msg.err == nil {
+		pool.users[msg.userID] = msg.user
+	}
+
+	if p, exist := pool.observers[msg.userID]; exist {
+		for _, c := range p.notificationChannels {
+			c <- getUserResponse{
+				user: msg.user,
+				err:  msg.err,
 			}
 		}
+
+		delete(pool.observers, msg.userID)
+	}
+}
+
+func (pool *pool) handleGetUserRequest(msg getUserRequest) {
+	if user, ok := pool.users[msg.userID]; ok {
+		msg.replyChannel <- getUserResponse{
+			user: user,
+		}
+	} else if p, exist := pool.observers[msg.userID]; exist {
+		p.notificationChannels = append(p.notificationChannels, msg.replyChannel)
+	} else {
+		pool.observers[msg.userID] = &userObservers{
+			notificationChannels: []chan getUserResponse{msg.replyChannel},
+		}
+		go pool.fetchUser(msg.userID)
 	}
 }
 
