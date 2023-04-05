@@ -33,9 +33,7 @@ func (uc *commentUsecase) GetComments(ctx context.Context, resourceID uuid.UUID)
 	comments, err := uc.commentRepo.GetComments(ctx, resourceID)
 
 	for idx := range comments {
-		comment := &comments[idx]
-		user, _ := uc.userPool.GetUser(ctx, comment.UserID)
-		comment.User = &user
+		comments[idx].Author.LoadName(ctx, uc.userPool)
 	}
 
 	return comments, err
@@ -57,6 +55,7 @@ func (uc *commentUsecase) GetComment(ctx context.Context, commentID uuid.UUID) (
 	}
 
 	comment.Ancestors = ancestors
+	comment.Author.LoadName(ctx, uc.userPool)
 	return comment, nil
 }
 
@@ -80,7 +79,8 @@ func (uc *commentUsecase) CreateComment(ctx context.Context, comment domain.Comm
 			return err
 		} else {
 			comment.ID = createdResource.ID
-			comment.UserID = createdResource.CreatorID
+			comment.Author.ID = createdResource.CreatorID
+			comment.Author.LoadName(ctx, uc.userPool)
 			comment.BirthTime = createdResource.BirthTime
 		}
 
@@ -137,6 +137,7 @@ func (uc *commentUsecase) UpdateComment(ctx context.Context, commentID uuid.UUID
 		}
 
 		updatedComment.ID = original.ID
+		updatedComment.Author.LoadName(ctx, uc.userPool)
 
 		if err := uc.rh.TouchResource(txCtx, commentID, user.ID); err != nil {
 			return err

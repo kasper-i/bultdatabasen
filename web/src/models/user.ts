@@ -15,3 +15,15 @@ export const userSchema: z.ZodType<User> = z.object({
   lastName: z.string().optional(),
   firstSeen: z.coerce.date(),
 });
+
+export interface Author {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export const authorSchema: z.ZodType<Author> = z.object({
+  id: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+});

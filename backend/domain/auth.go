@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -21,18 +20,6 @@ const (
 	ReadPermission  PermissionType = "read"
 	WritePermission PermissionType = "write"
 )
-
-type User struct {
-	ID        string    `gorm:"primaryKey" json:"id"`
-	Email     *string   `json:"-"`
-	FirstName *string   `json:"firstName,omitempty"`
-	LastName  *string   `json:"lastName,omitempty"`
-	FirstSeen time.Time `json:"firstSeen,omitempty"`
-}
-
-func (User) TableName() string {
-	return "user"
-}
 
 type ResourceRole struct {
 	Role       RoleType  `json:"role"`

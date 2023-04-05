@@ -14,8 +14,7 @@ type Comment struct {
 	Text      string    `json:"text"`
 	Tags      Tags      `json:"tags"`
 	BirthTime time.Time `gorm:"<-:false;column:btime" json:"createdAt"`
-	UserID    string    `gorm:"<-:false;column:buser_id" json:"userId"`
-	User      *User     `json:"user,omitempty"`
+	Author    Author   `gorm:"<-:false;column:buser_id" json:"author"`
 }
 
 func (Comment) TableName() string {

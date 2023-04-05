@@ -77,7 +77,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         icon: "comment",
         timestamp: comment.createdAt,
         description: "Lämnade kommentar",
-        user: comment.user,
+        user: comment.author,
         value: <CommentView comment={comment} />,
       });
     });
