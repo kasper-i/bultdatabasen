@@ -1,4 +1,4 @@
-import { User } from "@/models/user";
+import { Author } from "@/models/user";
 import clsx from "clsx";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
@@ -12,7 +12,7 @@ export interface FeedItem {
   timestamp: Date;
   icon: IconType;
   description: string;
-  user?: User;
+  author: Author;
   value: ReactNode;
 }
 
@@ -28,7 +28,7 @@ const Feed = ({ items }: Props) => {
   return (
     <ul>
       {items.map(
-        ({ key, timestamp, icon, description, user, value }, index) => {
+        ({ key, timestamp, icon, description, author, value }, index) => {
           return (
             <li key={key}>
               <div>
@@ -39,7 +39,7 @@ const Feed = ({ items }: Props) => {
 
                   <div className="text-gray-600 ml-2">
                     <p className="text-xs">
-                      {user && <UserName user={user} />}
+                      <UserName user={author} />
                       <br />
                       <span>
                         {description}{" "}

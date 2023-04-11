@@ -65,7 +65,7 @@ func main() {
 	var userRepo domain.UserRepository = ds
 	var authRepo domain.AuthRepository = ds
 	var commentRepo domain.CommentRepository = ds
-	
+
 	userPool := authenticator.NewUserPool(config, userRepo)
 
 	authn := authenticator.New(userPool)
@@ -81,7 +81,7 @@ func main() {
 	sectorUsecase := usecases.NewSectorUsecase(authn, authz, sectorRepo, rh)
 	routeUsecase := usecases.NewRouteUsecase(authn, authz, routeRepo, rh)
 	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, boltRepo, rh)
-	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib)
+	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib, userPool)
 	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rh)
 	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)

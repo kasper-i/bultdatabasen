@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ResourceBase, resourceBaseSchema } from "./resource";
+import { Author, authorSchema } from "./user";
 
 const imageRotationSchema = z.union([
   z.literal(0),
@@ -29,7 +30,7 @@ export type Image = ResourceBase & {
   size: number;
   width: number;
   height: number;
-  userId: string;
+  author: Author;
 };
 
 export const imageSchema: z.ZodType<Image> = resourceBaseSchema.extend({
@@ -40,5 +41,5 @@ export const imageSchema: z.ZodType<Image> = resourceBaseSchema.extend({
   size: z.number(),
   width: z.number(),
   height: z.number(),
-  userId: z.string(),
+  author: authorSchema,
 });

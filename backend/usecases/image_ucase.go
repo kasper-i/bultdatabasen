@@ -19,15 +19,17 @@ type imageUsecase struct {
 	authorizer    domain.Authorizer
 	rh            domain.ResourceHelper
 	ib            domain.ImageBucket
+	userPool      domain.UserPool
 }
 
-func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, imageRepo domain.ImageRepository, rh domain.ResourceHelper, ib domain.ImageBucket) domain.ImageUsecase {
+func NewImageUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, imageRepo domain.ImageRepository, rh domain.ResourceHelper, ib domain.ImageBucket, userPool domain.UserPool) domain.ImageUsecase {
 	return &imageUsecase{
 		imageRepo:     imageRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rh:            rh,
 		ib:            ib,
+		userPool:      userPool,
 	}
 }
 
@@ -36,7 +38,16 @@ func (uc *imageUsecase) GetImages(ctx context.Context, resourceID uuid.UUID) ([]
 		return nil, err
 	}
 
-	return uc.imageRepo.GetImages(ctx, resourceID)
+	images, err := uc.imageRepo.GetImages(ctx, resourceID)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx := range images {
+		images[idx].Author.LoadName(ctx, uc.userPool)
+	}
+
+	return images, nil
 }
 
 func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain.Image, error) {
@@ -55,6 +66,7 @@ func (uc *imageUsecase) GetImage(ctx context.Context, imageID uuid.UUID) (domain
 	}
 
 	image.Ancestors = ancestors
+	image.Author.LoadName(ctx, uc.userPool)
 	return image, nil
 }
 
@@ -121,7 +133,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 			return err
 		} else {
 			img.ID = createdResource.ID
-			img.UserID = createdResource.CreatorID
+			img.Author.ID = createdResource.CreatorID
 		}
 
 		if err := uc.ib.UploadImage(txCtx, img.ID, imageBytes, mimeType); err != nil {
@@ -139,6 +151,8 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 		if img.Ancestors, err = uc.rh.GetAncestors(txCtx, img.ID); err != nil {
 			return nil
 		}
+
+		img.Author.LoadName(ctx, uc.userPool)
 
 		return nil
 	})

@@ -16,7 +16,7 @@ type Image struct {
 	Size        int       `json:"size"`
 	Width       int       `json:"width"`
 	Height      int       `json:"height"`
-	UserID      string    `gorm:"->;column:buser_id" json:"userId"`
+	Author      Author    `gorm:"<-:false;column:buser_id" json:"author"`
 }
 
 func (Image) TableName() string {
