@@ -134,6 +134,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 		} else {
 			img.ID = createdResource.ID
 			img.Author.ID = createdResource.CreatorID
+			img.Author.LoadName(txCtx, uc.userPool)
 		}
 
 		if err := uc.ib.UploadImage(txCtx, img.ID, imageBytes, mimeType); err != nil {
@@ -151,8 +152,6 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 		if img.Ancestors, err = uc.rh.GetAncestors(txCtx, img.ID); err != nil {
 			return nil
 		}
-
-		img.Author.LoadName(ctx, uc.userPool)
 
 		return nil
 	})

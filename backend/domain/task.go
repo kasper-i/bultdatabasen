@@ -15,7 +15,7 @@ type Task struct {
 	Assignee    *string    `gorm:"<-:false" json:"assignee,omitempty"`
 	Comment     *string    `json:"comment,omitempty"`
 	BirthTime   time.Time  `gorm:"->;column:btime" json:"createdAt"`
-	UserID      string     `gorm:"->;column:buser_id" json:"userId"`
+	Author      Author     `gorm:"<-:false;column:buser_id" json:"author"`
 	ClosedAt    *time.Time `json:"closedAt,omitempty"`
 }
 

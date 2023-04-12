@@ -83,7 +83,7 @@ func main() {
 	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, boltRepo, rh)
 	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib, userPool)
 	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rh)
-	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh, userPool)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
 	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
 	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh, userPool)

@@ -80,7 +80,7 @@ func (uc *commentUsecase) CreateComment(ctx context.Context, comment domain.Comm
 		} else {
 			comment.ID = createdResource.ID
 			comment.Author.ID = createdResource.CreatorID
-			comment.Author.LoadName(ctx, uc.userPool)
+			comment.Author.LoadName(txCtx, uc.userPool)
 			comment.BirthTime = createdResource.BirthTime
 		}
 
@@ -137,7 +137,7 @@ func (uc *commentUsecase) UpdateComment(ctx context.Context, commentID uuid.UUID
 		}
 
 		updatedComment.ID = original.ID
-		updatedComment.Author.LoadName(ctx, uc.userPool)
+		updatedComment.Author.LoadName(txCtx, uc.userPool)
 
 		if err := uc.rh.TouchResource(txCtx, commentID, user.ID); err != nil {
 			return err
