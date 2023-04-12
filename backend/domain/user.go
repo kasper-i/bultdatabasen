@@ -55,6 +55,7 @@ func (author Author) Value() (driver.Value, error) {
 func (author *Author) LoadName(ctx context.Context, userPool UserPool) {
 	user, err := userPool.GetUser(ctx, author.ID)
 	if err != nil {
+		return;
 	}
 
 	if user.FirstName != nil {
