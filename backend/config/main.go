@@ -26,6 +26,12 @@ type Config struct {
 		URL    string
 		Secret string
 	}
+	Cognito struct {
+		AccessKey       string `toml:"access_key"`
+		SecretAccessKey string `toml:"secret_access_key"`
+		Region          string
+		UserPoolID      string `toml:"user_pool_id"`
+	}
 }
 
 func Read() (Config, error) {

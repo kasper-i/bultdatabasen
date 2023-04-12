@@ -66,7 +66,9 @@ func main() {
 	var authRepo domain.AuthRepository = ds
 	var commentRepo domain.CommentRepository = ds
 
-	authn := authenticator.New()
+	userPool := authenticator.NewUserPool(config, userRepo)
+
+	authn := authenticator.New(userPool)
 	authz := authorizer.New(authRepo, resourceRepo)
 
 	rh := helpers.NewResourceHelper(resourceRepo, treeRepo, trashRepo)
@@ -79,12 +81,12 @@ func main() {
 	sectorUsecase := usecases.NewSectorUsecase(authn, authz, sectorRepo, rh)
 	routeUsecase := usecases.NewRouteUsecase(authn, authz, routeRepo, rh)
 	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, boltRepo, rh)
-	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib)
+	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib, userPool)
 	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rh)
-	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh, userPool)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
 	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
-	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh)
+	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh, userPool)
 
 	router.Use(CORSMiddleware)
 	router.Use(authn.Middleware)

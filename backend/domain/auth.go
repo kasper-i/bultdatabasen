@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -22,26 +21,9 @@ const (
 	WritePermission PermissionType = "write"
 )
 
-type User struct {
-	ID        string    `gorm:"primaryKey" json:"id"`
-	Email     *string   `json:"email,omitempty"`
-	FirstName *string   `json:"firstName,omitempty"`
-	LastName  *string   `json:"lastName,omitempty"`
-	FirstSeen time.Time `json:"firstSeen,omitempty"`
-}
-
-func (User) TableName() string {
-	return "user"
-}
-
 type ResourceRole struct {
 	Role       RoleType  `json:"role"`
 	ResourceID uuid.UUID `json:"resourceId"`
-}
-
-type UserUsecase interface {
-	GetUsers(ctx context.Context) ([]User, error)
-	GetUserRoles(ctx context.Context, userID string) ([]ResourceRole, error)
 }
 
 type Authenticator interface {

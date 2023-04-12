@@ -12,14 +12,16 @@ type commentUsecase struct {
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rh            domain.ResourceHelper
+	userPool      domain.UserPool
 }
 
-func NewCommentUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, commentRepo domain.CommentRepository, rh domain.ResourceHelper) domain.CommentUsecase {
+func NewCommentUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, commentRepo domain.CommentRepository, rh domain.ResourceHelper, userPool domain.UserPool) domain.CommentUsecase {
 	return &commentUsecase{
 		commentRepo:   commentRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rh:            rh,
+		userPool:      userPool,
 	}
 }
 
@@ -28,7 +30,13 @@ func (uc *commentUsecase) GetComments(ctx context.Context, resourceID uuid.UUID)
 		return nil, err
 	}
 
-	return uc.commentRepo.GetComments(ctx, resourceID)
+	comments, err := uc.commentRepo.GetComments(ctx, resourceID)
+
+	for idx := range comments {
+		comments[idx].Author.LoadName(ctx, uc.userPool)
+	}
+
+	return comments, err
 }
 
 func (uc *commentUsecase) GetComment(ctx context.Context, commentID uuid.UUID) (domain.Comment, error) {
@@ -47,6 +55,7 @@ func (uc *commentUsecase) GetComment(ctx context.Context, commentID uuid.UUID) (
 	}
 
 	comment.Ancestors = ancestors
+	comment.Author.LoadName(ctx, uc.userPool)
 	return comment, nil
 }
 
@@ -70,7 +79,8 @@ func (uc *commentUsecase) CreateComment(ctx context.Context, comment domain.Comm
 			return err
 		} else {
 			comment.ID = createdResource.ID
-			comment.UserID = createdResource.CreatorID
+			comment.Author.ID = createdResource.CreatorID
+			comment.Author.LoadName(txCtx, uc.userPool)
 			comment.BirthTime = createdResource.BirthTime
 		}
 
@@ -127,6 +137,8 @@ func (uc *commentUsecase) UpdateComment(ctx context.Context, commentID uuid.UUID
 		}
 
 		updatedComment.ID = original.ID
+		updatedComment.Author.ID = original.Author.ID
+		updatedComment.Author.LoadName(txCtx, uc.userPool)
 
 		if err := uc.rh.TouchResource(txCtx, commentID, user.ID); err != nil {
 			return err

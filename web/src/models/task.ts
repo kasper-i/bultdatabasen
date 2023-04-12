@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ResourceBase, resourceBaseSchema } from "./resource";
+import { Author, authorSchema } from "./user";
 
 const taskStatusSchema = z.union([
   z.literal("open"),
@@ -17,7 +18,7 @@ export type Task = ResourceBase & {
   assignee?: string;
   comment?: string;
   createdAt: Date;
-  userId: string;
+  author: Author;
   closedAt?: Date;
 };
 
@@ -28,6 +29,6 @@ export const taskSchema: z.ZodType<Task> = resourceBaseSchema.extend({
   assignee: z.string().optional(),
   comment: z.string().optional(),
   createdAt: z.coerce.date(),
-  userId: z.string(),
+  author: authorSchema,
   closedAt: z.coerce.date().optional(),
 });

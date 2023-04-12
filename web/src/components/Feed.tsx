@@ -1,7 +1,8 @@
+import { Author } from "@/models/user";
 import clsx from "clsx";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
-import React, { Fragment, Key, ReactNode } from "react";
+import { Fragment, Key, ReactNode } from "react";
 import Icon from "./atoms/Icon";
 import { IconType } from "./atoms/types";
 import UserName from "./UserName";
@@ -11,7 +12,7 @@ export interface FeedItem {
   timestamp: Date;
   icon: IconType;
   description: string;
-  userId: string;
+  author: Author;
   value: ReactNode;
 }
 
@@ -27,7 +28,7 @@ const Feed = ({ items }: Props) => {
   return (
     <ul>
       {items.map(
-        ({ key, timestamp, icon, description, userId, value }, index) => {
+        ({ key, timestamp, icon, description, author, value }, index) => {
           return (
             <li key={key}>
               <div>
@@ -38,7 +39,7 @@ const Feed = ({ items }: Props) => {
 
                   <div className="text-gray-600 ml-2">
                     <p className="text-xs">
-                      <UserName userId={userId} />
+                      <UserName user={author} />
                       <br />
                       <span>
                         {description}{" "}

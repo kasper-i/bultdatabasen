@@ -16,19 +16,10 @@ func NewUserHandler(router *mux.Router, userUsecase domain.UserUsecase) {
 		userUsecase: userUsecase,
 	}
 
-	router.HandleFunc("/users", handler.GetUsers).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/{userID}/roles", handler.GetUserRoles).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/{userID}/teams", nil).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/users/{userID}/teams/{teamID}", nil).Methods(http.MethodDelete, http.MethodOptions)
 	router.HandleFunc("/users/{userID}/invites", nil).Methods(http.MethodGet, http.MethodOptions)
-}
-
-func (hdlr *userHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	if names, err := hdlr.userUsecase.GetUsers(r.Context()); err != nil {
-		writeError(w, err)
-	} else {
-		writeResponse(w, http.StatusOK, names)
-	}
 }
 
 func (hdlr *userHandler) GetUserRoles(w http.ResponseWriter, r *http.Request) {

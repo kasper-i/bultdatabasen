@@ -60,7 +60,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         icon: "image",
         timestamp: image.timestamp,
         description: "Laddade upp foto",
-        userId: image.userId,
+        author: image.author,
         value: (
           <ImageThumbnail
             image={image}
@@ -77,7 +77,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         icon: "comment",
         timestamp: comment.createdAt,
         description: "Lämnade kommentar",
-        userId: comment.userId,
+        author: comment.author,
         value: <CommentView comment={comment} />,
       });
     });

@@ -1,14 +1,10 @@
-import { useUsers } from "@/queries/userQueries";
-import React, { FC } from "react";
+import { User } from "@/models/user";
+import { FC } from "react";
 
-const UserName: FC<{ userId: string }> = ({ userId }) => {
-  const { data: users } = useUsers();
-
-  const userInfo = users?.get(userId);
-
+const UserName: FC<{ user: User }> = ({ user }) => {
   return (
     <span className="text-primary-500">
-      {`${userInfo?.firstName} ${userInfo?.lastName?.[0]}`}
+      {`${user?.firstName} ${user?.lastName?.[0]}`}
     </span>
   );
 };

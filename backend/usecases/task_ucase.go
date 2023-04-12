@@ -12,14 +12,16 @@ type taskUsecase struct {
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rh            domain.ResourceHelper
+	userPool      domain.UserPool
 }
 
-func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, taskRepo domain.TaskRepository, rh domain.ResourceHelper) domain.TaskUsecase {
+func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, taskRepo domain.TaskRepository, rh domain.ResourceHelper, userPool domain.UserPool) domain.TaskUsecase {
 	return &taskUsecase{
 		taskRepo:      taskRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rh:            rh,
+		userPool:      userPool,
 	}
 }
 
@@ -28,7 +30,16 @@ func (uc *taskUsecase) GetTasks(ctx context.Context, resourceID uuid.UUID, pagin
 		return domain.EmptyPage[domain.Task](), err
 	}
 
-	return uc.taskRepo.GetTasks(ctx, resourceID, pagination, statuses)
+	page, err := uc.taskRepo.GetTasks(ctx, resourceID, pagination, statuses)
+	if err != nil {
+		return domain.EmptyPage[domain.Task](), err
+	}
+
+	for idx := range page.Data {
+		page.Data[idx].Author.LoadName(ctx, uc.userPool)
+	}
+
+	return page, nil
 }
 
 func (uc *taskUsecase) GetTask(ctx context.Context, taskID uuid.UUID) (domain.Task, error) {
@@ -47,6 +58,7 @@ func (uc *taskUsecase) GetTask(ctx context.Context, taskID uuid.UUID) (domain.Ta
 	}
 
 	task.Ancestors = ancestors
+	task.Author.LoadName(ctx, uc.userPool)
 	return task, nil
 }
 
@@ -80,7 +92,8 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		} else {
 			task.ID = createdResource.ID
 			task.BirthTime = createdResource.BirthTime
-			task.UserID = createdResource.CreatorID
+			task.Author.ID = createdResource.CreatorID
+			task.Author.LoadName(txCtx, uc.userPool)
 		}
 
 		if err := uc.taskRepo.InsertTask(txCtx, task); err != nil {
@@ -118,6 +131,8 @@ func (uc *taskUsecase) UpdateTask(ctx context.Context, taskID uuid.UUID, task do
 		}
 
 		task.ID = original.ID
+		task.Author.ID = original.Author.ID
+		task.Author.LoadName(txCtx, uc.userPool)
 
 		if original.Assignee != nil && task.Assignee == nil {
 			task.Status = "open"
