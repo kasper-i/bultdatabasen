@@ -137,6 +137,7 @@ func (uc *commentUsecase) UpdateComment(ctx context.Context, commentID uuid.UUID
 		}
 
 		updatedComment.ID = original.ID
+		updatedComment.Author.ID = original.Author.ID
 		updatedComment.Author.LoadName(txCtx, uc.userPool)
 
 		if err := uc.rh.TouchResource(txCtx, commentID, user.ID); err != nil {
