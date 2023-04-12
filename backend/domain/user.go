@@ -8,10 +8,10 @@ import (
 
 type User struct {
 	ID        string    `gorm:"primaryKey" json:"id"`
-	Email     *string   `json:"-"`
-	FirstName *string   `json:"firstName,omitempty"`
-	LastName  *string   `json:"lastName,omitempty"`
-	FirstSeen time.Time `json:"firstSeen,omitempty"`
+	Email     *string   `gorm:"-" json:"email,omitempty"`
+	FirstName *string   `gorm:"-" json:"firstName,omitempty"`
+	LastName  *string   `gorm:"-" json:"lastName,omitempty"`
+	FirstSeen time.Time `gorm:"-" json:"firstSeen,omitempty"`
 }
 
 func (User) TableName() string {
@@ -55,7 +55,7 @@ func (author Author) Value() (driver.Value, error) {
 func (author *Author) LoadName(ctx context.Context, userPool UserPool) {
 	user, err := userPool.GetUser(ctx, author.ID)
 	if err != nil {
-		return;
+		return
 	}
 
 	if user.FirstName != nil {
