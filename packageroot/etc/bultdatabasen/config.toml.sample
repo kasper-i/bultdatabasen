@@ -17,6 +17,13 @@ secret_access_key = ""
 region = "eu-west-1"
 user_pool_id = ""
 
+[smtp]
+host = "email-smtp.eu-west-1.amazonaws.com"
+port = 465
+tls = true
+username = ""
+password = ""
+
 [[functions]]
 name = "images/resize"
 url = "https://.doserverless.co/api/v1/web/fn-/images/resize"
