@@ -3,25 +3,30 @@ package usecases
 import (
 	"bultdatabasen/domain"
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 )
 
 type taskUsecase struct {
 	taskRepo      domain.TaskRepository
+	userRepo      domain.UserRepository
 	authenticator domain.Authenticator
 	authorizer    domain.Authorizer
 	rh            domain.ResourceHelper
 	userPool      domain.UserPool
+	emailer       domain.EmailSender
 }
 
-func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, taskRepo domain.TaskRepository, rh domain.ResourceHelper, userPool domain.UserPool) domain.TaskUsecase {
+func NewTaskUsecase(authenticator domain.Authenticator, authorizer domain.Authorizer, taskRepo domain.TaskRepository, userRepo domain.UserRepository, rh domain.ResourceHelper, userPool domain.UserPool, emailer domain.EmailSender) domain.TaskUsecase {
 	return &taskUsecase{
 		taskRepo:      taskRepo,
+		userRepo:      userRepo,
 		authenticator: authenticator,
 		authorizer:    authorizer,
 		rh:            rh,
 		userPool:      userPool,
+		emailer:       emailer,
 	}
 }
 
@@ -110,6 +115,30 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 
 		return nil
 	})
+
+	var route domain.Resource
+	for _, ancestor := range task.Ancestors {
+		if ancestor.Type == domain.TypeRoute {
+			route = ancestor
+		}
+	}
+
+	maintainers, err := uc.userRepo.GetMaintainers(ctx, task.Ancestors.IDs()...)
+	if err != nil {
+		return task, err
+	}
+
+	for _, maintainer := range maintainers {
+		details, err := uc.userPool.GetUser(ctx, maintainer)
+		if err != nil {
+			continue
+		}
+
+		fmt.Println(*details.Email)
+		message := fmt.Sprintf("Hej %s,\n\nEtt nytt problem har rapporterats på leden \"%s\" av användaren %s.\n\n\"%s\"\n\nMer info: http://localhost:3000/route/%s/tasks",
+			*user.FirstName, *route.Name, task.Author.FirstName, task.Description, route.ID)
+		uc.emailer.SendEmail(*details.Email, "Nytt uppdrag publicerat", message)
+	}
 
 	return task, err
 }

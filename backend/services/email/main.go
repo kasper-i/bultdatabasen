@@ -21,7 +21,7 @@ type sendEmailRequest struct {
 	body      string
 }
 
-func NewMailSender(config config.Config) *emailer {
+func NewMailSender(config config.Config) (*emailer, error) {
 	emailer := &emailer{
 		comm: make(chan any, 1024),
 		auth: smtp.PlainAuth("", config.SMTP.Username, config.SMTP.Password, config.SMTP.Host),
@@ -31,7 +31,7 @@ func NewMailSender(config config.Config) *emailer {
 
 	go emailer.main()
 
-	return emailer
+	return emailer, nil
 }
 
 func (e *emailer) SendEmail(recipient string, subject string, body string) {
@@ -46,14 +46,17 @@ func (e *emailer) main() {
 	for msg := range e.comm {
 		switch msg := msg.(type) {
 		case sendEmailRequest:
-			e.handleSendEmailRequest(msg)
+			err := e.handleSendEmailRequest(msg)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 	}
 }
 
 func (e *emailer) handleSendEmailRequest(msg sendEmailRequest) error {
+	var err error
 	from := mail.Address{Name: "Bultdatabasen", Address: "no-reply@bultdatabasen.se"}
-	address := e.host + ":" + fmt.Sprintf("%d", e.port)
 
 	headers := make(map[string]string)
 	headers["From"] = fmt.Sprintf("%s <%s>", from.Name, from.Address)
@@ -66,6 +69,7 @@ func (e *emailer) handleSendEmailRequest(msg sendEmailRequest) error {
 	}
 	message += "\r\n" + msg.body
 
+	address := e.host + ":" + fmt.Sprintf("%d", e.port)
 	tlsconfig := &tls.Config{
 		ServerName: e.host,
 	}
@@ -75,24 +79,24 @@ func (e *emailer) handleSendEmailRequest(msg sendEmailRequest) error {
 		return err
 	}
 
-	c, err := smtp.NewClient(conn, e.host)
+	client, err := smtp.NewClient(conn, e.host)
 	if err != nil {
 		return err
 	}
 
-	if err = c.Auth(e.auth); err != nil {
+	if err := client.Auth(e.auth); err != nil {
 		return err
 	}
 
-	if err = c.Mail(from.Address); err != nil {
+	if err = client.Mail(from.Address); err != nil {
 		return err
 	}
 
-	if err = c.Rcpt(msg.recipient); err != nil {
+	if err = client.Rcpt(msg.recipient); err != nil {
 		return err
 	}
 
-	w, err := c.Data()
+	w, err := client.Data()
 	if err != nil {
 		return err
 	}
@@ -107,7 +111,7 @@ func (e *emailer) handleSendEmailRequest(msg sendEmailRequest) error {
 		return err
 	}
 
-	c.Quit()
+	client.Quit()
 
 	return nil
 }

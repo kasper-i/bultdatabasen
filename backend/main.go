@@ -9,6 +9,7 @@ import (
 	"bultdatabasen/helpers"
 	"bultdatabasen/images"
 	"bultdatabasen/repositories"
+	"bultdatabasen/services/email"
 	"bultdatabasen/usecases"
 	"fmt"
 	"io"
@@ -73,6 +74,10 @@ func main() {
 
 	rh := helpers.NewResourceHelper(resourceRepo, treeRepo, trashRepo)
 	ib := images.NewImageBucket(config)
+	emailer, err := email.NewMailSender(config)
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
 
 	userUsecase := usecases.NewUserUsecase(authn, authRepo, userRepo)
 	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rh)
@@ -83,7 +88,7 @@ func main() {
 	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, boltRepo, rh)
 	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib, userPool)
 	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rh)
-	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh, userPool)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, userRepo, rh, userPool, emailer)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
 	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
 	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh, userPool)

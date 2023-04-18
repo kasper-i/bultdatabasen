@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql/driver"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
@@ -26,6 +28,7 @@ type UserRepository interface {
 	Transactor
 
 	SaveUser(ctx context.Context, user User) error
+	GetMaintainers(ctx context.Context, resourceIDs ...uuid.UUID) ([]string, error)
 }
 
 type AuthRepository interface {
@@ -39,8 +42,8 @@ type UserPool interface {
 
 type Author struct {
 	ID        string `json:"id"`
-	FirstName string `json:"firstName,omitempty"`
-	LastName  string `json:"lastName,omitempty"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
 func (author *Author) Scan(value interface{}) error {
