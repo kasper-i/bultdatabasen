@@ -76,7 +76,7 @@ func main() {
 
 	userUsecase := usecases.NewUserUsecase(authn, authRepo, userRepo)
 	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rh)
-	areaUsecase := usecases.NewAreaUsecase(authn, authz, areaRepo, authRepo, rh)
+	areaUsecase := usecases.NewAreaUsecase(authn, authz, areaRepo, rh)
 	cragUsecase := usecases.NewCragUsecase(authn, authz, cragRepo, rh)
 	sectorUsecase := usecases.NewSectorUsecase(authn, authz, sectorRepo, rh)
 	routeUsecase := usecases.NewRouteUsecase(authn, authz, routeRepo, rh)
