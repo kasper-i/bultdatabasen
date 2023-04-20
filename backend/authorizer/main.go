@@ -25,12 +25,8 @@ func (a *authorizer) HasPermission(ctx context.Context, user *domain.User, resou
 		Permission: permission,
 	}
 
-	if resourceID.String() == domain.RootID {
-		if permission == domain.ReadPermission {
-			return nil
-		} else {
-			return notAuthorized
-		}
+	if resourceID.String() == domain.RootID && permission == domain.ReadPermission {
+		return nil
 	}
 
 	ancestors, err := a.resourceRepo.GetAncestors(ctx, resourceID)
@@ -39,10 +35,15 @@ func (a *authorizer) HasPermission(ctx context.Context, user *domain.User, resou
 	}
 
 	isDeleted := true
+
 	for _, ancestor := range ancestors {
 		if ancestor.ID == uuid.MustParse(domain.RootID) {
 			isDeleted = false
 		}
+	}
+
+	if len(ancestors) == 0 && resourceID == uuid.MustParse(domain.RootID) {
+		isDeleted = false
 	}
 
 	if isDeleted {
