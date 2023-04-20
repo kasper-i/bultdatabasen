@@ -52,10 +52,8 @@ func (uc *resourceUsecase) MoveResource(ctx context.Context, resourceID, newPare
 		return err
 	}
 
-	if newParentID.String() != domain.RootID {
-		if err := uc.authorizer.HasPermission(ctx, &user, newParentID, domain.WritePermission); err != nil {
-			return err
-		}
+	if err := uc.authorizer.HasPermission(ctx, &user, newParentID, domain.WritePermission); err != nil {
+		return err
 	}
 
 	return uc.rh.MoveResource(ctx, resourceID, newParentID)

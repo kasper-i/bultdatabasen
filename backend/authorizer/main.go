@@ -35,10 +35,15 @@ func (a *authorizer) HasPermission(ctx context.Context, user *domain.User, resou
 	}
 
 	isDeleted := true
+
 	for _, ancestor := range ancestors {
 		if ancestor.ID == uuid.MustParse(domain.RootID) {
 			isDeleted = false
 		}
+	}
+
+	if len(ancestors) == 0 && resourceID == uuid.MustParse(domain.RootID) {
+		isDeleted = false
 	}
 
 	if isDeleted {
