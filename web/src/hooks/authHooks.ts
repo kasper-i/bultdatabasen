@@ -10,7 +10,7 @@ export const useIsOwner = (resourceId: string): boolean => {
   const ancestors = resource?.ancestors ?? [];
 
   const role = roles?.find((role) => role.resourceId === resourceId)?.role;
-  if (role === "owner") {
+  if (role === "owner" || role === "maintainer") {
     return true;
   }
 
@@ -21,6 +21,6 @@ export const useIsOwner = (resourceId: string): boolean => {
         (ancestor) =>
           roles?.find((role) => role.resourceId === ancestor.id)?.role
       )
-      .findIndex((role) => role === "owner") !== -1
+      .findIndex((role) => role === "owner" || role === "maintainer") !== -1
   );
 };

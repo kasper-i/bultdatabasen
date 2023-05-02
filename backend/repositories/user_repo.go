@@ -20,13 +20,13 @@ func (store *psqlDatastore) GetUsersByRole(ctx context.Context, resourceID uuid.
 		FROM tree, unnest(string_to_array(tree.path::text, '.')) AS id
 		WHERE resource_id = @resourceID
 	)
-	SELECT ut.user_id
+	SELECT ut.user_id AS id
 		FROM path
 		INNER JOIN team_role tr ON path.resource_id = tr.resource_id
 		INNER JOIN user_team ut ON tr.team_id = ut.team_id
 		WHERE tr.role = @role
 	UNION
-	SELECT ur.user_id
+	SELECT ur.user_id AS id
 		FROM path
 		INNER JOIN user_role ur ON path.resource_id = ur.resource_id
 		WHERE ur.role = @role`
