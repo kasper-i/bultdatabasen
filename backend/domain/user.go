@@ -28,7 +28,7 @@ type UserRepository interface {
 	Transactor
 
 	SaveUser(ctx context.Context, user User) error
-	GetMaintainers(ctx context.Context, resourceIDs ...uuid.UUID) ([]string, error)
+	GetUsersByRole(ctx context.Context, resourceID uuid.UUID, role RoleType) ([]User, error)
 }
 
 type AuthRepository interface {

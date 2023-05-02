@@ -21,6 +21,7 @@ import { manufacturerSchema } from "./models/manufacturer";
 import { materialSchema } from "./models/material";
 import { modelSchema } from "./models/model";
 import { ResourceRole, resourceRoleSchema } from "./models/role";
+import { teamSchema } from "./models/team";
 
 export interface Pagination {
   page: number;
@@ -155,6 +156,16 @@ export class Api {
     });
 
     return z.array(resourceSchema).parse(result.data);
+  };
+
+  static getMaintainers = async (resourceId: string) => {
+    const endpoint = `/resources/${resourceId}/maintainers`;
+
+    const result = await axios.get(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return z.array(teamSchema).parse(result.data);
   };
 
   static getRoute = async (routeId: string) => {

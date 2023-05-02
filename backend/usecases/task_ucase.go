@@ -123,13 +123,13 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		}
 	}
 
-	maintainers, err := uc.userRepo.GetMaintainers(ctx, task.Ancestors.IDs()...)
+	maintainers, err := uc.userRepo.GetUsersByRole(ctx, parentResourceID, domain.RoleMaintainer)
 	if err != nil {
 		return task, err
 	}
 
 	for _, maintainer := range maintainers {
-		details, err := uc.userPool.GetUser(ctx, maintainer)
+		details, err := uc.userPool.GetUser(ctx, maintainer.ID)
 		if err != nil {
 			continue
 		}

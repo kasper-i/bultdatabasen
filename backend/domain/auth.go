@@ -9,9 +9,9 @@ import (
 type RoleType string
 
 const (
-	RoleGuest RoleType = "guest"
-	RoleOwner RoleType = "owner"
-	RoleAdmin RoleType = "admin"
+	RoleGuest      RoleType = "guest"
+	RoleMaintainer RoleType = "maintainer"
+	RoleOwner      RoleType = "owner"
 )
 
 type PermissionType string

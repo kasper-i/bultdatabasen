@@ -1,9 +1,10 @@
-import { Resource } from "@/models/resource";
-import { useResource } from "@/queries/resourceQueries";
+import { Resource, ResourceType } from "@/models/resource";
+import { useMaintainers, useResource } from "@/queries/resourceQueries";
 import { getResourceLabel } from "@/utils/resourceUtils";
 import React, { ReactElement } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import { Underlined } from "./Underlined";
+import { Concatenator } from "@/components/Concatenator";
 
 interface Props {
   resourceId: string;
@@ -11,12 +12,28 @@ interface Props {
   showCounts?: boolean;
 }
 
+const locationDescription = (resourceType: ResourceType) => {
+  switch (resourceType) {
+    case "area":
+      return `Detta område`;
+    case "crag":
+      return `Denna klippa`;
+    case "sector":
+      return `Denna sektor`;
+    case "route":
+      return `Denna led`;
+    default:
+      return undefined;
+  }
+};
+
 const PageHeader = ({
   resourceId,
   ancestors,
   showCounts = false,
 }: Props): ReactElement => {
   const { data: resource } = useResource(resourceId);
+  const { data: maintainers } = useMaintainers(resourceId);
 
   if (!resource) {
     return <></>;
@@ -39,6 +56,16 @@ const PageHeader = ({
           <Underlined>{resource.counters?.routes ?? 0}</Underlined> leder och{" "}
           <Underlined>{resource.counters?.installedBolts ?? 0}</Underlined>{" "}
           dokumenterade bultar.
+        </p>
+      )}
+      {!!maintainers?.length && (
+        <p className="border border-primary-300 bg-primary-50 rounded p-2 my-2">
+          {locationDescription(resource.type)} underhålls av{" "}
+          <Concatenator>
+            {maintainers?.map((maintainer) => (
+              <span key={maintainer.id}>{maintainer.name}</span>
+            ))}
+          </Concatenator>
         </p>
       )}
     </div>

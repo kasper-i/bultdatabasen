@@ -66,6 +66,7 @@ func main() {
 	var userRepo domain.UserRepository = ds
 	var authRepo domain.AuthRepository = ds
 	var commentRepo domain.CommentRepository = ds
+	var teamRepo domain.TeamRepository = ds
 
 	userPool := authenticator.NewUserPool(config, userRepo)
 
@@ -92,6 +93,7 @@ func main() {
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
 	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
 	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh, userPool)
+	teamUsecase := usecases.NewTeamUsecase(teamRepo)
 
 	router.Use(CORSMiddleware)
 	router.Use(authn.Middleware)
@@ -109,7 +111,7 @@ func main() {
 
 	router.HandleFunc("/invites", nil).Methods(http.MethodPost, http.MethodOptions)
 
-	httpdelivery.NewResourceHandler(router, resourceUseCase)
+	httpdelivery.NewResourceHandler(router, resourceUseCase, teamUsecase)
 	httpdelivery.NewAreaHandler(router, areaUsecase)
 	httpdelivery.NewCragHandler(router, cragUsecase)
 	httpdelivery.NewSectorHandler(router, sectorUsecase)

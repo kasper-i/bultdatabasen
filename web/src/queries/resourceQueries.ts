@@ -11,3 +11,8 @@ export const useLazyResource = (resourceId: string) =>
 
 export const useChildren = (resourceId: string) =>
   useQuery(["children", { resourceId }], () => Api.getChildren(resourceId));
+
+export const useMaintainers = (resourceId: string) =>
+  useQuery(["maintainers", { resourceId }], () =>
+    Api.getMaintainers(resourceId)
+  );
