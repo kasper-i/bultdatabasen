@@ -2,11 +2,18 @@ package usecases
 
 import (
 	"bultdatabasen/domain"
+	"bytes"
 	"context"
 	"fmt"
+	"text/template"
 
 	"github.com/google/uuid"
+
+	_ "embed"
 )
+
+//go:embed new_task.tmpl
+var newTaskTemplate string
 
 type taskUsecase struct {
 	taskRepo      domain.TaskRepository
@@ -135,9 +142,28 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		}
 
 		fmt.Println(*details.Email)
-		message := fmt.Sprintf("Hej %s,\n\nEtt nytt problem har rapporterats på leden \"%s\" av användaren %s.\n\n\"%s\"\n\nMer info: http://localhost:3000/route/%s/tasks",
-			*user.FirstName, *route.Name, task.Author.FirstName, task.Description, route.ID)
-		uc.emailer.SendEmail(*details.Email, "Nytt uppdrag publicerat", message)
+		tmpl, err := template.New("test").Parse(newTaskTemplate)
+		if err != nil {
+			return domain.Task{}, err
+		}
+
+		var buf bytes.Buffer
+		err = tmpl.Execute(&buf, struct {
+			FirstName    string
+			RouteName    string
+			ReporterName string
+			RouteID      uuid.UUID
+		}{
+			FirstName:    *user.FirstName,
+			RouteName:    *route.Name,
+			ReporterName: task.Author.FirstName,
+			RouteID:      route.ID,
+		})
+		if err != nil {
+			return domain.Task{}, err
+		}
+
+		uc.emailer.SendEmail(*details.Email, "Nytt uppdrag publicerat", buf.String())
 	}
 
 	return task, err
