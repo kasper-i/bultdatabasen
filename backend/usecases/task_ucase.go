@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"text/template"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -130,41 +131,46 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		}
 	}
 
-	maintainers, err := uc.userRepo.GetUsersByRole(ctx, parentResourceID, domain.RoleMaintainer)
-	if err != nil {
-		return task, err
-	}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
 
-	for _, maintainer := range maintainers {
-		details, err := uc.userPool.GetUser(ctx, maintainer.ID)
+		maintainers, err := uc.userRepo.GetUsersByRole(ctx, parentResourceID, domain.RoleMaintainer)
 		if err != nil {
-			continue
+			return
 		}
 
-		fmt.Println(*details.Email)
-		tmpl, err := template.New("test").Parse(newTaskTemplate)
-		if err != nil {
-			return domain.Task{}, err
-		}
+		for _, maintainer := range maintainers {
+			details, err := uc.userPool.GetUser(ctx, maintainer.ID)
+			if err != nil {
+				continue
+			}
 
-		var buf bytes.Buffer
-		err = tmpl.Execute(&buf, struct {
-			FirstName    string
-			RouteName    string
-			ReporterName string
-			RouteID      uuid.UUID
-		}{
-			FirstName:    *user.FirstName,
-			RouteName:    *route.Name,
-			ReporterName: task.Author.FirstName,
-			RouteID:      route.ID,
-		})
-		if err != nil {
-			return domain.Task{}, err
-		}
+			fmt.Println(*details.Email)
+			tmpl, err := template.New("test").Parse(newTaskTemplate)
+			if err != nil {
+				return
+			}
 
-		uc.emailer.SendEmail(*details.Email, "Nytt uppdrag publicerat", buf.String())
-	}
+			var buf bytes.Buffer
+			err = tmpl.Execute(&buf, struct {
+				FirstName    string
+				RouteName    string
+				ReporterName string
+				RouteID      uuid.UUID
+			}{
+				FirstName:    *user.FirstName,
+				RouteName:    *route.Name,
+				ReporterName: task.Author.FirstName,
+				RouteID:      route.ID,
+			})
+			if err != nil {
+				return
+			}
+
+			uc.emailer.SendEmail(*details.Email, "Nytt uppdrag publicerat", buf.String())
+		}
+	}()
 
 	return task, err
 }
