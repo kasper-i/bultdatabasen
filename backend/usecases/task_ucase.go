@@ -4,7 +4,7 @@ import (
 	"bultdatabasen/domain"
 	"bytes"
 	"context"
-	"fmt"
+	"log"
 	"text/template"
 	"time"
 
@@ -131,46 +131,7 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		}
 	}
 
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		maintainers, err := uc.userRepo.GetUsersByRole(ctx, parentResourceID, domain.RoleMaintainer)
-		if err != nil {
-			return
-		}
-
-		for _, maintainer := range maintainers {
-			details, err := uc.userPool.GetUser(ctx, maintainer.ID)
-			if err != nil {
-				continue
-			}
-
-			fmt.Println(*details.Email)
-			tmpl, err := template.New("test").Parse(newTaskTemplate)
-			if err != nil {
-				return
-			}
-
-			var buf bytes.Buffer
-			err = tmpl.Execute(&buf, struct {
-				FirstName    string
-				RouteName    string
-				ReporterName string
-				RouteID      uuid.UUID
-			}{
-				FirstName:    *user.FirstName,
-				RouteName:    *route.Name,
-				ReporterName: task.Author.FirstName,
-				RouteID:      route.ID,
-			})
-			if err != nil {
-				return
-			}
-
-			uc.emailer.SendEmail(*details.Email, "Nytt uppdrag publicerat", buf.String())
-		}
-	}()
+	go uc.sendNewTaskNotifications(parentResourceID, task, route)
 
 	return task, err
 }
@@ -246,4 +207,54 @@ func (uc *taskUsecase) DeleteTask(ctx context.Context, taskID uuid.UUID) error {
 	}
 
 	return uc.rh.DeleteResource(ctx, taskID, user.ID)
+}
+
+func (uc *taskUsecase) sendNewTaskNotifications(parentResourceID uuid.UUID, task domain.Task, route domain.Resource) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("%v", err)
+		}
+	}()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	maintainers, err := uc.userRepo.GetUsersByRole(ctx, parentResourceID, domain.RoleMaintainer)
+	if err != nil {
+		return
+	}
+
+	for _, maintainer := range maintainers {
+		details, err := uc.userPool.GetUser(ctx, maintainer.ID)
+		if err != nil {
+			continue
+		}
+
+		tmpl, err := template.New("new_task").Parse(newTaskTemplate)
+		if err != nil {
+			return
+		}
+
+		var buf bytes.Buffer
+		err = tmpl.Execute(&buf, struct {
+			FirstName    string
+			RouteName    string
+			ReporterName string
+			RouteID      uuid.UUID
+		}{
+			FirstName:    *details.FirstName,
+			RouteName:    *route.Name,
+			ReporterName: task.Author.FirstName,
+			RouteID:      route.ID,
+		})
+		if err != nil {
+			return
+		}
+
+		err = uc.emailer.SendEmail(ctx, *details.Email, "Nytt uppdrag publicerat", buf.String())
+		if err != nil {
+			log.Printf("failed to send email to %s: %s", *details.Email, err)
+			return
+		}
+	}
 }

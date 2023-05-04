@@ -2,6 +2,7 @@ package email
 
 import (
 	"bultdatabasen/config"
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/mail"
@@ -29,32 +30,30 @@ func NewMailSender(config config.Config) (*emailer, error) {
 		port: config.SMTP.Port,
 	}
 
-	go emailer.main()
-
 	return emailer, nil
 }
 
-func (e *emailer) SendEmail(recipient string, subject string, body string) {
-	e.comm <- sendEmailRequest{
-		recipient: recipient,
-		subject:   subject,
-		body:      body,
+func (e *emailer) SendEmail(ctx context.Context, recipient string, subject string, body string) error {
+	c := make(chan error, 1)
+
+	go func() {
+		c <- e.handleSendEmailRequest(ctx, sendEmailRequest{
+			recipient: recipient,
+			subject:   subject,
+			body:      body,
+		})
+	}()
+
+	select {
+	case <-ctx.Done():
+		<-c
+		return ctx.Err()
+	case err := <-c:
+		return err
 	}
 }
 
-func (e *emailer) main() {
-	for msg := range e.comm {
-		switch msg := msg.(type) {
-		case sendEmailRequest:
-			err := e.handleSendEmailRequest(msg)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-		}
-	}
-}
-
-func (e *emailer) handleSendEmailRequest(msg sendEmailRequest) error {
+func (e *emailer) handleSendEmailRequest(ctx context.Context, msg sendEmailRequest) error {
 	var err error
 	from := mail.Address{Name: "Bultdatabasen", Address: "no-reply@bultdatabasen.se"}
 
@@ -70,14 +69,25 @@ func (e *emailer) handleSendEmailRequest(msg sendEmailRequest) error {
 	message += "\r\n" + msg.body
 
 	address := e.host + ":" + fmt.Sprintf("%d", e.port)
-	tlsconfig := &tls.Config{
-		ServerName: e.host,
+
+	dialer := tls.Dialer{
+		Config: &tls.Config{
+			ServerName: e.host,
+		},
 	}
 
-	conn, err := tls.Dial("tcp", address, tlsconfig)
+	conn, err := dialer.DialContext(ctx, "tcp", address)
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			defer conn.Close()
+		}
+	}()
 
 	client, err := smtp.NewClient(conn, e.host)
 	if err != nil {
@@ -111,7 +121,10 @@ func (e *emailer) handleSendEmailRequest(msg sendEmailRequest) error {
 		return err
 	}
 
-	client.Quit()
+	err = client.Quit()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

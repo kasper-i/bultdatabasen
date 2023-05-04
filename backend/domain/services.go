@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type EmailSender interface {
-	SendEmail(recipient string, subject string, body string)
+	SendEmail(ctx context.Context, recipient string, subject string, body string) error
 }
