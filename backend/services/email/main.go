@@ -80,14 +80,11 @@ func (e *emailer) handleSendEmailRequest(ctx context.Context, msg sendEmailReque
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	if deadline, ok := ctx.Deadline(); ok {
+		conn.SetDeadline(deadline)
+	}
 
-	go func() {
-		select {
-		case <-ctx.Done():
-			defer conn.Close()
-		}
-	}()
+	defer conn.Close()
 
 	client, err := smtp.NewClient(conn, e.host)
 	if err != nil {
