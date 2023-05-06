@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: |
-          for f in "backend/cors.go" "backend/usecases/new_task.tmpl" "packageroot/etc/nginx/sites-available/api.bultdatabasen.se" "packageroot/etc/nginx/sites-available/bultdatabasen.se"; do
+          for f in "web/src/config.json" "backend/cors.go" "backend/usecases/new_task.tmpl" "packageroot/etc/nginx/sites-available/api.bultdatabasen.se" "packageroot/etc/nginx/sites-available/bultdatabasen.se"; do
             sed -i 's/bultdatabasen.se/test.bultdatabasen.se/g' $f
           done
           sudo apt install -y jq
