@@ -1,26 +1,51 @@
+import { Permission } from "@/models/permission";
+import { UserRole } from "@/models/role";
 import { useLazyResource } from "@/queries/resourceQueries";
 import { useRoles } from "@/queries/roleQueries";
 import { selectUserId } from "@/slices/authSlice";
+import { useMemo } from "react";
 import { useSelector } from "react-redux";
 
-export const useIsOwner = (resourceId: string): boolean => {
+const roleToPermissions = (role: UserRole): Permission[] => {
+  switch (role) {
+    case "owner":
+    case "maintainer":
+      return ["read", "write"];
+    default:
+      return ["read"];
+  }
+};
+
+export const usePermissions = (resourceId: string): Permission[] => {
   const { data: resource } = useLazyResource(resourceId);
   const userId = useSelector(selectUserId);
   const { roles } = useRoles(userId);
   const ancestors = resource?.ancestors ?? [];
 
-  const role = roles?.find((role) => role.resourceId === resourceId)?.role;
-  if (role === "owner" || role === "maintainer") {
-    return true;
-  }
+  return useMemo(() => {
+    const permissions: Set<Permission> = new Set();
 
-  return (
+    const role = roles?.find((role) => role.resourceId === resourceId)?.role;
+    if (role) {
+      roleToPermissions(role).forEach((permission) =>
+        permissions.add(permission)
+      );
+    }
+
     ancestors
       .filter((ancestor) => ancestor.type !== "root")
-      .flatMap(
-        (ancestor) =>
-          roles?.find((role) => role.resourceId === ancestor.id)?.role
-      )
-      .findIndex((role) => role === "owner" || role === "maintainer") !== -1
-  );
+      .forEach((ancestor) => {
+        const role = roles?.find(
+          (role) => role.resourceId === ancestor.id
+        )?.role;
+
+        if (role) {
+          roleToPermissions(role).forEach((permission) =>
+            permissions.add(permission)
+          );
+        }
+      });
+
+    return [...permissions.values()];
+  }, [resourceId, roles, ancestors]);
 };
