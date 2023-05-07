@@ -81,7 +81,9 @@ func (e *emailer) handleSendEmailRequest(ctx context.Context, msg sendEmailReque
 		return err
 	}
 	if deadline, ok := ctx.Deadline(); ok {
-		conn.SetDeadline(deadline)
+		if err := conn.SetDeadline(deadline); err != nil {
+			return err
+		}
 	}
 
 	defer conn.Close()
