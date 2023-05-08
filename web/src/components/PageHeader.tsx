@@ -1,32 +1,17 @@
-import { Resource, ResourceType } from "@/models/resource";
+import { Concatenator } from "@/components/Concatenator";
+import { Resource } from "@/models/resource";
 import { useMaintainers, useResource } from "@/queries/resourceQueries";
 import { getResourceLabel } from "@/utils/resourceUtils";
-import React, { ReactElement } from "react";
+import { ReactElement } from "react";
+import Icon from "./atoms/Icon";
 import Breadcrumbs from "./Breadcrumbs";
 import { Underlined } from "./Underlined";
-import { Concatenator } from "@/components/Concatenator";
-import Icon from "./atoms/Icon";
 
 interface Props {
   resourceId: string;
   ancestors?: Resource[];
   showCounts?: boolean;
 }
-
-const locationDescription = (resourceType: ResourceType) => {
-  switch (resourceType) {
-    case "area":
-      return `Detta område`;
-    case "crag":
-      return `Denna klippa`;
-    case "sector":
-      return `Denna sektor`;
-    case "route":
-      return `Denna led`;
-    default:
-      return undefined;
-  }
-};
 
 const PageHeader = ({
   resourceId,
