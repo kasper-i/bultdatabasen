@@ -32,6 +32,13 @@ type Config struct {
 		Region          string
 		UserPoolID      string `toml:"user_pool_id"`
 	}
+	SMTP struct {
+		Host     string
+		Port     int
+		TLS      bool
+		Username string
+		Password string
+	}
 }
 
 func Read() (Config, error) {

@@ -1,7 +1,7 @@
 import React, { Children, FC, Fragment, ReactNode } from "react";
 
 export const Concatenator: FC<{
-  children: ReactNode[];
+  children?: ReactNode[];
   className?: string;
 }> = ({ children, className }) => {
   const count = Children.count(children);

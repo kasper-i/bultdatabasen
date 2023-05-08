@@ -49,9 +49,9 @@ func NewDatastore(config config.Config) (*psqlDatastore, error) {
 
 	tx := func(ctx context.Context) *gorm.DB {
 		if tx, ok := ctx.Value(txKey{}).(*gorm.DB); ok {
-			return tx
+			return tx.WithContext(ctx)
 		} else {
-			return db
+			return db.WithContext(ctx)
 		}
 	}
 

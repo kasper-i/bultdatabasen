@@ -2,7 +2,7 @@ import { InsertPosition } from "@/Api";
 import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
 import Restricted from "@/components/Restricted";
-import { useIsOwner } from "@/hooks/authHooks";
+import { usePermissions } from "@/hooks/authHooks";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -31,7 +31,9 @@ const PointEditor = ({
   const [openInitialWizard, setOpenInitialWizard] = useState(false);
   const createPoint = useAttachPoint(routeId);
 
-  const editable = useIsOwner(routeId);
+  const editable = usePermissions(routeId)?.some(
+    (permission) => permission === "write"
+  );
 
   const selectedPointId = searchParams.get("p");
 

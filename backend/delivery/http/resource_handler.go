@@ -13,15 +13,17 @@ import (
 
 type resourceHandler struct {
 	resourceUsecase domain.ResourceUsecase
+	teamUsecase     domain.TeamUsecase
 }
 
 type resourcePatch struct {
 	ParentID uuid.UUID `json:"parentId"`
 }
 
-func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUsecase) {
+func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUsecase, teamUsecase domain.TeamUsecase) {
 	handler := &resourceHandler{
 		resourceUsecase: resourceUsecase,
+		teamUsecase: teamUsecase,
 	}
 
 	router.HandleFunc("/resources/{resourceID}", handler.GetResource).Methods(http.MethodGet, http.MethodOptions)
@@ -29,6 +31,7 @@ func NewResourceHandler(router *mux.Router, resourceUsecase domain.ResourceUseca
 	router.HandleFunc("/resources/{resourceID}/ancestors", handler.GetAncestors).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources/{resourceID}/children", handler.GetChildren).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/resources", handler.Search).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/resources/{resourceID}/maintainers", handler.GetMaintainers).Methods(http.MethodGet, http.MethodOptions)
 }
 
 func (hdlr *resourceHandler) GetResource(w http.ResponseWriter, r *http.Request) {
@@ -126,5 +129,20 @@ func (hdlr *resourceHandler) Search(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 	} else {
 		writeResponse(w, http.StatusOK, results)
+	}
+}
+
+func (hdlr *resourceHandler) GetMaintainers(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := uuid.Parse(vars["resourceID"])
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+
+	if maintainers, err := hdlr.teamUsecase.GetMaintainers(r.Context(), id); err != nil {
+		writeError(w, err)
+	} else {
+		writeResponse(w, http.StatusOK, maintainers)
 	}
 }

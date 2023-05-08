@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-const userRoleSchema = z.union([z.literal("owner"), z.literal("guest")]);
+const userRoleSchema = z.union([
+  z.literal("maintainer"),
+  z.literal("owner"),
+  z.literal("guest"),
+]);
 
 export type UserRole = z.infer<typeof userRoleSchema>;
 

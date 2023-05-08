@@ -18,7 +18,7 @@ const SimpleTable: FC<{ items: SimpleTableItem[] }> = ({
               {row}
 
               {badge && (
-                <span className="bg-primary-400 rounded-full py-1 px-2 text-xs text-white">
+                <span className="bg-gray-200 rounded-full py-1 px-2 text-xs">
                   {badge}
                 </span>
               )}

@@ -64,7 +64,7 @@ func NewUserPool(config config.Config, userRepo domain.UserRepository) domain.Us
 }
 
 func (pool *pool) GetUser(ctx context.Context, userID string) (domain.User, error) {
-	replyChannel := make(chan getUserResponse)
+	replyChannel := make(chan getUserResponse, 1)
 	pool.comm <- getUserRequest{
 		userID:       userID,
 		replyChannel: replyChannel,

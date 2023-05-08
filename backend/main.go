@@ -9,6 +9,7 @@ import (
 	"bultdatabasen/helpers"
 	"bultdatabasen/images"
 	"bultdatabasen/repositories"
+	"bultdatabasen/services/email"
 	"bultdatabasen/usecases"
 	"fmt"
 	"io"
@@ -65,6 +66,7 @@ func main() {
 	var userRepo domain.UserRepository = ds
 	var authRepo domain.AuthRepository = ds
 	var commentRepo domain.CommentRepository = ds
+	var teamRepo domain.TeamRepository = ds
 
 	userPool := authenticator.NewUserPool(config, userRepo)
 
@@ -73,6 +75,10 @@ func main() {
 
 	rh := helpers.NewResourceHelper(resourceRepo, treeRepo, trashRepo)
 	ib := images.NewImageBucket(config)
+	emailer, err := email.NewMailSender(config)
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
 
 	userUsecase := usecases.NewUserUsecase(authn, authRepo, userRepo)
 	resourceUseCase := usecases.NewResourceUsecase(authn, authz, resourceRepo, rh)
@@ -83,10 +89,11 @@ func main() {
 	pointUsecase := usecases.NewPointUsecase(authn, authz, pointRepo, routeRepo, resourceRepo, treeRepo, boltRepo, rh)
 	imageUsecase := usecases.NewImageUsecase(authn, authz, imageRepo, rh, ib, userPool)
 	boltUsecase := usecases.NewBoltUsecase(authn, authz, boltRepo, rh)
-	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, rh, userPool)
+	taskUsecase := usecases.NewTaskUsecase(authn, authz, taskRepo, userRepo, rh, userPool, emailer)
 	manufacturerUsecase := usecases.NewManufacturerUsecase(catalogRepo)
 	materialUsecase := usecases.NewMaterialUsecase(catalogRepo)
 	commentUsecase := usecases.NewCommentUsecase(authn, authz, commentRepo, rh, userPool)
+	teamUsecase := usecases.NewTeamUsecase(teamRepo)
 
 	router.Use(CORSMiddleware)
 	router.Use(authn.Middleware)
@@ -104,7 +111,7 @@ func main() {
 
 	router.HandleFunc("/invites", nil).Methods(http.MethodPost, http.MethodOptions)
 
-	httpdelivery.NewResourceHandler(router, resourceUseCase)
+	httpdelivery.NewResourceHandler(router, resourceUseCase, teamUsecase)
 	httpdelivery.NewAreaHandler(router, areaUsecase)
 	httpdelivery.NewCragHandler(router, cragUsecase)
 	httpdelivery.NewSectorHandler(router, sectorUsecase)

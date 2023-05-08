@@ -71,7 +71,7 @@ func (a *authorizer) HasPermission(ctx context.Context, user *domain.User, resou
 
 	for _, id := range resourceIDs {
 		for _, role := range roles {
-			if role.ResourceID == id && (role.Role == domain.RoleAdmin || role.Role == domain.RoleOwner) {
+			if role.ResourceID == id && (role.Role == domain.RoleMaintainer || role.Role == domain.RoleOwner) {
 				return nil
 			}
 		}

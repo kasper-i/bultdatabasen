@@ -1,4 +1,4 @@
-import { RoleContext } from "@/contexts/RoleContext";
+import { PermissionContext } from "@/contexts/PermissionContext";
 import { Fragment, ReactNode, useContext } from "react";
 
 interface Props {
@@ -6,13 +6,13 @@ interface Props {
 }
 
 const Restricted = ({ children }: Props) => {
-  const { isOwner } = useContext(RoleContext);
+  const { permissions } = useContext(PermissionContext);
 
-  if (!isOwner) {
-    return <Fragment />;
+  if (permissions.some((permission) => permission === "write")) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  return <Fragment />;
 };
 
 export default Restricted;
