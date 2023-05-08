@@ -140,9 +140,9 @@ func (hdlr *resourceHandler) GetMaintainers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if ancestors, err := hdlr.teamUsecase.GetMaintainers(r.Context(), id); err != nil {
+	if maintainers, err := hdlr.teamUsecase.GetMaintainers(r.Context(), id); err != nil {
 		writeError(w, err)
 	} else {
-		writeResponse(w, http.StatusOK, ancestors)
+		writeResponse(w, http.StatusOK, maintainers)
 	}
 }
