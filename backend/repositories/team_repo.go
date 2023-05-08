@@ -19,8 +19,7 @@ func (store *psqlDatastore) GetTeamsByRole(ctx context.Context, resourceID uuid.
 		FROM path
 		JOIN team_role tr ON path.resource_id = tr.resource_id
 		JOIN team ON tr.team_id = team.id
-		WHERE tr.role = ?
-		GROUP BY team.id;`
+		WHERE tr.role = ?;`
 
 	err := store.tx(ctx).Raw(query, resourceID, role).Scan(&teams).Error
 
