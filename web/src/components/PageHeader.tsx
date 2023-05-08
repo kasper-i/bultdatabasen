@@ -37,23 +37,23 @@ const PageHeader = ({
       )}
       <h1 className="text-2xl font-bold">{resource.name}</h1>
 
-      <div className="flex items-center gap-1 text-sm">
+      <p className="text-sm leading-snug">
         <Icon name="wrench" className="mr-0.5" />
-        <p className="leading-snug">
-          {maintainers?.length ? (
-            <Concatenator>
-              {maintainers?.map((maintainer) => (
-                <Underlined key={maintainer.id}>{maintainer.name}</Underlined>
-              ))}
-            </Concatenator>
-          ) : (
-            "Underhållsansvarig saknas"
-          )}
-        </p>
-      </div>
+        {maintainers?.length ? (
+          <Concatenator>
+            {maintainers?.map((maintainer) => (
+              <Underlined key={maintainer.id}>{maintainer.name}</Underlined>
+            ))}
+          </Concatenator>
+        ) : (
+          <Underlined>Underhållsansvarig saknas</Underlined>
+        )}
+      </p>
+
+      <div className="h-2.5" />
 
       {showCounts && (
-        <p className="text-md mt-2.5">
+        <p className="text-md">
           {getResourceLabel(resource.type)} med{" "}
           <Underlined>{resource.counters?.routes ?? 0}</Underlined> leder och{" "}
           <Underlined>{resource.counters?.installedBolts ?? 0}</Underlined>{" "}

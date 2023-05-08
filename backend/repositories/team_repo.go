@@ -15,11 +15,12 @@ func (store *psqlDatastore) GetTeamsByRole(ctx context.Context, resourceID uuid.
 		FROM tree, unnest(string_to_array(tree.path::text, '.')) AS id
 		WHERE resource_id = ?
 	)
-	SELECT DISTINCT team.id, team.name
+	SELECT team.id, team.name
 		FROM path
 		JOIN team_role tr ON path.resource_id = tr.resource_id
 		JOIN team ON tr.team_id = team.id
-		WHERE tr.role = ?;`
+		WHERE tr.role = ?
+		GROUP BY team.id`
 
 	err := store.tx(ctx).Raw(query, resourceID, role).Scan(&teams).Error
 
