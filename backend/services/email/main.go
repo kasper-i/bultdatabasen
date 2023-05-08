@@ -23,7 +23,6 @@ type sendEmailRequest struct {
 
 func NewMailSender(config config.Config) (*emailer, error) {
 	emailer := &emailer{
-		comm: make(chan any, 1024),
 		auth: smtp.PlainAuth("", config.SMTP.Username, config.SMTP.Password, config.SMTP.Host),
 		host: config.SMTP.Host,
 		port: config.SMTP.Port,
