@@ -209,7 +209,7 @@ func (uc *taskUsecase) DeleteTask(ctx context.Context, taskID uuid.UUID) error {
 	return uc.rh.DeleteResource(ctx, taskID, user.ID)
 }
 
-func (uc *taskUsecase) sendNewTaskNotifications(parentResourceID uuid.UUID, task domain.Task, route domain.Resource) {
+func (uc *taskUsecase) sendNewTaskNotification(parentResourceID uuid.UUID, task domain.Task, route domain.Resource) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Printf("%v", err)
