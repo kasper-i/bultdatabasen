@@ -131,7 +131,7 @@ func (uc *taskUsecase) CreateTask(ctx context.Context, task domain.Task, parentR
 		}
 	}
 
-	go uc.sendNewTaskNotifications(parentResourceID, task, route)
+	go uc.sendNewTaskNotification(parentResourceID, task, route)
 
 	return task, err
 }
