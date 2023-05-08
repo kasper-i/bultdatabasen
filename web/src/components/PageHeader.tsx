@@ -52,18 +52,20 @@ const PageHeader = ({
       )}
       <h1 className="text-2xl font-bold">{resource.name}</h1>
 
-      {!!maintainers?.length && (
-        <div className="flex items-center gap-1 text-sm">
-          <p>
-            <Icon name="wrench" className="mr-1" />
+      <div className="flex items-center gap-1 text-sm">
+        <Icon name="wrench" className="mr-0.5" />
+        <p className="leading-snug">
+          {maintainers?.length ? (
             <Concatenator>
               {maintainers?.map((maintainer) => (
                 <Underlined key={maintainer.id}>{maintainer.name}</Underlined>
               ))}
             </Concatenator>
-          </p>
-        </div>
-      )}
+          ) : (
+            "Underhållsansvarig saknas"
+          )}
+        </p>
+      </div>
 
       {showCounts && (
         <p className="text-md mt-2.5">
