@@ -5,6 +5,7 @@ import React, { ReactElement } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import { Underlined } from "./Underlined";
 import { Concatenator } from "@/components/Concatenator";
+import Icon from "./atoms/Icon";
 
 interface Props {
   resourceId: string;
@@ -43,29 +44,33 @@ const PageHeader = ({
   const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col">
       {crumbs && !onlyRoot && (
-        <div className="mr-14">
+        <div className="mr-14 mb-2.5">
           <Breadcrumbs resources={crumbs} />
         </div>
       )}
       <h1 className="text-2xl font-bold">{resource.name}</h1>
+
+      {!!maintainers?.length && (
+        <div className="flex items-center gap-1 mb-2.5 text-sm">
+          <p>
+            <Icon name="wrench" className="mr-1" />
+            <Concatenator>
+              {maintainers?.map((maintainer) => (
+                <Underlined key={maintainer.id}>{maintainer.name}</Underlined>
+              ))}
+            </Concatenator>
+          </p>
+        </div>
+      )}
+
       {showCounts && (
-        <p className="text-lg">
+        <p className="text-md">
           {getResourceLabel(resource.type)} med{" "}
           <Underlined>{resource.counters?.routes ?? 0}</Underlined> leder och{" "}
           <Underlined>{resource.counters?.installedBolts ?? 0}</Underlined>{" "}
           dokumenterade bultar.
-        </p>
-      )}
-      {!!maintainers?.length && (
-        <p className="border border-primary-300 bg-primary-50 rounded p-2 my-2">
-          {locationDescription(resource.type)} underhålls av{" "}
-          <Concatenator>
-            {maintainers?.map((maintainer) => (
-              <span key={maintainer.id}>{maintainer.name}</span>
-            ))}
-          </Concatenator>
         </p>
       )}
     </div>
