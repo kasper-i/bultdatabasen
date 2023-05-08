@@ -10,7 +10,6 @@ import (
 )
 
 type emailer struct {
-	comm chan any
 	auth smtp.Auth
 	host string
 	port int
