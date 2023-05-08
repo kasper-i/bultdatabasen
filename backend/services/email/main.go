@@ -4,6 +4,7 @@ import (
 	"bultdatabasen/config"
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/mail"
 	"net/smtp"
@@ -35,6 +36,19 @@ func (e *emailer) SendEmail(ctx context.Context, recipient, subject, body string
 	c := make(chan error, 1)
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				switch x := r.(type) {
+				case string:
+					c <- errors.New(x)
+				case error:
+					c <- x
+				default:
+					c <- errors.New("unknown panic")
+				}
+			}
+		}()
+
 		c <- e.handleSendEmailRequest(ctx, sendEmailRequest{
 			recipient: recipient,
 			subject:   subject,
