@@ -53,7 +53,7 @@ const PageHeader = ({
       <h1 className="text-2xl font-bold">{resource.name}</h1>
 
       {!!maintainers?.length && (
-        <div className="flex items-center gap-1 mb-2.5 text-sm">
+        <div className="flex items-center gap-1 text-sm">
           <p>
             <Icon name="wrench" className="mr-1" />
             <Concatenator>
@@ -66,7 +66,7 @@ const PageHeader = ({
       )}
 
       {showCounts && (
-        <p className="text-md">
+        <p className="text-md mt-2.5">
           {getResourceLabel(resource.type)} med{" "}
           <Underlined>{resource.counters?.routes ?? 0}</Underlined> leder och{" "}
           <Underlined>{resource.counters?.installedBolts ?? 0}</Underlined>{" "}
