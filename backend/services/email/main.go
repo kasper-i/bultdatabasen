@@ -31,7 +31,7 @@ func NewMailSender(config config.Config) (*emailer, error) {
 	return emailer, nil
 }
 
-func (e *emailer) SendEmail(ctx context.Context, recipient string, subject string, body string) error {
+func (e *emailer) SendEmail(ctx context.Context, recipient, subject, body string) error {
 	c := make(chan error, 1)
 
 	go func() {
