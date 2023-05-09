@@ -120,7 +120,7 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 	exifData, err := exif.Decode(reader)
 	if err == nil {
 		if timestamp, err := exifData.DateTime(); err == nil {
-			img.Timestamp = timestamp
+			img.Timestamp = timestamp.In(time.Now().Location())
 		}
 
 		if rotation, err := getRotation(exifData); err == nil {
