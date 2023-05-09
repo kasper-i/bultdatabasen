@@ -21,7 +21,7 @@ func NewDatastore(config config.Config) (*psqlDatastore, error) {
 	var db *gorm.DB
 
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable search_path=%s TimeZone=Europe/Stockholm",
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable search_path=%s",
 		config.Database.Host,
 		config.Database.Username,
 		config.Database.Password,

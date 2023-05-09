@@ -123,6 +123,17 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 			img.Timestamp = timestamp
 		}
 
+		if tz, _ := exifData.TimeZone(); tz == nil {
+			// If the EXIF lacks time zone information we assume that the image
+			// was taken in Europe/Stockholm
+			if loc, err := time.LoadLocation("Europe/Stockholm"); err == nil {
+				layout := "2006-01-02T15:04:05"
+				if swedishTime, err := time.ParseInLocation(layout, img.Timestamp.Format(layout), loc); err == nil {
+					img.Timestamp = swedishTime
+				}
+			}
+		}
+
 		if rotation, err := getRotation(exifData); err == nil {
 			img.Rotation = rotation
 		}
