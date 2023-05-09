@@ -120,7 +120,15 @@ func (uc *imageUsecase) UploadImage(ctx context.Context, parentResourceID uuid.U
 	exifData, err := exif.Decode(reader)
 	if err == nil {
 		if timestamp, err := exifData.DateTime(); err == nil {
-			img.Timestamp = timestamp.In(time.Now().Location())
+			img.Timestamp = timestamp
+		}
+
+		if tz, _ := exifData.TimeZone(); tz == nil {
+			// If the EXIF lacks time zone information we assume that the image
+			// is taken Europe/Stockholm
+			if loc, err := time.LoadLocation("Europe/Stockholm"); err != nil {
+				img.Timestamp = img.Timestamp.In(loc)
+			}
 		}
 
 		if rotation, err := getRotation(exifData); err == nil {
