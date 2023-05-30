@@ -16,7 +16,8 @@ const routeTypeOptions: Option<RouteType>[] = routeTypes.map((type) => ({
 export const RouteForm: FC<{
   loading: boolean;
   onSubmit: SubmitHandler<Route>;
-}> = ({ loading, onSubmit }) => {
+  onCancel: () => void;
+}> = ({ loading, onSubmit, onCancel }) => {
   const { control, handleSubmit } = useFormContext<Route>();
 
   return (
@@ -70,7 +71,9 @@ export const RouteForm: FC<{
         )}
       />
       <div className="col-span-2 flex justify-end gap-2">
-        <Button outlined>Avbryt</Button>
+        <Button outlined onClick={onCancel}>
+          Avbryt
+        </Button>
         <Button loading={loading} type="submit">
           Spara
         </Button>

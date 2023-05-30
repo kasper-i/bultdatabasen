@@ -27,7 +27,11 @@ export const NewRoutePage = () => {
 
   return (
     <FormProvider {...methods}>
-      <RouteForm loading={createRoute.isLoading} onSubmit={onSubmit} />
+      <RouteForm
+        loading={createRoute.isLoading}
+        onSubmit={onSubmit}
+        onCancel={() => navigate("..")}
+      />
     </FormProvider>
   );
 };

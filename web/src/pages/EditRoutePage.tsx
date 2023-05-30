@@ -32,7 +32,11 @@ export const EditRoutePage = () => {
 
   return (
     <FormProvider {...methods}>
-      <RouteForm loading={updateRoute.isLoading} onSubmit={onSubmit} />
+      <RouteForm
+        loading={updateRoute.isLoading}
+        onSubmit={onSubmit}
+        onCancel={() => navigate("..")}
+      />
     </FormProvider>
   );
 };
