@@ -1,4 +1,6 @@
+import Button from "@/components/atoms/Button";
 import PointEditor from "@/components/features/routeEditor/PointEditor";
+import TaskButton from "@/components/features/task/TaskButton";
 import PageHeader from "@/components/PageHeader";
 import { Underlined } from "@/components/Underlined";
 import { useUnsafeParams } from "@/hooks/common";
@@ -6,8 +8,9 @@ import { RouteType } from "@/models/route";
 import { usePoints } from "@/queries/pointQueries";
 import { useRoute } from "@/queries/routeQueries";
 import { Fragment } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-const renderRouteType = (routeType: RouteType) => {
+export const renderRouteType = (routeType: RouteType) => {
   switch (routeType) {
     case "sport":
       return "Sportled";
@@ -26,6 +29,7 @@ const renderRouteType = (routeType: RouteType) => {
 
 const RoutePage = () => {
   const { resourceId } = useUnsafeParams<"resourceId">();
+  const naviate = useNavigate();
 
   const { data: route } = useRoute(resourceId);
   const { data: points } = usePoints(resourceId);
@@ -45,7 +49,14 @@ const RoutePage = () => {
 
   return (
     <div className="flex flex-col">
+      <div className="absolute top-0 right-0 p-5">
+        <Link to="tasks">
+          <TaskButton resourceId={resourceId} />
+        </Link>
+      </div>
       <PageHeader resourceId={resourceId} ancestors={route.ancestors} />
+
+      <Button onClick={() => naviate("edit")}>Redigera</Button>
 
       <div className="flex items-center gap-2">
         <p className="text-md">

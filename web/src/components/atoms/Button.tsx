@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import React, { FC, ReactNode } from "react";
+import React, { ButtonHTMLAttributes, FC, ReactNode } from "react";
 import { Dots } from "react-activity";
 import "react-activity/dist/Dots.css";
 import Icon from "./Icon";
@@ -15,6 +15,7 @@ export interface ButtonProps {
   full?: boolean;
   outlined?: boolean;
   children: ReactNode;
+  type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 }
 
 const Button: FC<ButtonProps> = ({
@@ -27,6 +28,7 @@ const Button: FC<ButtonProps> = ({
   disabled,
   full,
   outlined,
+  type,
 }) => {
   const solidStyle = () => {
     if (color === "white") {
@@ -61,10 +63,11 @@ const Button: FC<ButtonProps> = ({
         "relative h-[2.125rem] flex justify-center items-center py-1.5 px-3 gap-1.5 text-sm shadow-sm rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:ring-0",
         outlined ? outlinedStyle() : solidStyle(),
         "disabled:opacity-40",
-        full && "w-full",
+        full ? "w-full" : "w-min",
         className
       )}
       disabled={disabled}
+      type={type}
     >
       {icon && <Icon name={icon} className={clsx(loading && "invisible")} />}
       <div className={clsx(loading && "invisible", "whitespace-nowrap")}>

@@ -1,10 +1,10 @@
 import { Concatenator } from "@/components/Concatenator";
 import { Resource } from "@/models/resource";
 import { useMaintainers, useResource } from "@/queries/resourceQueries";
-import { getResourceLabel } from "@/utils/resourceUtils";
 import { ReactElement } from "react";
 import Icon from "./atoms/Icon";
 import Breadcrumbs from "./Breadcrumbs";
+import { Counter } from "./Counter";
 import { Underlined } from "./Underlined";
 
 interface Props {
@@ -53,11 +53,12 @@ const PageHeader = ({
       <div className="h-2.5" />
 
       {showCounts && (
-        <p className="text-md">
-          {getResourceLabel(resource.type)} med{" "}
-          <Underlined>{resource.counters?.routes ?? 0}</Underlined> leder och{" "}
-          <Underlined>{resource.counters?.installedBolts ?? 0}</Underlined>{" "}
-          dokumenterade bultar.
+        <p className="text-md flex gap-4">
+          <Counter
+            label="Bultar"
+            count={resource.counters?.installedBolts ?? 0}
+          />
+          <Counter label="Leder" count={resource.counters?.routes ?? 0} />
         </p>
       )}
     </div>

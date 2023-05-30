@@ -153,7 +153,7 @@ export function Select<T>({
   );
 
   return (
-    <div>
+    <div className="w-full">
       <Listbox
         value={value}
         onChange={onSelect}

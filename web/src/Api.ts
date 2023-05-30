@@ -9,7 +9,7 @@ import {
   resourceSchema,
   searchResultSchema,
 } from "@/models/resource";
-import { routeSchema } from "@/models/route";
+import { Route, routeSchema } from "@/models/route";
 import { sectorSchema } from "@/models/sector";
 import { Task, taskSchema } from "@/models/task";
 import { userSchema } from "@/models/user";
@@ -61,9 +61,15 @@ export class Api {
     Api.accessToken = null;
   };
 
-  private static getDefaultHeaders = (): AxiosRequestHeaders => ({
-    Authorization: `Bearer ${Api.accessToken}`,
-  });
+  private static getDefaultHeaders = (): AxiosRequestHeaders => {
+    const headers: AxiosRequestHeaders = {};
+
+    if (Api.accessToken) {
+      headers["Authorization"] = `Bearer ${Api.accessToken}`;
+    }
+
+    return headers;
+  };
 
   static getUsers = async () => {
     const result = await axios.get(`${Api.baseUrl}/users`, {
@@ -186,6 +192,29 @@ export class Api {
     });
 
     return z.array(routeSchema).parse(result.data);
+  };
+
+  static createRoute = async (
+    parentResourceId: string,
+    route: Omit<Route, "id">
+  ) => {
+    const endpoint = `/resources/${parentResourceId}/routes`;
+
+    const result = await axios.post(`${Api.baseUrl}${endpoint}`, route, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return routeSchema.parse(result.data);
+  };
+
+  static updateRoute = async (routeId: string, route: Route) => {
+    const endpoint = `/routes/${routeId}`;
+
+    const result = await axios.put(`${Api.baseUrl}${endpoint}`, route, {
+      headers: Api.getDefaultHeaders(),
+    });
+
+    return routeSchema.parse(result.data);
   };
 
   static searchResources = async (searchTerm?: string) => {

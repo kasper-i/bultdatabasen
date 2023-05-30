@@ -24,6 +24,8 @@ import { login } from "./slices/authSlice";
 import { useAppDispatch } from "./store";
 import { getCurrentUser, refreshSession } from "./utils/cognito";
 import configData from "@/config.json";
+import { NewRoutePage } from "./pages/NewRoutePage";
+import { EditRoutePage } from "./pages/EditRoutePage";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -157,6 +159,7 @@ const App = () => {
             >
               <Route index element={<SectorPage />} />
               <Route path="tasks" element={<TasksPage />} />
+              <Route path="new" element={<NewRoutePage />} />
             </Route>
             <Route
               path="route/:resourceId"
@@ -168,6 +171,7 @@ const App = () => {
             >
               <Route index element={<RoutePage />} />
               <Route path="tasks" element={<TasksPage />} />
+              <Route path="edit" element={<EditRoutePage />} />
             </Route>
           </Route>
         </Routes>

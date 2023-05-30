@@ -18,7 +18,7 @@ export const Card: FC<{
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative shadow">
       {upperCutout && (
         <div className="absolute top-0 w-full overflow-hidden h-2.5">
           <div className="mx-auto -mt-3.5 w-6 h-6 border border-gray-300 bg-neutral-50 rounded-full" />
