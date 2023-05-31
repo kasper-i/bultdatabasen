@@ -39,23 +39,16 @@ export const useCreateRoute = (parentId: string) => {
     (route: Omit<Route, "id">) => Api.createRoute(parentId, route),
     {
       onSuccess: async (data) => {
-        const { id, name, ancestors, counters } = data;
-        const resource: Resource = {
-          id,
-          name,
-          ancestors,
-          counters,
-          type: "route",
-        };
+        const resource = createResource(data);
 
         queryClient.setQueryData<Resource>(
-          ["resource", { resourceId: id }],
+          ["resource", { resourceId: data.id }],
           resource
         );
 
-        queryClient.setQueryData(["route", { routeId: id }], data);
+        queryClient.setQueryData(["route", { routeId: data.id }], data);
 
-        ancestors?.forEach((ancestor) => {
+        data.ancestors?.forEach((ancestor) => {
           addToListings<Route>(
             queryClient,
             { queryKey: ["routes", { resourceId: ancestor.id }] },
@@ -78,23 +71,16 @@ export const useUpdateRoute = (routeId: string) => {
 
   return useMutation((route: Route) => Api.updateRoute(routeId, route), {
     onSuccess: async (data) => {
-      const { id, name, ancestors, counters } = data;
-      const resource: Resource = {
-        id,
-        name,
-        ancestors,
-        counters,
-        type: "route",
-      };
+      const resource = createResource(data);
 
       queryClient.setQueryData<Resource>(
-        ["resource", { resourceId: id }],
+        ["resource", { resourceId: data.id }],
         resource
       );
 
-      queryClient.setQueryData(["route", { routeId: id }], data);
+      queryClient.setQueryData(["route", { routeId: data.id }], data);
 
-      ancestors?.forEach((ancestor) => {
+      data.ancestors?.forEach((ancestor) => {
         updateInListings<Route>(
           queryClient,
           { queryKey: ["routes", { resourceId: ancestor.id }] },
@@ -131,6 +117,17 @@ export const useDeleteRoute = (routeId: string) => {
       );
     },
   });
+};
+
+const createResource = (route: Route): Resource => {
+  const { id, name, ancestors, counters } = route;
+  return {
+    id,
+    name,
+    ancestors,
+    counters,
+    type: "route",
+  };
 };
 
 const addToListings = <T>(
