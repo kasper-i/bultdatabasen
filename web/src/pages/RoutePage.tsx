@@ -1,13 +1,15 @@
-import Button from "@/components/atoms/Button";
 import PointEditor from "@/components/features/routeEditor/PointEditor";
 import TaskButton from "@/components/features/task/TaskButton";
+import DeleteDialog from "@/components/molecules/DeleteDialog";
+import { Menu } from "@/components/molecules/Menu";
 import PageHeader from "@/components/PageHeader";
+import Restricted from "@/components/Restricted";
 import { Underlined } from "@/components/Underlined";
 import { useUnsafeParams } from "@/hooks/common";
 import { RouteType } from "@/models/route";
 import { usePoints } from "@/queries/pointQueries";
-import { useRoute } from "@/queries/routeQueries";
-import { Fragment } from "react";
+import { useDeleteRoute, useRoute } from "@/queries/routeQueries";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export const renderRouteType = (routeType: RouteType) => {
@@ -30,9 +32,18 @@ export const renderRouteType = (routeType: RouteType) => {
 const RoutePage = () => {
   const { resourceId } = useUnsafeParams<"resourceId">();
   const naviate = useNavigate();
+  const [action, setAction] = useState<"delete" | "add_bolt">();
+  const deleteRoute = useDeleteRoute(resourceId);
 
   const { data: route } = useRoute(resourceId);
   const { data: points } = usePoints(resourceId);
+
+  useEffect(() => {
+    if (deleteRoute.isSuccess) {
+      const parent = route?.ancestors?.slice(-1)[0];
+      naviate(`/${parent?.type}/${parent?.id}`);
+    }
+  }, [deleteRoute.isSuccess]);
 
   if (route === undefined || points === undefined) {
     return <Fragment />;
@@ -56,7 +67,30 @@ const RoutePage = () => {
       </div>
       <PageHeader resourceId={resourceId} ancestors={route.ancestors} />
 
-      <Button onClick={() => naviate("edit")}>Redigera</Button>
+      <Restricted>
+        <Menu
+          items={[
+            {
+              label: "Radera",
+              icon: "trash",
+              className: "text-red-500",
+              onClick: () => setAction("delete"),
+            },
+            {
+              label: "Redigera",
+              icon: "edit",
+              onClick: () => naviate("edit"),
+            },
+          ]}
+        />
+        {action === "delete" && (
+          <DeleteDialog
+            mutation={deleteRoute}
+            target="leden"
+            onClose={() => setAction(undefined)}
+          />
+        )}
+      </Restricted>
 
       <div className="flex items-center gap-2">
         <p className="text-md">

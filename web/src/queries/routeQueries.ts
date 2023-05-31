@@ -54,6 +54,14 @@ export const useEditRoute = (routeId: string) => {
   });
 };
 
+export const useDeleteRoute = (routeId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(() => Api.deleteRoute(routeId), {
+    onSuccess: async (data) => {},
+  });
+};
+
 const updateCache = <T extends ResourceBase>(
   queryClient: QueryClient,
   data: T,

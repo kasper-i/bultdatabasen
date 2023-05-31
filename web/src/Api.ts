@@ -217,6 +217,14 @@ export class Api {
     return routeSchema.parse(result.data);
   };
 
+  static deleteRoute = async (routeId: string) => {
+    const endpoint = `/routes/${routeId}`;
+
+    axios.delete(`${Api.baseUrl}${endpoint}`, {
+      headers: Api.getDefaultHeaders(),
+    });
+  };
+
   static searchResources = async (searchTerm?: string) => {
     const endpoint = `/resources`;
 
