@@ -7,7 +7,7 @@ import {
 } from "@/queries/routeQueries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 export const EditRoutePage = () => {
@@ -17,7 +17,7 @@ export const EditRoutePage = () => {
   const updateRoute = useUpdateRoute(routeId);
   const { data: route } = useRoute(routeId);
 
-  const methods = useForm<Route>({
+  const formMethods = useForm<Route>({
     defaultValues: route,
     resolver: zodResolver(editableRouteSchema),
   });
@@ -28,13 +28,11 @@ export const EditRoutePage = () => {
     }
   }, [updateRoute.isSuccess]);
 
-  const onSubmit: SubmitHandler<Route> = (data) => updateRoute.mutate(data);
-
   return (
-    <FormProvider {...methods}>
+    <FormProvider {...formMethods}>
       <RouteForm
         loading={updateRoute.isLoading}
-        onSubmit={onSubmit}
+        onSubmit={(data) => updateRoute.mutate(data)}
         onCancel={() => navigate("..")}
       />
     </FormProvider>

@@ -4,18 +4,18 @@ import { editableRouteSchema, Route } from "@/models/route";
 import { useCreateRoute } from "@/queries/routeQueries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 export const NewRoutePage = () => {
-  const { resourceId } = useUnsafeParams<"resourceId">();
+  const { resourceId: routeId } = useUnsafeParams<"resourceId">();
   const navigate = useNavigate();
-  const methods = useForm<Route>({
+  const formMethods = useForm<Route>({
     defaultValues: {},
     resolver: zodResolver(editableRouteSchema),
   });
 
-  const createRoute = useCreateRoute(resourceId);
+  const createRoute = useCreateRoute(routeId);
 
   useEffect(() => {
     if (createRoute.isSuccess) {
@@ -23,13 +23,11 @@ export const NewRoutePage = () => {
     }
   }, [createRoute.isSuccess]);
 
-  const onSubmit: SubmitHandler<Route> = (data) => createRoute.mutate(data);
-
   return (
-    <FormProvider {...methods}>
+    <FormProvider {...formMethods}>
       <RouteForm
         loading={createRoute.isLoading}
-        onSubmit={onSubmit}
+        onSubmit={(data) => createRoute.mutate(data)}
         onCancel={() => navigate("..")}
       />
     </FormProvider>
