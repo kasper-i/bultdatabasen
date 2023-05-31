@@ -1,6 +1,7 @@
 import Button from "@/components/atoms/Button";
 import ChildrenTable from "@/components/ChildrenTable";
 import PageHeader from "@/components/PageHeader";
+import Restricted from "@/components/Restricted";
 import { useUnsafeParams } from "@/hooks/common";
 import { useSector } from "@/queries/sectorQueries";
 import { Fragment, ReactElement } from "react";
@@ -22,11 +23,13 @@ const SectorPage = (): ReactElement => {
         ancestors={sector.data.ancestors}
         showCounts
       />
-      <div className="flex justify-end">
-        <Link to="new">
-          <Button icon="plus">Ny led</Button>
-        </Link>
-      </div>
+      <Restricted>
+        <div className="flex justify-end">
+          <Link to="new">
+            <Button icon="plus">Ny led</Button>
+          </Link>
+        </div>
+      </Restricted>
       <ChildrenTable resourceId={resourceId} filters={{ types: ["route"] }} />
     </div>
   );
