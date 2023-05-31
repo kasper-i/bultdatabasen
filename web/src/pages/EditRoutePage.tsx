@@ -2,7 +2,7 @@ import { RouteForm } from "@/forms/RouteForm";
 import { useUnsafeParams } from "@/hooks/common";
 import { editableRouteSchema, Route } from "@/models/route";
 import {
-  useEditRoute as useUpdateRoute,
+  useUpdateRoute as useUpdateRoute,
   useRoute,
 } from "@/queries/routeQueries";
 import { zodResolver } from "@hookform/resolvers/zod";

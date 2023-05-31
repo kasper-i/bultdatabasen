@@ -1,7 +1,8 @@
-import { Resource, ResourceBase, ResourceType } from "@/models/resource";
+import { Resource } from "@/models/resource";
 import { Route } from "@/models/route";
 import {
   QueryClient,
+  QueryFilters,
   useMutation,
   useQuery,
   useQueryClient,
@@ -38,18 +39,76 @@ export const useCreateRoute = (parentId: string) => {
     (route: Omit<Route, "id">) => Api.createRoute(parentId, route),
     {
       onSuccess: async (data) => {
-        updateCache(queryClient, data, "route");
+        const { id, name, ancestors, counters } = data;
+        const resource: Resource = {
+          id,
+          name,
+          ancestors,
+          counters,
+          type: "route",
+        };
+
+        queryClient.setQueryData<Resource>(
+          ["resource", { resourceId: id }],
+          resource
+        );
+
+        queryClient.setQueryData(["route", { routeId: id }], data);
+
+        ancestors?.forEach((ancestor) => {
+          addToListings<Route>(
+            queryClient,
+            { queryKey: ["routes", { resourceId: ancestor.id }] },
+            data
+          );
+
+          addToListings<Resource>(
+            queryClient,
+            { queryKey: ["children", { resourceId: ancestor.id }] },
+            resource
+          );
+        });
       },
     }
   );
 };
 
-export const useEditRoute = (routeId: string) => {
+export const useUpdateRoute = (routeId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation((route: Route) => Api.updateRoute(routeId, route), {
     onSuccess: async (data) => {
-      updateCache(queryClient, data, "route");
+      const { id, name, ancestors, counters } = data;
+      const resource: Resource = {
+        id,
+        name,
+        ancestors,
+        counters,
+        type: "route",
+      };
+
+      queryClient.setQueryData<Resource>(
+        ["resource", { resourceId: id }],
+        resource
+      );
+
+      queryClient.setQueryData(["route", { routeId: id }], data);
+
+      ancestors?.forEach((ancestor) => {
+        updateInListings<Route>(
+          queryClient,
+          { queryKey: ["routes", { resourceId: ancestor.id }] },
+          ({ id }) => id === routeId,
+          data
+        );
+
+        updateInListings<Resource>(
+          queryClient,
+          { queryKey: ["children", { resourceId: ancestor.id }] },
+          ({ id }) => id === routeId,
+          resource
+        );
+      });
     },
   });
 };
@@ -58,42 +117,48 @@ export const useDeleteRoute = (routeId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation(() => Api.deleteRoute(routeId), {
-    onSuccess: async (data) => {},
+    onSuccess: async () => {
+      removeFromListings<Route>(
+        queryClient,
+        { queryKey: ["routes"], exact: false },
+        ({ id }) => id === routeId
+      );
+
+      removeFromListings<Resource>(
+        queryClient,
+        { queryKey: ["children"], exact: false },
+        ({ id }) => id === routeId
+      );
+    },
   });
 };
 
-const updateCache = <T extends ResourceBase>(
+const addToListings = <T>(
   queryClient: QueryClient,
-  data: T,
-  resourceType: ResourceType
-) => {
-  const { id, name, ancestors, counters } = data;
-  const resource: Resource = {
-    id,
-    name,
-    ancestors,
-    counters,
-    type: resourceType,
-  };
-
-  queryClient.setQueryData<Resource>(
-    ["resource", { resourceId: id }],
-    resource
+  filters: QueryFilters,
+  data: T
+) =>
+  queryClient.setQueriesData<T[]>(filters, (list) =>
+    list === undefined ? undefined : [...list, data]
   );
 
-  queryClient.setQueryData(["route", { routeId: id }], data);
+const updateInListings = <T>(
+  queryClient: QueryClient,
+  filters: QueryFilters,
+  predicate: (data: T) => boolean,
+  data: T
+) =>
+  queryClient.setQueriesData<T[]>(filters, (list) =>
+    list === undefined
+      ? undefined
+      : list.map((old) => (predicate(old) ? data : old))
+  );
 
-  ancestors
-    ?.filter((ancestor) => ancestor.type !== "root")
-    ?.forEach((ancestor) => {
-      queryClient.setQueryData<T[]>(
-        ["routes", { resourceId: ancestor.id }],
-        (old) => (old === undefined ? undefined : [...old, data])
-      );
-
-      queryClient.setQueryData<Resource[]>(
-        ["children", { resourceId: ancestor.id }],
-        (old) => (old === undefined ? undefined : [...old, resource])
-      );
-    });
-};
+const removeFromListings = <T>(
+  queryClient: QueryClient,
+  filters: QueryFilters,
+  predicate: (data: T) => boolean
+) =>
+  queryClient.setQueriesData<T[]>(filters, (list) =>
+    list === undefined ? undefined : list.filter((data) => !predicate(data))
+  );

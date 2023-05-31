@@ -53,13 +53,13 @@ const PageHeader = ({
       <div className="h-2.5" />
 
       {showCounts && (
-        <p className="text-md flex gap-4">
+        <div className="text-md flex gap-4">
           <Counter
             label="Bultar"
             count={resource.counters?.installedBolts ?? 0}
           />
           <Counter label="Leder" count={resource.counters?.routes ?? 0} />
-        </p>
+        </div>
       )}
     </div>
   );
