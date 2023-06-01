@@ -60,29 +60,29 @@ const RoutePage = () => {
 
   return (
     <div className="flex flex-col">
-      <div className="absolute top-0 right-0 p-5">
-        <Link to="tasks">
-          <TaskButton resourceId={resourceId} />
-        </Link>
-      </div>
-      <PageHeader resourceId={resourceId} ancestors={route.ancestors} />
+      <PageHeader
+        resourceId={resourceId}
+        ancestors={route.ancestors}
+        menuItems={[
+          {
+            label: "Radera",
+            icon: "trash",
+            className: "text-red-500",
+            onClick: () => setAction("delete"),
+          },
+          {
+            label: "Redigera",
+            icon: "edit",
+            onClick: () => naviate("edit"),
+          },
+        ]}
+      />
+
+      <Link to="tasks">
+        <TaskButton resourceId={resourceId} />
+      </Link>
 
       <Restricted>
-        <Menu
-          items={[
-            {
-              label: "Radera",
-              icon: "trash",
-              className: "text-red-500",
-              onClick: () => setAction("delete"),
-            },
-            {
-              label: "Redigera",
-              icon: "edit",
-              onClick: () => naviate("edit"),
-            },
-          ]}
-        />
         {action === "delete" && (
           <DeleteDialog
             mutation={deleteRoute}
