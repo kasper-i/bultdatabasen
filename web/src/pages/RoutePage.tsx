@@ -81,7 +81,6 @@ const RoutePage = () => {
         <TaskButton resourceId={resourceId} />
       </Link>
 
-      <Restricted>
         {action === "delete" && (
           <DeleteDialog
             mutation={deleteRoute}
@@ -89,7 +88,6 @@ const RoutePage = () => {
             onClose={() => setAction(undefined)}
           />
         )}
-      </Restricted>
 
       <div className="flex items-center gap-2">
         <p className="text-md">
