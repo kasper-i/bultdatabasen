@@ -3,7 +3,7 @@ import Input from "@/components/atoms/Input";
 import { Option } from "@/components/atoms/RadioGroup";
 import { Select } from "@/components/atoms/Select";
 import { Route, RouteType, routeTypes } from "@/models/route";
-import { renderRouteType } from "@/pages/RoutePage";
+import { renderRouteType } from "@/utils/routeUtils";
 import { FC } from "react";
 import { Controller, SubmitHandler, useFormContext } from "react-hook-form";
 

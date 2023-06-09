@@ -4,29 +4,12 @@ import DeleteDialog from "@/components/molecules/DeleteDialog";
 import PageHeader from "@/components/PageHeader";
 import { Underlined } from "@/components/Underlined";
 import { useUnsafeParams } from "@/hooks/common";
-import { RouteType } from "@/models/route";
 import { usePoints } from "@/queries/pointQueries";
 import { useDeleteRoute, useRoute } from "@/queries/routeQueries";
 import { getParent } from "@/utils/resourceUtils";
+import { renderRouteType } from "@/utils/routeUtils";
 import { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-export const renderRouteType = (routeType: RouteType) => {
-  switch (routeType) {
-    case "sport":
-      return "Sportled";
-    case "traditional":
-      return "Tradled";
-    case "partially_bolted":
-      return "Mixled";
-    case "top_rope":
-      return "Topprepsled";
-    case "aid":
-      return "Aidled";
-    case "dws":
-      return "Djupvattensolo";
-  }
-};
 
 const RoutePage = () => {
   const { resourceId } = useUnsafeParams<"resourceId">();
