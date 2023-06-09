@@ -159,7 +159,7 @@ const App = () => {
             >
               <Route index element={<SectorPage />} />
               <Route path="tasks" element={<TasksPage />} />
-              <Route path="new" element={<NewRoutePage />} />
+              <Route path="new-route" element={<NewRoutePage />} />
             </Route>
             <Route
               path="route/:resourceId"

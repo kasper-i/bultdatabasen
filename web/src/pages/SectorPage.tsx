@@ -25,7 +25,7 @@ const SectorPage = (): ReactElement => {
       />
       <Restricted>
         <div className="flex justify-end">
-          <Link to="new">
+          <Link to="new-route">
             <Button icon="plus">Ny led</Button>
           </Link>
         </div>

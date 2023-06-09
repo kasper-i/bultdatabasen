@@ -54,7 +54,7 @@ export const RouteForm: FC<{
         render={({ field: { onChange, value } }) => (
           <Input
             label="Längd"
-            value={value ? Number(value).toString() : ""}
+            value={value ? `${value}` : ""}
             onChange={(event) => onChange(Number(event.currentTarget.value))}
           />
         )}
@@ -65,7 +65,7 @@ export const RouteForm: FC<{
         render={({ field: { onChange, value } }) => (
           <Input
             label="År"
-            value={value ? Number(value).toString() : ""}
+            value={value ? `${value}` : ""}
             onChange={(event) => onChange(Number(event.currentTarget.value))}
           />
         )}
