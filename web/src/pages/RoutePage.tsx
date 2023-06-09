@@ -7,6 +7,7 @@ import { useUnsafeParams } from "@/hooks/common";
 import { RouteType } from "@/models/route";
 import { usePoints } from "@/queries/pointQueries";
 import { useDeleteRoute, useRoute } from "@/queries/routeQueries";
+import { getParent } from "@/utils/resourceUtils";
 import { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -37,8 +38,8 @@ const RoutePage = () => {
   const { data: points } = usePoints(resourceId);
 
   useEffect(() => {
-    if (deleteRoute.isSuccess) {
-      const parent = route?.ancestors?.slice(-1)[0];
+    if (deleteRoute.isSuccess && route?.ancestors) {
+      const parent = getParent(route?.ancestors);
       naviate(`/${parent?.type}/${parent?.id}`);
     }
   }, [deleteRoute.isSuccess]);
