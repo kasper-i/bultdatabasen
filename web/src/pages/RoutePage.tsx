@@ -2,7 +2,6 @@ import PointEditor from "@/components/features/routeEditor/PointEditor";
 import TaskButton from "@/components/features/task/TaskButton";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import PageHeader from "@/components/PageHeader";
-import Restricted from "@/components/Restricted";
 import { Underlined } from "@/components/Underlined";
 import { useUnsafeParams } from "@/hooks/common";
 import { RouteType } from "@/models/route";
@@ -81,13 +80,13 @@ const RoutePage = () => {
         <TaskButton resourceId={resourceId} />
       </Link>
 
-        {action === "delete" && (
-          <DeleteDialog
-            mutation={deleteRoute}
-            target="leden"
-            onClose={() => setAction(undefined)}
-          />
-        )}
+      {action === "delete" && (
+        <DeleteDialog
+          mutation={deleteRoute}
+          target="leden"
+          onClose={() => setAction(undefined)}
+        />
+      )}
 
       <div className="flex items-center gap-2">
         <p className="text-md">
