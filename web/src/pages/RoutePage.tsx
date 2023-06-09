@@ -1,7 +1,6 @@
 import PointEditor from "@/components/features/routeEditor/PointEditor";
 import TaskButton from "@/components/features/task/TaskButton";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import { Menu } from "@/components/molecules/Menu";
 import PageHeader from "@/components/PageHeader";
 import Restricted from "@/components/Restricted";
 import { Underlined } from "@/components/Underlined";
