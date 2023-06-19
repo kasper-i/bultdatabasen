@@ -1,6 +1,11 @@
 {
   "name": "bultdatabasen",
   "version": "0.0.0",
+  "engines": {
+    "node": "18",
+    "pnpm": "8.6.3"
+  },
+  "packageManager": "pnpm@8.6.3",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
