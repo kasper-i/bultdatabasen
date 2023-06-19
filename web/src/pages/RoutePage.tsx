@@ -1,5 +1,5 @@
+import Icon from "@/components/atoms/Icon";
 import PointEditor from "@/components/features/routeEditor/PointEditor";
-import TaskButton from "@/components/features/task/TaskButton";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import PageHeader from "@/components/PageHeader";
 import { Underlined } from "@/components/Underlined";
@@ -60,10 +60,6 @@ const RoutePage = () => {
         ]}
       />
 
-      <Link to="tasks">
-        <TaskButton resourceId={resourceId} />
-      </Link>
-
       {action === "delete" && (
         <DeleteDialog
           mutation={deleteRoute}
@@ -73,7 +69,7 @@ const RoutePage = () => {
       )}
 
       <div className="flex items-center gap-2">
-        <p className="text-md">
+        <p className="text-sm">
           <Underlined>{renderRouteType(routeType)}</Underlined>
           {year && (
             <>
@@ -92,6 +88,17 @@ const RoutePage = () => {
           {numInstalledBolts !== 1 && "ar"}.
         </p>
       </div>
+
+      {route.counters?.openTasks && (
+        <div className="mt-5 flex gap-1 items-center border-l-4 border-primary-500 px-2">
+          <Icon name="wrench" />
+          <span className="font-bold">{route.counters.openTasks}</span>
+          ohanterade problem
+          <Link to="tasks" className="flex-grow text-right text-primary-500">
+            <span>Visa</span>
+          </Link>
+        </div>
+      )}
 
       <div className="mt-5">
         <PointEditor
