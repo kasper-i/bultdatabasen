@@ -1,3 +1,4 @@
+import { PencilIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import React, { FC, InputHTMLAttributes, LegacyRef, useId } from "react";
 
@@ -7,7 +8,7 @@ const Input: FC<{
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
   onClick?: () => void;
-  icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
+  icon?: typeof PencilIcon;
   inputRef?: LegacyRef<HTMLInputElement>;
   password?: boolean;
   tabIndex?: number;
