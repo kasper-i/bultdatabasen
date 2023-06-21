@@ -1,5 +1,5 @@
-import Icon from "@/components/atoms/Icon";
 import PointEditor from "@/components/features/routeEditor/PointEditor";
+import { TaskAlert } from "@/components/features/task/TaskAlert";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import PageHeader from "@/components/PageHeader";
 import { Underlined } from "@/components/Underlined";
@@ -9,7 +9,7 @@ import { useDeleteRoute, useRoute } from "@/queries/routeQueries";
 import { getParent } from "@/utils/resourceUtils";
 import { renderRouteType } from "@/utils/routeUtils";
 import { Fragment, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const RoutePage = () => {
   const { resourceId } = useUnsafeParams<"resourceId">();
@@ -90,14 +90,7 @@ const RoutePage = () => {
       </div>
 
       {route.counters?.openTasks && (
-        <div className="mt-5 flex gap-1 items-center border-l-4 border-primary-500 px-2">
-          <Icon name="wrench" />
-          <span className="font-bold">{route.counters.openTasks}</span>
-          ohanterade problem
-          <Link to="tasks" className="flex-grow text-right text-primary-500">
-            <span>Visa</span>
-          </Link>
-        </div>
+        <TaskAlert openTasks={route.counters.openTasks} />
       )}
 
       <div className="mt-5">
