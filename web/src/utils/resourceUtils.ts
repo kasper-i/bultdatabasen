@@ -1,4 +1,4 @@
-import { ResourceType } from "@/models/resource";
+import { Ancestor, ResourceType } from "@/models/resource";
 
 export const getResourceLabel = (type: string): string | undefined => {
   switch (type) {
@@ -38,3 +38,5 @@ export const getResourceRoute = (
       return "/";
   }
 };
+
+export const getParent = (ancestors: Ancestor[]) => ancestors?.slice(-1)[0];

@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import { ReactElement } from "react";
 import { useLocation } from "react-router-dom";
 import LoginToolbar from "./LoginToolbar";
 import Search from "./Search";

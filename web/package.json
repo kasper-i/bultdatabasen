@@ -1,6 +1,11 @@
 {
   "name": "bultdatabasen",
   "version": "0.0.0",
+  "engines": {
+    "node": "18",
+    "pnpm": "8.6.3"
+  },
+  "packageManager": "pnpm@8.6.3",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
@@ -10,6 +15,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.3",
     "@heroicons/react": "^v2.0.18",
+    "@hookform/resolvers": "^3.1.0",
     "@popperjs/core": "^2.11.6",
     "@reduxjs/toolkit": "^1.8.1",
     "@sentry/core": "^7.56.0",
@@ -28,6 +34,7 @@
     "react-activity": "^2.1.3",
     "react-dom": "^18.0.0",
     "react-dropzone": "^12.0.4",
+    "react-hook-form": "^7.43.9",
     "react-popper": "^2.3.0",
     "react-redux": "^7.2.8",
     "react-router-dom": "^6.3.0",

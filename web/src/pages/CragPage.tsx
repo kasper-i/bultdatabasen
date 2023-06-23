@@ -1,15 +1,16 @@
 import ChildrenTable from "@/components/ChildrenTable";
+import { TaskAlert } from "@/components/features/task/TaskAlert";
 import PageHeader from "@/components/PageHeader";
 import { useUnsafeParams } from "@/hooks/common";
 import { useCrag } from "@/queries/cragQueries";
-import React, { Fragment, ReactElement } from "react";
+import { Fragment, ReactElement } from "react";
 
 const CragPage = (): ReactElement => {
   const { resourceId } = useUnsafeParams<"resourceId">();
 
-  const crag = useCrag(resourceId);
+  const { data: crag } = useCrag(resourceId);
 
-  if (crag.data == null) {
+  if (crag == null) {
     return <Fragment />;
   }
 
@@ -17,9 +18,12 @@ const CragPage = (): ReactElement => {
     <div className="flex flex-col space-y-5">
       <PageHeader
         resourceId={resourceId}
-        ancestors={crag.data.ancestors}
+        ancestors={crag.ancestors}
         showCounts
       />
+      {crag?.counters?.openTasks && (
+        <TaskAlert openTasks={crag.counters.openTasks} />
+      )}
       <ChildrenTable
         resourceId={resourceId}
         filters={{ types: ["sector", "route"] }}
