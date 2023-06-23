@@ -22,7 +22,7 @@ const RoutePage = () => {
 
   useEffect(() => {
     if (deleteRoute.isSuccess && route?.ancestors) {
-      const parent = getParent(route?.ancestors);
+      const parent = getParent(route.ancestors);
       naviate(`/${parent?.type}/${parent?.id}`);
     }
   }, [deleteRoute.isSuccess]);
