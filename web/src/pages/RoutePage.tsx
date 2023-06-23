@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 const RoutePage = () => {
   const { resourceId } = useUnsafeParams<"resourceId">();
   const naviate = useNavigate();
-  const [action, setAction] = useState<"delete" | "add_bolt">();
+  const [action, setAction] = useState<"delete">();
   const deleteRoute = useDeleteRoute(resourceId);
 
   const { data: route } = useRoute(resourceId);
