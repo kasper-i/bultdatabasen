@@ -7,7 +7,7 @@ export const TaskAlert: FC<{ openTasks: number }> = ({ openTasks }) => {
     <div className="mt-5 flex gap-1 items-center border-l-4 border-primary-500 px-2">
       <Icon name="wrench" />
       <span className="font-bold">{openTasks}</span>
-      ohanterade problem
+      {openTasks === 1 ? "ohanterat" : "ohanterade"} problem
       <Link
         to="tasks"
         className="flex-grow text-right text-primary-500 font-bold"
