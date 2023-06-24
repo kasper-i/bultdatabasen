@@ -47,6 +47,7 @@ const Button: FC<ButtonProps> = ({
         {
           [css`
             color: ${color};
+            background-color: transparent;
             border-width: ${Border.Thin};
             border-color: ${color};
             &:disabled {
@@ -55,20 +56,22 @@ const Button: FC<ButtonProps> = ({
             }
           `]: outlined,
           [css`
-            background: ${color};
+            background-color: ${color};
             color: ${Color.White};
+            border: none;
             &:disabled {
-              background: ${Color.Disabled};
+              background-color: ${Color.Disabled};
             }
             &:not(:disabled) {
               &:hover,
               &:focus {
-                background: ${chroma(color).darken(0.4).hex()};
+                background-color: ${chroma(color).darken(0.4).hex()};
               }
             }
           `]: !outlined,
         },
         css`
+          cursor: pointer;
           display: inline;
           outline: none;
           height: ${Size.Base};
