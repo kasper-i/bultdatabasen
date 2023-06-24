@@ -11,6 +11,7 @@ import App from "./App";
 import "./index.css";
 import { store } from "./store";
 import { refreshSession } from "./utils/cognito";
+import "normalize.css";
 
 if (!import.meta.env.DEV) {
   init({
