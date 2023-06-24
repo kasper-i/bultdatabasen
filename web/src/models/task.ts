@@ -1,6 +1,15 @@
-import { ResourceBase } from "./resource";
+import { z } from "zod";
+import { ResourceBase, resourceBaseSchema } from "./resource";
+import { Author, authorSchema } from "./user";
 
-export type TaskStatus = "open" | "assigned" | "closed" | "rejected";
+const taskStatusSchema = z.union([
+  z.literal("open"),
+  z.literal("assigned"),
+  z.literal("closed"),
+  z.literal("rejected"),
+]);
+
+export type TaskStatus = z.infer<typeof taskStatusSchema>;
 
 export type Task = ResourceBase & {
   status: TaskStatus;
@@ -8,8 +17,18 @@ export type Task = ResourceBase & {
   priority: number;
   assignee?: string;
   comment?: string;
-  parentId: string;
-  createdAt: string;
-  userId: string;
-  closedAt?: string;
+  createdAt: Date;
+  author: Author;
+  closedAt?: Date;
 };
+
+export const taskSchema: z.ZodType<Task> = resourceBaseSchema.extend({
+  status: taskStatusSchema,
+  description: z.string(),
+  priority: z.number(),
+  assignee: z.string().optional(),
+  comment: z.string().optional(),
+  createdAt: z.coerce.date(),
+  author: authorSchema,
+  closedAt: z.coerce.date().optional(),
+});

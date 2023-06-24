@@ -1,7 +1,8 @@
 import { logout } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
+import { signOut } from "@/utils/cognito";
 import { useQueryClient } from "@tanstack/react-query";
-import { Fragment, ReactElement, useEffect } from "react";
+import { Fragment, ReactElement, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Api } from "../Api";
 
@@ -10,17 +11,21 @@ function SignoutPage(): ReactElement {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    Api.clearTokens();
-    queryClient.removeQueries(["role"]);
+  const logOut = useCallback(async () => {
+    Api.clearAccessToken();
 
-    const returnPath = localStorage.getItem("returnPath");
-    localStorage.removeItem("returnPath");
+    queryClient.removeQueries({ queryKey: ["roles"], exact: false });
+
+    await signOut();
 
     dispatch(logout());
 
-    navigate(returnPath != null ? returnPath : "/");
-  }, [dispatch]);
+    navigate("/");
+  }, []);
+
+  useEffect(() => {
+    logOut();
+  }, [logOut]);
 
   return <Fragment />;
 }

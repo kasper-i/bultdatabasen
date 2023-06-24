@@ -1,6 +1,6 @@
 import { css, cx } from "@emotion/css";
 import chroma from "chroma-js";
-import React, { FC, ReactNode } from "react";
+import React, { ButtonHTMLAttributes, FC, ReactNode } from "react";
 import { Dots } from "react-activity";
 import "react-activity/dist/Dots.css";
 import {
@@ -25,6 +25,7 @@ export interface ButtonProps {
   full?: boolean;
   outlined?: boolean;
   children: ReactNode;
+  type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 }
 
 const Button: FC<ButtonProps> = ({
@@ -37,6 +38,7 @@ const Button: FC<ButtonProps> = ({
   disabled,
   full,
   outlined,
+  type,
 }) => {
   return (
     <button
@@ -87,6 +89,7 @@ const Button: FC<ButtonProps> = ({
         className
       )}
       disabled={disabled}
+      type={type}
     >
       <span
         className={cx(

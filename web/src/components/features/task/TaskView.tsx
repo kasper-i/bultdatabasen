@@ -8,6 +8,7 @@ import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Menu } from "@/components/molecules/Menu";
 import UserName from "@/components/UserName";
 import { Point } from "@/models/point";
+import { Resource } from "@/models/resource";
 import { Task, TaskStatus } from "@/models/task";
 import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { emptyArray } from "@/utils/constants";
@@ -60,7 +61,7 @@ const CompleteButton: FC<{
               ? setPhase(2)
               : onComplete({
                   comment: comment.trim(),
-                  closedAt: closedAt.toISOString(),
+                  closedAt: closedAt,
                 })
           }
           icon="check badge"
@@ -77,7 +78,8 @@ const CompleteButton: FC<{
 
 const TaskView: FC<{
   taskId: string;
-}> = ({ taskId }): ReactElement => {
+  parentResourceId: string;
+}> = ({ taskId, parentResourceId }): ReactElement => {
   const { data: task } = useTask(taskId);
 
   const ancestors = task?.ancestors;
@@ -86,19 +88,29 @@ const TaskView: FC<{
 
   const [action, setAction] = useState<"delete" | "edit">();
 
-  const parent = ancestors?.filter((ancestor) =>
-    ["area", "crag", "sector", "route"].includes(ancestor.type)
-  )?.[0];
+  let parent = ancestors
+    ?.slice()
+    .reverse()
+    ?.filter((ancestor) =>
+      ["area", "crag", "sector", "route"].includes(ancestor.type)
+    )?.[0];
+  const pointId = ancestors?.find(({ type }) => type === "point")?.id;
+  let route: Resource | undefined;
 
-  const routeId = ancestors?.find(
-    ({ id, type }) => id === task?.parentId && type === "point"
-  )?.parentId;
+  if (pointId) {
+    route = ancestors?.find(
+      ({ id, type }) => type === "route" && id === parentResourceId
+    );
+    if (route) {
+      parent = route;
+    }
+  }
 
   const { data: points } = useQuery<Point[]>(
-    ["points", { resourceId: routeId }],
-    () => Api.getPoints(routeId ?? ""),
+    ["points", { resourceId: route?.id }],
+    () => Api.getPoints(route?.id ?? ""),
     {
-      enabled: !!routeId,
+      enabled: !!route?.id,
     }
   );
 
@@ -123,14 +135,14 @@ const TaskView: FC<{
 
   const isComplete = finalStatuses.includes(task.status);
 
-  const { name: pointName, no: pointNo } = pointLabeler(task.parentId);
+  const { name: pointName, no: pointNo } = pointLabeler(pointId ?? "");
 
   return (
     <div className="w-full sm:w-96 flex flex-col space-y-2.5 bg-white shadow-sm p-5 rounded border border-gray-300">
       <div className="relative flex justify-between items-start">
         <Link
           to={`${getResourceRoute(parent.type, parent.id)}${
-            points ? `?p=${task.parentId}` : ""
+            pointId ? `?p=${pointId}` : ""
           }`}
           className="w-full pr-5"
         >
@@ -163,7 +175,7 @@ const TaskView: FC<{
             <span className="font-medium">
               <Time time={task.createdAt} />
             </span>{" "}
-            av <UserName userId={task.userId} />
+            av <UserName user={task.author} />
           </div>
         </Link>
         <Restricted>

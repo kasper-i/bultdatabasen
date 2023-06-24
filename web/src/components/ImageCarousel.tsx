@@ -154,7 +154,7 @@ export const FullSizeImage: FC<{
               <Button
                 loading={updateImage.isLoading}
                 onClick={() =>
-                  (window.location.href = `${configData.API_URL}/images/${image.id}/original`)
+                  (window.location.href = `${configData.API_URL}/images/${image.id}`)
                 }
                 icon="download"
                 className="ring-offset-neutral-100"

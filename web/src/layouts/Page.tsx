@@ -1,24 +1,17 @@
-import TaskButton from "@/components/features/task/TaskButton";
-import { RoleContext } from "@/contexts/RoleContext";
+import { PermissionContext } from "@/contexts/PermissionContext";
+import { usePermissions } from "@/hooks/authHooks";
 import { useUnsafeParams } from "@/hooks/common";
-import { useRole } from "@/queries/roleQueries";
-import React from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 const Page = () => {
   const { resourceId } = useUnsafeParams<"resourceId">();
 
-  const { role } = useRole(resourceId);
+  const permissions = usePermissions(resourceId);
 
   return (
-    <RoleContext.Provider value={{ role }}>
-      <div className="absolute top-0 right-0 p-5">
-        <Link to="tasks">
-          <TaskButton resourceId={resourceId} />
-        </Link>
-      </div>
+    <PermissionContext.Provider value={{ permissions }}>
       <Outlet />
-    </RoleContext.Provider>
+    </PermissionContext.Provider>
   );
 };
 

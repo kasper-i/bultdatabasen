@@ -5,10 +5,12 @@ import axios from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
+import { ZodError } from "zod";
 import { Api } from "./Api";
 import App from "./App";
 import "./index.css";
 import { store } from "./store";
+import { refreshSession } from "./utils/cognito";
 
 if (!import.meta.env.DEV) {
   init({
@@ -27,14 +29,15 @@ if (!import.meta.env.DEV) {
   });
 }
 
-Api.restoreTokens();
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const refreshAuthLogic = async (failedRequest?: any) => {
-  await Api.refreshTokens();
+  const accessToken = await refreshSession(true);
+  if (accessToken) {
+    Api.setAccessToken(accessToken);
+  }
 
   failedRequest.response.config.headers["Authorization"] =
-    "Bearer " + Api.accessToken;
+    "Bearer " + accessToken;
 };
 
 createAuthRefreshInterceptor(axios, refreshAuthLogic);
@@ -42,8 +45,9 @@ createAuthRefreshInterceptor(axios, refreshAuthLogic);
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: !import.meta.env.DEV,
+      refetchOnWindowFocus: false,
       suspense: true,
+      retry: (_, error) => !(error instanceof ZodError),
     },
   },
 });

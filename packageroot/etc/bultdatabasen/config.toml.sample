@@ -1,0 +1,30 @@
+[database]
+database = "bultdatabasen"
+schema = "bultdatabasen"
+host = "127.0.0.1"
+port = 5432
+username = "bultdatabasen"
+password = "bultdatabasen"
+
+[spaces]
+bucket = "bultdatabasen"
+key = ""
+secret = ""
+
+[cognito]
+access_key = ""
+secret_access_key = ""
+region = "eu-west-1"
+user_pool_id = ""
+
+[smtp]
+host = "email-smtp.eu-west-1.amazonaws.com"
+port = 465
+tls = true
+username = ""
+password = ""
+
+[[functions]]
+name = "images/resize"
+url = "https://.doserverless.co/api/v1/web/fn-/images/resize"
+secret = ""

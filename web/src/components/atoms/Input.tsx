@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
-import React, { FC, LegacyRef, useId } from "react";
+import { PencilIcon } from "@heroicons/react/24/outline";
+import React, { FC, InputHTMLAttributes, LegacyRef, useId } from "react";
 import {
   Border,
   Color,
@@ -17,11 +18,13 @@ const Input: FC<{
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
   onClick?: () => void;
-  icon?: (props: React.ComponentProps<"svg">) => JSX.Element;
+  icon?: typeof PencilIcon;
   inputRef?: LegacyRef<HTMLInputElement>;
   password?: boolean;
   tabIndex?: number;
   disabled?: boolean;
+  autoComplete?: InputHTMLAttributes<HTMLInputElement>["autoComplete"];
+  labelStyle?: "above" | "none";
 }> = ({
   label,
   placeholder,
@@ -33,6 +36,8 @@ const Input: FC<{
   password,
   tabIndex,
   disabled,
+  autoComplete,
+  labelStyle = "above",
 }) => {
   const id = useId();
 
@@ -68,6 +73,7 @@ const Input: FC<{
         `}
       >
         <input
+          autoComplete={autoComplete}
           disabled={disabled}
           tabIndex={tabIndex ?? -1}
           ref={inputRef}
@@ -76,6 +82,7 @@ const Input: FC<{
           onChange={onChange}
           readOnly={!onChange}
           onClick={onClick}
+          onFocus={(e) => (onClick ? e.target.blur() : undefined)}
           placeholder={placeholder}
           value={value}
         />

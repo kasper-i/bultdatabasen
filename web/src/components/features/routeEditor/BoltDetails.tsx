@@ -82,7 +82,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
                 onClick: () =>
                   updateBolt.mutate({
                     ...bolt,
-                    dismantled: new Date().toISOString(),
+                    dismantled: new Date(),
                   }),
                 disabled: !!bolt.dismantled,
               },

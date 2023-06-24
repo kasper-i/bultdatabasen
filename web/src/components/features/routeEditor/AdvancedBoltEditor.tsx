@@ -34,6 +34,11 @@ interface DiameterAndUnit {
 
 const diameterOptions: Option<DiameterAndUnit>[] = [
   {
+    key: "8mm",
+    label: "8mm",
+    value: { diameter: 8, unit: "mm" },
+  },
+  {
     key: "10mm",
     label: "10mm",
     value: { diameter: 10, unit: "mm" },
@@ -206,7 +211,7 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
         label="År"
         onSelect={(value) =>
           updateBolt({
-            installed: new Date(Date.UTC(Number(value), 0, 1)).toISOString(),
+            installed: new Date(Date.UTC(Number(value), 0, 1)),
           })
         }
         options={yearOptions}
@@ -220,9 +225,7 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
           <Datepicker
             label="Demonterad"
             value={bolt.dismantled ? new Date(bolt.dismantled) : undefined}
-            onChange={(value) =>
-              updateBolt({ dismantled: new Date(value).toISOString() })
-            }
+            onChange={(value) => updateBolt({ dismantled: new Date(value) })}
           />
 
           <ClearButton onClick={() => updateBolt({ dismantled: undefined })} />

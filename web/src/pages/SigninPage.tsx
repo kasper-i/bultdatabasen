@@ -11,12 +11,11 @@ import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
-  parseJwt,
+  isCognitoError,
   resendConfirmationCode,
-  signin as cognitoSignin,
+  signIn as cognitoSignin,
   translateCognitoError,
 } from "@/utils/cognito";
-import { isEqual } from "lodash-es";
 import { useState } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 
@@ -35,31 +34,18 @@ export const handleLogin = async (
   dispatch: ReturnType<typeof useAppDispatch>
 ) => {
   const accessToken = session.getAccessToken().getJwtToken();
-  const idToken = session.getIdToken().getJwtToken();
-  const refreshToken = session.getRefreshToken().getToken();
+  const idToken = session.getIdToken();
 
-  Api.setTokens(idToken, accessToken, refreshToken);
-  const { given_name: firstName, family_name: lastName } = parseJwt(idToken);
+  Api.setAccessToken(accessToken);
+  const {
+    sub: userId,
+    email,
+    given_name: firstName,
+    family_name: lastName,
+  } = idToken.decodePayload();
 
-  (async () => {
-    const info = await Api.getMyself();
-    const updatedInfo = {
-      ...info,
-      firstName,
-      lastName,
-    };
-
-    if (!isEqual(info, updatedInfo)) {
-      await Api.updateMyself(updatedInfo);
-    }
-  })();
-
-  const returnPath = localStorage.getItem("returnPath");
-  localStorage.removeItem("returnPath");
-
-  dispatch(login({ firstName, lastName }));
-
-  navigate(returnPath != null ? returnPath : "/");
+  dispatch(login({ userId, email, firstName, lastName }));
+  navigate(-1);
 };
 
 const SigninPage = () => {
@@ -108,14 +94,16 @@ const SigninPage = () => {
 
       const session = await cognitoSignin(authenticationDetails);
       handleLogin(session, navigate, dispatch);
-    } catch (err: any) {
-      updateState({ errorMessage: translateCognitoError(err) });
+    } catch (err: unknown) {
+      if (isCognitoError(err)) {
+        updateState({ errorMessage: translateCognitoError(err) });
 
-      switch (err.name) {
-        case "UserNotConfirmedException":
-          updateState({ requireConfirmationCode: true });
-          await resendConfirmationCode(email.trim());
-          break;
+        switch (err.name) {
+          case "UserNotConfirmedException":
+            updateState({ requireConfirmationCode: true });
+            await resendConfirmationCode(email.trim());
+            break;
+        }
       }
     } finally {
       updateState({ inProgress: false });
@@ -150,6 +138,7 @@ const SigninPage = () => {
       ) : (
         <Link
           to={`/auth/forgot-password?email=${email}`}
+          replace
           className="text-sm text-purple-600 self-start"
         >
           Glömt lösenord?
@@ -162,7 +151,7 @@ const SigninPage = () => {
       <Button onClick={signin} disabled={!canSubmit} loading={inProgress} full>
         Logga in
       </Button>
-      <Link to="/auth/register">
+      <Link to="/auth/register" replace>
         <span className="text-sm text-purple-600">Skapa nytt konto</span>
       </Link>
     </div>

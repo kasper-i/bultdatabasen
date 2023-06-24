@@ -5,7 +5,8 @@ import { useAppDispatch } from "@/store";
 import {
   confirmPassword,
   forgotPassword,
-  signin,
+  isCognitoError,
+  signIn,
   translateCognitoError,
 } from "@/utils/cognito";
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
@@ -50,7 +51,8 @@ const RestorePasswordPage = () => {
       forgotPassword(email.trim());
       updateState({ phase: 2 });
     } catch (err) {
-      updateState({ errorMessage: translateCognitoError(err) });
+      isCognitoError(err) &&
+        updateState({ errorMessage: translateCognitoError(err) });
     } finally {
       updateState({ inProgress: false });
     }
@@ -71,10 +73,11 @@ const RestorePasswordPage = () => {
         Password: newPassword.trim(),
       });
 
-      const session = await signin(authenticationDetails);
+      const session = await signIn(authenticationDetails);
       handleLogin(session, navigate, dispatch);
     } catch (err) {
-      updateState({ errorMessage: translateCognitoError(err) });
+      isCognitoError(err) &&
+        updateState({ errorMessage: translateCognitoError(err) });
     } finally {
       updateState({ inProgress: false });
     }
@@ -112,6 +115,7 @@ const RestorePasswordPage = () => {
             password
             onChange={(e) => updateState({ newPassword: e.target.value })}
             tabIndex={2}
+            autoComplete="new-password"
           />
 
           <hr />
