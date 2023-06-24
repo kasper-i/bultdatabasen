@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
+import { useEffect } from "react";
 import Button from "../atoms/Button";
-import Modal from "../atoms/Modal";
 import { Color } from "../atoms/constants";
+import Modal from "../atoms/Modal";
 
 type Props = {
   mutation: UseMutationResult<void, unknown, void, unknown>;

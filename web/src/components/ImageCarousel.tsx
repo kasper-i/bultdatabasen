@@ -3,7 +3,7 @@ import { Image, ImageRotation, ImageVersion } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import { Dialog, Transition } from "@headlessui/react";
 import clsx from "clsx";
-import React, {
+import {
   CSSProperties,
   FC,
   Fragment,
