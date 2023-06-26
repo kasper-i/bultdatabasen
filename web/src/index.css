@@ -1,6 +1,1 @@
-@font-face {
-  font-family: "Inter";
-  src: local("Inter"), url(@/fonts/Inter-VariableFont.ttf) format("truetype");
-}
-
 @tailwind utilities;
