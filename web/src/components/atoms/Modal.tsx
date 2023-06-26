@@ -9,11 +9,10 @@ const Modal: FC<{
   children: ReactNode;
 }> = ({ children, onClose, title, description }) => {
   return (
-    <Transition appear show as={Fragment}>
+    <Transition appear show>
       <Dialog className="fixed inset-0 z-10 overflow-y-auto" onClose={onClose}>
         <div className="min-h-screen flex justify-center items-center">
           <Transition.Child
-            as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-70"
@@ -26,7 +25,6 @@ const Modal: FC<{
           </Transition.Child>
 
           <Transition.Child
-            as={Fragment}
             enter="ease-out duration-300"
             enterFrom="scale-95"
             enterTo="scale-100"

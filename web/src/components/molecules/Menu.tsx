@@ -1,7 +1,7 @@
 import { Menu as HeadlessMenu, Transition } from "@headlessui/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import React, { FC, Fragment } from "react";
+import { FC } from "react";
 import Icon from "../atoms/Icon";
 import { IconType } from "../atoms/types";
 
@@ -23,7 +23,6 @@ export const Menu: FC<{ items: MenuItem[] }> = ({ items }) => {
           </HeadlessMenu.Button>
         </div>
         <Transition
-          as={Fragment}
           enter="transition ease-out duration-100"
           enterFrom="transform opacity-0 scale-95"
           enterTo="transform opacity-100 scale-100"
