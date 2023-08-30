@@ -24,9 +24,9 @@ const SectorPage = (): ReactElement => {
         ancestors={sector.ancestors}
         showCounts
       />
-      {sector?.counters?.openTasks && (
-        <TaskAlert openTasks={sector.counters.openTasks} />
-      )}
+
+      <TaskAlert openTasks={sector.counters?.openTasks ?? 0} />
+
       <Restricted>
         <div className="flex justify-end">
           <Link to="new-route">
