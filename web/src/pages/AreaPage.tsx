@@ -21,9 +21,9 @@ const AreaPage = (): ReactElement => {
         ancestors={area.ancestors}
         showCounts
       />
-      {area?.counters?.openTasks && (
-        <TaskAlert openTasks={area.counters.openTasks} />
-      )}
+
+      <TaskAlert openTasks={area.counters?.openTasks ?? 0} />
+
       <ChildrenTable
         resourceId={resourceId}
         filters={{ types: ["area", "crag", "route"] }}

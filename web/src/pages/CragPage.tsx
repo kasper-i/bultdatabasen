@@ -21,9 +21,9 @@ const CragPage = (): ReactElement => {
         ancestors={crag.ancestors}
         showCounts
       />
-      {crag?.counters?.openTasks && (
-        <TaskAlert openTasks={crag.counters.openTasks} />
-      )}
+
+      <TaskAlert openTasks={crag.counters?.openTasks ?? 0} />
+
       <ChildrenTable
         resourceId={resourceId}
         filters={{ types: ["sector", "route"] }}
