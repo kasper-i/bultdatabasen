@@ -89,9 +89,7 @@ const RoutePage = () => {
         </p>
       </div>
 
-      {route.counters?.openTasks && (
-        <TaskAlert openTasks={route.counters.openTasks} />
-      )}
+      <TaskAlert openTasks={route.counters?.openTasks ?? 0} />
 
       <div className="mt-5">
         <PointEditor
