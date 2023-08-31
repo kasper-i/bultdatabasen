@@ -11,7 +11,7 @@ export enum ExtendedColor {
 }
 
 export enum Size {
-  Base = "2rem",
+  Base = "1.75rem",
 }
 
 export enum Shadow {

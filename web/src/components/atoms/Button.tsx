@@ -46,6 +46,8 @@ const Button: FC<ButtonProps> = ({
       className={cx(
         css`
           border: none;
+          font-size: ${FontSize.Sm};
+          font-weight: ${FontWeight.Md};
           cursor: pointer;
           display: inline;
           outline: none;
@@ -59,6 +61,10 @@ const Button: FC<ButtonProps> = ({
           white-space: nowrap;
           &:disabled {
             cursor: not-allowed;
+          }
+          &:active {
+            transform: scale(0.95);
+            transform-origin: center;
           }
         `,
         {
@@ -91,7 +97,7 @@ const Button: FC<ButtonProps> = ({
         },
         className
       )}
-      disabled={disabled}
+      disabled={disabled || loading}
       type={type}
     >
       <span
@@ -102,8 +108,6 @@ const Button: FC<ButtonProps> = ({
             justify-content: center;
             align-items: center;
             gap: 0.375rem;
-            font-size: ${FontSize.Sm};
-            font-weight: ${FontWeight.Md};
           `,
           {
             [css`
@@ -116,7 +120,6 @@ const Button: FC<ButtonProps> = ({
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                color: ${outlined ? color : chroma(color).brighten(4).hex()};
               }
             `]: loading,
           }
