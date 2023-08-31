@@ -1,6 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import React, { FC, Fragment } from "react";
-import { ReactNode } from "react";
+import { FC, ReactNode } from "react";
 
 const Modal: FC<{
   onClose: () => void;

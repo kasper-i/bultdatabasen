@@ -21,7 +21,7 @@ import RestorePasswordPage from "./pages/RestorePasswordPage";
 import RootPage from "./pages/RootPage";
 import RoutePage from "./pages/RoutePage";
 import SectorPage from "./pages/SectorPage";
-import { ShowcasePage } from "./pages/ShowcasePage";
+import { KitchenSinkPage } from "./pages/KitchenSinkPage";
 import SignoutPage from "./pages/SignoutPage";
 import TasksPage from "./pages/TasksPage";
 import { login } from "./slices/authSlice";
@@ -118,7 +118,7 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route element={<Main />}>
-            <Route path="/showcase" element={<ShowcasePage />} />
+            <Route path="/kitchen-sink" element={<KitchenSinkPage />} />
             <Route element={<Auth />}>
               <Route path="/auth/signin" element={<SigninPage />} />
               <Route

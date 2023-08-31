@@ -44,12 +44,28 @@ const Button: FC<ButtonProps> = ({
     <button
       onClick={onClick}
       className={cx(
+        css`
+          border: none;
+          cursor: pointer;
+          display: inline;
+          outline: none;
+          &:focus {
+            outline: none;
+          }
+          height: ${Size.Base};
+          line-height: calc(${Size.Base} - 0.75rem - 2px);
+          padding: 0.375rem 0.75rem;
+          border-radius: ${Rounding.Base};
+          white-space: nowrap;
+          &:disabled {
+            cursor: not-allowed;
+          }
+        `,
         {
           [css`
             color: ${color};
             background-color: transparent;
-            border-width: ${Border.Thin};
-            border-color: ${color};
+            border: ${Border.Thin} solid ${color};
             &:disabled {
               border-color: ${Color.Disabled};
               color: ${Color.Disabled};
@@ -69,22 +85,6 @@ const Button: FC<ButtonProps> = ({
               }
             }
           `]: !outlined,
-        },
-        css`
-          cursor: pointer;
-          display: inline;
-          outline: none;
-          height: ${Size.Base};
-          line-height: calc(${Size.Base} - 0.75rem - 2px);
-          padding: 0.375rem 0.75rem;
-          box-shadow: ${Shadow.Sm};
-          border-radius: ${Rounding.Base};
-          white-space: nowrap;
-          &:disabled {
-            cursor: not-allowed;
-          }
-        `,
-        {
           [css`
             width: 100%;
           `]: full,

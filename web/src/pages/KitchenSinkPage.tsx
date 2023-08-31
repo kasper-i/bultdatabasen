@@ -18,7 +18,7 @@ import { useState } from "react";
 
 type Fruit = "banana" | "apple" | "orange" | "pineapple" | "kiwi" | "pear";
 
-export const ShowcasePage = () => {
+export const KitchenSinkPage = () => {
   const [date, setDate] = useState(new Date());
   const [fruit, setFruit] = useState<Fruit>("banana");
   const [ingredients, setIngredients] = useState<Fruit[]>(["banana", "apple"]);
