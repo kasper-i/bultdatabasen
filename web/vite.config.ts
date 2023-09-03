@@ -10,6 +10,9 @@ export default defineConfig({
   plugins: [
     react({
       jsxImportSource: "@emotion/react",
+      babel: {
+        plugins: ["@emotion/babel-plugin"],
+      },
     }),
     visualizer({
       template: "sunburst",

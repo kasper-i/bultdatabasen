@@ -1,4 +1,5 @@
 import { css, cx } from "@emotion/css";
+import styled from "@emotion/styled";
 import React, { ButtonHTMLAttributes, FC, ReactNode } from "react";
 import { Dots } from "react-activity";
 import "react-activity/dist/Dots.css";
@@ -13,6 +14,69 @@ import {
 } from "./constants";
 import Icon from "./Icon";
 import { IconType } from "./types";
+
+export const StyledButton = styled.button<{ color: Color; outlined?: boolean }>(
+  ({ color, outlined }) => `
+  border: none;
+  outline: none;
+  font-size: ${FontSize.Sm};
+  font-weight: ${FontWeight.Medium};
+  cursor: pointer;
+  height: ${Size.Input};
+  padding: 0 ${Spacing.Sm};
+  border-radius: ${Rounding.Base};
+  white-space: nowrap;
+  position: relative;
+  gap: ${Spacing.Xxs};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled) {
+    &:hover,
+    &:active,
+    &:focus {
+      outline: solid ${Border.Thin} ${color};
+      outline-offset: ${Border.Thin};
+    }
+  }
+
+  ${cx({
+    [`
+        color: ${color};
+        background-color: transparent;
+        border: ${Border.Thin} solid ${color};
+        &:disabled {
+          border-color: ${Color.Disabled};
+          color: ${Color.Disabled};
+        }
+  `]: outlined,
+    [`
+        background-color: ${color};
+        color: ${Color.White};
+        &:disabled {
+          background-color: ${Color.Disabled};
+        }
+  `]: !outlined,
+  })}
+`
+);
+
+export const StyledLoader = styled(Dots)`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 export interface ButtonProps {
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -40,82 +104,30 @@ const Button: FC<ButtonProps> = ({
   type,
 }) => {
   return (
-    <button
+    <StyledButton
       onClick={onClick}
       disabled={disabled || loading}
       type={type}
+      outlined={outlined}
+      color={color}
       className={cx(
         css`
-          border: none;
-          outline: none;
-          font-size: ${FontSize.Sm};
-          font-weight: ${FontWeight.Medium};
-          cursor: pointer;
-          height: ${Size.Input};
-          padding: 0 ${Spacing.Sm};
-          border-radius: ${Rounding.Base};
-          white-space: nowrap;
-          position: relative;
-          gap: ${Spacing.Xxs};
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
           width: ${full ? "100%" : "min-content"};
 
-          &:focus {
-            outline: none;
-          }
-
-          &:disabled {
-            cursor: not-allowed;
-          }
-
-          &:not(:disabled) {
-            &:hover,
-            &:active,
-            &:focus {
-              outline: solid ${Border.Thin} ${color};
-              outline-offset: ${Border.Thin};
-            }
-          }
-
-          & > :not(.rai-container) {
+          & > :not(${StyledLoader}) {
             visibility: ${loading ? "hidden" : "visible"};
           }
 
-          & > .rai-container {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+          & > ${StyledLoader} {
           }
         `,
-        {
-          [css`
-            color: ${color};
-            background-color: transparent;
-            border: ${Border.Thin} solid ${color};
-            &:disabled {
-              border-color: ${Color.Disabled};
-              color: ${Color.Disabled};
-            }
-          `]: outlined,
-          [css`
-            background-color: ${color};
-            color: ${Color.White};
-            &:disabled {
-              background-color: ${Color.Disabled};
-            }
-          `]: !outlined,
-        },
         className
       )}
     >
       {icon && <Icon name={icon} />}
       <span>{children}</span>
-      {loading && <Dots />}
-    </button>
+      {loading && <StyledLoader />}
+    </StyledButton>
   );
 };
 

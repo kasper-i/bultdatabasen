@@ -16,6 +16,7 @@
     "@babel/core": "^7.22.5",
     "@emotion/css": "^11.11.2",
     "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@headlessui/react": "^1.7.15",
     "@heroicons/react": "^v2.0.18",
     "@hookform/resolvers": "^3.1.0",
@@ -47,6 +48,7 @@
     "zod": "^3.20.6"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "^11.11.0",
     "@types/chroma-js": "^2.1.4",
     "@types/lodash-es": "^4.17.6",
     "@types/react": "^18.0.5",
