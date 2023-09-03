@@ -57,7 +57,7 @@ const Input: FC<{
             border-width: ${Border.Thin};
             border-radius: ${Rounding.Base};
             border-color: ${ExtendedColor.Input};
-            height: ${Size.Base};
+            height: ${Size.Input};
             &:focus {
               border-color: ${Color.Primary};
               outline: ${Color.Primary} solid ${Border.Thin};

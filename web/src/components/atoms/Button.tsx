@@ -1,5 +1,4 @@
 import { css, cx } from "@emotion/css";
-import chroma from "chroma-js";
 import React, { ButtonHTMLAttributes, FC, ReactNode } from "react";
 import { Dots } from "react-activity";
 import "react-activity/dist/Dots.css";
@@ -9,8 +8,8 @@ import {
   FontSize,
   FontWeight,
   Rounding,
-  Shadow,
   Size,
+  Spacing,
 } from "./constants";
 import Icon from "./Icon";
 import { IconType } from "./types";
@@ -43,28 +42,53 @@ const Button: FC<ButtonProps> = ({
   return (
     <button
       onClick={onClick}
+      disabled={disabled || loading}
+      type={type}
       className={cx(
         css`
           border: none;
-          font-size: ${FontSize.Sm};
-          font-weight: ${FontWeight.Md};
-          cursor: pointer;
-          display: inline;
           outline: none;
+          font-size: ${FontSize.Sm};
+          font-weight: ${FontWeight.Medium};
+          cursor: pointer;
+          height: ${Size.Input};
+          padding: 0 ${Spacing.Sm};
+          border-radius: ${Rounding.Base};
+          white-space: nowrap;
+          position: relative;
+          gap: ${Spacing.Xxs};
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: ${full ? "100%" : "min-content"};
+
           &:focus {
             outline: none;
           }
-          height: ${Size.Base};
-          line-height: calc(${Size.Base} - 0.75rem - 2px);
-          padding: 0.375rem 0.75rem;
-          border-radius: ${Rounding.Base};
-          white-space: nowrap;
+
           &:disabled {
             cursor: not-allowed;
           }
-          &:active {
-            transform: scale(0.95);
-            transform-origin: center;
+
+          &:not(:disabled) {
+            &:hover,
+            &:active,
+            &:focus {
+              outline: solid ${Border.Thin} ${color};
+              outline-offset: ${Border.Thin};
+            }
+          }
+
+          & > :not(.rai-container) {
+            visibility: ${loading ? "hidden" : "visible"};
+          }
+
+          & > .rai-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
           }
         `,
         {
@@ -80,55 +104,17 @@ const Button: FC<ButtonProps> = ({
           [css`
             background-color: ${color};
             color: ${Color.White};
-            border: none;
             &:disabled {
               background-color: ${Color.Disabled};
             }
-            &:not(:disabled) {
-              &:hover,
-              &:focus {
-                background-color: ${chroma(color).darken(0.4).hex()};
-              }
-            }
           `]: !outlined,
-          [css`
-            width: 100%;
-          `]: full,
         },
         className
       )}
-      disabled={disabled || loading}
-      type={type}
     >
-      <span
-        className={cx(
-          css`
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.375rem;
-          `,
-          {
-            [css`
-              & > :not(:last-child) {
-                visibility: hidden;
-              }
-              & > :last-child {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-              }
-            `]: loading,
-          }
-        )}
-      >
-        {icon && <Icon name={icon} />}
-        <span>{children}</span>
-        {loading && <Dots />}
-      </span>
+      {icon && <Icon name={icon} />}
+      <span>{children}</span>
+      {loading && <Dots />}
     </button>
   );
 };

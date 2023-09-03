@@ -12,7 +12,7 @@ export const Label: FC<{ children: ReactNode; htmlForId: string }> = ({
       className={css`
         display: block;
         font-size: ${FontSize.Xs};
-        font-weight: ${FontWeight.Md};
+        font-weight: ${FontWeight.Medium};
         color: ${ExtendedColor.Label};
         margin-bottom: 0.25rem;
       `}

@@ -11,7 +11,7 @@ export enum ExtendedColor {
 }
 
 export enum Size {
-  Base = "1.75rem",
+  Input = "2rem",
 }
 
 export enum Shadow {
@@ -31,9 +31,17 @@ export enum FontSize {
 }
 
 export enum FontWeight {
-  Md = "500",
+  Normal = "400",
+  Medium = "500",
 }
 
 export enum Border {
   Thin = "1px",
+}
+
+export enum Spacing {
+  Xxs = "0.25rem",
+  Xs = "0.5rem",
+  Sm = "0.75rem",
+  Md = "1rem",
 }
