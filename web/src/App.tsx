@@ -1,4 +1,6 @@
+import configData from "@/config.json";
 import SigninPage from "@/pages/SigninPage";
+import { css, Global } from "@emotion/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CognitoUserSession } from "amazon-cognito-identity-js";
 import { Suspense, useEffect, useState } from "react";
@@ -12,20 +14,19 @@ import Main from "./layouts/Main";
 import Page from "./layouts/Page";
 import AreaPage from "./pages/AreaPage";
 import CragPage from "./pages/CragPage";
+import { EditRoutePage } from "./pages/EditRoutePage";
+import { NewRoutePage } from "./pages/NewRoutePage";
 import RegisterPage from "./pages/RegisterPage";
 import RestorePasswordPage from "./pages/RestorePasswordPage";
 import RootPage from "./pages/RootPage";
 import RoutePage from "./pages/RoutePage";
 import SectorPage from "./pages/SectorPage";
-import { ShowcasePage } from "./pages/ShowcasePage";
+import { KitchenSinkPage } from "./pages/KitchenSinkPage";
 import SignoutPage from "./pages/SignoutPage";
 import TasksPage from "./pages/TasksPage";
 import { login } from "./slices/authSlice";
 import { useAppDispatch } from "./store";
 import { getCurrentUser, refreshSession } from "./utils/cognito";
-import configData from "@/config.json";
-import { NewRoutePage } from "./pages/NewRoutePage";
-import { EditRoutePage } from "./pages/EditRoutePage";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -105,10 +106,19 @@ const App = () => {
 
   return (
     <ErrorBoundary>
+      <Global
+        styles={css`
+          @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+          * {
+            font-family: "Inter";
+          }
+        `}
+      />
       <BrowserRouter>
         <Routes>
           <Route element={<Main />}>
-            <Route path="/showcase" element={<ShowcasePage />} />
+            <Route path="/kitchen-sink" element={<KitchenSinkPage />} />
             <Route element={<Auth />}>
               <Route path="/auth/signin" element={<SigninPage />} />
               <Route

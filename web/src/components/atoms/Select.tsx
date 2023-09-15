@@ -4,6 +4,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { isArray } from "lodash-es";
 import { FC, Fragment, ReactNode } from "react";
+import { Color } from "./constants";
 import Icon from "./Icon";
 import IconButton from "./IconButton";
 import { Option } from "./RadioGroup";
@@ -144,7 +145,7 @@ export function Select<T>({
                 className="cursor-pointer"
                 icon="x"
                 tiny
-                color="white"
+                color={Color.White}
                 onClick={() => removeOption(value)}
               />
             </div>
@@ -178,7 +179,6 @@ export function Select<T>({
             </div>
           </Listbox.Button>
           <Transition
-            as={Fragment}
             leave="transition ease-in duration-100"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"

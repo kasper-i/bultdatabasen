@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
+import { useEffect } from "react";
 import Button from "../atoms/Button";
+import { Color } from "../atoms/constants";
 import Modal from "../atoms/Modal";
 
 type Props = {
@@ -26,7 +27,7 @@ const DeleteDialog = ({ mutation, target, onClose }: Props) => {
             Avbryt
           </Button>
           <Button
-            color="danger"
+            color={Color.Danger}
             onClick={() => mutation.mutate()}
             icon="trash"
             loading={mutation.isLoading}

@@ -104,7 +104,7 @@ export function Combobox<T>({
       </HeadlessCombobox.Label>
       <div className="relative">
         <HeadlessCombobox.Button className="w-full">
-          <HeadlessCombobox.Input<"input", T>
+          <HeadlessCombobox.Input<T>
             displayValue={
               displayValue ??
               ((value) =>
@@ -121,7 +121,6 @@ export function Combobox<T>({
           </div>
         </HeadlessCombobox.Button>
         <Transition
-          as={Fragment}
           leave="transition ease-in duration-100"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"

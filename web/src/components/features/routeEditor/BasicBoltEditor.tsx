@@ -1,3 +1,4 @@
+import { Color } from "@/components/atoms/constants";
 import IconButton from "@/components/atoms/IconButton";
 import RadioGroup, { Option } from "@/components/atoms/RadioGroup";
 import { Bolt, BoltType } from "@/models/bolt";
@@ -38,7 +39,12 @@ const BasicBoltEditor = ({
           )}
         </p>
         {onRemove && (
-          <IconButton tiny onClick={onRemove} icon="trash" color="danger" />
+          <IconButton
+            tiny
+            onClick={onRemove}
+            icon="trash"
+            color={Color.Danger}
+          />
         )}
       </div>
 

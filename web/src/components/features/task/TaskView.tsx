@@ -51,7 +51,11 @@ const CompleteButton: FC<{
       )}
       <div className="flex justify-end gap-2 mt-2">
         {phase === 2 && (
-          <Button onClick={() => setPhase(1)} outlined disabled={loading}>
+          <Button
+            onClick={() => setPhase(1)}
+            variant="outlined"
+            disabled={loading}
+          >
             Avbryt
           </Button>
         )}

@@ -158,7 +158,7 @@ function PointWizard({
       )}
 
       <div className="flex gap-2 w-full mt-4">
-        <Button onClick={onCancel} outlined>
+        <Button onClick={onCancel} variant="outlined">
           Avbryt
         </Button>
         <Button

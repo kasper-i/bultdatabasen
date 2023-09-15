@@ -3,7 +3,7 @@ import { Image, ImageRotation, ImageVersion } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import { Dialog, Transition } from "@headlessui/react";
 import clsx from "clsx";
-import React, {
+import {
   CSSProperties,
   FC,
   Fragment,
@@ -94,11 +94,10 @@ export const FullSizeImage: FC<{
   }
 
   return (
-    <Transition appear show as={Fragment}>
+    <Transition appear show>
       <Dialog className="fixed inset-0 z-10 overflow-y-auto" onClose={onClose}>
         <div className="min-h-screen flex flex-col justify-center items-center overflow-hidden">
           <Transition.Child
-            as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"

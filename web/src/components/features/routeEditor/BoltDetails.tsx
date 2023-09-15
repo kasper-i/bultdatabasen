@@ -95,7 +95,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
         <div className="flex flex-col items-start pt-2">
           <AdvancedBoltEditor bolt={editedBolt} onChange={setEditedBolt} />
           <div className="flex gap-x-2.5 py-2 mt-2">
-            <Button onClick={() => setAction(undefined)} outlined>
+            <Button onClick={() => setAction(undefined)} variant="outlined">
               Avbryt
             </Button>
 

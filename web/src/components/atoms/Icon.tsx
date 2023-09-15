@@ -1,3 +1,4 @@
+import { css, cx } from "@emotion/css";
 import {
   ArrowUturnLeftIcon,
   HomeIcon,
@@ -28,7 +29,6 @@ import {
   WrenchScrewdriverIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import clsx from "clsx";
 import { FC } from "react";
 import { IconType } from "./types";
 
@@ -95,12 +95,16 @@ const Icon: FC<{ name: IconType; className?: string; big?: boolean }> = ({
   };
 
   const Icon = getIcon();
+  const size = big === true ? "2.5rem" : "1rem";
 
   return (
     <Icon
-      className={clsx(
-        "inline-block",
-        big === true ? "h-10 w-10" : "h-4 w-4",
+      className={cx(
+        css`
+          display: inline-block;
+          width: ${size};
+          height: ${size};
+        `,
         className
       )}
     />

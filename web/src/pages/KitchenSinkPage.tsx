@@ -1,5 +1,6 @@
 import Button from "@/components/atoms/Button";
 import { Combobox } from "@/components/atoms/Combobox";
+import { Color } from "@/components/atoms/constants";
 import { Datepicker } from "@/components/atoms/DatePicker";
 import IconButton from "@/components/atoms/IconButton";
 import Input from "@/components/atoms/Input";
@@ -12,11 +13,12 @@ import { Select } from "@/components/atoms/Select";
 import { Switch } from "@/components/atoms/Switch";
 import { Menu } from "@/components/molecules/Menu";
 import Search from "@/components/Search";
+import { CogIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 type Fruit = "banana" | "apple" | "orange" | "pineapple" | "kiwi" | "pear";
 
-export const ShowcasePage = () => {
+export const KitchenSinkPage = () => {
   const [date, setDate] = useState(new Date());
   const [fruit, setFruit] = useState<Fruit>("banana");
   const [ingredients, setIngredients] = useState<Fruit[]>(["banana", "apple"]);
@@ -73,16 +75,51 @@ export const ShowcasePage = () => {
     <div className="flex flex-col gap-5 max-w-xs">
       <div className="flex flex-wrap gap-2">
         <Button>Save</Button>
-        <Button disabled>Save</Button>
-        <Button loading>Save</Button>
-        <Button icon="wrench">Save</Button>
-        <Button outlined>Save</Button>
-        <Button color="danger">Delete</Button>
+        <Button variant="outlined" icon="wrench">
+          Save
+        </Button>
+        <Button variant="outlined" loading icon="wrench">
+          Save
+        </Button>
+        <Button variant="outlined" disabled icon="wrench">
+          Save
+        </Button>
+
+        <Button variant="filled" icon="wrench">
+          Save
+        </Button>
+        <Button variant="filled" loading icon="wrench">
+          Save
+        </Button>
+        <Button variant="filled" disabled icon="wrench">
+          Save
+        </Button>
+
+        <Button variant="filled" icon="wrench" color={Color.Danger}>
+          Delete
+        </Button>
+        <Button variant="filled" loading icon="wrench" color={Color.Danger}>
+          Delete
+        </Button>
+        <Button variant="filled" disabled icon="wrench" color={Color.Danger}>
+          Delete
+        </Button>
+
+        <Button variant="subtle">Cancel</Button>
+        <Button variant="subtle" disabled>
+          Cancel
+        </Button>
+
+        <Button full icon="wrench">
+          Wide
+        </Button>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <IconButton icon="wrench" />
+        <IconButton icon="wrench" loading />
         <IconButton circular icon="wrench" />
         <IconButton tiny icon="wrench" />
+        <IconButton disabled tiny icon="wrench" />
       </div>
       <div>
         <Search />
@@ -125,6 +162,16 @@ export const ShowcasePage = () => {
           label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          icon={CogIcon}
+          tabIndex={2}
+        />
+      </div>
+      <div>
+        <Input
+          label="Password"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          password
         />
       </div>
       <div>
