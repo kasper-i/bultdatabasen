@@ -71,7 +71,7 @@ export const RouteForm: FC<{
         )}
       />
       <div className="col-span-2 flex justify-end gap-2">
-        <Button outlined onClick={onCancel}>
+        <Button variant="outlined" onClick={onCancel}>
           Avbryt
         </Button>
         <Button loading={loading} type="submit">

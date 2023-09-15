@@ -164,7 +164,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
               hideDismantled
             />
             <div className="flex gap-x-2.5 py-2 mt-2">
-              <Button onClick={() => setAction(undefined)} outlined>
+              <Button onClick={() => setAction(undefined)} variant="outlined">
                 Avbryt
               </Button>
               <Button

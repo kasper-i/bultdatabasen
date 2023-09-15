@@ -1,5 +1,6 @@
 import { css, cx } from "@emotion/css";
 import styled from "@emotion/styled";
+import chroma from "chroma-js";
 import React, { ButtonHTMLAttributes, FC, ReactNode } from "react";
 import { Dots } from "react-activity";
 import "react-activity/dist/Dots.css";
@@ -15,12 +16,15 @@ import {
 import Icon from "./Icon";
 import { IconType } from "./types";
 
-export const StyledButton = styled.button<{ color: Color; outlined?: boolean }>(
-  ({ color, outlined }) => `
+export const StyledButton = styled.button<{
+  color: Color;
+  variant: "outlined" | "filled" | "subtle";
+}>(
+  ({ color, variant }) => `
   border: none;
   outline: none;
   font-size: ${FontSize.Sm};
-  font-weight: ${FontWeight.Medium};
+  font-weight: ${FontWeight.SemiBold};
   cursor: pointer;
   height: ${Size.Input};
   padding: 0 ${Spacing.Sm};
@@ -40,15 +44,15 @@ export const StyledButton = styled.button<{ color: Color; outlined?: boolean }>(
     cursor: not-allowed;
   }
 
-  &:not(:disabled) {
-    &:hover,
-    &:active,
-    &:focus {
-      outline: solid ${Border.Thin} ${color};
-      outline-offset: ${Border.Thin};
-    }
+  &:focus-visible {
+    outline: ${Border.Thin} dotted ${color};
+    outline-offset: ${Border.Thin};
   }
-
+    
+  &:active {
+    transform: translateY(0.09375rem);
+  }
+    
   ${cx({
     [`
         color: ${color};
@@ -58,19 +62,38 @@ export const StyledButton = styled.button<{ color: Color; outlined?: boolean }>(
           border-color: ${Color.Disabled};
           color: ${Color.Disabled};
         }
-  `]: outlined,
+
+        &:not(:disabled):hover {
+          background-color: ${chroma(color).alpha(0.1).hex()};
+        }
+  `]: variant === "outlined",
     [`
         background-color: ${color};
         color: ${Color.White};
         &:disabled {
           background-color: ${Color.Disabled};
         }
-  `]: !outlined,
+
+        &:not(:disabled):hover {
+          background-color: ${chroma(color).alpha(0.9).hex()};
+        }
+  `]: variant === "filled",
+    [`
+        background-color: transparent;
+        color: ${color};
+        &:disabled {
+          color: ${Color.Disabled};
+        }
+
+        &:not(:disabled):hover {
+          background-color: ${chroma(color).alpha(0.1).hex()};
+        }
+  `]: variant === "subtle",
   })}
 `
 );
 
-export const StyledLoader = styled(Dots)`
+const StyledLoader = styled(Dots)`
   position: absolute;
   inset: 0;
   display: flex;
@@ -86,7 +109,7 @@ export interface ButtonProps {
   loading?: boolean;
   disabled?: boolean;
   full?: boolean;
-  outlined?: boolean;
+  variant?: "outlined" | "filled" | "subtle";
   children: ReactNode;
   type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 }
@@ -100,25 +123,26 @@ const Button: FC<ButtonProps> = ({
   loading,
   disabled,
   full,
-  outlined,
+  variant = "filled",
   type,
 }) => {
   return (
     <StyledButton
-      onClick={onClick}
+      onClick={(event) => {
+        event.currentTarget.blur();
+        onClick?.(event);
+      }}
       disabled={disabled || loading}
       type={type}
-      outlined={outlined}
+      variant={variant}
       color={color}
+      tabIndex={disabled ? -1 : undefined}
       className={cx(
         css`
           width: ${full ? "100%" : "min-content"};
 
           & > :not(${StyledLoader}) {
             visibility: ${loading ? "hidden" : "visible"};
-          }
-
-          & > ${StyledLoader} {
           }
         `,
         className

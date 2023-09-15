@@ -75,28 +75,51 @@ export const KitchenSinkPage = () => {
     <div className="flex flex-col gap-5 max-w-xs">
       <div className="flex flex-wrap gap-2">
         <Button>Save</Button>
-        <Button outlined>Save</Button>
-        <Button disabled>Save</Button>
-        <Button disabled outlined>
+        <Button variant="outlined" icon="wrench">
           Save
         </Button>
-        <Button loading>Save</Button>
-        <Button outlined loading>
+        <Button variant="outlined" loading icon="wrench">
           Save
         </Button>
-        <Button icon="wrench">Save</Button>
-        <Button outlined icon="wrench">
+        <Button variant="outlined" disabled icon="wrench">
           Save
         </Button>
-        <Button color={Color.Danger}>Delete</Button>
+
+        <Button variant="filled" icon="wrench">
+          Save
+        </Button>
+        <Button variant="filled" loading icon="wrench">
+          Save
+        </Button>
+        <Button variant="filled" disabled icon="wrench">
+          Save
+        </Button>
+
+        <Button variant="filled" icon="wrench" color={Color.Danger}>
+          Delete
+        </Button>
+        <Button variant="filled" loading icon="wrench" color={Color.Danger}>
+          Delete
+        </Button>
+        <Button variant="filled" disabled icon="wrench" color={Color.Danger}>
+          Delete
+        </Button>
+
+        <Button variant="subtle">Cancel</Button>
+        <Button variant="subtle" disabled>
+          Cancel
+        </Button>
+
         <Button full icon="wrench">
           Wide
         </Button>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <IconButton icon="wrench" />
+        <IconButton icon="wrench" loading />
         <IconButton circular icon="wrench" />
         <IconButton tiny icon="wrench" />
+        <IconButton disabled tiny icon="wrench" />
       </div>
       <div>
         <Search />

@@ -4,6 +4,7 @@ import { useDropzone } from "react-dropzone";
 import { useQueryClient } from "@tanstack/react-query";
 import IconButton from "./atoms/IconButton";
 import Progress from "./atoms/Progress";
+import { Color } from "./atoms/constants";
 
 interface Props {
   pointId: string;
@@ -48,7 +49,7 @@ const ImageUploadButton = ({ pointId }: Props): ReactElement => {
       <IconButton
         loading={!!progress}
         icon="camera"
-        color={error ? "danger" : "primary"}
+        color={error ? Color.Danger : Color.Primary}
       />
     </div>
   );

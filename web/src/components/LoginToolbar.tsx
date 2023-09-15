@@ -11,7 +11,7 @@ function LoginToolbar(): ReactElement {
   if (isAuthenticated) {
     return (
       <Link to="/auth/signout">
-        <Button outlined color={Color.White}>
+        <Button variant="outlined" color={Color.White}>
           Logga ut
         </Button>
       </Link>
@@ -19,7 +19,7 @@ function LoginToolbar(): ReactElement {
   } else {
     return (
       <Link to="/auth/signin">
-        <Button outlined color={Color.White}>
+        <Button variant="outlined" color={Color.White}>
           Logga in
         </Button>
       </Link>

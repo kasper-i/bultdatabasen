@@ -15,6 +15,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": ["@emotion/react/types/css-prop"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

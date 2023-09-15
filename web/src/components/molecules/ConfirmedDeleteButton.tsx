@@ -1,5 +1,6 @@
 import { UseMutationResult } from "@tanstack/react-query";
 import { useState } from "react";
+import { Color } from "../atoms/constants";
 import IconButton, { IconButtonProps } from "../atoms/IconButton";
 import DeleteDialog from "./DeleteDialog";
 
@@ -24,7 +25,7 @@ const ConfirmedDeleteButton = ({ mutation, target, ...buttonProps }: Props) => {
       <IconButton
         {...buttonProps}
         icon="trash"
-        color="danger"
+        color={Color.Danger}
         loading={mutation.isLoading}
         onClick={requestDelete}
       />

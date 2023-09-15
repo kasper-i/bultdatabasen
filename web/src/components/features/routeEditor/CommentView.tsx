@@ -32,7 +32,7 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
             labelStyle="none"
           />
           <div className="flex flex-row gap-2 justify-start">
-            <Button outlined onClick={() => setAction(undefined)}>
+            <Button variant="outlined" onClick={() => setAction(undefined)}>
               Avbryt
             </Button>
             <Button

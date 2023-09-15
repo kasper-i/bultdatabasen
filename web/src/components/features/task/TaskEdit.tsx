@@ -43,7 +43,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
       />
 
       <div className="flex justify-end gap-2.5 w-full">
-        <Button onClick={() => onDone()} outlined>
+        <Button onClick={() => onDone()} variant="outlined">
           Avbryt
         </Button>
         <Button
