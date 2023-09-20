@@ -1,10 +1,9 @@
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Option } from "@/components/atoms/RadioGroup";
-import { Select } from "@/components/atoms/Select";
 import { Point } from "@/models/point";
 import { usePoints } from "@/queries/pointQueries";
 import { useCreateTask } from "@/queries/taskQueries";
-import { Button, TextInput } from "@mantine/core";
+import { Button, Select, TextInput } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { ReactElement, useReducer, useState } from "react";
 import { usePointLabeler } from "../routeEditor/hooks";
@@ -68,26 +67,21 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
         required
       />
 
-      <Select<Point>
+      <Select
         label="Ledbult eller ankare"
-        value={points?.find((point) => point.id === selectedPointId)}
-        options={
+        value={selectedPointId}
+        data={
           points
             ?.slice()
             ?.reverse()
             ?.map((point) => ({
               label: pointLabeler(point.id).name,
               sublabel: pointLabeler(point.id).no,
-              value: point,
-              key: point.id,
+              value: point.id,
             })) ?? []
         }
-        onSelect={(point) => setSelectedPointId(point.id)}
-        displayValue={(point) => {
-          const { name, no } = pointLabeler(point.id);
-          return `${name} ${no}`;
-        }}
-        noOptionsText="Leden saknar dokumenterade bultar."
+        onSelect={(event) => setSelectedPointId(event.currentTarget.value)}
+        nothingFoundMessage="Leden saknar dokumenterade bultar."
         disabled={points === undefined}
         multiple={false}
       />

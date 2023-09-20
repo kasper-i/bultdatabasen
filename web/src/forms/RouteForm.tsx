@@ -1,8 +1,7 @@
 import { Option } from "@/components/atoms/RadioGroup";
-import { Select } from "@/components/atoms/Select";
 import { Route, RouteType, routeTypes } from "@/models/route";
 import { renderRouteType } from "@/utils/routeUtils";
-import { Button, NumberInput, TextInput } from "@mantine/core";
+import { Button, NumberInput, Select, TextInput } from "@mantine/core";
 import { YearPickerInput } from "@mantine/dates";
 import { FC } from "react";
 import { Controller, SubmitHandler, useFormContext } from "react-hook-form";
@@ -34,12 +33,13 @@ export const RouteForm: FC<{
         name="routeType"
         render={({ field: { onChange, value } }) => (
           <div className="col-span-2">
-            <Select<RouteType>
+            <Select
               label="Typ"
-              options={routeTypeOptions}
+              data={routeTypeOptions}
               value={value}
               onSelect={onChange}
               multiple={false}
+              required
             />
           </div>
         )}

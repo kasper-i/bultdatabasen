@@ -1,13 +1,13 @@
 import IconButton from "@/components/atoms/IconButton";
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Option } from "@/components/atoms/RadioGroup";
-import { Select } from "@/components/atoms/Select";
 import { Bolt, BoltType, DiameterUnit } from "@/models/bolt";
 import { useManufacturers } from "@/queries/manufacturerQueries";
 import { useMaterials } from "@/queries/materialQueries";
 import { useModels } from "@/queries/modelQueries";
 import { translateBoltType } from "@/utils/boltUtils";
-import { DatePickerInput } from "@mantine/dates";
+import { Select } from "@mantine/core";
+import { DatePickerInput, YearPickerInput } from "@mantine/dates";
 import clsx from "clsx";
 import { FC, useMemo } from "react";
 
@@ -138,12 +138,15 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
     >
       <Select
         value={bolt.manufacturerId}
-        options={manufacturerOptions}
-        onSelect={(manufacturerId) =>
-          updateBolt({ manufacturerId, modelId: undefined })
+        data={manufacturerOptions}
+        onSelect={(event) =>
+          updateBolt({
+            manufacturerId: event.currentTarget.value,
+            modelId: undefined,
+          })
         }
         label="Tillverkare"
-        noOptionsText="Inga tillverkare hittades"
+        nothingFoundMessage="Inga tillverkare hittades"
         multiple={false}
       />
 
@@ -151,8 +154,9 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
 
       <Select
         value={bolt.modelId}
-        options={modelOptions}
-        onSelect={(modelId) => {
+        data={modelOptions}
+        onSelect={(event) => {
+          const modelId = event.currentTarget.value;
           const model = models?.find((model) => model.id === modelId);
           if (model) {
             const { materialId, type, diameter, diameterUnit } = model;
@@ -160,7 +164,7 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
           }
         }}
         label="Modell"
-        noOptionsText="Inga modeller hittades"
+        nothingFoundMessage="Inga modeller hittades"
         multiple={false}
       />
 
@@ -175,12 +179,14 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
 
       <div />
 
-      <Select<Bolt["materialId"]>
+      <Select
         value={bolt.materialId}
-        options={materialOptions}
-        onSelect={(materialId) => updateBolt({ materialId })}
+        data={materialOptions}
+        onSelect={(event) =>
+          updateBolt({ materialId: event.currentTarget.value })
+        }
         label="Material"
-        noOptionsText="Inga material hittades"
+        nothingFoundMessage="Inga material hittades"
         multiple={false}
       />
 
@@ -206,19 +212,18 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
 
       <div />
 
-      <Select
-        value={bolt.installed ? new Date(bolt.installed).getFullYear() : ""}
+      <YearPickerInput
+        value={bolt.installed}
         label="År"
         onSelect={(value) =>
           updateBolt({
             installed: new Date(Date.UTC(Number(value), 0, 1)),
           })
         }
-        options={yearOptions}
-        multiple={false}
+        clearable
       />
 
-      <ClearButton onClick={() => updateBolt({ installed: undefined })} />
+      <div />
 
       {!hideDismantled && (
         <>

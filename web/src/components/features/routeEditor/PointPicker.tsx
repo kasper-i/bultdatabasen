@@ -1,11 +1,11 @@
 import { Api } from "@/Api";
-import { Select } from "@/components/atoms/Select";
 import { Point } from "@/models/point";
 import { Route } from "@/models/route";
 import { useRoutes } from "@/queries/routeQueries";
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePointLabeler } from "./hooks";
+import { Select } from "@mantine/core";
 
 type Props = {
   value?: string;
@@ -35,47 +35,43 @@ const PointPicker = ({
   return (
     <div>
       <div className="flex flex-col gap-2">
-        <Select<Route>
+        <Select
           label="Närliggande led"
-          value={selectedRoute}
-          options={
+          value={selectedRoute?.id}
+          data={
             routes?.map((route) => ({
               label: route.name,
-              value: route,
-              key: route.id,
+              value: route.id,
               disabled: route.id === targetRouteId,
             })) ?? []
           }
-          onSelect={(route) => {
+          onSelect={(event) => {
             onSelect(undefined);
-            setSelectedRoute(route);
+            setSelectedRoute(
+              routes?.find((route) => route.id == event.currentTarget.value)
+            );
           }}
-          noOptionsText="Inga närliggande leder"
+          nothingFoundMessage="Inga närliggande leder"
           multiple={false}
         />
 
-        <Select<Point>
+        <Select
           key={selectedRoute?.id}
           label="Ledbult eller ankare"
-          value={points?.find((point) => point.id === value)}
-          options={
+          value={value}
+          data={
             points
               ?.slice()
               ?.reverse()
               ?.map((point) => ({
                 label: pointLabeler(point.id).name,
                 sublabel: pointLabeler(point.id).no,
-                value: point,
-                key: point.id,
+                value: point.id,
                 disabled: illegalPoints.includes(point.id),
               })) ?? []
           }
-          onSelect={(point) => onSelect(point.id)}
-          displayValue={(point) => {
-            const { name, no } = pointLabeler(point.id);
-            return `${name} ${no}`;
-          }}
-          noOptionsText="Leden saknar dokumenterade bultar."
+          onSelect={(event) => onSelect(event.currentTarget.value)}
+          nothingFoundMessage="Leden saknar dokumenterade bultar."
           disabled={selectedRoute === undefined}
           multiple={false}
         />
