@@ -1,8 +1,8 @@
 import IconButton from "@/components/atoms/IconButton";
-import RadioGroup, { Option } from "@/components/atoms/RadioGroup";
+import { Option } from "@/components/atoms/RadioGroup";
 import { Bolt, BoltType } from "@/models/bolt";
 import { positionToLabel, translateBoltType } from "@/utils/boltUtils";
-import React from "react";
+import { Group, Radio } from "@mantine/core";
 
 const typeOptions = (["expansion", "glue", "piton"] as const).map<
   Option<BoltType>
@@ -42,11 +42,13 @@ const BasicBoltEditor = ({
         )}
       </div>
 
-      <RadioGroup<BoltType>
-        options={typeOptions}
-        value={bolt.type}
-        onChange={(type) => updateBolt({ type })}
-      />
+      <Radio.Group label="Typ" required>
+        <Group mt="xs">
+          {typeOptions.map(({ value, label }) => (
+            <Radio value={value} label={label} />
+          ))}
+        </Group>
+      </Radio.Group>
     </div>
   );
 };
