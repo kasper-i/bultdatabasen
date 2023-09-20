@@ -1,7 +1,7 @@
 import Pagination from "@/components/atoms/Pagination";
-import { Switch } from "@/components/atoms/Switch";
 import { useTasks } from "@/queries/taskQueries";
-import React, { ReactElement, Suspense, useState } from "react";
+import { Switch } from "@mantine/core";
+import { ReactElement, Suspense, useState } from "react";
 import { Dots } from "react-activity";
 import TaskView from "./TaskView";
 
@@ -25,7 +25,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
       <div className="w-full border-b"></div>
       <Switch
         label="Visa åtgärdade"
-        enabled={showClosed}
+        checked={showClosed}
         onChange={() => {
           setShowClosed((state) => !state);
           setPage(1);

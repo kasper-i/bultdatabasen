@@ -1,14 +1,13 @@
 import { CreatePointRequest, InsertPosition } from "@/Api";
 import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
-import { Switch } from "@/components/atoms/Switch";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
 import React, { ReactElement, Suspense, useState } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import BasicBoltEditor from "./BasicBoltEditor";
 import PointPicker from "./PointPicker";
-import { Button } from "@mantine/core";
+import { Button, Switch } from "@mantine/core";
 
 interface Props {
   mutation: UseMutationResult<Point, unknown, CreatePointRequest, unknown>;
@@ -118,7 +117,11 @@ function PointWizard({
         </Suspense>
       ) : (
         <>
-          <Switch enabled={isAnchor} onChange={toggleAnchor} label="Ankare" />
+          <Switch
+            checked={isAnchor}
+            onChange={(event) => toggleAnchor(event.currentTarget.checked)}
+            label="Ankare"
+          />
 
           <p className="mt-4 mb-1 font-medium">Bultar</p>
 
