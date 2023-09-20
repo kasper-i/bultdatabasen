@@ -1,7 +1,5 @@
 import { Api } from "@/Api";
-import { Datepicker } from "@/components/atoms/DatePicker";
 import Icon from "@/components/atoms/Icon";
-import Input from "@/components/atoms/Input";
 import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Menu } from "@/components/molecules/Menu";
@@ -13,7 +11,8 @@ import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { emptyArray } from "@/utils/constants";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import { translatePriority } from "@/utils/taskUtils";
-import { Button } from "@mantine/core";
+import { Button, TextInput } from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
 import { IconClipboardCheck } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -38,15 +37,17 @@ const CompleteButton: FC<{
     <div className="flex flex-col gap-2">
       {phase === 2 && (
         <>
-          <Input
+          <TextInput
             label="Kommentar"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            required
           />
-          <Datepicker
+          <DatePickerInput
             label="Datum"
             value={closedAt}
-            onChange={(date) => setClosedAt(date)}
+            onChange={(date) => setClosedAt(date ?? new Date())}
+            required
           />
         </>
       )}

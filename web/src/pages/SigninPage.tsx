@@ -1,4 +1,3 @@
-import Input from "@/components/atoms/Input";
 import {
   AuthenticationDetails,
   CognitoUserSession,
@@ -17,7 +16,7 @@ import {
 } from "@/utils/cognito";
 import { useState } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
-import { Button } from "@mantine/core";
+import { Button, PasswordInput, TextInput } from "@mantine/core";
 
 interface State {
   email: string;
@@ -111,24 +110,25 @@ const SigninPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
-      <Input
+    <div className="flex flex-col gap-2.5">
+      <TextInput
         label="E-postadress"
         value={email}
         onChange={(e) => updateState({ email: e.target.value })}
         tabIndex={1}
         disabled={requireConfirmationCode}
+        required
       />
-      <Input
+      <PasswordInput
         label="Lösenord"
-        password
         value={password}
         onChange={(e) => updateState({ password: e.target.value })}
         tabIndex={2}
         disabled={requireConfirmationCode}
+        required
       />
       {requireConfirmationCode ? (
-        <Input
+        <TextInput
           label="Verifikationskod"
           value={confirmationCode}
           onChange={(e) => updateState({ confirmationCode: e.target.value })}

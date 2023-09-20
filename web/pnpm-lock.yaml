@@ -17,6 +17,9 @@ dependencies:
   '@mantine/core':
     specifier: ^7.0.0
     version: 7.0.0(@mantine/hooks@7.0.0)(@types/react@18.2.22)(react-dom@18.2.0)(react@18.2.0)
+  '@mantine/dates':
+    specifier: ^7.0.0
+    version: 7.0.0(@mantine/core@7.0.0)(@mantine/hooks@7.0.0)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0)
   '@mantine/hooks':
     specifier: ^7.0.0
     version: 7.0.0(react@18.2.0)
@@ -56,6 +59,9 @@ dependencies:
   date-fns:
     specifier: ^2.28.0
     version: 2.28.0
+  dayjs:
+    specifier: ^1.11.10
+    version: 1.11.10
   dayzed:
     specifier: ^3.2.3
     version: 3.2.3(prop-types@15.8.1)(react@18.2.0)
@@ -97,9 +103,6 @@ dependencies:
     version: 3.20.6
 
 devDependencies:
-  '@tailwindcss/forms':
-    specifier: ^0.5.0
-    version: 0.5.0(tailwindcss@3.0.23)
   '@types/lodash-es':
     specifier: ^4.17.6
     version: 4.17.6
@@ -627,6 +630,23 @@ packages:
       - '@types/react'
     dev: false
 
+  /@mantine/dates@7.0.0(@mantine/core@7.0.0)(@mantine/hooks@7.0.0)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-X7IMLsLR3gygwrPX6hxMIKTNWy6EmULI7gbpfGkoNjr6PaP+DLvhjvTzXOA6CCdiwXvqT8x69mddBuYhEergsw==}
+    peerDependencies:
+      '@mantine/core': 7.0.0
+      '@mantine/hooks': 7.0.0
+      dayjs: ^1.10.5
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mantine/core': 7.0.0(@mantine/hooks@7.0.0)(@types/react@18.2.22)(react-dom@18.2.0)(react@18.2.0)
+      '@mantine/hooks': 7.0.0(react@18.2.0)
+      clsx: 2.0.0
+      dayjs: 1.11.10
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
   /@mantine/hooks@7.0.0(react@18.2.0):
     resolution: {integrity: sha512-HdZ6qE15OKNA3esbO72+mRqztMcdGphL/wl/ks8N7iAlSUu7sFtgZN+IU6MfJxGc/MEN3x5dEceWG6FgwOmHOw==}
     peerDependencies:
@@ -767,15 +787,6 @@ packages:
   /@tabler/icons@2.34.0:
     resolution: {integrity: sha512-65GsJsT4ZBETWcdrNxbsjsbRoZvbVk3CcU2SafaElrzP1wpOeuAn9aELVEbxhdyZyP9dg2SCfgH6iAArJgp7lw==}
     dev: false
-
-  /@tailwindcss/forms@0.5.0(tailwindcss@3.0.23):
-    resolution: {integrity: sha512-KzWugryEBFkmoaYcBE18rs6gthWCFHHO7cAZm2/hv3hwD67AzwP7udSCa22E7R1+CEJL/FfhYsJWrc0b1aeSzw==}
-    peerDependencies:
-      tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1'
-    dependencies:
-      mini-svg-data-uri: 1.4.4
-      tailwindcss: 3.0.23(autoprefixer@10.4.4)(postcss@8.4.21)
-    dev: true
 
   /@tanstack/match-sorter-utils@8.8.4:
     resolution: {integrity: sha512-rKH8LjZiszWEvmi01NR72QWZ8m4xmXre0OOwlRGnjU01Eqz/QnN+cqpty2PJ0efHblq09+KilvyR7lsbzmXVEw==}
@@ -1364,6 +1375,10 @@ packages:
   /date-fns@2.28.0:
     resolution: {integrity: sha512-8d35hViGYx/QH0icHYCeLmsLmMUheMmTyV9Fcm6gvNwdw31yXXH+O85sOBJ+OLnLQMKZowvpKb6FgMIQjcpvQw==}
     engines: {node: '>=0.11'}
+    dev: false
+
+  /dayjs@1.11.10:
+    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
     dev: false
 
   /dayzed@3.2.3(prop-types@15.8.1)(react@18.2.0):
@@ -2496,11 +2511,6 @@ packages:
     dependencies:
       braces: 3.0.2
       picomatch: 2.3.1
-    dev: true
-
-  /mini-svg-data-uri@1.4.4:
-    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
-    hasBin: true
     dev: true
 
   /minimatch@3.1.2:

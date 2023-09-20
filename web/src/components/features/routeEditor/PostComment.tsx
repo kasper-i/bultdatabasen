@@ -1,6 +1,5 @@
-import Input from "@/components/atoms/Input";
 import { useCreateComment } from "@/queries/commentQueries";
-import { Button } from "@mantine/core";
+import { Button, Textarea, TextInput } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 
 export const PostComment: FC<{ parentResourceId: string }> = ({
@@ -18,10 +17,8 @@ export const PostComment: FC<{ parentResourceId: string }> = ({
 
   return (
     <div className="flex flex-row gap-x-2">
-      <Input
-        label="Kommentar"
+      <Textarea
         placeholder="Kommentar"
-        labelStyle="none"
         value={comment}
         onChange={(e) => setComment(e.target.value)}
       />

@@ -17,6 +17,7 @@
     "@heroicons/react": "^v2.0.18",
     "@hookform/resolvers": "^3.1.0",
     "@mantine/core": "^7.0.0",
+    "@mantine/dates": "^7.0.0",
     "@mantine/hooks": "^7.0.0",
     "@popperjs/core": "^2.11.6",
     "@reduxjs/toolkit": "^1.8.1",
@@ -30,6 +31,7 @@
     "axios-auth-refresh": "^3.2.2",
     "clsx": "^1.1.1",
     "date-fns": "^2.28.0",
+    "dayjs": "^1.11.10",
     "dayzed": "^3.2.3",
     "lodash-es": "^4.17.21",
     "prop-types": "^15.8.1",
@@ -45,7 +47,6 @@
     "zod": "^3.20.6"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.0",
     "@types/lodash-es": "^4.17.6",
     "@types/react": "^18.2.22",
     "@types/react-dom": "^18.2.7",

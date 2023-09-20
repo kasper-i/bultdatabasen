@@ -1,10 +1,9 @@
-import Input from "@/components/atoms/Input";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
 import { Comment } from "@/models/comment";
 import { useDeleteComment, useUpdateComment } from "@/queries/commentQueries";
-import { Button } from "@mantine/core";
+import { Button, TextInput } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 
 export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
@@ -25,11 +24,11 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
     <div className="flex flex-row justify-between gap-x-2">
       {action === "edit" ? (
         <div className="flex-grow flex flex-col gap-2">
-          <Input
+          <TextInput
             label="Kommentar"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            labelStyle="none"
+            required
           />
           <div className="flex flex-row gap-2 justify-start">
             <Button variant="subtle" onClick={() => setAction(undefined)}>

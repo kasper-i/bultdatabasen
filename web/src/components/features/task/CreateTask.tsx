@@ -1,11 +1,10 @@
-import Input from "@/components/atoms/Input";
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Option } from "@/components/atoms/RadioGroup";
 import { Select } from "@/components/atoms/Select";
 import { Point } from "@/models/point";
 import { usePoints } from "@/queries/pointQueries";
 import { useCreateTask } from "@/queries/taskQueries";
-import { Button } from "@mantine/core";
+import { Button, TextInput } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { ReactElement, useReducer, useState } from "react";
 import { usePointLabeler } from "../routeEditor/hooks";
@@ -61,11 +60,12 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
 
   return (
     <div className="sm:w-96 flex flex-col gap-4">
-      <Input
+      <TextInput
         label="Beskrivning"
         placeholder="Byt nedsliten firningskarbin"
         onChange={(event) => setDescription(event.target.value)}
         value={description}
+        required
       />
 
       <Select<Point>

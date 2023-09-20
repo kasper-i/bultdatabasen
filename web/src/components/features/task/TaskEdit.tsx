@@ -1,8 +1,7 @@
-import Input from "@/components/atoms/Input";
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Task } from "@/models/task";
 import { useUpdateTask } from "@/queries/taskQueries";
-import { Button } from "@mantine/core";
+import { Button, TextInput } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 import { priorityOptions } from "./CreateTask";
 
@@ -16,8 +15,8 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
   }, [onDone, updateTask.isSuccess]);
 
   return (
-    <div className="flex flex-col gap-2.5 items-start">
-      <Input
+    <div className="flex flex-col gap-2.5">
+      <TextInput
         label="Beskrivning"
         value={editedTask.description}
         onChange={(event) =>
@@ -26,6 +25,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
             description: event.target.value,
           }))
         }
+        required
       />
 
       <RadioCardsGroup<number>
@@ -43,7 +43,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
       />
 
       <div className="flex justify-end gap-2.5 w-full">
-        <Button onClick={() => onDone()} variant="outline">
+        <Button onClick={() => onDone()} variant="subtle">
           Avbryt
         </Button>
         <Button

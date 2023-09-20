@@ -1,9 +1,9 @@
-import Input from "@/components/atoms/Input";
 import { Option } from "@/components/atoms/RadioGroup";
 import { Select } from "@/components/atoms/Select";
 import { Route, RouteType, routeTypes } from "@/models/route";
 import { renderRouteType } from "@/utils/routeUtils";
-import { Button } from "@mantine/core";
+import { Button, NumberInput, TextInput } from "@mantine/core";
+import { YearPickerInput } from "@mantine/dates";
 import { FC } from "react";
 import { Controller, SubmitHandler, useFormContext } from "react-hook-form";
 
@@ -18,18 +18,15 @@ export const RouteForm: FC<{
   onSubmit: SubmitHandler<Route>;
   onCancel: () => void;
 }> = ({ loading, onSubmit, onCancel }) => {
-  const { control, handleSubmit } = useFormContext<Route>();
+  const { control, handleSubmit, register } = useFormContext<Route>();
 
   return (
     <form className="grid gap-3 grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
-      <Controller
-        control={control}
-        name="name"
-        render={({ field: { onChange, value } }) => (
-          <div className="col-span-2">
-            <Input label="Lednamn" value={value} onChange={onChange} />
-          </div>
-        )}
+      <TextInput
+        {...register("name")}
+        label="Lednamn"
+        required
+        className="col-span-2"
       />
 
       <Controller
@@ -52,10 +49,10 @@ export const RouteForm: FC<{
         control={control}
         name="length"
         render={({ field: { onChange, value } }) => (
-          <Input
+          <NumberInput
             label="Längd"
             value={value ? `${value}` : ""}
-            onChange={(event) => onChange(Number(event.currentTarget.value))}
+            onChange={(value) => onChange(Number(value))}
           />
         )}
       />
@@ -63,10 +60,11 @@ export const RouteForm: FC<{
         control={control}
         name="year"
         render={({ field: { onChange, value } }) => (
-          <Input
+          <YearPickerInput
             label="År"
-            value={value ? `${value}` : ""}
-            onChange={(event) => onChange(Number(event.currentTarget.value))}
+            value={value ? new Date(value) : undefined}
+            onChange={(value) => onChange(value?.getFullYear())}
+            clearable
           />
         )}
       />

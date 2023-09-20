@@ -1,3 +1,6 @@
+import { createTheme, MantineProvider } from "@mantine/core";
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 import { init } from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -11,12 +14,6 @@ import App from "./App";
 import "./index.css";
 import { store } from "./store";
 import { refreshSession } from "./utils/cognito";
-import "@mantine/core/styles.css";
-import {
-  createTheme,
-  MantineColorsTuple,
-  MantineProvider,
-} from "@mantine/core";
 
 if (!import.meta.env.DEV) {
   init({

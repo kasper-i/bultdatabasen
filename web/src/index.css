@@ -3,6 +3,4 @@
   src: local("Inter"), url(@/fonts/Inter-VariableFont.ttf) format("truetype");
 }
 
-@tailwind base;
-@tailwind components;
 @tailwind utilities;

@@ -1,5 +1,4 @@
 import { Alert } from "@/components/atoms/Alert";
-import Input from "@/components/atoms/Input";
 import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
@@ -8,7 +7,7 @@ import {
   signUp,
   translateCognitoError,
 } from "@/utils/cognito";
-import { Button } from "@mantine/core";
+import { Button, PasswordInput, PinInput, TextInput } from "@mantine/core";
 import {
   AuthenticationDetails,
   CognitoUserAttribute,
@@ -116,35 +115,38 @@ const RegisterPage = () => {
   const canRegister = !!email && !!password && !!givenName && !!lastName;
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <div className="flex flex-col gap-2.5">
       {phase === 1 ? (
         <>
-          <Input
+          <TextInput
             label="E-post"
             value={email}
             onChange={(e) => updateState({ email: e.target.value })}
             tabIndex={1}
+            required
           />
-          <Input
+          <PasswordInput
             label="Lösenord"
             value={password}
-            password
             onChange={(e) => updateState({ password: e.target.value })}
             tabIndex={2}
             autoComplete="new-password"
+            required
           />
           <div className="flex gap-2.5">
-            <Input
+            <TextInput
               label="Förnamn"
               value={givenName}
               onChange={(e) => updateState({ givenName: e.target.value })}
               tabIndex={3}
+              required
             />
-            <Input
+            <TextInput
               label="Efternamn"
               value={lastName}
               onChange={(e) => updateState({ lastName: e.target.value })}
               tabIndex={4}
+              required
             />
           </div>
 
@@ -162,10 +164,10 @@ const RegisterPage = () => {
         </>
       ) : (
         <>
-          <Input
-            label="Verifikationskod"
+          <PinInput
+            length={6}
             value={confirmationCode}
-            onChange={(e) => updateState({ confirmationCode: e.target.value })}
+            onChange={(value) => updateState({ confirmationCode: value })}
           />
 
           <hr />

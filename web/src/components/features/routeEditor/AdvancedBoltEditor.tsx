@@ -1,4 +1,3 @@
-import { Datepicker } from "@/components/atoms/DatePicker";
 import IconButton from "@/components/atoms/IconButton";
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Option } from "@/components/atoms/RadioGroup";
@@ -8,6 +7,7 @@ import { useManufacturers } from "@/queries/manufacturerQueries";
 import { useMaterials } from "@/queries/materialQueries";
 import { useModels } from "@/queries/modelQueries";
 import { translateBoltType } from "@/utils/boltUtils";
+import { DatePickerInput } from "@mantine/dates";
 import clsx from "clsx";
 import { FC, useMemo } from "react";
 
@@ -222,13 +222,14 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
 
       {!hideDismantled && (
         <>
-          <Datepicker
+          <DatePickerInput
             label="Demonterad"
-            value={bolt.dismantled ? new Date(bolt.dismantled) : undefined}
-            onChange={(value) => updateBolt({ dismantled: new Date(value) })}
+            value={bolt.dismantled}
+            onChange={(value) => updateBolt({ dismantled: value ?? undefined })}
+            clearable
           />
 
-          <ClearButton onClick={() => updateBolt({ dismantled: undefined })} />
+          <div />
         </>
       )}
     </div>

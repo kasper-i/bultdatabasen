@@ -1,5 +1,4 @@
 import { Alert } from "@/components/atoms/Alert";
-import Input from "@/components/atoms/Input";
 import { useAppDispatch } from "@/store";
 import {
   confirmPassword,
@@ -8,7 +7,7 @@ import {
   signIn,
   translateCognitoError,
 } from "@/utils/cognito";
-import { Button } from "@mantine/core";
+import { Button, PasswordInput, PinInput, TextInput } from "@mantine/core";
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
@@ -84,14 +83,15 @@ const RestorePasswordPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <div className="flex flex-col gap-2.5">
       {phase === 1 ? (
         <>
-          <Input
+          <TextInput
             label="E-post"
             value={email}
             onChange={(e) => updateState({ email: e.target.value })}
             tabIndex={1}
+            required
           />
 
           <hr />
@@ -108,19 +108,19 @@ const RestorePasswordPage = () => {
         </>
       ) : (
         <>
-          <Input
-            label="Verifikationskod"
+          <PinInput
+            length={6}
             value={verificationCode}
-            onChange={(e) => updateState({ verificationCode: e.target.value })}
+            onChange={(value) => updateState({ verificationCode: value })}
             tabIndex={1}
           />
-          <Input
+          <PasswordInput
             label="Lösenord"
             value={newPassword}
-            password
             onChange={(e) => updateState({ newPassword: e.target.value })}
             tabIndex={2}
             autoComplete="new-password"
+            required
           />
 
           <hr />
