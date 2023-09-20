@@ -1,4 +1,3 @@
-import Button from "@/components/atoms/Button";
 import { Concatenator } from "@/components/Concatenator";
 import Feed, { FeedItem } from "@/components/Feed";
 import { ImageCarousel } from "@/components/ImageCarousel";
@@ -13,6 +12,7 @@ import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useComments } from "@/queries/commentQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
+import { Button } from "@mantine/core";
 import { compareDesc } from "date-fns";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -164,7 +164,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
               hideDismantled
             />
             <div className="flex gap-x-2.5 py-2 mt-2">
-              <Button onClick={() => setAction(undefined)} outlined>
+              <Button onClick={() => setAction(undefined)} variant="subtle">
                 Avbryt
               </Button>
               <Button

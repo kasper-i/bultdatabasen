@@ -22,6 +22,7 @@
     "@reduxjs/toolkit": "^1.8.1",
     "@sentry/core": "^7.56.0",
     "@sentry/react": "^7.56.0",
+    "@tabler/icons-react": "^2.34.0",
     "@tanstack/react-query": "v4.0.10",
     "@tanstack/react-query-devtools": "^4.0.10",
     "amazon-cognito-identity-js": "^6.0.1",

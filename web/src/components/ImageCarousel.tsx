@@ -2,6 +2,13 @@ import configData from "@/config.json";
 import { Image, ImageRotation, ImageVersion } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import { Dialog, Transition } from "@headlessui/react";
+import { Button } from "@mantine/core";
+import {
+  IconDownload,
+  IconRotate360,
+  IconRotateClockwise,
+  IconRotateClockwise2,
+} from "@tabler/icons-react";
 import clsx from "clsx";
 import React, {
   CSSProperties,
@@ -12,7 +19,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import Button from "./atoms/Button";
 import IconButton from "./atoms/IconButton";
 import Spinner from "./atoms/Spinner";
 import ConfirmedDeleteButton from "./molecules/ConfirmedDeleteButton";
@@ -144,7 +150,7 @@ export const FullSizeImage: FC<{
                         : 90,
                     })
                   }
-                  icon="refresh"
+                  leftSection={<IconRotateClockwise2 size={14} />}
                   className="ring-offset-neutral-100"
                 >
                   Rotera
@@ -156,7 +162,7 @@ export const FullSizeImage: FC<{
                 onClick={() =>
                   (window.location.href = `${configData.API_URL}/images/${image.id}`)
                 }
-                icon="download"
+                leftSection={<IconDownload size={14} />}
                 className="ring-offset-neutral-100"
               >
                 Original

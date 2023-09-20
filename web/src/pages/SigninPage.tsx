@@ -1,4 +1,3 @@
-import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import {
   AuthenticationDetails,
@@ -18,6 +17,7 @@ import {
 } from "@/utils/cognito";
 import { useState } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
+import { Button } from "@mantine/core";
 
 interface State {
   email: string;
@@ -147,7 +147,12 @@ const SigninPage = () => {
       <hr />
 
       <Alert>{errorMessage}</Alert>
-      <Button onClick={signin} disabled={!canSubmit} loading={inProgress} full>
+      <Button
+        onClick={signin}
+        disabled={!canSubmit}
+        loading={inProgress}
+        fullWidth
+      >
         Logga in
       </Button>
       <Link to="/auth/register" replace>

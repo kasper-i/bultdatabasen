@@ -1,6 +1,6 @@
+import { Button } from "@mantine/core";
 import { captureException, withScope } from "@sentry/core";
 import React, { ErrorInfo, ReactNode } from "react";
-import Button from "./components/atoms/Button";
 
 interface Props {
   children: ReactNode;
@@ -42,7 +42,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
               <span className="text-gray-500">{this.state.eventId}</span>
             )}
           </p>
-          <Button onClick={() => location.reload()}>Ladda om sidan</Button>
+          <Button variant="filled" onClick={() => location.reload()}>
+            Ladda om sidan
+          </Button>
         </div>
       );
     }

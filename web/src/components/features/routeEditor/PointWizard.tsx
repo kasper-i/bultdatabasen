@@ -1,5 +1,4 @@
 import { CreatePointRequest, InsertPosition } from "@/Api";
-import Button from "@/components/atoms/Button";
 import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
 import { Switch } from "@/components/atoms/Switch";
@@ -9,6 +8,7 @@ import React, { ReactElement, Suspense, useState } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import BasicBoltEditor from "./BasicBoltEditor";
 import PointPicker from "./PointPicker";
+import { Button } from "@mantine/core";
 
 interface Props {
   mutation: UseMutationResult<Point, unknown, CreatePointRequest, unknown>;
@@ -158,7 +158,7 @@ function PointWizard({
       )}
 
       <div className="flex gap-2 w-full mt-4">
-        <Button onClick={onCancel} outlined>
+        <Button onClick={onCancel} variant="subtle">
           Avbryt
         </Button>
         <Button

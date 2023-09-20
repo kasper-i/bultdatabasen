@@ -1,8 +1,8 @@
-import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Task } from "@/models/task";
 import { useUpdateTask } from "@/queries/taskQueries";
+import { Button } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 import { priorityOptions } from "./CreateTask";
 
@@ -43,7 +43,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
       />
 
       <div className="flex justify-end gap-2.5 w-full">
-        <Button onClick={() => onDone()} outlined>
+        <Button onClick={() => onDone()} variant="outline">
           Avbryt
         </Button>
         <Button

@@ -1,5 +1,4 @@
 import { Api } from "@/Api";
-import Button from "@/components/atoms/Button";
 import { Datepicker } from "@/components/atoms/DatePicker";
 import Icon from "@/components/atoms/Icon";
 import Input from "@/components/atoms/Input";
@@ -14,6 +13,8 @@ import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { emptyArray } from "@/utils/constants";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import { translatePriority } from "@/utils/taskUtils";
+import { Button } from "@mantine/core";
+import { IconClipboardCheck } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { isEmpty } from "lodash-es";
@@ -51,7 +52,11 @@ const CompleteButton: FC<{
       )}
       <div className="flex justify-end gap-2 mt-2">
         {phase === 2 && (
-          <Button onClick={() => setPhase(1)} outlined disabled={loading}>
+          <Button
+            onClick={() => setPhase(1)}
+            variant="outline"
+            disabled={loading}
+          >
             Avbryt
           </Button>
         )}
@@ -64,10 +69,10 @@ const CompleteButton: FC<{
                   closedAt: closedAt,
                 })
           }
-          icon="check badge"
+          leftSection={<IconClipboardCheck size={14} />}
           loading={loading}
           disabled={phase === 2 && isEmpty(comment.trim())}
-          full
+          fullWidth
         >
           Markera åtgärdad
         </Button>

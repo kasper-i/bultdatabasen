@@ -1,4 +1,3 @@
-import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Option } from "@/components/atoms/RadioGroup";
@@ -6,6 +5,8 @@ import { Select } from "@/components/atoms/Select";
 import { Point } from "@/models/point";
 import { usePoints } from "@/queries/pointQueries";
 import { useCreateTask } from "@/queries/taskQueries";
+import { Button } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { ReactElement, useReducer, useState } from "react";
 import { usePointLabeler } from "../routeEditor/hooks";
 
@@ -51,7 +52,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
   if (!showForm) {
     return (
       <div className="sm:w-96">
-        <Button icon="plus" onClick={() => openForm()}>
+        <Button leftSection={<IconPlus size={14} />} onClick={() => openForm()}>
           Nytt uppdrag
         </Button>
       </div>

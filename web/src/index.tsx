@@ -12,7 +12,11 @@ import "./index.css";
 import { store } from "./store";
 import { refreshSession } from "./utils/cognito";
 import "@mantine/core/styles.css";
-import { MantineProvider } from "@mantine/core";
+import {
+  createTheme,
+  MantineColorsTuple,
+  MantineProvider,
+} from "@mantine/core";
 
 if (!import.meta.env.DEV) {
   init({
@@ -59,8 +63,26 @@ const container = document.getElementById("root");
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const root = createRoot(container!);
 
+const theme = createTheme({
+  colors: {
+    brand: [
+      "#f7ebff",
+      "#e6d3fe",
+      "#c8a4f7",
+      "#aa74f1",
+      "#9049eb",
+      "#802ee8",
+      "#7820e8",
+      "#6614cf",
+      "#5a10ba",
+      "#4d08a4",
+    ],
+  },
+  primaryColor: "brand",
+});
+
 root.render(
-  <MantineProvider>
+  <MantineProvider theme={theme}>
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <App />

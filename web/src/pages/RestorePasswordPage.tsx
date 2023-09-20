@@ -1,5 +1,4 @@
 import { Alert } from "@/components/atoms/Alert";
-import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import { useAppDispatch } from "@/store";
 import {
@@ -9,6 +8,7 @@ import {
   signIn,
   translateCognitoError,
 } from "@/utils/cognito";
+import { Button } from "@mantine/core";
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
@@ -97,7 +97,12 @@ const RestorePasswordPage = () => {
           <hr />
 
           <Alert>{errorMessage}</Alert>
-          <Button loading={inProgress} full onClick={restore} disabled={!email}>
+          <Button
+            loading={inProgress}
+            fullWidth
+            onClick={restore}
+            disabled={!email}
+          >
             Återställ
           </Button>
         </>
@@ -123,7 +128,7 @@ const RestorePasswordPage = () => {
           <Alert>{errorMessage}</Alert>
           <Button
             loading={inProgress}
-            full
+            fullWidth
             onClick={confirm}
             disabled={!verificationCode || !newPassword}
           >

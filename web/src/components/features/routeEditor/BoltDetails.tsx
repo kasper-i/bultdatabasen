@@ -1,4 +1,3 @@
-import Button from "@/components/atoms/Button";
 import { Time } from "@/components/atoms/Time";
 import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
@@ -9,6 +8,7 @@ import {
   positionToLabel,
   translateBoltType,
 } from "@/utils/boltUtils";
+import { Button } from "@mantine/core";
 import clsx from "clsx";
 import React, { FC, Fragment, ReactNode, useEffect, useState } from "react";
 import AdvancedBoltEditor from "./AdvancedBoltEditor";
@@ -95,7 +95,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
         <div className="flex flex-col items-start pt-2">
           <AdvancedBoltEditor bolt={editedBolt} onChange={setEditedBolt} />
           <div className="flex gap-x-2.5 py-2 mt-2">
-            <Button onClick={() => setAction(undefined)} outlined>
+            <Button onClick={() => setAction(undefined)} variant="subtle">
               Avbryt
             </Button>
 

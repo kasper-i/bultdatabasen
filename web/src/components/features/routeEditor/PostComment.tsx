@@ -1,6 +1,6 @@
-import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import { useCreateComment } from "@/queries/commentQueries";
+import { Button } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 
 export const PostComment: FC<{ parentResourceId: string }> = ({

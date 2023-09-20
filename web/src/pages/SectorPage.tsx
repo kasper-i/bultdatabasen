@@ -1,10 +1,11 @@
-import Button from "@/components/atoms/Button";
 import ChildrenTable from "@/components/ChildrenTable";
 import { TaskAlert } from "@/components/features/task/TaskAlert";
 import PageHeader from "@/components/PageHeader";
 import Restricted from "@/components/Restricted";
 import { useUnsafeParams } from "@/hooks/common";
 import { useSector } from "@/queries/sectorQueries";
+import { Button } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { Fragment, ReactElement } from "react";
 import { Link } from "react-router-dom";
 
@@ -30,7 +31,7 @@ const SectorPage = (): ReactElement => {
       <Restricted>
         <div className="flex justify-end">
           <Link to="new-route">
-            <Button icon="plus">Ny led</Button>
+            <Button leftSection={<IconPlus size={14} />}>Ny led</Button>
           </Link>
         </div>
       </Restricted>

@@ -1,5 +1,4 @@
 import { Alert } from "@/components/atoms/Alert";
-import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import { useAppDispatch } from "@/store";
 import {
@@ -9,6 +8,7 @@ import {
   signUp,
   translateCognitoError,
 } from "@/utils/cognito";
+import { Button } from "@mantine/core";
 import {
   AuthenticationDetails,
   CognitoUserAttribute,
@@ -153,7 +153,7 @@ const RegisterPage = () => {
           <Alert>{errorMessage}</Alert>
           <Button
             loading={inProgress}
-            full
+            fullWidth
             onClick={register}
             disabled={!canRegister}
           >
@@ -171,7 +171,7 @@ const RegisterPage = () => {
           <hr />
 
           <Alert>{errorMessage}</Alert>
-          <Button loading={inProgress} full onClick={confirm}>
+          <Button loading={inProgress} fullWidth onClick={confirm}>
             Bekräfta
           </Button>
         </>

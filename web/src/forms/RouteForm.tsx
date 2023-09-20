@@ -1,9 +1,9 @@
-import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import { Option } from "@/components/atoms/RadioGroup";
 import { Select } from "@/components/atoms/Select";
 import { Route, RouteType, routeTypes } from "@/models/route";
 import { renderRouteType } from "@/utils/routeUtils";
+import { Button } from "@mantine/core";
 import { FC } from "react";
 import { Controller, SubmitHandler, useFormContext } from "react-hook-form";
 
@@ -71,7 +71,7 @@ export const RouteForm: FC<{
         )}
       />
       <div className="col-span-2 flex justify-end gap-2">
-        <Button outlined onClick={onCancel}>
+        <Button variant="outline" onClick={onCancel}>
           Avbryt
         </Button>
         <Button loading={loading} type="submit">

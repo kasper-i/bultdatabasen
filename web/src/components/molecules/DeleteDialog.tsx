@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
-import Button from "../atoms/Button";
 import Modal from "../atoms/Modal";
+import { Button } from "@mantine/core";
+import { IconTrash } from "@tabler/icons-react";
 
 type Props = {
   mutation: UseMutationResult<void, unknown, void, unknown>;
@@ -22,13 +23,13 @@ const DeleteDialog = ({ mutation, target, onClose }: Props) => {
         description={`Vill du flytta ${target.toLocaleLowerCase()} till papperskorgen?`}
       >
         <div className="flex w-full justify-end gap-2">
-          <Button icon="cancel" onClick={onClose}>
+          <Button variant="subtle" onClick={onClose}>
             Avbryt
           </Button>
           <Button
-            color="danger"
+            color="red"
             onClick={() => mutation.mutate()}
-            icon="trash"
+            leftSection={<IconTrash size={14} />}
             loading={mutation.isLoading}
           >
             Ta bort
