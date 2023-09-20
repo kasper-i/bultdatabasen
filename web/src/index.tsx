@@ -11,6 +11,8 @@ import App from "./App";
 import "./index.css";
 import { store } from "./store";
 import { refreshSession } from "./utils/cognito";
+import "@mantine/core/styles.css";
+import { MantineProvider } from "@mantine/core";
 
 if (!import.meta.env.DEV) {
   init({
@@ -58,10 +60,12 @@ const container = document.getElementById("root");
 const root = createRoot(container!);
 
 root.render(
-  <QueryClientProvider client={queryClient}>
-    <Provider store={store}>
-      <App />
-      <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
-    </Provider>
-  </QueryClientProvider>
+  <MantineProvider>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <App />
+        <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
+      </Provider>
+    </QueryClientProvider>
+  </MantineProvider>
 );
