@@ -114,21 +114,6 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
     [models]
   );
 
-  const yearOptions = useMemo(() => {
-    const yearOptions: Option<number>[] = [];
-    const currentYear = new Date().getFullYear();
-
-    for (let year = currentYear; year >= 1960; year--) {
-      yearOptions.push({
-        key: year,
-        label: year.toString(),
-        value: year,
-      });
-    }
-
-    return yearOptions;
-  }, []);
-
   return (
     <div
       className={clsx("w-full grid gap-x-2 gap-y-2 content-center")}

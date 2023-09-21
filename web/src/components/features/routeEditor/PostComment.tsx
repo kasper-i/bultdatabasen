@@ -1,5 +1,5 @@
 import { useCreateComment } from "@/queries/commentQueries";
-import { Button, Textarea, TextInput } from "@mantine/core";
+import { Button, Textarea } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 
 export const PostComment: FC<{ parentResourceId: string }> = ({

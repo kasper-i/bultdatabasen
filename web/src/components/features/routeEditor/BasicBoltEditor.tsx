@@ -42,10 +42,18 @@ const BasicBoltEditor = ({
         )}
       </div>
 
-      <Radio.Group label="Typ" required>
+      <Radio.Group
+        label="Typ"
+        required
+        onChange={(value) =>
+          updateBolt({
+            type: value as BoltType,
+          })
+        }
+      >
         <Group mt="xs">
-          {typeOptions.map(({ value, label }) => (
-            <Radio value={value} label={label} />
+          {typeOptions.map(({ key, value, label }) => (
+            <Radio key={key} value={value} label={label} />
           ))}
         </Group>
       </Radio.Group>

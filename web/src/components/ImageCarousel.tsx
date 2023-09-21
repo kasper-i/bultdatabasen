@@ -3,14 +3,9 @@ import { Image, ImageRotation, ImageVersion } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import { Dialog, Transition } from "@headlessui/react";
 import { Button } from "@mantine/core";
-import {
-  IconDownload,
-  IconRotate360,
-  IconRotateClockwise,
-  IconRotateClockwise2,
-} from "@tabler/icons-react";
+import { IconDownload, IconRotateClockwise2 } from "@tabler/icons-react";
 import clsx from "clsx";
-import React, {
+import {
   CSSProperties,
   FC,
   Fragment,
