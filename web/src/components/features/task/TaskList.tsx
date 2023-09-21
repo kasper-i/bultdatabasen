@@ -1,6 +1,5 @@
-import Pagination from "@/components/atoms/Pagination";
 import { useTasks } from "@/queries/taskQueries";
-import { Switch } from "@mantine/core";
+import { Pagination, Switch } from "@mantine/core";
 import { ReactElement, Suspense, useState } from "react";
 import { Dots } from "react-activity";
 import TaskView from "./TaskView";
@@ -44,10 +43,10 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
         </div>
         <div className="w-full my-5">
           <Pagination
-            page={page}
-            itemsPerPage={ITEMS_PER_PAGE}
-            totalItems={tasks?.meta.totalItems ?? 0}
-            onPageSelect={setPage}
+            value={page}
+            total={Math.ceil(tasks?.meta.totalItems ?? 0 / ITEMS_PER_PAGE)}
+            onChange={setPage}
+            withEdges
           />
         </div>
       </div>
