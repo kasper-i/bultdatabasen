@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
-import { UseMutationResult } from "@tanstack/react-query";
-import Modal from "../atoms/Modal";
-import { Button } from "@mantine/core";
+import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
+import { UseMutationResult } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 type Props = {
   mutation: UseMutationResult<void, unknown, void, unknown>;
@@ -17,24 +16,25 @@ const DeleteDialog = ({ mutation, target, onClose }: Props) => {
 
   return (
     <div>
-      <Modal
-        onClose={onClose}
-        title={`Bekräfta borttagning`}
-        description={`Vill du flytta ${target.toLocaleLowerCase()} till papperskorgen?`}
-      >
-        <div className="flex w-full justify-end gap-2">
-          <Button variant="subtle" onClick={onClose}>
-            Avbryt
-          </Button>
-          <Button
-            color="red"
-            onClick={() => mutation.mutate()}
-            leftSection={<IconTrash size={14} />}
-            loading={mutation.isLoading}
-          >
-            Ta bort
-          </Button>
-        </div>
+      <Modal opened onClose={onClose} title="Bekräfta borttagning" centered>
+        <Stack>
+          <Text size="sm">
+            Vill du flytta {target.toLocaleLowerCase()} till papperskorgen?
+          </Text>
+          <Group justify="right">
+            <Button variant="default" onClick={onClose}>
+              Avbryt
+            </Button>
+            <Button
+              color="red"
+              onClick={() => mutation.mutate()}
+              leftSection={<IconTrash size={14} />}
+              loading={mutation.isLoading}
+            >
+              Ta bort
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     </div>
   );
