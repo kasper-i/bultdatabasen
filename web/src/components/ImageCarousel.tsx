@@ -2,8 +2,8 @@ import configData from "@/config.json";
 import { Image, ImageRotation, ImageVersion } from "@/models/image";
 import { useDeleteImage, useUpdateImage } from "@/queries/imageQueries";
 import { Dialog, Transition } from "@headlessui/react";
-import { Button } from "@mantine/core";
-import { IconDownload, IconRotateClockwise2 } from "@tabler/icons-react";
+import { ActionIcon, Button, Loader } from "@mantine/core";
+import { IconDownload, IconRotateClockwise2, IconX } from "@tabler/icons-react";
 import clsx from "clsx";
 import {
   CSSProperties,
@@ -14,8 +14,6 @@ import {
   useRef,
   useState,
 } from "react";
-import IconButton from "./atoms/IconButton";
-import Spinner from "./atoms/Spinner";
 import ConfirmedDeleteButton from "./molecules/ConfirmedDeleteButton";
 import Restricted from "./Restricted";
 
@@ -113,7 +111,7 @@ export const FullSizeImage: FC<{
 
           {loading && (
             <div className="fixed flex items-center justify-center -mt-16">
-              <Spinner active={loading} />
+              <Loader type="bars" />
             </div>
           )}
 
@@ -133,8 +131,10 @@ export const FullSizeImage: FC<{
           </div>
 
           <div className="fixed h-16 w-full bottom-0 inset-x-0 flex justify-between px-5 bg-neutral-100">
-            <IconButton tiny onClick={onClose} icon="back" />
             <div className="flex items-center gap-2.5">
+              <ActionIcon onClick={onClose} variant="subtle">
+                <IconX size={14} />
+              </ActionIcon>
               <Restricted>
                 <Button
                   loading={updateImage.isLoading}

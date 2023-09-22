@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { isEqual } from "lodash-es";
 import React, { useId } from "react";
-import { Option } from "./RadioGroup";
+import { Option } from "./types";
 
 type Props<T> = {
   value?: T;

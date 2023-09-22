@@ -2,7 +2,6 @@ import { Api } from "@/Api";
 import Icon from "@/components/atoms/Icon";
 import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import { Menu } from "@/components/molecules/Menu";
 import UserName from "@/components/UserName";
 import { Point } from "@/models/point";
 import { Resource } from "@/models/resource";
@@ -11,9 +10,16 @@ import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { emptyArray } from "@/utils/constants";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import { translatePriority } from "@/utils/taskUtils";
-import { Button, TextInput } from "@mantine/core";
+import { ActionIcon, Button, Menu, TextInput } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import { IconClipboardCheck } from "@tabler/icons-react";
+import {
+  IconClipboardCheck,
+  IconEdit,
+  IconMenu,
+  IconMenu2,
+  IconRefresh,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { isEmpty } from "lodash-es";
@@ -185,28 +191,37 @@ const TaskView: FC<{
           </div>
         </Link>
         <Restricted>
-          <Menu
-            items={[
-              {
-                label: "Redigera",
-                icon: "edit",
-                disabled: isComplete,
-                onClick: () => setAction("edit"),
-              },
-              {
-                label: "Återöppna",
-                icon: "refresh",
-                disabled: !isComplete,
-                onClick: () => changeStatus("open"),
-              },
-              {
-                label: "Radera",
-                icon: "trash",
-                className: "text-red-500",
-                onClick: () => setAction("delete"),
-              },
-            ]}
-          />
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon variant="light">
+                <IconMenu2 size={14} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                onClick={() => setAction("edit")}
+                disabled={isComplete}
+              >
+                Redigera
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<IconRefresh size={14} />}
+                onClick={() => changeStatus("open")}
+                disabled={!isComplete}
+              >
+                Återöppna
+              </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<IconTrash size={14} />}
+                onClick={() => setAction("delete")}
+              >
+                Redigera
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Restricted>
       </div>
 

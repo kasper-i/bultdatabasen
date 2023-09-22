@@ -8,6 +8,8 @@ import { usePoints } from "@/queries/pointQueries";
 import { useDeleteRoute, useRoute } from "@/queries/routeQueries";
 import { getParent } from "@/utils/resourceUtils";
 import { renderRouteType } from "@/utils/routeUtils";
+import { ActionIcon, Menu } from "@mantine/core";
+import { IconEdit, IconMenu2, IconTrash } from "@tabler/icons-react";
 import { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -45,19 +47,31 @@ const RoutePage = () => {
       <PageHeader
         resourceId={resourceId}
         ancestors={route.ancestors}
-        menuItems={[
-          {
-            label: "Radera",
-            icon: "trash",
-            className: "text-red-500",
-            onClick: () => setAction("delete"),
-          },
-          {
-            label: "Redigera",
-            icon: "edit",
-            onClick: () => naviate("edit"),
-          },
-        ]}
+        menu={
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon variant="light">
+                <IconMenu2 size={14} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                onClick={() => naviate("edit")}
+              >
+                Redigera
+              </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<IconTrash size={14} />}
+                onClick={() => setAction("delete")}
+              >
+                Radera
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        }
       />
 
       {action === "delete" && (

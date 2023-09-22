@@ -4,7 +4,6 @@ import { ImageCarousel } from "@/components/ImageCarousel";
 import ImageThumbnail from "@/components/ImageThumbnail";
 import ImageUploadButton from "@/components/ImageUploadButton";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
@@ -12,7 +11,8 @@ import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useComments } from "@/queries/commentQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
-import { Button } from "@mantine/core";
+import { ActionIcon, Button, Menu } from "@mantine/core";
+import { IconMenu2, IconPlus, IconTrash } from "@tabler/icons-react";
 import { compareDesc } from "date-fns";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -129,21 +129,29 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
 
         <div className="flex gap-2">
           <Restricted>
-            <Menu
-              items={[
-                {
-                  label: "Radera",
-                  icon: "trash",
-                  className: "text-red-500",
-                  onClick: () => setAction("delete"),
-                },
-                {
-                  label: "Ny bult",
-                  icon: "plus",
-                  onClick: () => setAction("add_bolt"),
-                },
-              ]}
-            />
+            <Menu position="bottom-end" withArrow>
+              <Menu.Target>
+                <ActionIcon variant="light">
+                  <IconMenu2 size={14} />
+                </ActionIcon>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Item
+                  leftSection={<IconPlus size={14} />}
+                  onClick={() => setAction("add_bolt")}
+                >
+                  Ny bult
+                </Menu.Item>
+                <Menu.Item
+                  color="red"
+                  leftSection={<IconTrash size={14} />}
+                  onClick={() => setAction("delete")}
+                >
+                  Radera
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
             {action === "delete" && (
               <DeleteDialog
                 mutation={deletePoint}

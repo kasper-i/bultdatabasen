@@ -1,8 +1,8 @@
-import IconButton from "@/components/atoms/IconButton";
-import { Option } from "@/components/atoms/RadioGroup";
+import { Option } from "@/components/atoms/types";
 import { Bolt, BoltType } from "@/models/bolt";
 import { positionToLabel, translateBoltType } from "@/utils/boltUtils";
-import { Group, Radio } from "@mantine/core";
+import { ActionIcon, Group, Radio } from "@mantine/core";
+import { IconTrack, IconTrash } from "@tabler/icons-react";
 
 const typeOptions = (["expansion", "glue", "piton"] as const).map<
   Option<BoltType>
@@ -38,7 +38,9 @@ const BasicBoltEditor = ({
           )}
         </p>
         {onRemove && (
-          <IconButton tiny onClick={onRemove} icon="trash" color="danger" />
+          <ActionIcon onClick={onRemove} variant="subtle" color="red">
+            <IconTrash size={14} />
+          </ActionIcon>
         )}
       </div>
 

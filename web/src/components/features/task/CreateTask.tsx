@@ -1,5 +1,5 @@
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
-import { Option } from "@/components/atoms/RadioGroup";
+import { Option } from "@/components/atoms/types";
 import { usePoints } from "@/queries/pointQueries";
 import { useCreateTask } from "@/queries/taskQueries";
 import { Button, Select, TextInput } from "@mantine/core";

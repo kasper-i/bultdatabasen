@@ -6,10 +6,11 @@ import { usePermissions } from "@/hooks/authHooks";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ActionIcon } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import clsx from "clsx";
 import { FC, ReactElement, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import IconButton from "../../atoms/IconButton";
 import { Card } from "./Card";
 import { usePointLabeler } from "./hooks";
 import PointDetails from "./PointDetails";
@@ -92,11 +93,13 @@ const PointEditor = ({
         ) : (
           <div className="flex flex-col items-center justify-center">
             <Restricted>
-              <IconButton
+              <ActionIcon
                 onClick={() => createFirst()}
-                icon="plus"
                 className="mb-2.5"
-              />
+                size="lg"
+              >
+                <IconPlus size={20} />
+              </ActionIcon>
             </Restricted>
             <div className="text-sm text-gray-600 text-center">
               <p>På den här leden finns ännu inga dokumenterade bultar.</p>

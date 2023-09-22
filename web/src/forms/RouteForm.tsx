@@ -1,4 +1,4 @@
-import { Option } from "@/components/atoms/RadioGroup";
+import { Option } from "@/components/atoms/types";
 import { Route, RouteType, routeTypes } from "@/models/route";
 import { renderRouteType } from "@/utils/routeUtils";
 import { Button, NumberInput, Select, TextInput } from "@mantine/core";

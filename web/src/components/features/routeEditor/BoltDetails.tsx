@@ -1,5 +1,4 @@
 import { Time } from "@/components/atoms/Time";
-import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
 import { Bolt } from "@/models/bolt";
 import { useUpdateBolt } from "@/queries/boltQueries";
@@ -8,7 +7,8 @@ import {
   positionToLabel,
   translateBoltType,
 } from "@/utils/boltUtils";
-import { Button } from "@mantine/core";
+import { ActionIcon, Button, Menu } from "@mantine/core";
+import { IconArchive, IconEdit, IconMenu2 } from "@tabler/icons-react";
 import clsx from "clsx";
 import React, { FC, Fragment, ReactNode, useEffect, useState } from "react";
 import AdvancedBoltEditor from "./AdvancedBoltEditor";
@@ -69,25 +69,34 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
         </p>
 
         <Restricted>
-          <Menu
-            items={[
-              {
-                label: "Redigera",
-                icon: "edit",
-                onClick: () => setAction("edit"),
-              },
-              {
-                label: "Demontera",
-                icon: "archive",
-                onClick: () =>
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon variant="light">
+                <IconMenu2 size={14} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                onClick={() => setAction("edit")}
+              >
+                Redigera
+              </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<IconArchive size={14} />}
+                onClick={() =>
                   updateBolt.mutate({
                     ...bolt,
                     dismantled: new Date(),
-                  }),
-                disabled: !!bolt.dismantled,
-              },
-            ]}
-          />
+                  })
+                }
+              >
+                Demontera
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Restricted>
       </div>
 

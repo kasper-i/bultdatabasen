@@ -1,9 +1,9 @@
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
 import { Comment } from "@/models/comment";
 import { useDeleteComment, useUpdateComment } from "@/queries/commentQueries";
-import { Button, TextInput } from "@mantine/core";
+import { ActionIcon, Button, Menu, TextInput } from "@mantine/core";
+import { IconEdit, IconMenu2, IconTrash } from "@tabler/icons-react";
 import { FC, useEffect, useState } from "react";
 
 export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
@@ -47,24 +47,32 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
       )}
       {action === undefined && (
         <Restricted>
-          <Menu
-            items={[
-              {
-                label: "Redigera",
-                onClick: () => {
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon variant="light">
+                <IconMenu2 size={14} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                onClick={() => {
                   setAction("edit");
                   setText(comment.text);
-                },
-                icon: "edit",
-              },
-              {
-                label: "Radera",
-                onClick: () => setAction("delete"),
-                icon: "trash",
-                className: "text-red-500",
-              },
-            ]}
-          />
+                }}
+              >
+                Redigera
+              </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<IconTrash size={14} />}
+                onClick={() => setAction("delete")}
+              >
+                Radera
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Restricted>
       )}
       {action === "delete" && (

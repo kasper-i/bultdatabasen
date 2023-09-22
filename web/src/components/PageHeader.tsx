@@ -1,11 +1,10 @@
 import { Concatenator } from "@/components/Concatenator";
 import { Resource } from "@/models/resource";
 import { useMaintainers, useResource } from "@/queries/resourceQueries";
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 import Icon from "./atoms/Icon";
 import Breadcrumbs from "./Breadcrumbs";
 import { Counter } from "./Counter";
-import { Menu, MenuItem } from "./molecules/Menu";
 import Restricted from "./Restricted";
 import { Underlined } from "./Underlined";
 
@@ -13,14 +12,14 @@ interface Props {
   resourceId: string;
   ancestors?: Resource[];
   showCounts?: boolean;
-  menuItems?: MenuItem[];
+  menu?: ReactNode;
 }
 
 const PageHeader = ({
   resourceId,
   ancestors,
   showCounts = false,
-  menuItems,
+  menu,
 }: Props): ReactElement => {
   const { data: resource } = useResource(resourceId);
   const { data: maintainers } = useMaintainers(resourceId);
@@ -41,7 +40,7 @@ const PageHeader = ({
       )}
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">{resource.name}</h1>
-        <Restricted>{menuItems && <Menu items={menuItems} />}</Restricted>
+        <Restricted>{menu}</Restricted>
       </div>
 
       <p className="text-sm leading-snug">

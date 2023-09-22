@@ -1,8 +1,8 @@
 import configData from "@/config.json";
 import { Image, ImageVersion } from "@/models/image";
+import { Loader } from "@mantine/core";
 import clsx from "clsx";
-import React, { CSSProperties, ReactNode, useReducer, useRef } from "react";
-import Spinner from "./atoms/Spinner";
+import { CSSProperties, ReactNode, useReducer, useRef } from "react";
 
 interface Props {
   image: Image;
@@ -95,7 +95,7 @@ export const ImageView = ({
       }}
     >
       <div className="absolute inset-0 flex justify-center items-center">
-        <Spinner active={loading} />
+        {loading && <Loader type="bars" />}
       </div>
       <div className="absolute" style={innerStyle}>
         <img

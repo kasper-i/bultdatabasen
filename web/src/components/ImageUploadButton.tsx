@@ -1,9 +1,9 @@
 import { Api } from "@/Api";
-import React, { ReactElement, useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { ActionIcon, Progress } from "@mantine/core";
+import { IconCamera } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
-import IconButton from "./atoms/IconButton";
-import Progress from "./atoms/Progress";
+import { ReactElement, useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
 
 interface Props {
   pointId: string;
@@ -40,16 +40,14 @@ const ImageUploadButton = ({ pointId }: Props): ReactElement => {
 
   return progress && progress < 100 ? (
     <div className="h-[2.125rem] w-[2.125rem]">
-      <Progress percent={progress} />
+      <Progress value={progress} animated />
     </div>
   ) : (
     <div {...getRootProps()}>
       <input {...getInputProps()} />
-      <IconButton
-        loading={!!progress}
-        icon="camera"
-        color={error ? "danger" : "primary"}
-      />
+      <ActionIcon loading={!!progress} color={error ? "red" : undefined}>
+        <IconCamera size={14} />
+      </ActionIcon>
     </div>
   );
 };

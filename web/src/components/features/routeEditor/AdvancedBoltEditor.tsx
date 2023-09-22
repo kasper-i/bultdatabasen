@@ -1,13 +1,13 @@
-import IconButton from "@/components/atoms/IconButton";
 import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
-import { Option } from "@/components/atoms/RadioGroup";
+import { Option } from "@/components/atoms/types";
 import { Bolt, BoltType, DiameterUnit } from "@/models/bolt";
 import { useManufacturers } from "@/queries/manufacturerQueries";
 import { useMaterials } from "@/queries/materialQueries";
 import { useModels } from "@/queries/modelQueries";
 import { translateBoltType } from "@/utils/boltUtils";
-import { Select } from "@mantine/core";
+import { ActionIcon, Select } from "@mantine/core";
 import { DatePickerInput, YearPickerInput } from "@mantine/dates";
+import { IconX } from "@tabler/icons-react";
 import clsx from "clsx";
 import { FC, useMemo } from "react";
 
@@ -22,7 +22,9 @@ const typeOptions = (["expansion", "glue", "piton"] as const).map<
 const ClearButton: FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
     <div className="mt-6 h-[2.125rem] flex justify-center items-center">
-      <IconButton icon="x" tiny onClick={onClick} />
+      <ActionIcon onClick={onClick} variant="subtle" color="black">
+        <IconX size={14} />
+      </ActionIcon>
     </div>
   );
 };
