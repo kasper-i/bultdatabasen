@@ -1,4 +1,3 @@
-import { Alert } from "@/components/atoms/Alert";
 import { useAppDispatch } from "@/store";
 import {
   confirmPassword,
@@ -7,7 +6,14 @@ import {
   signIn,
   translateCognitoError,
 } from "@/utils/cognito";
-import { Button, PasswordInput, PinInput, TextInput } from "@mantine/core";
+import {
+  Alert,
+  Button,
+  PasswordInput,
+  PinInput,
+  TextInput,
+} from "@mantine/core";
+import { IconAlertHexagon } from "@tabler/icons-react";
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
@@ -94,9 +100,16 @@ const RestorePasswordPage = () => {
             required
           />
 
-          <hr />
+          {errorMessage && (
+            <Alert
+              color="red"
+              icon={<IconAlertHexagon />}
+              title="Operationen misslyckades"
+            >
+              {errorMessage}
+            </Alert>
+          )}
 
-          <Alert>{errorMessage}</Alert>
           <Button
             loading={inProgress}
             fullWidth
@@ -123,9 +136,15 @@ const RestorePasswordPage = () => {
             required
           />
 
-          <hr />
-
-          <Alert>{errorMessage}</Alert>
+          {errorMessage && (
+            <Alert
+              color="red"
+              icon={<IconAlertHexagon />}
+              title="Återställning misslyckades"
+            >
+              {errorMessage}
+            </Alert>
+          )}
           <Button
             loading={inProgress}
             fullWidth

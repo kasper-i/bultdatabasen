@@ -12,7 +12,13 @@ import { useComments } from "@/queries/commentQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
 import { ActionIcon, Button, Menu } from "@mantine/core";
-import { IconMenu2, IconPlus, IconTrash } from "@tabler/icons-react";
+import {
+  IconMenu2,
+  IconMessage,
+  IconPhoto,
+  IconPlus,
+  IconTrash,
+} from "@tabler/icons-react";
 import { compareDesc } from "date-fns";
 import { ReactElement, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -57,7 +63,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
     images?.forEach((image) => {
       feedItems.push({
         key: image.id,
-        icon: "image",
+        icon: <IconPhoto size={14} />,
         timestamp: image.timestamp,
         description: "Laddade upp foto",
         author: image.author,
@@ -74,7 +80,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
     comments?.forEach((comment) => {
       feedItems.push({
         key: comment.id,
-        icon: "comment",
+        icon: <IconMessage size={14} />,
         timestamp: comment.createdAt,
         description: "Lämnade kommentar",
         author: comment.author,

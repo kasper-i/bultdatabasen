@@ -1,8 +1,8 @@
 import { Resource } from "@/models/resource";
 import { getResourceRoute } from "@/utils/resourceUtils";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { IconChevronRight, IconHome, IconHome2 } from "@tabler/icons-react";
 import clsx from "clsx";
-import React, {
+import {
   FC,
   Fragment,
   ReactElement,
@@ -12,7 +12,6 @@ import React, {
   useState,
 } from "react";
 import { Link } from "react-router-dom";
-import Icon from "./atoms/Icon";
 
 interface Crumb {
   key: string;
@@ -93,11 +92,7 @@ const Breadcrumbs: FC<{
           to={to}
           className="flex items-center text-primary-500 whitespace-nowrap text-xs"
         >
-          {resource.type === "root" ? (
-            <Icon className="h-3 text-primary-500" name="home" />
-          ) : (
-            resource.name
-          )}
+          {resource.type === "root" ? <IconHome size={14} /> : resource.name}
         </Link>
       ),
     };
@@ -127,9 +122,7 @@ const Breadcrumbs: FC<{
         {crumbs.map(({ key, content }, index) => (
           <Fragment key={key}>
             {content}
-            {index !== crumbs.length - 1 && (
-              <ChevronRightIcon className="mx-0.5 h-4 text-gray-400" />
-            )}
+            {index !== crumbs.length - 1 && <IconChevronRight size={14} />}
           </Fragment>
         ))}
       </div>

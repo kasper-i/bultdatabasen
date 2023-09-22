@@ -1,4 +1,3 @@
-import { Alert } from "@/components/atoms/Alert";
 import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
@@ -7,7 +6,14 @@ import {
   signUp,
   translateCognitoError,
 } from "@/utils/cognito";
-import { Button, PasswordInput, PinInput, TextInput } from "@mantine/core";
+import {
+  Alert,
+  Button,
+  PasswordInput,
+  PinInput,
+  TextInput,
+} from "@mantine/core";
+import { IconAlertHexagon } from "@tabler/icons-react";
 import {
   AuthenticationDetails,
   CognitoUserAttribute,
@@ -150,9 +156,15 @@ const RegisterPage = () => {
             />
           </div>
 
-          <hr />
-
-          <Alert>{errorMessage}</Alert>
+          {errorMessage && (
+            <Alert
+              color="red"
+              icon={<IconAlertHexagon />}
+              title="Registrering misslyckades"
+            >
+              {errorMessage}
+            </Alert>
+          )}
           <Button
             loading={inProgress}
             fullWidth
@@ -170,9 +182,15 @@ const RegisterPage = () => {
             onChange={(value) => updateState({ confirmationCode: value })}
           />
 
-          <hr />
-
-          <Alert>{errorMessage}</Alert>
+          {errorMessage && (
+            <Alert
+              color="red"
+              icon={<IconAlertHexagon />}
+              title="Verifiering misslyckades"
+            >
+              {errorMessage}
+            </Alert>
+          )}
           <Button loading={inProgress} fullWidth onClick={confirm}>
             Bekräfta
           </Button>

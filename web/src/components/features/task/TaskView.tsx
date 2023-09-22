@@ -1,5 +1,4 @@
 import { Api } from "@/Api";
-import Icon from "@/components/atoms/Icon";
 import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import UserName from "@/components/UserName";
@@ -13,10 +12,11 @@ import { translatePriority } from "@/utils/taskUtils";
 import { ActionIcon, Button, Menu, TextInput } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import {
+  IconCheck,
   IconClipboardCheck,
   IconEdit,
-  IconMenu,
   IconMenu2,
+  IconMessage,
   IconRefresh,
   IconTrash,
 } from "@tabler/icons-react";
@@ -237,13 +237,12 @@ const TaskView: FC<{
 
               <div className="flex flex-col">
                 <div className="flex items-center">
-                  <Icon
+                  <IconCheck
                     className={clsx(
                       task.status === "closed"
                         ? "text-green-600"
                         : "text-red-500"
                     )}
-                    name="check"
                   />
                   <p
                     className={clsx(
@@ -260,7 +259,7 @@ const TaskView: FC<{
                 </div>
                 {task.comment && (
                   <p className="text-sm text-gray-700">
-                    <Icon name="comment" className="mr-1" />
+                    <IconMessage name="comment" className="mr-1" />
                     {task.comment}
                   </p>
                 )}

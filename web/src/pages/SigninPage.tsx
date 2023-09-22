@@ -4,7 +4,6 @@ import {
 } from "amazon-cognito-identity-js";
 
 import { Api } from "@/Api";
-import { Alert } from "@/components/atoms/Alert";
 import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import {
@@ -16,7 +15,8 @@ import {
 } from "@/utils/cognito";
 import { useState } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
-import { Button, PasswordInput, TextInput } from "@mantine/core";
+import { Alert, Button, PasswordInput, TextInput } from "@mantine/core";
+import { IconAlertHexagon } from "@tabler/icons-react";
 
 interface State {
   email: string;
@@ -144,9 +144,15 @@ const SigninPage = () => {
         </Link>
       )}
 
-      <hr />
-
-      <Alert>{errorMessage}</Alert>
+      {errorMessage && (
+        <Alert
+          color="red"
+          icon={<IconAlertHexagon />}
+          title="Inloggning misslyckades"
+        >
+          {errorMessage}
+        </Alert>
+      )}
       <Button
         onClick={signin}
         disabled={!canSubmit}

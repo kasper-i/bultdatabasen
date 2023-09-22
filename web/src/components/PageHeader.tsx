@@ -1,8 +1,8 @@
 import { Concatenator } from "@/components/Concatenator";
 import { Resource } from "@/models/resource";
 import { useMaintainers, useResource } from "@/queries/resourceQueries";
+import { IconTool } from "@tabler/icons-react";
 import { ReactElement, ReactNode } from "react";
-import Icon from "./atoms/Icon";
 import Breadcrumbs from "./Breadcrumbs";
 import { Counter } from "./Counter";
 import Restricted from "./Restricted";
@@ -44,7 +44,7 @@ const PageHeader = ({
       </div>
 
       <p className="text-sm leading-snug">
-        <Icon name="wrench" className="mr-0.5" />
+        <IconTool size={14} />
         {maintainers?.length ? (
           <Concatenator>
             {maintainers?.map((maintainer) => (

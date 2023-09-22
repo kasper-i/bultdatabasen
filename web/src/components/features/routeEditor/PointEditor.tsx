@@ -1,12 +1,10 @@
 import { InsertPosition } from "@/Api";
-import Icon from "@/components/atoms/Icon";
 import Restricted from "@/components/Restricted";
 import { usePermissions } from "@/hooks/authHooks";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { ActionIcon, Loader } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { IconChevronRight, IconPlus } from "@tabler/icons-react";
 import clsx from "clsx";
 import { FC, ReactElement, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -129,15 +127,16 @@ const PointEditor = ({
     return (
       <div className="relative h-0 w-full my-0.5">
         <div className="absolute z-10 w-full h-5 -top-2.5 flex justify-center items-center">
-          <button
+          <ActionIcon
             onClick={() => {
               deselectPoint();
               setInsertPosition(insertPosition);
             }}
-            className="flex justify-center items-center h-4 w-4 bg-primary-500 rounded-full focus:outline-none"
+            radius="xl"
+            size="xs"
           >
-            <Icon name="plus" className="h-4 w-4 text-white"></Icon>
-          </button>
+            <IconPlus size={14} color="white" />
+          </ActionIcon>
         </div>
       </div>
     );
@@ -199,7 +198,7 @@ const PointEditor = ({
                       {no}
                     </span>
                   </span>
-                  <ChevronRightIcon className="h-4 text-primary-500" />
+                  <IconChevronRight size={14} />
                 </div>
               )}
             </Card>

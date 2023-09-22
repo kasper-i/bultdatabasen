@@ -1,12 +1,12 @@
 import { CreatePointRequest, InsertPosition } from "@/Api";
-import Icon from "@/components/atoms/Icon";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
-import React, { ReactElement, Suspense, useState } from "react";
+import { Button, Loader, Switch } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { UseMutationResult } from "@tanstack/react-query";
+import { ReactElement, Suspense, useState } from "react";
 import BasicBoltEditor from "./BasicBoltEditor";
 import PointPicker from "./PointPicker";
-import { Button, Loader, Switch } from "@mantine/core";
 
 interface Props {
   mutation: UseMutationResult<Point, unknown, CreatePointRequest, unknown>;
@@ -144,11 +144,7 @@ function PointWizard({
                 className="h-24 w-28 border-2 border-gray-300 border-dashed rounded-md flex justify-center items-center"
               >
                 <div className="text-center" onClick={addRightBolt}>
-                  <Icon
-                    big
-                    name="plus"
-                    className="cursor-pointer text-primary-500"
-                  />
+                  <IconPlus />
                   <p className="cursor-pointer text-gray-700 text-sm">
                     Lägg till en högerbult
                   </p>

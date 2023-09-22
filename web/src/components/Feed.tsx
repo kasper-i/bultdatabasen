@@ -3,14 +3,12 @@ import clsx from "clsx";
 import { format } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Fragment, Key, ReactNode } from "react";
-import Icon from "./atoms/Icon";
-import { IconType } from "./atoms/types";
 import UserName from "./UserName";
 
 export interface FeedItem {
   key: Key;
   timestamp: Date;
-  icon: IconType;
+  icon: ReactNode;
   description: string;
   author: Author;
   value: ReactNode;
@@ -34,7 +32,7 @@ const Feed = ({ items }: Props) => {
               <div>
                 <div className="flex items-center">
                   <div className="rounded-full h-6 w-6 bg-gray-500 flex justify-center items-center">
-                    <Icon name={icon} className="text-white" />
+                    {icon}
                   </div>
 
                   <div className="text-gray-600 ml-2">
