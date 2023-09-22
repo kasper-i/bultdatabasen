@@ -1,7 +1,6 @@
 import { useTasks } from "@/queries/taskQueries";
-import { Pagination, Switch } from "@mantine/core";
+import { Loader, Pagination, Switch } from "@mantine/core";
 import { ReactElement, Suspense, useState } from "react";
-import { Dots } from "react-activity";
 import TaskView from "./TaskView";
 
 interface Props {
@@ -20,8 +19,8 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
   });
 
   return (
-    <Suspense fallback={<Dots />}>
-      <div className="w-full border-b"></div>
+    <Suspense fallback={<Loader type="bars" />}>
+      <div className="w-full border-b" />
       <Switch
         label="Visa åtgärdade"
         checked={showClosed}

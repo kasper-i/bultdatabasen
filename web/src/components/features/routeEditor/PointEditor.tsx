@@ -1,12 +1,11 @@
 import { InsertPosition } from "@/Api";
-import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
 import Restricted from "@/components/Restricted";
 import { usePermissions } from "@/hooks/authHooks";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import { ActionIcon } from "@mantine/core";
+import { ActionIcon, Loader } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import clsx from "clsx";
 import { FC, ReactElement, Suspense, useEffect, useState } from "react";
@@ -178,7 +177,7 @@ const PointEditor = ({
               upperCutout={editable && !wizardAbove}
             >
               {selected && selectedPoint !== undefined ? (
-                <Suspense fallback={<Dots />}>
+                <Suspense fallback={<Loader type="bars" />}>
                   <PointDetails
                     point={selectedPoint}
                     label={pointLabeler(selectedPoint.id)}

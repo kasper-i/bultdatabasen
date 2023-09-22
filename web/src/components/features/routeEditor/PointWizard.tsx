@@ -1,5 +1,4 @@
 import { CreatePointRequest, InsertPosition } from "@/Api";
-import Dots from "@/components/atoms/Dots";
 import Icon from "@/components/atoms/Icon";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
@@ -7,7 +6,7 @@ import React, { ReactElement, Suspense, useState } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import BasicBoltEditor from "./BasicBoltEditor";
 import PointPicker from "./PointPicker";
-import { Button, Switch } from "@mantine/core";
+import { Button, Loader, Switch } from "@mantine/core";
 
 interface Props {
   mutation: UseMutationResult<Point, unknown, CreatePointRequest, unknown>;
@@ -106,7 +105,7 @@ function PointWizard({
       )}
 
       {mergeMode ? (
-        <Suspense fallback={<Dots />}>
+        <Suspense fallback={<Loader type="bars" />}>
           <PointPicker
             targetRouteId={routeId}
             targetRouteParentId={routeParentId}

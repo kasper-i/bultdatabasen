@@ -2,10 +2,8 @@ import SigninPage from "@/pages/SigninPage";
 import { useQueryClient } from "@tanstack/react-query";
 import { CognitoUserSession } from "amazon-cognito-identity-js";
 import { Suspense, useEffect, useState } from "react";
-import "react-activity/dist/Digital.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Api } from "./Api";
-import Loader from "./components/atoms/Loader";
 import { ErrorBoundary } from "./ErrorBoundary";
 import Auth from "./layouts/Auth";
 import Main from "./layouts/Main";
@@ -25,6 +23,7 @@ import { getCurrentUser, refreshSession } from "./utils/cognito";
 import configData from "@/config.json";
 import { NewRoutePage } from "./pages/NewRoutePage";
 import { EditRoutePage } from "./pages/EditRoutePage";
+import { Center, Loader } from "@mantine/core";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -96,8 +95,10 @@ const App = () => {
 
   if (!initialized) {
     return (
-      <div className="w-screen h-screen bg-gray-900 text-gray-400">
-        <Loader />
+      <div className="fixed inset-0">
+        <Center h="100%">
+          <Loader type="bars" size="lg" />
+        </Center>
       </div>
     );
   }
