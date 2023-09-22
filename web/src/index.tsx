@@ -1,6 +1,7 @@
 import { createTheme, MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import "@mantine/spotlight/styles.css";
 import { init } from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -11,10 +12,8 @@ import { Provider } from "react-redux";
 import { ZodError } from "zod";
 import { Api } from "./Api";
 import App from "./App";
-import "./index.css";
 import { store } from "./store";
 import { refreshSession } from "./utils/cognito";
-import "@mantine/spotlight/styles.css";
 
 if (!import.meta.env.DEV) {
   init({
