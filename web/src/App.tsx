@@ -23,7 +23,9 @@ import { getCurrentUser, refreshSession } from "./utils/cognito";
 import configData from "@/config.json";
 import { NewRoutePage } from "./pages/NewRoutePage";
 import { EditRoutePage } from "./pages/EditRoutePage";
-import { Center, Loader } from "@mantine/core";
+import { Alert, Center, Loader } from "@mantine/core";
+import { IconAlertHexagon } from "@tabler/icons-react";
+import classes from "./App.module.css";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -87,15 +89,15 @@ const App = () => {
     configData.API_URL === "https://api.bultdatabasen.se"
   ) {
     return (
-      <pre className="text-red-500 h-screen w-screen flex justify-center items-center">
-        Production environment is blocked in DEV mode!
-      </pre>
+      <Alert color="red" icon={<IconAlertHexagon />} title="Loading aborted">
+        Production environment is blocked in development mode.
+      </Alert>
     );
   }
 
   if (!initialized) {
     return (
-      <div className="fixed inset-0">
+      <div className={classes.loaderContainer}>
         <Center h="100%">
           <Loader type="bars" size="lg" />
         </Center>
