@@ -23,6 +23,9 @@ dependencies:
   '@mantine/hooks':
     specifier: ^7.0.0
     version: 7.0.0(react@18.2.0)
+  '@mantine/spotlight':
+    specifier: ^7.0.0
+    version: 7.0.0(@mantine/core@7.0.0)(@mantine/hooks@7.0.0)(react-dom@18.2.0)(react@18.2.0)
   '@popperjs/core':
     specifier: ^2.11.6
     version: 2.11.6
@@ -649,6 +652,29 @@ packages:
 
   /@mantine/hooks@7.0.0(react@18.2.0):
     resolution: {integrity: sha512-HdZ6qE15OKNA3esbO72+mRqztMcdGphL/wl/ks8N7iAlSUu7sFtgZN+IU6MfJxGc/MEN3x5dEceWG6FgwOmHOw==}
+    peerDependencies:
+      react: ^18.2.0
+    dependencies:
+      react: 18.2.0
+    dev: false
+
+  /@mantine/spotlight@7.0.0(@mantine/core@7.0.0)(@mantine/hooks@7.0.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-MgPyYPEMMMQDG8rgfMkTrHxRep6I/rb072vsUXDJkuA4Rt0+/mdmB40hee5xwSqHjk0gdfmLNNAwHBZiE43P7g==}
+    peerDependencies:
+      '@mantine/core': 7.0.0
+      '@mantine/hooks': 7.0.0
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mantine/core': 7.0.0(@mantine/hooks@7.0.0)(@types/react@18.2.22)(react-dom@18.2.0)(react@18.2.0)
+      '@mantine/hooks': 7.0.0(react@18.2.0)
+      '@mantine/store': 7.0.0(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@mantine/store@7.0.0(react@18.2.0):
+    resolution: {integrity: sha512-MliHi9TUe7fTLIzj3LWYEoQPkm3TbkmCUNBdynFrx0Ls+WoyNjW73RhxbiZB2KfHXs/tsYySA6mjMoSgUhkQDw==}
     peerDependencies:
       react: ^18.2.0
     dependencies:

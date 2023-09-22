@@ -19,6 +19,7 @@
     "@mantine/core": "^7.0.0",
     "@mantine/dates": "^7.0.0",
     "@mantine/hooks": "^7.0.0",
+    "@mantine/spotlight": "^7.0.0",
     "@popperjs/core": "^2.11.6",
     "@reduxjs/toolkit": "^1.8.1",
     "@sentry/core": "^7.56.0",
