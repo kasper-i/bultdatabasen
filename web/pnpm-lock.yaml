@@ -23,9 +23,6 @@ dependencies:
   '@mantine/spotlight':
     specifier: ^7.0.0
     version: 7.0.0(@mantine/core@7.0.0)(@mantine/hooks@7.0.0)(react-dom@18.2.0)(react@18.2.0)
-  '@popperjs/core':
-    specifier: ^2.11.6
-    version: 2.11.6
   '@reduxjs/toolkit':
     specifier: ^1.8.1
     version: 1.8.1(react-redux@7.2.8)(react@18.2.0)
@@ -62,9 +59,6 @@ dependencies:
   dayjs:
     specifier: ^1.11.10
     version: 1.11.10
-  dayzed:
-    specifier: ^3.2.3
-    version: 3.2.3(prop-types@15.8.1)(react@18.2.0)
   lodash-es:
     specifier: ^4.17.21
     version: 4.17.21
@@ -86,9 +80,6 @@ dependencies:
   react-hook-form:
     specifier: ^7.43.9
     version: 7.43.9(react@18.2.0)
-  react-popper:
-    specifier: ^2.3.0
-    version: 2.3.0(@popperjs/core@2.11.6)(react-dom@18.2.0)(react@18.2.0)
   react-redux:
     specifier: ^7.2.8
     version: 7.2.8(react-dom@18.2.0)(react@18.2.0)
@@ -687,10 +678,6 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
     dev: true
-
-  /@popperjs/core@2.11.6:
-    resolution: {integrity: sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==}
-    dev: false
 
   /@reduxjs/toolkit@1.8.1(react-redux@7.2.8)(react@18.2.0):
     resolution: {integrity: sha512-Q6mzbTpO9nOYRnkwpDlFOAbQnd3g7zj7CtHAZWz5SzE5lcV97Tf8f3SzOO8BoPOMYBFgfZaqTUZqgGu+a0+Fng==}
@@ -1391,18 +1378,6 @@ packages:
 
   /dayjs@1.11.10:
     resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
-    dev: false
-
-  /dayzed@3.2.3(prop-types@15.8.1)(react@18.2.0):
-    resolution: {integrity: sha512-qXTIKs+R6ydWwNo+X1wu3lUptyRSGoyY+ZzRcQSM0zUlaG+/Ei+bFjqbQm1T2oJ+WKNkTHURBcGsxnx9N+9kfA==}
-    peerDependencies:
-      prop-types: ^15
-      react: ^16.8 || ^17.0 || ^18.0
-    dependencies:
-      '@babel/runtime': 7.22.5
-      date-fns: 2.28.0
-      prop-types: 15.8.1
-      react: 18.2.0
     dev: false
 
   /debug@4.3.4:
@@ -2879,10 +2854,6 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-fast-compare@3.2.2:
-    resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
-    dev: false
-
   /react-hook-form@7.43.9(react@18.2.0):
     resolution: {integrity: sha512-AUDN3Pz2NSeoxQ7Hs6OhQhDr6gtF9YRuutGDwPQqhSUAHJSgGl2VeY3qN19MG0SucpjgDiuMJ4iC5T5uB+eaNQ==}
     engines: {node: '>=12.22.0'}
@@ -2908,20 +2879,6 @@ packages:
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  /react-popper@2.3.0(@popperjs/core@2.11.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-e1hj8lL3uM+sgSR4Lxzn5h1GxBlpa4CQz0XLF8kx4MDrDRWY0Ena4c97PUeSX9i5W3UAfDP0z0FXCTQkoXUl3Q==}
-    peerDependencies:
-      '@popperjs/core': ^2.0.0
-      react: ^16.8.0 || ^17 || ^18
-      react-dom: ^16.8.0 || ^17 || ^18
-    dependencies:
-      '@popperjs/core': 2.11.6
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-fast-compare: 3.2.2
-      warning: 4.0.3
     dev: false
 
   /react-redux@7.2.8(react-dom@18.2.0)(react@18.2.0):
@@ -3555,12 +3512,6 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
-
-  /warning@4.0.3:
-    resolution: {integrity: sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==}
-    dependencies:
-      loose-envify: 1.4.0
-    dev: false
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
