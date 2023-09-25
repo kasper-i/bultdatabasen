@@ -9,9 +9,14 @@ const NavigationBar = (): ReactElement => {
   const location = useLocation();
 
   return (
-    <Flex justify="space-between" align="center" className={classes.bar}>
-      {location.pathname !== "/" && <Search />}
+    <Flex
+      justify="space-between"
+      align="center"
+      direction="row-reverse"
+      className={classes.bar}
+    >
       <LoginToolbar />
+      {location.pathname !== "/" && <Search />}
     </Flex>
   );
 };
