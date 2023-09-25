@@ -2,17 +2,17 @@ import { ReactElement } from "react";
 import { useLocation } from "react-router-dom";
 import LoginToolbar from "./LoginToolbar";
 import Search from "./Search";
+import classes from "./NavigationBar.module.css";
+import { Flex } from "@mantine/core";
 
 const NavigationBar = (): ReactElement => {
   const location = useLocation();
 
   return (
-    <div data-tailwind="bg-gradient-to-r from-primary-500 to-primary-300 h-14 shadow-md flex justify-between items-center px-5 gap-4">
-      <div data-tailwind="max-w-xs">
-        {location.pathname !== "/" && <Search />}
-      </div>
+    <Flex justify="space-between" align="center" className={classes.bar}>
+      {location.pathname !== "/" && <Search />}
       <LoginToolbar />
-    </div>
+    </Flex>
   );
 };
 

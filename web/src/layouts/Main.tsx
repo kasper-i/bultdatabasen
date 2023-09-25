@@ -1,17 +1,16 @@
 import NavigationBar from "@/components/NavigationBar";
-import React from "react";
+import { Flex, Stack } from "@mantine/core";
 import { Outlet } from "react-router-dom";
+import classes from "./Main.module.css";
 
 const Main = () => {
   return (
-    <div data-tailwind="w-screen min-h-screen flex flex-col">
+    <Stack className={classes.main} gap={0}>
       <NavigationBar />
-      <div data-tailwind="relative flex flex-grow">
-        <div data-tailwind="flex-grow mx-auto p-5" style={{ maxWidth: 768 }}>
-          <Outlet />
-        </div>
-      </div>
-    </div>
+      <Flex className={classes.content}>
+        <Outlet />
+      </Flex>
+    </Stack>
   );
 };
 

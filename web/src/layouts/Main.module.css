@@ -1,0 +1,11 @@
+.main {
+    width: 100vw;
+    min-height: 100vh;   
+    background-color: var(--mantine-color-gray-0);
+}
+
+.content {
+    max-width: 768px;
+    margin: 0 auto;
+    padding: var(--mantine-spacing-lg);
+}
