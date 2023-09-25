@@ -32,14 +32,16 @@ export class ErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col gap-2.5 justify-center items-center h-screen w-screen">
-          <h1 className="font-bold text-3xl">:(</h1>
-          <p className="text-center">
-            <span className="font-medium">Attans bananer, något gick fel.</span>
+        <div data-tailwind="flex flex-col gap-2.5 justify-center items-center h-screen w-screen">
+          <h1 data-tailwind="font-bold text-3xl">:(</h1>
+          <p data-tailwind="text-center">
+            <span data-tailwind="font-medium">
+              Attans bananer, något gick fel.
+            </span>
             <br />
 
             {this.state.eventId && (
-              <span className="text-gray-500">{this.state.eventId}</span>
+              <span data-tailwind="text-gray-500">{this.state.eventId}</span>
             )}
           </p>
           <Button variant="filled" onClick={() => location.reload()}>

@@ -16,7 +16,7 @@ export const PostComment: FC<{ parentResourceId: string }> = ({
   }, [postComment.isSuccess]);
 
   return (
-    <div className="flex flex-row gap-x-2">
+    <div data-tailwind="flex flex-row gap-x-2">
       <Textarea
         placeholder="Kommentar"
         value={comment}

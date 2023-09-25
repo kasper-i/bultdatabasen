@@ -23,9 +23,14 @@ const LabelAndValue: FC<{
   }
 
   return (
-    <div className={clsx("flex items-center justify-between", className)}>
-      <div className="text-xs text-gray-600">{label}</div>
-      <div className={clsx("text-sm", className)}>{value}</div>
+    <div
+      data-tailwind="flex items-center justify-between"
+      className={className}
+    >
+      <div data-tailwind="text-xs text-gray-600">{label}</div>
+      <div data-tailwind="text-sm" className={className}>
+        {value}
+      </div>
     </div>
   );
 };
@@ -58,9 +63,9 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
   const textStyle = bolt.dismantled ? "line-through opacity-50" : undefined;
 
   return (
-    <div className="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
-      <div className="flex justify-between">
-        <p className="text-left font-medium">
+    <div data-tailwind="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
+      <div data-tailwind="flex justify-between">
+        <p data-tailwind="text-left font-medium">
           <span>
             {positionToLabel(
               totalNumberOfBolts === 1 ? undefined : bolt.position
@@ -101,9 +106,9 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
       </div>
 
       {action === "edit" ? (
-        <div className="flex flex-col items-start pt-2">
+        <div data-tailwind="flex flex-col items-start pt-2">
           <AdvancedBoltEditor bolt={editedBolt} onChange={setEditedBolt} />
-          <div className="flex gap-x-2.5 py-2 mt-2">
+          <div data-tailwind="flex gap-x-2.5 py-2 mt-2">
             <Button onClick={() => setAction(undefined)} variant="subtle">
               Avbryt
             </Button>
@@ -118,7 +123,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
         </div>
       ) : (
         <div
-          className={clsx(
+          data-tailwind={clsx(
             "relative grid items-center text-left grid-cols-2 gap-x-2.5"
           )}
         >
@@ -168,7 +173,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
             value={
               bolt.dismantled ? <Time time={bolt.dismantled} /> : undefined
             }
-            className="col-span-2"
+            data-tailwind="col-span-2"
           />
         </div>
       )}

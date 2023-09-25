@@ -48,7 +48,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
 
   if (!showForm) {
     return (
-      <div className="sm:w-96">
+      <div data-tailwind="sm:w-96">
         <Button leftSection={<IconPlus size={14} />} onClick={() => openForm()}>
           Nytt uppdrag
         </Button>
@@ -57,7 +57,7 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
   }
 
   return (
-    <div className="sm:w-96 flex flex-col gap-4">
+    <div data-tailwind="sm:w-96 flex flex-col gap-4">
       <TextInput
         label="Beskrivning"
         placeholder="Byt nedsliten firningskarbin"

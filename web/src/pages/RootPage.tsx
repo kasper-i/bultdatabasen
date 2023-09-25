@@ -4,17 +4,17 @@ import { rootNodeId } from "@/constants";
 
 const RootPage = () => {
   return (
-    <div className="flex flex-grow flex-col items-center">
-      <h1 className="text-center text-4xl leading-tight">
-        <span className="text-transparent font-bold bg-clip-text bg-gradient-to-r from-primary-500 to-primary-300">
+    <div data-tailwind="flex flex-grow flex-col items-center">
+      <h1 data-tailwind="text-center text-4xl leading-tight">
+        <span data-tailwind="text-transparent font-bold bg-clip-text bg-gradient-to-r from-primary-500 to-primary-300">
           bult
         </span>
         databasen
       </h1>
-      <p className="text-md text-center text-gray-700">
+      <p data-tailwind="text-md text-center text-gray-700">
         En databas över borrbultar och ankare på klätterleder i Västsverige.
       </p>
-      <div className="mt-5 w-full mb-5">
+      <div data-tailwind="mt-5 w-full mb-5">
         <Search />
       </div>
       <ChildrenTable resourceId={rootNodeId} filters={{ types: ["area"] }} />

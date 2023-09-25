@@ -97,7 +97,7 @@ function PointWizard({
     <div>
       {!mergeMode && (
         <button
-          className="text-primary-500 underline mb-4"
+          data-tailwind="text-primary-500 underline mb-4"
           onClick={() => setMergeMode((mode) => !mode)}
         >
           Anslut till närliggande led
@@ -122,9 +122,9 @@ function PointWizard({
             label="Ankare"
           />
 
-          <p className="mt-4 mb-1 font-medium">Bultar</p>
+          <p data-tailwind="mt-4 mb-1 font-medium">Bultar</p>
 
-          <div className="flex flex-wrap gap-4">
+          <div data-tailwind="flex flex-wrap gap-4">
             {bolts.map(([index, bolt]) => (
               <BasicBoltEditor
                 key={index}
@@ -141,11 +141,11 @@ function PointWizard({
             {bolts.length < 2 && (
               <div
                 key="new"
-                className="h-24 w-28 border-2 border-gray-300 border-dashed rounded-md flex justify-center items-center"
+                data-tailwind="h-24 w-28 border-2 border-gray-300 border-dashed rounded-md flex justify-center items-center"
               >
-                <div className="text-center" onClick={addRightBolt}>
+                <div data-tailwind="text-center" onClick={addRightBolt}>
                   <IconPlus />
-                  <p className="cursor-pointer text-gray-700 text-sm">
+                  <p data-tailwind="cursor-pointer text-gray-700 text-sm">
                     Lägg till en högerbult
                   </p>
                 </div>
@@ -155,7 +155,7 @@ function PointWizard({
         </>
       )}
 
-      <div className="flex gap-2 w-full mt-4">
+      <div data-tailwind="flex gap-2 w-full mt-4">
         <Button onClick={onCancel} variant="subtle">
           Avbryt
         </Button>

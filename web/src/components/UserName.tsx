@@ -3,7 +3,7 @@ import { FC } from "react";
 
 const UserName: FC<{ user: User }> = ({ user }) => {
   return (
-    <span className="text-primary-500">
+    <span data-tailwind="text-primary-500">
       {`${user?.firstName} ${user?.lastName?.[0]}`}
     </span>
   );

@@ -110,7 +110,7 @@ const SigninPage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div data-tailwind="flex flex-col gap-2.5">
       <TextInput
         label="E-postadress"
         value={email}
@@ -138,7 +138,7 @@ const SigninPage = () => {
         <Link
           to={`/auth/forgot-password?email=${email}`}
           replace
-          className="text-sm text-purple-600 self-start"
+          data-tailwind="text-sm text-purple-600 self-start"
         >
           Glömt lösenord?
         </Link>
@@ -162,7 +162,7 @@ const SigninPage = () => {
         Logga in
       </Button>
       <Link to="/auth/register" replace>
-        <span className="text-sm text-purple-600">Skapa nytt konto</span>
+        <span data-tailwind="text-sm text-purple-600">Skapa nytt konto</span>
       </Link>
     </div>
   );

@@ -121,7 +121,7 @@ const RegisterPage = () => {
   const canRegister = !!email && !!password && !!givenName && !!lastName;
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div data-tailwind="flex flex-col gap-2.5">
       {phase === 1 ? (
         <>
           <TextInput
@@ -139,7 +139,7 @@ const RegisterPage = () => {
             autoComplete="new-password"
             required
           />
-          <div className="flex gap-2.5">
+          <div data-tailwind="flex gap-2.5">
             <TextInput
               label="Förnamn"
               value={givenName}

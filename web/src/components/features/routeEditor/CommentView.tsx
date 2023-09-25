@@ -21,16 +21,16 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
   }, [updateComment.isSuccess]);
 
   return (
-    <div className="flex flex-row justify-between gap-x-2">
+    <div data-tailwind="flex flex-row justify-between gap-x-2">
       {action === "edit" ? (
-        <div className="flex-grow flex flex-col gap-2">
+        <div data-tailwind="flex-grow flex flex-col gap-2">
           <TextInput
             label="Kommentar"
             value={text}
             onChange={(e) => setText(e.target.value)}
             required
           />
-          <div className="flex flex-row gap-2 justify-start">
+          <div data-tailwind="flex flex-row gap-2 justify-start">
             <Button variant="subtle" onClick={() => setAction(undefined)}>
               Avbryt
             </Button>
@@ -43,7 +43,7 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
           </div>
         </div>
       ) : (
-        <div className="flex-grow w-0 text-sm italic">{comment.text}</div>
+        <div data-tailwind="flex-grow w-0 text-sm italic">{comment.text}</div>
       )}
       {action === undefined && (
         <Restricted>

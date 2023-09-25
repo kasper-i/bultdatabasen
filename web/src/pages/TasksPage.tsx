@@ -37,17 +37,17 @@ const TasksPage = (): ReactElement => {
   const onlyRoot = ancestors?.length === 1;
 
   return (
-    <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-4">
+    <div data-tailwind="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-4">
       {!onlyRoot && <Breadcrumbs resources={ancestors} />}
       <div>
-        <h1 className="text-2xl font-bold pb-1 flex items-start leading-none">
+        <h1 data-tailwind="text-2xl font-bold pb-1 flex items-start leading-none">
           Uppdrag
           {(resource.counters?.openTasks ?? 0) > 0 && (
-            <Pill className="ml-2">{resource.counters?.openTasks}</Pill>
+            <Pill data-tailwind="ml-2">{resource.counters?.openTasks}</Pill>
           )}
         </h1>
         {resource.name !== undefined && (
-          <span className="text-sm">
+          <span data-tailwind="text-sm">
             {locationDescription(resource.name, resource.type)}
           </span>
         )}

@@ -30,9 +30,9 @@ const BasicBoltEditor = ({
   };
 
   return (
-    <div className="w-28 border-2 border-primary-500 rounded-md flex flex-col justify-between p-2">
-      <div className="flex justify-between items-center mb-2">
-        <p className="text-left font-medium">
+    <div data-tailwind="w-28 border-2 border-primary-500 rounded-md flex flex-col justify-between p-2">
+      <div data-tailwind="flex justify-between items-center mb-2">
+        <p data-tailwind="text-left font-medium">
           {positionToLabel(
             totalNumberOfBolts === 1 ? undefined : bolt.position
           )}

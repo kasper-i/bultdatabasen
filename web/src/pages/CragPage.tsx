@@ -15,7 +15,7 @@ const CragPage = (): ReactElement => {
   }
 
   return (
-    <div className="flex flex-col space-y-5">
+    <div data-tailwind="flex flex-col space-y-5">
       <PageHeader
         resourceId={resourceId}
         ancestors={crag.ancestors}

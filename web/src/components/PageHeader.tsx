@@ -32,18 +32,18 @@ const PageHeader = ({
   const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (
-    <div className="flex flex-col">
+    <div data-tailwind="flex flex-col">
       {crumbs && !onlyRoot && (
-        <div className="mr-14 mb-2.5">
+        <div data-tailwind="mr-14 mb-2.5">
           <Breadcrumbs resources={crumbs} />
         </div>
       )}
-      <div className="flex justify-between">
-        <h1 className="text-2xl font-bold">{resource.name}</h1>
+      <div data-tailwind="flex justify-between">
+        <h1 data-tailwind="text-2xl font-bold">{resource.name}</h1>
         <Restricted>{menu}</Restricted>
       </div>
 
-      <p className="text-sm leading-snug">
+      <p data-tailwind="text-sm leading-snug">
         <IconTool size={14} />
         {maintainers?.length ? (
           <Concatenator>
@@ -56,10 +56,10 @@ const PageHeader = ({
         )}
       </p>
 
-      <div className="h-2.5" />
+      <div data-tailwind="h-2.5" />
 
       {showCounts && (
-        <div className="text-md flex gap-4">
+        <div data-tailwind="text-md flex gap-4">
           <Counter
             label="Bultar"
             count={resource.counters?.installedBolts ?? 0}

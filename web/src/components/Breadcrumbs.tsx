@@ -90,7 +90,7 @@ const Breadcrumbs: FC<{
       content: (
         <Link
           to={to}
-          className="flex items-center text-primary-500 whitespace-nowrap text-xs"
+          data-tailwind="flex items-center text-primary-500 whitespace-nowrap text-xs"
         >
           {resource.type === "root" ? <IconHome size={14} /> : resource.name}
         </Link>
@@ -102,7 +102,7 @@ const Breadcrumbs: FC<{
     crumbs.splice(1, crumbs.length - 2, {
       key: "ellipsis",
       content: (
-        <div className="cursor-pointer" onClick={() => setExpanded(true)}>
+        <div data-tailwind="cursor-pointer" onClick={() => setExpanded(true)}>
           ...
         </div>
       ),
@@ -110,11 +110,11 @@ const Breadcrumbs: FC<{
   }
 
   return (
-    <div className="relative h-5">
-      <div ref={rulerRef} className="w-full" />
+    <div data-tailwind="relative h-5">
+      <div ref={rulerRef} data-tailwind="w-full" />
       <div
         ref={breadcrumbsRef}
-        className={clsx(
+        data-tailwind={clsx(
           "absolute flex h-5 items-center",
           expandedWidth === undefined && "invisible"
         )}

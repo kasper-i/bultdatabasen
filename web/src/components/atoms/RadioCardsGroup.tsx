@@ -24,14 +24,14 @@ const RadioCardsGroup = <T,>({
     <div>
       <label
         htmlFor={groupId}
-        className="block text-sm font-medium text-gray-700 mb-1"
+        data-tailwind="block text-sm font-medium text-gray-700 mb-1"
       >
         {label}
       </label>
 
       <div
         id={groupId}
-        className="flex flex-wrap items-center gap-2 select-none"
+        data-tailwind="flex flex-wrap items-center gap-2 select-none"
       >
         {options.map(({ key, value: optionValue, label }) => {
           const optionId = useId();
@@ -42,7 +42,7 @@ const RadioCardsGroup = <T,>({
               <input
                 id={optionId}
                 type="radio"
-                className="pointer-events-none opacity-0 fixed"
+                data-tailwind="pointer-events-none opacity-0 fixed"
                 defaultChecked={selected}
                 onClick={() =>
                   onChange(selected && !mandatory ? undefined : optionValue)
@@ -50,7 +50,7 @@ const RadioCardsGroup = <T,>({
               />
               <label
                 htmlFor={optionId}
-                className={clsx(
+                data-tailwind={clsx(
                   "block text-sm border border-gray-300 shadow-sm rounded-md py-1.5 px-3 cursor-pointer",
                   selected
                     ? "border-primary-500 text-primary-500 font-medium"

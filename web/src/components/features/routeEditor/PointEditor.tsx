@@ -76,7 +76,7 @@ const PointEditor = ({
 
   if (points.length === 0 || openInitialWizard) {
     return (
-      <div className="p-4 border-2 border-gray-300 border-dashed rounded-md">
+      <div data-tailwind="p-4 border-2 border-gray-300 border-dashed rounded-md">
         {openInitialWizard ? (
           <PointWizard
             mutation={createPoint}
@@ -88,23 +88,23 @@ const PointEditor = ({
             illegalPoints={points.map((point) => point.id)}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center">
+          <div data-tailwind="flex flex-col items-center justify-center">
             <Restricted>
               <ActionIcon
                 onClick={() => createFirst()}
-                className="mb-2.5"
+                data-tailwind="mb-2.5"
                 size="lg"
               >
                 <IconPlus size={20} />
               </ActionIcon>
             </Restricted>
-            <div className="text-sm text-gray-600 text-center">
+            <div data-tailwind="text-sm text-gray-600 text-center">
               <p>På den här leden finns ännu inga dokumenterade bultar.</p>
               <Restricted>
-                <p className="font-medium mt-2">
+                <p data-tailwind="font-medium mt-2">
                   <span
                     onClick={() => createFirst()}
-                    className="text-primary-500 hover:text-primary-400 pr-1 cursor-pointer"
+                    data-tailwind="text-primary-500 hover:text-primary-400 pr-1 cursor-pointer"
                   >
                     Lägg till
                   </span>
@@ -125,8 +125,8 @@ const PointEditor = ({
     insertPosition,
   }) => {
     return (
-      <div className="relative h-0 w-full my-0.5">
-        <div className="absolute z-10 w-full h-5 -top-2.5 flex justify-center items-center">
+      <div data-tailwind="relative h-0 w-full my-0.5">
+        <div data-tailwind="absolute z-10 w-full h-5 -top-2.5 flex justify-center items-center">
           <ActionIcon
             onClick={() => {
               deselectPoint();
@@ -143,7 +143,9 @@ const PointEditor = ({
   };
 
   return (
-    <div className={clsx("flex flex-col w-full sm:w-96", !editable && "gap-1")}>
+    <div
+      data-tailwind={clsx("flex flex-col w-full sm:w-96", !editable && "gap-1")}
+    >
       {points
         .slice()
         .reverse()
@@ -186,7 +188,7 @@ const PointEditor = ({
                 </Suspense>
               ) : (
                 <div
-                  className={clsx(
+                  data-tailwind={clsx(
                     "h-6 w-full cursor-pointer flex items-center justify-between",
                     navigable && "cursor-pointer"
                   )}
@@ -194,7 +196,7 @@ const PointEditor = ({
                 >
                   <span>
                     {name}
-                    <span className="font-medium text-primary-500 ml-1">
+                    <span data-tailwind="font-medium text-primary-500 ml-1">
                       {no}
                     </span>
                   </span>
@@ -217,7 +219,7 @@ const PointEditor = ({
             cards.splice(
               insertPosition.order === "after" ? 0 : cards.length - 1,
               1,
-              <div key="new" className="my-1">
+              <div key="new" data-tailwind="my-1">
                 <Card dashed>
                   <PointWizard
                     mutation={createPoint}

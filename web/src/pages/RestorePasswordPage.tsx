@@ -89,7 +89,7 @@ const RestorePasswordPage = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div data-tailwind="flex flex-col gap-2.5">
       {phase === 1 ? (
         <>
           <TextInput

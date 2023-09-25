@@ -11,14 +11,17 @@ const SimpleTable: FC<{ items: SimpleTableItem[] }> = ({
 }): ReactElement => {
   return (
     <div>
-      <ul className="divide-y">
+      <ul data-tailwind="divide-y">
         {items.map(({ key, row, badge }) => {
           return (
-            <li key={key} className="flex justify-between items-center py-1.5">
+            <li
+              key={key}
+              data-tailwind="flex justify-between items-center py-1.5"
+            >
               {row}
 
               {badge && (
-                <span className="bg-gray-200 rounded-full py-1 px-2 text-xs">
+                <span data-tailwind="bg-gray-200 rounded-full py-1 px-2 text-xs">
                   {badge}
                 </span>
               )}

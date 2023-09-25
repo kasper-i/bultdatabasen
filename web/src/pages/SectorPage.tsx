@@ -19,7 +19,7 @@ const SectorPage = (): ReactElement => {
   }
 
   return (
-    <div className="flex flex-col space-y-5">
+    <div data-tailwind="flex flex-col space-y-5">
       <PageHeader
         resourceId={resourceId}
         ancestors={sector.ancestors}
@@ -29,7 +29,7 @@ const SectorPage = (): ReactElement => {
       <TaskAlert openTasks={sector.counters?.openTasks ?? 0} />
 
       <Restricted>
-        <div className="flex justify-end">
+        <div data-tailwind="flex justify-end">
           <Link to="new-route">
             <Button leftSection={<IconPlus size={14} />}>Ny led</Button>
           </Link>

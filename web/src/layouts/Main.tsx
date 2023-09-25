@@ -4,10 +4,10 @@ import { Outlet } from "react-router-dom";
 
 const Main = () => {
   return (
-    <div className="w-screen min-h-screen flex flex-col">
+    <div data-tailwind="w-screen min-h-screen flex flex-col">
       <NavigationBar />
-      <div className="relative flex flex-grow">
-        <div className="flex-grow mx-auto p-5" style={{ maxWidth: 768 }}>
+      <div data-tailwind="relative flex flex-grow">
+        <div data-tailwind="flex-grow mx-auto p-5" style={{ maxWidth: 768 }}>
           <Outlet />
         </div>
       </div>

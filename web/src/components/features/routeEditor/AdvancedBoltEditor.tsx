@@ -21,7 +21,7 @@ const typeOptions = (["expansion", "glue", "piton"] as const).map<
 
 const ClearButton: FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
-    <div className="mt-6 h-[2.125rem] flex justify-center items-center">
+    <div data-tailwind="mt-6 h-[2.125rem] flex justify-center items-center">
       <ActionIcon onClick={onClick} variant="subtle" color="black">
         <IconX size={14} />
       </ActionIcon>
@@ -118,7 +118,7 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
 
   return (
     <div
-      className={clsx("w-full grid gap-x-2 gap-y-2 content-center")}
+      data-tailwind={clsx("w-full grid gap-x-2 gap-y-2 content-center")}
       style={{
         gridTemplateColumns: "1fr 1rem",
       }}

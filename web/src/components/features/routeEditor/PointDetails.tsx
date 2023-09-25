@@ -95,21 +95,21 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
 
   return (
     <div>
-      <div className="flex justify-between">
+      <div data-tailwind="flex justify-between">
         <div>
-          <div className="h-6 cursor-pointer" onClick={onClose}>
+          <div data-tailwind="h-6 cursor-pointer" onClick={onClose}>
             {label.name}
-            <span className="font-medium text-primary-500 ml-1">
+            <span data-tailwind="font-medium text-primary-500 ml-1">
               {label.no}
             </span>
           </div>
 
-          <div className="space-x-1 text-xs">
+          <div data-tailwind="space-x-1 text-xs">
             {sharedParents.length === 0
               ? "Delas ej med annan led."
               : sharedParents.length > 0 && (
                   <>
-                    <span className="whitespace-nowrap">Delas med</span>
+                    <span data-tailwind="whitespace-nowrap">Delas med</span>
                     <span>
                       <Concatenator>
                         {sharedParents.map((parent) => (
@@ -120,7 +120,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
                               search: `?p=${point.id}`,
                             }}
                           >
-                            <span className="underline text-primary-500">
+                            <span data-tailwind="underline text-primary-500">
                               {parent.name}
                             </span>
                           </Link>
@@ -133,7 +133,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div data-tailwind="flex gap-2">
           <Restricted>
             <Menu position="bottom-end" withArrow>
               <Menu.Target>
@@ -169,15 +169,15 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2.5 py-4">
+      <div data-tailwind="flex flex-wrap gap-2.5 py-4">
         {action === "add_bolt" && (
-          <div className="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
+          <div data-tailwind="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
             <AdvancedBoltEditor
               bolt={newBolt}
               onChange={setNewBolt}
               hideDismantled
             />
-            <div className="flex gap-x-2.5 py-2 mt-2">
+            <div data-tailwind="flex gap-x-2.5 py-2 mt-2">
               <Button onClick={() => setAction(undefined)} variant="subtle">
                 Avbryt
               </Button>
@@ -202,7 +202,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           ))}
 
         <Restricted>
-          <div className="flex flex-row gap-2 w-full mt-1">
+          <div data-tailwind="flex flex-row gap-2 w-full mt-1">
             <PostComment parentResourceId={point.id} />
             <ImageUploadButton pointId={point.id} />
           </div>

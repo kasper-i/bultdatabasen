@@ -20,19 +20,22 @@ export const RouteForm: FC<{
   const { control, handleSubmit, register } = useFormContext<Route>();
 
   return (
-    <form className="grid gap-3 grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      data-tailwind="grid gap-3 grid-cols-2"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <TextInput
         {...register("name")}
         label="Lednamn"
         required
-        className="col-span-2"
+        data-tailwind="col-span-2"
       />
 
       <Controller
         control={control}
         name="routeType"
         render={({ field: { onChange, value } }) => (
-          <div className="col-span-2">
+          <div data-tailwind="col-span-2">
             <Select
               label="Typ"
               data={routeTypeOptions}
@@ -68,7 +71,7 @@ export const RouteForm: FC<{
           />
         )}
       />
-      <div className="col-span-2 flex justify-end gap-2">
+      <div data-tailwind="col-span-2 flex justify-end gap-2">
         <Button variant="outline" onClick={onCancel}>
           Avbryt
         </Button>

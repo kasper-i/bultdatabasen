@@ -34,10 +34,12 @@ const ChildrenTable = ({ resourceId, filters }: Props): ReactElement => {
             key: resource.id,
             row: (
               <Link to={url}>
-                <div className="w-[16rem] sm:w-[32rem] text-md truncate flex items-center">
+                <div data-tailwind="w-[16rem] sm:w-[32rem] text-md truncate flex items-center">
                   {resource.name}
                   {(resource.counters?.openTasks ?? 0) > 0 && (
-                    <Pill className="ml-2">{resource.counters?.openTasks}</Pill>
+                    <Pill data-tailwind="ml-2">
+                      {resource.counters?.openTasks}
+                    </Pill>
                   )}
                 </div>
               </Link>

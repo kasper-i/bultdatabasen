@@ -100,16 +100,16 @@ export const FullSizeImage: FC<{
       transitionProps={{ transition: "fade", duration: 200 }}
       withCloseButton={false}
     >
-      <div className="min-h-screen flex flex-col justify-center items-center overflow-hidden">
+      <div data-tailwind="min-h-screen flex flex-col justify-center items-center overflow-hidden">
         {loading && (
-          <div className="fixed flex items-center justify-center -mt-16">
+          <div data-tailwind="fixed flex items-center justify-center -mt-16">
             <Loader type="bars" />
           </div>
         )}
 
-        <div className="-mt-16" tabIndex={1}>
+        <div data-tailwind="-mt-16" tabIndex={1}>
           <img
-            className={clsx(loading && "invisible")}
+            data-tailwind={clsx(loading && "invisible")}
             ref={imgRef}
             onLoad={onLoad}
             style={{
@@ -122,8 +122,8 @@ export const FullSizeImage: FC<{
           />
         </div>
 
-        <div className="fixed h-16 w-full bottom-0 inset-x-0 flex justify-between px-5 bg-neutral-100">
-          <div className="flex items-center gap-2.5">
+        <div data-tailwind="fixed h-16 w-full bottom-0 inset-x-0 flex justify-between px-5 bg-neutral-100">
+          <div data-tailwind="flex items-center gap-2.5">
             <ActionIcon onClick={onClose} variant="subtle">
               <IconX size={14} />
             </ActionIcon>
@@ -138,7 +138,7 @@ export const FullSizeImage: FC<{
                   })
                 }
                 leftSection={<IconRotateClockwise2 size={14} />}
-                className="ring-offset-neutral-100"
+                data-tailwind="ring-offset-neutral-100"
               >
                 Rotera
               </Button>
@@ -150,7 +150,7 @@ export const FullSizeImage: FC<{
                 (window.location.href = `${configData.API_URL}/images/${image.id}`)
               }
               leftSection={<IconDownload size={14} />}
-              className="ring-offset-neutral-100"
+              data-tailwind="ring-offset-neutral-100"
             >
               Original
             </Button>

@@ -20,7 +20,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
 
   return (
     <Suspense fallback={<Loader type="bars" />}>
-      <div className="w-full border-b" />
+      <div data-tailwind="w-full border-b" />
       <Switch
         label="Visa åtgärdade"
         checked={showClosed}
@@ -30,8 +30,8 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
         }}
       />
 
-      <div className="flex flex-col w-full">
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-5 items-start">
+      <div data-tailwind="flex flex-col w-full">
+        <div data-tailwind="flex flex-col sm:flex-row sm:flex-wrap gap-5 items-start">
           {tasks?.data?.map((task) => (
             <TaskView
               key={task.id}
@@ -40,7 +40,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
             />
           ))}
         </div>
-        <div className="w-full my-5">
+        <div data-tailwind="w-full my-5">
           <Pagination
             value={page}
             total={Math.ceil(tasks?.meta.totalItems ?? 0 / ITEMS_PER_PAGE)}

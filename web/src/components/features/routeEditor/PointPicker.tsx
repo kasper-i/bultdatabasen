@@ -34,7 +34,7 @@ const PointPicker = ({
 
   return (
     <div>
-      <div className="flex flex-col gap-2">
+      <div data-tailwind="flex flex-col gap-2">
         <Select
           label="Närliggande led"
           value={selectedRoute?.id}

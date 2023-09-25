@@ -10,10 +10,8 @@ interface Props {
 const Pill = ({ children, className }: Props) => {
   return (
     <div
-      className={clsx([
-        className,
-        "w-min bg-red-500 rounded-full h-5 flex justify-center items-center px-2 text-xs font-bold text-white",
-      ])}
+      className={className}
+      data-tailwind="w-min bg-red-500 rounded-full h-5 flex justify-center items-center px-2 text-xs font-bold text-white"
     >
       {children}
     </div>

@@ -43,7 +43,7 @@ const RoutePage = () => {
   }
 
   return (
-    <div className="flex flex-col">
+    <div data-tailwind="flex flex-col">
       <PageHeader
         resourceId={resourceId}
         ancestors={route.ancestors}
@@ -82,8 +82,8 @@ const RoutePage = () => {
         />
       )}
 
-      <div className="flex items-center gap-2">
-        <p className="text-sm">
+      <div data-tailwind="flex items-center gap-2">
+        <p data-tailwind="text-sm">
           <Underlined>{renderRouteType(routeType)}</Underlined>
           {year && (
             <>
@@ -105,7 +105,7 @@ const RoutePage = () => {
 
       <TaskAlert openTasks={route.counters?.openTasks ?? 0} />
 
-      <div className="mt-5">
+      <div data-tailwind="mt-5">
         <PointEditor
           routeId={resourceId}
           routeParentId={parentId}

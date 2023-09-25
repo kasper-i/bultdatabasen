@@ -18,14 +18,14 @@ export const Card: FC<{
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} data-tailwind="relative">
       {upperCutout && (
-        <div className="absolute top-0 w-full overflow-hidden h-2.5">
-          <div className="mx-auto -mt-3.5 w-6 h-6 border border-gray-300 bg-neutral-50 rounded-full" />
+        <div data-tailwind="absolute top-0 w-full overflow-hidden h-2.5">
+          <div data-tailwind="mx-auto -mt-3.5 w-6 h-6 border border-gray-300 bg-neutral-50 rounded-full" />
         </div>
       )}
       <div
-        className={clsx(
+        data-tailwind={clsx(
           "rounded-md w-full p-4",
           dashed
             ? "border-2 border-gray-300 border-dashed bg-neutral-50"
@@ -35,8 +35,8 @@ export const Card: FC<{
         {children}
       </div>
       {lowerCutout && (
-        <div className="absolute bottom-0 w-full overflow-hidden h-2.5">
-          <div className="mx-auto w-6 h-6 border border-gray-300 bg-neutral-50 rounded-full" />
+        <div data-tailwind="absolute bottom-0 w-full overflow-hidden h-2.5">
+          <div data-tailwind="mx-auto w-6 h-6 border border-gray-300 bg-neutral-50 rounded-full" />
         </div>
       )}
     </div>

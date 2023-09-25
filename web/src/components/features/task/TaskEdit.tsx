@@ -15,7 +15,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
   }, [onDone, updateTask.isSuccess]);
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div data-tailwind="flex flex-col gap-2.5">
       <TextInput
         label="Beskrivning"
         value={editedTask.description}
@@ -42,7 +42,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
         mandatory
       />
 
-      <div className="flex justify-end gap-2.5 w-full">
+      <div data-tailwind="flex justify-end gap-2.5 w-full">
         <Button onClick={() => onDone()} variant="subtle">
           Avbryt
         </Button>

@@ -40,7 +40,7 @@ const CompleteButton: FC<{
   const [closedAt, setClosedAt] = useState(new Date());
 
   return (
-    <div className="flex flex-col gap-2">
+    <div data-tailwind="flex flex-col gap-2">
       {phase === 2 && (
         <>
           <TextInput
@@ -57,7 +57,7 @@ const CompleteButton: FC<{
           />
         </>
       )}
-      <div className="flex justify-end gap-2 mt-2">
+      <div data-tailwind="flex justify-end gap-2 mt-2">
         {phase === 2 && (
           <Button
             onClick={() => setPhase(1)}
@@ -150,19 +150,19 @@ const TaskView: FC<{
   const { name: pointName, no: pointNo } = pointLabeler(pointId ?? "");
 
   return (
-    <div className="w-full sm:w-96 flex flex-col space-y-2.5 bg-white shadow-sm p-5 rounded border border-gray-300">
-      <div className="relative flex justify-between items-start">
+    <div data-tailwind="w-full sm:w-96 flex flex-col space-y-2.5 bg-white shadow-sm p-5 rounded border border-gray-300">
+      <div data-tailwind="relative flex justify-between items-start">
         <Link
           to={`${getResourceRoute(parent.type, parent.id)}${
             pointId ? `?p=${pointId}` : ""
           }`}
-          className="w-full pr-5"
+          data-tailwind="w-full pr-5"
         >
-          <div className="text-sm">
-            <span className="inline-flex items-center gap-1">
+          <div data-tailwind="text-sm">
+            <span data-tailwind="inline-flex items-center gap-1">
               {translatePriority(task.priority) && (
                 <span
-                  className={clsx(
+                  data-tailwind={clsx(
                     "text-xs font-medium text-white rounded-md py-0.5 px-1.5",
                     task.priority === 1
                       ? "bg-red-500"
@@ -177,14 +177,14 @@ const TaskView: FC<{
               {parent?.name}
             </span>
             {pointNo && (
-              <span className="ml-1 text-gray-500 text-xs">
+              <span data-tailwind="ml-1 text-gray-500 text-xs">
                 {pointName} {pointNo}
               </span>
             )}
           </div>
-          <div className="text-xs mt-0.5">
+          <div data-tailwind="text-xs mt-0.5">
             Rapporterat{" "}
-            <span className="font-medium">
+            <span data-tailwind="font-medium">
               <Time time={task.createdAt} />
             </span>{" "}
             av <UserName user={task.author} />
@@ -229,37 +229,37 @@ const TaskView: FC<{
         <TaskEdit task={task} onDone={() => setAction(undefined)} />
       ) : (
         <>
-          <p className="text-sm">{task.description}</p>
+          <p data-tailwind="text-sm">{task.description}</p>
 
           {isComplete ? (
             <>
-              <hr className="-mx-5 pb-2" />
+              <hr data-tailwind="-mx-5 pb-2" />
 
-              <div className="flex flex-col">
-                <div className="flex items-center">
+              <div data-tailwind="flex flex-col">
+                <div data-tailwind="flex items-center">
                   <IconCheck
-                    className={clsx(
+                    data-tailwind={clsx(
                       task.status === "closed"
                         ? "text-green-600"
                         : "text-red-500"
                     )}
                   />
                   <p
-                    className={clsx(
+                    data-tailwind={clsx(
                       task.status === "closed"
                         ? "text-green-600"
                         : "text-red-500"
                     )}
                   >
-                    <span className="text-sm ml-1 font-semibold">
+                    <span data-tailwind="text-sm ml-1 font-semibold">
                       {task.status === "closed" ? "Åtgärdat" : "Stängd"}
                     </span>{" "}
                     {task.closedAt && <Time time={task.closedAt} />}
                   </p>
                 </div>
                 {task.comment && (
-                  <p className="text-sm text-gray-700">
-                    <IconMessage name="comment" className="mr-1" />
+                  <p data-tailwind="text-sm text-gray-700">
+                    <IconMessage name="comment" data-tailwind="mr-1" />
                     {task.comment}
                   </p>
                 )}
@@ -268,7 +268,7 @@ const TaskView: FC<{
           ) : (
             <Restricted>
               <>
-                <hr className="-mx-5 pb-2" />
+                <hr data-tailwind="-mx-5 pb-2" />
 
                 <CompleteButton
                   loading={updateTask.isLoading}

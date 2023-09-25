@@ -88,21 +88,22 @@ export const ImageView = ({
 
   return (
     <div
-      className="relative"
+      data-tailwind="relative"
       style={{
         height: targetHeight,
         width: width,
       }}
     >
-      <div className="absolute inset-0 flex justify-center items-center">
+      <div data-tailwind="absolute inset-0 flex justify-center items-center">
         {loading && <Loader type="bars" />}
       </div>
-      <div className="absolute" style={innerStyle}>
+      <div data-tailwind="absolute" style={innerStyle}>
         <img
           ref={imgRef}
           onLoad={onLoad}
           onClick={onClick}
-          className={clsx(className, "h-full w-full object-contain")}
+          className={className}
+          data-tailwind="h-full w-full object-contain"
           style={{ imageOrientation: "none", ...rotatorClasses }}
           src={`${configData.API_URL}/images/${image.id}/${version}`}
           alt=""
