@@ -11,6 +11,7 @@ import {
   Button,
   PasswordInput,
   PinInput,
+  Stack,
   TextInput,
 } from "@mantine/core";
 import { IconAlertHexagon } from "@tabler/icons-react";
@@ -89,7 +90,7 @@ const RestorePasswordPage = () => {
   };
 
   return (
-    <div data-tailwind="flex flex-col gap-2.5">
+    <Stack gap="sm">
       {phase === 1 ? (
         <>
           <TextInput
@@ -155,7 +156,7 @@ const RestorePasswordPage = () => {
           </Button>
         </>
       )}
-    </div>
+    </Stack>
   );
 };
 

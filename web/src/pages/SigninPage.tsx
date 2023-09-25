@@ -15,7 +15,16 @@ import {
 } from "@/utils/cognito";
 import { useState } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
-import { Alert, Button, PasswordInput, TextInput } from "@mantine/core";
+import {
+  Alert,
+  Anchor,
+  Button,
+  Group,
+  PasswordInput,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { IconAlertHexagon } from "@tabler/icons-react";
 
 interface State {
@@ -110,7 +119,7 @@ const SigninPage = () => {
   };
 
   return (
-    <div data-tailwind="flex flex-col gap-2.5">
+    <Stack gap="sm">
       <TextInput
         label="E-postadress"
         value={email}
@@ -135,13 +144,14 @@ const SigninPage = () => {
           tabIndex={3}
         />
       ) : (
-        <Link
+        <Anchor
+          size="sm"
+          component={Link}
           to={`/auth/forgot-password?email=${email}`}
           replace
-          data-tailwind="text-sm text-purple-600 self-start"
         >
           Glömt lösenord?
-        </Link>
+        </Anchor>
       )}
 
       {errorMessage && (
@@ -153,18 +163,22 @@ const SigninPage = () => {
           {errorMessage}
         </Alert>
       )}
-      <Button
-        onClick={signin}
-        disabled={!canSubmit}
-        loading={inProgress}
-        fullWidth
-      >
-        Logga in
-      </Button>
-      <Link to="/auth/register" replace>
-        <span data-tailwind="text-sm text-purple-600">Skapa nytt konto</span>
-      </Link>
-    </div>
+      <Group justify="space-between">
+        <Anchor
+          size="sm"
+          c="dimmed"
+          variant="subtle"
+          component={Link}
+          to="/auth/register"
+          replace
+        >
+          Saknar du konto? Registrera
+        </Anchor>
+        <Button onClick={signin} disabled={!canSubmit} loading={inProgress}>
+          Logga in
+        </Button>
+      </Group>
+    </Stack>
   );
 };
 

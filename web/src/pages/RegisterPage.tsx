@@ -8,19 +8,26 @@ import {
 } from "@/utils/cognito";
 import {
   Alert,
+  Anchor,
+  Box,
   Button,
+  Center,
+  Group,
   PasswordInput,
   PinInput,
+  Space,
+  Stack,
+  Text,
   TextInput,
 } from "@mantine/core";
-import { IconAlertHexagon } from "@tabler/icons-react";
+import { IconAlertHexagon, IconArrowLeft } from "@tabler/icons-react";
 import {
   AuthenticationDetails,
   CognitoUserAttribute,
 } from "amazon-cognito-identity-js";
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useId, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { handleLogin } from "./SigninPage";
 
 interface State {
@@ -37,6 +44,7 @@ interface State {
 const RegisterPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const id = useId();
 
   const [
     {
@@ -121,7 +129,7 @@ const RegisterPage = () => {
   const canRegister = !!email && !!password && !!givenName && !!lastName;
 
   return (
-    <div data-tailwind="flex flex-col gap-2.5">
+    <Stack gap="sm">
       {phase === 1 ? (
         <>
           <TextInput
@@ -139,7 +147,7 @@ const RegisterPage = () => {
             autoComplete="new-password"
             required
           />
-          <div data-tailwind="flex gap-2.5">
+          <Group gap="sm" justify="stretch" grow>
             <TextInput
               label="Förnamn"
               value={givenName}
@@ -154,7 +162,7 @@ const RegisterPage = () => {
               tabIndex={4}
               required
             />
-          </div>
+          </Group>
 
           {errorMessage && (
             <Alert
@@ -165,21 +173,32 @@ const RegisterPage = () => {
               {errorMessage}
             </Alert>
           )}
-          <Button
-            loading={inProgress}
-            fullWidth
-            onClick={register}
-            disabled={!canRegister}
-          >
-            Registrera
-          </Button>
+          <Group justify="space-between" mt="lg">
+            <Anchor c="dimmed" size="sm" component={Link} to="/auth/signin">
+              <Center inline>
+                <IconArrowLeft size={14} />
+                <Box ml={4}>Tillbaka till inloggingssidan</Box>
+              </Center>
+            </Anchor>
+            <Button
+              loading={inProgress}
+              onClick={register}
+              disabled={!canRegister}
+            >
+              Registrera
+            </Button>
+          </Group>
         </>
       ) : (
         <>
+          <Text component="label" htmlFor={id} size="sm" fw={500}>
+            Verifikationskod
+          </Text>
           <PinInput
             length={6}
             value={confirmationCode}
             onChange={(value) => updateState({ confirmationCode: value })}
+            id={id}
           />
 
           {errorMessage && (
@@ -191,12 +210,17 @@ const RegisterPage = () => {
               {errorMessage}
             </Alert>
           )}
-          <Button loading={inProgress} fullWidth onClick={confirm}>
-            Bekräfta
+
+          <Button
+            loading={inProgress}
+            disabled={confirmationCode.length !== 6}
+            onClick={confirm}
+          >
+            Verifiera
           </Button>
         </>
       )}
-    </div>
+    </Stack>
   );
 };
 
