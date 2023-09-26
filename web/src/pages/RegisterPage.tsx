@@ -12,10 +12,10 @@ import {
   Box,
   Button,
   Center,
+  Grid,
   Group,
   PasswordInput,
   PinInput,
-  Space,
   Stack,
   Text,
   TextInput,
@@ -25,6 +25,7 @@ import {
   AuthenticationDetails,
   CognitoUserAttribute,
 } from "amazon-cognito-identity-js";
+import classes from "./RegisterPage.module.css";
 
 import { useId, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -129,9 +130,9 @@ const RegisterPage = () => {
   const canRegister = !!email && !!password && !!givenName && !!lastName;
 
   return (
-    <Stack gap="sm">
+    <>
       {phase === 1 ? (
-        <>
+        <Stack gap="sm">
           <TextInput
             label="E-post"
             value={email}
@@ -188,17 +189,21 @@ const RegisterPage = () => {
               Registrera
             </Button>
           </Group>
-        </>
+        </Stack>
       ) : (
-        <>
-          <Text component="label" htmlFor={id} size="sm" fw={500}>
-            Verifikationskod
+        <Stack align="center" gap="sm">
+          <Text ta="center" component="label" size="lg" fw={500}>
+            Verifiera din e-post
+            <Text c="dimmed" size="sm">
+              Skriv in den 6-siffriga koden som skickades till din e-post
+            </Text>
           </Text>
           <PinInput
             length={6}
             value={confirmationCode}
             onChange={(value) => updateState({ confirmationCode: value })}
             id={id}
+            size="md"
           />
 
           {errorMessage && (
@@ -206,6 +211,7 @@ const RegisterPage = () => {
               color="red"
               icon={<IconAlertHexagon />}
               title="Verifiering misslyckades"
+              className={classes.alert}
             >
               {errorMessage}
             </Alert>
@@ -218,9 +224,9 @@ const RegisterPage = () => {
           >
             Verifiera
           </Button>
-        </>
+        </Stack>
       )}
-    </Stack>
+    </>
   );
 };
 
