@@ -3,6 +3,7 @@ import { TaskAlert } from "@/components/features/task/TaskAlert";
 import PageHeader from "@/components/PageHeader";
 import { useUnsafeParams } from "@/hooks/common";
 import { useCrag } from "@/queries/cragQueries";
+import { Stack } from "@mantine/core";
 import { Fragment, ReactElement } from "react";
 
 const CragPage = (): ReactElement => {
@@ -15,7 +16,7 @@ const CragPage = (): ReactElement => {
   }
 
   return (
-    <div data-tailwind="flex flex-col space-y-5">
+    <Stack>
       <PageHeader
         resourceId={resourceId}
         ancestors={crag.ancestors}
@@ -28,7 +29,7 @@ const CragPage = (): ReactElement => {
         resourceId={resourceId}
         filters={{ types: ["sector", "route"] }}
       />
-    </div>
+    </Stack>
   );
 };
 
