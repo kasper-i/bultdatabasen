@@ -1,0 +1,29 @@
+.container {
+  --height: 1.25rem;
+
+  position: relative;
+  height: var(--height);
+}
+
+.ruler {
+  width: 100%;
+}
+
+.crumbs {
+  position: absolute;
+  display: flex;
+  height: var(--height);
+  align-items: center;
+}
+
+.crumb {
+  color: var(--mantine-color-brand-6);
+  white-space: nowrap;
+  font-size: var(--mantine-font-size-sm);
+  text-decoration: none;
+  display: contents;
+}
+
+.ellipsis {
+  cursor: pointer;
+}

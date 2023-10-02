@@ -1,7 +1,6 @@
 import { Resource } from "@/models/resource";
 import { getResourceRoute } from "@/utils/resourceUtils";
-import { IconChevronRight, IconHome, IconHome2 } from "@tabler/icons-react";
-import clsx from "clsx";
+import { IconChevronRight, IconHome } from "@tabler/icons-react";
 import {
   FC,
   Fragment,
@@ -12,6 +11,7 @@ import {
   useState,
 } from "react";
 import { Link } from "react-router-dom";
+import classes from "./Breadcrumbs.module.css";
 
 interface Crumb {
   key: string;
@@ -88,10 +88,7 @@ const Breadcrumbs: FC<{
     return {
       key: resource.id,
       content: (
-        <Link
-          to={to}
-          data-tailwind="flex items-center text-primary-500 whitespace-nowrap text-xs"
-        >
+        <Link to={to} className={classes.crumb}>
           {resource.type === "root" ? <IconHome size={14} /> : resource.name}
         </Link>
       ),
@@ -102,7 +99,7 @@ const Breadcrumbs: FC<{
     crumbs.splice(1, crumbs.length - 2, {
       key: "ellipsis",
       content: (
-        <div data-tailwind="cursor-pointer" onClick={() => setExpanded(true)}>
+        <div className={classes.ellipsis} onClick={() => setExpanded(true)}>
           ...
         </div>
       ),
@@ -110,14 +107,14 @@ const Breadcrumbs: FC<{
   }
 
   return (
-    <div data-tailwind="relative h-5">
-      <div ref={rulerRef} data-tailwind="w-full" />
+    <div className={classes.container}>
+      <div ref={rulerRef} className={classes.ruler} />
       <div
         ref={breadcrumbsRef}
-        data-tailwind={clsx(
-          "absolute flex h-5 items-center",
-          expandedWidth === undefined && "invisible"
-        )}
+        className={classes.crumbs}
+        style={{
+          display: expandedWidth === undefined ? "invisible" : undefined,
+        }}
       >
         {crumbs.map(({ key, content }, index) => (
           <Fragment key={key}>
