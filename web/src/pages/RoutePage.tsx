@@ -2,7 +2,6 @@ import PointEditor from "@/components/features/routeEditor/PointEditor";
 import { TaskAlert } from "@/components/features/task/TaskAlert";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import PageHeader from "@/components/PageHeader";
-import { Underlined } from "@/components/Underlined";
 import { useUnsafeParams } from "@/hooks/common";
 import { usePoints } from "@/queries/pointQueries";
 import { useDeleteRoute, useRoute } from "@/queries/routeQueries";
@@ -84,21 +83,11 @@ const RoutePage = () => {
 
       <div data-tailwind="flex items-center gap-2">
         <p data-tailwind="text-sm">
-          <Underlined>{renderRouteType(routeType)}</Underlined>
-          {year && (
-            <>
-              {" "}
-              från <Underlined>{year}</Underlined>
-            </>
-          )}
+          {renderRouteType(routeType)}
+          {year && <> från {year}</>}
           {" som "}
-          {length && (
-            <>
-              {" "}
-              är <Underlined>{length}m</Underlined> lång och{" "}
-            </>
-          )}
-          har <Underlined>{numInstalledBolts}</Underlined> dokumenterade bult
+          {length && <> är {length}m lång och </>}
+          har {numInstalledBolts} dokumenterade bult
           {numInstalledBolts !== 1 && "ar"}.
         </p>
       </div>

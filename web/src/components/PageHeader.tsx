@@ -6,7 +6,6 @@ import { ReactElement, ReactNode } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import { Counter } from "./Counter";
 import Restricted from "./Restricted";
-import { Underlined } from "./Underlined";
 import { Group, Space, Stack, Text, Title } from "@mantine/core";
 import classes from "./PageHeader.module.css";
 
@@ -48,11 +47,11 @@ const PageHeader = ({
         {maintainers?.length ? (
           <Concatenator>
             {maintainers?.map((maintainer) => (
-              <Underlined key={maintainer.id}>{maintainer.name}</Underlined>
+              <span key={maintainer.id}>{maintainer.name}</span>
             ))}
           </Concatenator>
         ) : (
-          <Underlined>Underhållsansvarig saknas</Underlined>
+          <span>Underhållsansvarig saknas</span>
         )}
       </Text>
 
