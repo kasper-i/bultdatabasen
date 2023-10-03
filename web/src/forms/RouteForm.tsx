@@ -1,14 +1,7 @@
 import { Option } from "@/components/atoms/types";
 import { Route, RouteType, routeTypes } from "@/models/route";
 import { renderRouteType } from "@/utils/routeUtils";
-import {
-  Button,
-  Group,
-  NumberInput,
-  Select,
-  Space,
-  TextInput,
-} from "@mantine/core";
+import { Button, Group, NumberInput, Select, TextInput } from "@mantine/core";
 import { YearPickerInput } from "@mantine/dates";
 import { FC } from "react";
 import { Controller, SubmitHandler, useFormContext } from "react-hook-form";
