@@ -10,7 +10,7 @@ const RootPage = () => {
       <Text variant="gradient" gradient={{ from: "brand", to: "red", deg: 90 }}>
         <Title order={1}>bultdatabasen</Title>
       </Text>
-      <Text>
+      <Text ta="center">
         En databas över borrbultar och ankare på klätterleder i Västsverige.
       </Text>
       <Search className={classes.search} />
