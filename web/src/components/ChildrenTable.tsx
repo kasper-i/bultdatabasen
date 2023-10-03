@@ -34,7 +34,7 @@ const ChildrenTable = ({ resourceId, filters }: Props): ReactElement => {
             return (
               <Table.Tr key={resource.id}>
                 <Table.Td>
-                  <Group>
+                  <Group gap="xs">
                     <Anchor component={Link} to={url}>
                       {resource.name}
                     </Anchor>

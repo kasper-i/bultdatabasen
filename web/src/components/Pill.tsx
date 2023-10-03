@@ -1,6 +1,6 @@
-import clsx from "clsx";
-import React from "react";
 import { ReactNode } from "react";
+import classes from "./Pill.module.css";
+import clsx from "clsx";
 
 interface Props {
   children: ReactNode;
@@ -8,14 +8,7 @@ interface Props {
 }
 
 const Pill = ({ children, className }: Props) => {
-  return (
-    <div
-      className={className}
-      data-tailwind="w-min bg-red-500 rounded-full h-5 flex justify-center items-center px-2 text-xs font-bold text-white"
-    >
-      {children}
-    </div>
-  );
+  return <div className={clsx(className, classes.pill)}>{children}</div>;
 };
 
 export default Pill;
