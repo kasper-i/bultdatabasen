@@ -7,7 +7,7 @@ import { usePoints } from "@/queries/pointQueries";
 import { useDeleteRoute, useRoute } from "@/queries/routeQueries";
 import { getParent } from "@/utils/resourceUtils";
 import { renderRouteType } from "@/utils/routeUtils";
-import { ActionIcon, Menu } from "@mantine/core";
+import { ActionIcon, Menu, Space, Stack, Text } from "@mantine/core";
 import { IconEdit, IconMenu2, IconTrash } from "@tabler/icons-react";
 import { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -42,7 +42,7 @@ const RoutePage = () => {
   }
 
   return (
-    <div data-tailwind="flex flex-col">
+    <Stack>
       <PageHeader
         resourceId={resourceId}
         ancestors={route.ancestors}
@@ -81,27 +81,27 @@ const RoutePage = () => {
         />
       )}
 
-      <div data-tailwind="flex items-center gap-2">
-        <p data-tailwind="text-sm">
-          {renderRouteType(routeType)}
-          {year && <> från {year}</>}
-          {" som "}
-          {length && <> är {length}m lång och </>}
-          har {numInstalledBolts} dokumenterade bult
-          {numInstalledBolts !== 1 && "ar"}.
-        </p>
-      </div>
+      <Text size="sm">
+        {renderRouteType(routeType)}
+        {year && <> från {year}</>}
+        {" som "}
+        {length && <> är {length}m lång och </>}
+        har {numInstalledBolts} dokumenterade bult
+        {numInstalledBolts !== 1 && "ar"}.
+      </Text>
+
+      <Space h="lg" />
 
       <TaskAlert openTasks={route.counters?.openTasks ?? 0} />
 
-      <div data-tailwind="mt-5">
-        <PointEditor
-          routeId={resourceId}
-          routeParentId={parentId}
-          points={points}
-        />
-      </div>
-    </div>
+      <Space h="lg" />
+
+      <PointEditor
+        routeId={resourceId}
+        routeParentId={parentId}
+        points={points}
+      />
+    </Stack>
   );
 };
 

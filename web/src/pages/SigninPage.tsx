@@ -7,14 +7,12 @@ import { Api } from "@/Api";
 import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import {
+  signIn as cognitoSignin,
   confirmRegistration,
   isCognitoError,
   resendConfirmationCode,
-  signIn as cognitoSignin,
   translateCognitoError,
 } from "@/utils/cognito";
-import { useState } from "react";
-import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 import {
   Alert,
   Anchor,
@@ -22,10 +20,11 @@ import {
   Group,
   PasswordInput,
   Stack,
-  Text,
   TextInput,
 } from "@mantine/core";
 import { IconAlertHexagon } from "@tabler/icons-react";
+import { useState } from "react";
+import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 
 interface State {
   email: string;
