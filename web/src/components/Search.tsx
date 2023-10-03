@@ -3,10 +3,10 @@ import { getResourceLabel, getResourceRoute } from "@/utils/resourceUtils";
 import { rem, Text, TextInput } from "@mantine/core";
 import { spotlight, Spotlight, SpotlightActionData } from "@mantine/spotlight";
 import { IconSearch } from "@tabler/icons-react";
-import { useState } from "react";
+import { FC, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Search() {
+const Search: FC<{ className?: string }> = ({ className }) => {
   const navigate = useNavigate();
   const [actions, setActions] = useState<SpotlightActionData[]>([]);
 
@@ -34,6 +34,7 @@ function Search() {
   return (
     <>
       <TextInput
+        className={className}
         leftSection={<IconSearch size={14} />}
         onClick={spotlight.open}
         placeholder="Sök ..."
@@ -56,6 +57,6 @@ function Search() {
       />
     </>
   );
-}
+};
 
 export default Search;
