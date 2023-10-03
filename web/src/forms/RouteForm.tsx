@@ -1,10 +1,18 @@
 import { Option } from "@/components/atoms/types";
 import { Route, RouteType, routeTypes } from "@/models/route";
 import { renderRouteType } from "@/utils/routeUtils";
-import { Button, NumberInput, Select, TextInput } from "@mantine/core";
+import {
+  Button,
+  Group,
+  NumberInput,
+  Select,
+  Space,
+  TextInput,
+} from "@mantine/core";
 import { YearPickerInput } from "@mantine/dates";
 import { FC } from "react";
 import { Controller, SubmitHandler, useFormContext } from "react-hook-form";
+import classes from "./RouteForm.module.css";
 
 const routeTypeOptions: Option<RouteType>[] = routeTypes.map((type) => ({
   key: type,
@@ -20,22 +28,19 @@ export const RouteForm: FC<{
   const { control, handleSubmit, register } = useFormContext<Route>();
 
   return (
-    <form
-      data-tailwind="grid gap-3 grid-cols-2"
-      onSubmit={handleSubmit(onSubmit)}
-    >
+    <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
       <TextInput
         {...register("name")}
         label="Lednamn"
         required
-        data-tailwind="col-span-2"
+        className={classes.fullspan}
       />
 
       <Controller
         control={control}
         name="routeType"
         render={({ field: { onChange, value } }) => (
-          <div data-tailwind="col-span-2">
+          <div className={classes.fullspan}>
             <Select
               label="Typ"
               data={routeTypeOptions}
@@ -67,18 +72,20 @@ export const RouteForm: FC<{
             label="År"
             value={value ? new Date(value) : undefined}
             onChange={(value) => onChange(value?.getFullYear())}
+            placeholder="År"
+            maxDate={new Date()}
             clearable
           />
         )}
       />
-      <div data-tailwind="col-span-2 flex justify-end gap-2">
+      <Group className={classes.fullspan} justify="end" gap="sm">
         <Button variant="outline" onClick={onCancel}>
           Avbryt
         </Button>
         <Button loading={loading} type="submit">
           Spara
         </Button>
-      </div>
+      </Group>
     </form>
   );
 };

@@ -1,0 +1,9 @@
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--mantine-spacing-sm)
+}
+
+.fullspan {
+    grid-column: span 2;
+}
