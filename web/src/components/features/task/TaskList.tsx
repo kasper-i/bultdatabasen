@@ -4,6 +4,7 @@ import {
   Divider,
   Loader,
   Pagination,
+  Space,
   Stack,
   Switch,
 } from "@mantine/core";
@@ -36,6 +37,8 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
           setPage(1);
         }}
       />
+
+      <Space h="lg" />
 
       <Stack gap="sm">
         {tasks?.data?.map((task) => (

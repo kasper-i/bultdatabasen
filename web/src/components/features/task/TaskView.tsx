@@ -1,7 +1,7 @@
 import { Api } from "@/Api";
+import UserName from "@/components/UserName";
 import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import UserName from "@/components/UserName";
 import { Point } from "@/models/point";
 import { Resource } from "@/models/resource";
 import { Task, TaskStatus } from "@/models/task";
@@ -9,7 +9,16 @@ import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { emptyArray } from "@/utils/constants";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import { translatePriority } from "@/utils/taskUtils";
-import { ActionIcon, Button, Menu, TextInput } from "@mantine/core";
+import {
+  ActionIcon,
+  Anchor,
+  Button,
+  Card,
+  Group,
+  Menu,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import {
   IconCheck,
@@ -57,11 +66,11 @@ const CompleteButton: FC<{
           />
         </>
       )}
-      <div data-tailwind="flex justify-end gap-2 mt-2">
+      <Group justify="end">
         {phase === 2 && (
           <Button
             onClick={() => setPhase(1)}
-            variant="outline"
+            variant="subtle"
             disabled={loading}
           >
             Avbryt
@@ -79,11 +88,11 @@ const CompleteButton: FC<{
           leftSection={<IconClipboardCheck size={14} />}
           loading={loading}
           disabled={phase === 2 && isEmpty(comment.trim())}
-          fullWidth
+          variant="filled"
         >
           Markera åtgärdad
         </Button>
-      </div>
+      </Group>
     </div>
   );
 };
@@ -150,46 +159,44 @@ const TaskView: FC<{
   const { name: pointName, no: pointNo } = pointLabeler(pointId ?? "");
 
   return (
-    <div data-tailwind="w-full sm:w-96 flex flex-col space-y-2.5 bg-white shadow-sm p-5 rounded border border-gray-300">
-      <div data-tailwind="relative flex justify-between items-start">
-        <Link
-          to={`${getResourceRoute(parent.type, parent.id)}${
-            pointId ? `?p=${pointId}` : ""
-          }`}
-          data-tailwind="w-full pr-5"
-        >
-          <div data-tailwind="text-sm">
-            <span data-tailwind="inline-flex items-center gap-1">
-              {translatePriority(task.priority) && (
-                <span
-                  data-tailwind={clsx(
-                    "text-xs font-medium text-white rounded-md py-0.5 px-1.5",
-                    task.priority === 1
-                      ? "bg-red-500"
-                      : task.priority === 3
-                      ? "bg-gray-500"
-                      : undefined
-                  )}
-                >
-                  {translatePriority(task.priority)}
-                </span>
-              )}
-              {parent?.name}
-            </span>
-            {pointNo && (
-              <span data-tailwind="ml-1 text-gray-500 text-xs">
-                {pointName} {pointNo}
+    <Card withBorder>
+      <Group justify="space-between">
+        <span>
+          <span data-tailwind="inline-flex items-center gap-1">
+            {translatePriority(task.priority) && (
+              <span
+                data-tailwind={clsx(
+                  "text-xs font-medium text-white rounded-md py-0.5 px-1.5",
+                  task.priority === 1
+                    ? "bg-red-500"
+                    : task.priority === 3
+                    ? "bg-gray-500"
+                    : undefined
+                )}
+              >
+                {translatePriority(task.priority)}
               </span>
             )}
-          </div>
-          <div data-tailwind="text-xs mt-0.5">
-            Rapporterat{" "}
-            <span data-tailwind="font-medium">
-              <Time time={task.createdAt} />
-            </span>{" "}
-            av <UserName user={task.author} />
-          </div>
-        </Link>
+            <Anchor
+              size="sm"
+              component={Link}
+              to={`${getResourceRoute(parent.type, parent.id)}${
+                pointId ? `?p=${pointId}` : ""
+              }`}
+            >
+              {parent?.name}
+            </Anchor>
+          </span>
+          {pointNo && (
+            <span data-tailwind="ml-1 text-gray-500 text-xs">
+              {pointName} {pointNo}
+            </span>
+          )}
+          <Text c="dimmed" size="xs">
+            Rapporterat <Time time={task.createdAt} /> av{" "}
+            <UserName user={task.author} />
+          </Text>
+        </span>
         <Restricted>
           <Menu position="bottom-end" withArrow>
             <Menu.Target>
@@ -223,7 +230,7 @@ const TaskView: FC<{
             </Menu.Dropdown>
           </Menu>
         </Restricted>
-      </div>
+      </Group>
 
       {action === "edit" ? (
         <TaskEdit task={task} onDone={() => setAction(undefined)} />
@@ -286,7 +293,7 @@ const TaskView: FC<{
           onClose={() => setAction(undefined)}
         />
       )}
-    </div>
+    </Card>
   );
 };
 
