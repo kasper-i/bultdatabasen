@@ -12,6 +12,7 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 import classes from "./Breadcrumbs.module.css";
+import clsx from "clsx";
 
 interface Crumb {
   key: string;
@@ -20,7 +21,8 @@ interface Crumb {
 
 const Breadcrumbs: FC<{
   resources?: Resource[];
-}> = ({ resources }): ReactElement => {
+  className?: string;
+}> = ({ resources, className }): ReactElement => {
   const rulerRef = useRef<HTMLDivElement>(null);
   const breadcrumbsRef = useRef<HTMLDivElement>(null);
 
@@ -107,7 +109,7 @@ const Breadcrumbs: FC<{
   }
 
   return (
-    <div className={classes.container}>
+    <div className={clsx(classes.container, className)}>
       <div ref={rulerRef} className={classes.ruler} />
       <div
         ref={breadcrumbsRef}

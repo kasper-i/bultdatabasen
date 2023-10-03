@@ -7,6 +7,8 @@ import Breadcrumbs from "./Breadcrumbs";
 import { Counter } from "./Counter";
 import Restricted from "./Restricted";
 import { Underlined } from "./Underlined";
+import { Group, Space, Stack, Text, Title } from "@mantine/core";
+import classes from "./PageHeader.module.css";
 
 interface Props {
   resourceId: string;
@@ -32,18 +34,16 @@ const PageHeader = ({
   const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (
-    <div data-tailwind="flex flex-col">
+    <Stack>
       {crumbs && !onlyRoot && (
-        <div data-tailwind="mr-14 mb-2.5">
-          <Breadcrumbs resources={crumbs} />
-        </div>
+        <Breadcrumbs className={classes.breadcrumbs} resources={crumbs} />
       )}
-      <div data-tailwind="flex justify-between">
-        <h1 data-tailwind="text-2xl font-bold">{resource.name}</h1>
+      <Group justify="space-between">
+        <Title order={1}>{resource.name}</Title>
         <Restricted>{menu}</Restricted>
-      </div>
+      </Group>
 
-      <p data-tailwind="text-sm leading-snug">
+      <Text className={classes.maintainer}>
         <IconTool size={14} />
         {maintainers?.length ? (
           <Concatenator>
@@ -54,20 +54,20 @@ const PageHeader = ({
         ) : (
           <Underlined>Underhållsansvarig saknas</Underlined>
         )}
-      </p>
+      </Text>
 
-      <div data-tailwind="h-2.5" />
+      <Space h="sm" />
 
       {showCounts && (
-        <div data-tailwind="text-md flex gap-4">
+        <Group>
           <Counter
             label="Bultar"
             count={resource.counters?.installedBolts ?? 0}
           />
           <Counter label="Leder" count={resource.counters?.routes ?? 0} />
-        </div>
+        </Group>
       )}
-    </div>
+    </Stack>
   );
 };
 
