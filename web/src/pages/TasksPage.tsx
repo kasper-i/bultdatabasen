@@ -1,12 +1,13 @@
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Restricted from "@/components/Restricted";
 import CreateTask from "@/components/features/task/CreateTask";
 import TaskList from "@/components/features/task/TaskList";
-import Pill from "@/components/Pill";
-import Restricted from "@/components/Restricted";
 import { useUnsafeParams } from "@/hooks/common";
 import { ResourceType } from "@/models/resource";
 import { useResource } from "@/queries/resourceQueries";
-import React, { Fragment, ReactElement } from "react";
+import { Text, Title } from "@mantine/core";
+import { Fragment, ReactElement } from "react";
+import classes from "./TasksPage.module.css";
 
 const locationDescription = (
   resourceName: string,
@@ -37,26 +38,21 @@ const TasksPage = (): ReactElement => {
   const onlyRoot = ancestors?.length === 1;
 
   return (
-    <div data-tailwind="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-4">
-      {!onlyRoot && <Breadcrumbs resources={ancestors} />}
-      <div>
-        <h1 data-tailwind="text-2xl font-bold pb-1 flex items-start leading-none">
-          Uppdrag
-          {(resource.counters?.openTasks ?? 0) > 0 && (
-            <Pill data-tailwind="ml-2">{resource.counters?.openTasks}</Pill>
-          )}
-        </h1>
-        {resource.name !== undefined && (
-          <span data-tailwind="text-sm">
-            {locationDescription(resource.name, resource.type)}
-          </span>
-        )}
-      </div>
+    <>
+      {!onlyRoot && (
+        <Breadcrumbs className={classes.breadcrumbs} resources={ancestors} />
+      )}
+      <Title order={1}>Uppdrag</Title>
+      {resource.name !== undefined && (
+        <Text size="sm">
+          {locationDescription(resource.name, resource.type)}
+        </Text>
+      )}
       <Restricted>
         {resource.type === "route" && <CreateTask routeId={resourceId} />}
       </Restricted>
       <TaskList resourceId={resourceId} />
-    </div>
+    </>
   );
 };
 

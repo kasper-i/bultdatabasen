@@ -1,11 +1,12 @@
 .pill {
     background-color: var(--mantine-color-red-6);
     color: var(--mantine-color-white);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0 var(--mantine-spacing-xs);
     border-radius: 9999px;
     font-weight: 600;
-    font-size: var(--mantine-font-size-xs)
+    font-size: var(--mantine-font-size-xs);
+    width: fit-content;
 }
