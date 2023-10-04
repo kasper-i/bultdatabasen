@@ -1,9 +1,8 @@
-import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
+import { Option } from "@/components/atoms/types";
 import { Task } from "@/models/task";
 import { useUpdateTask } from "@/queries/taskQueries";
-import { Button, TextInput } from "@mantine/core";
+import { Button, Group, Radio, Stack, TextInput } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
-import { Option } from "@/components/atoms/types";
 
 export const priorityOptions: Option<number>[] = [
   {
@@ -33,7 +32,7 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
   }, [onDone, updateTask.isSuccess]);
 
   return (
-    <div data-tailwind="flex flex-col gap-2.5">
+    <Stack gap="sm">
       <TextInput
         label="Beskrivning"
         value={editedTask.description}
@@ -46,21 +45,25 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
         required
       />
 
-      <RadioCardsGroup<number>
-        value={editedTask.priority}
+      <Radio.Group
+        label="Prioritet"
+        defaultValue={editedTask.priority.toString()}
         onChange={(value) =>
           value !== undefined &&
           setEditedTask((task) => ({
             ...task,
-            priority: value,
+            priority: Number(value),
           }))
         }
-        options={priorityOptions}
-        label="Prioritet"
-        mandatory
-      />
+      >
+        <Group>
+          <Radio value="3" label="Låg" />
+          <Radio value="2" label="Normal" />
+          <Radio value="1" label="Hög" />
+        </Group>
+      </Radio.Group>
 
-      <div data-tailwind="flex justify-end gap-2.5 w-full">
+      <Group justify="end">
         <Button onClick={() => onDone()} variant="subtle">
           Avbryt
         </Button>
@@ -70,8 +73,8 @@ const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
         >
           Spara
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 };
 
