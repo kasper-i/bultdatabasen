@@ -6,6 +6,7 @@ import { YearPickerInput } from "@mantine/dates";
 import { FC } from "react";
 import { Controller, SubmitHandler, useFormContext } from "react-hook-form";
 import classes from "./RouteForm.module.css";
+import { Spanner } from "@/components/Spanner";
 
 const routeTypeOptions: Option<RouteType>[] = routeTypes.map((type) => ({
   key: type,
@@ -22,18 +23,15 @@ export const RouteForm: FC<{
 
   return (
     <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
-      <TextInput
-        {...register("name")}
-        label="Lednamn"
-        required
-        className={classes.fullspan}
-      />
+      <Spanner cols={2}>
+        <TextInput {...register("name")} label="Lednamn" required />
+      </Spanner>
 
       <Controller
         control={control}
         name="routeType"
         render={({ field: { onChange, value } }) => (
-          <div className={classes.fullspan}>
+          <Spanner cols={2}>
             <Select
               label="Typ"
               data={routeTypeOptions}
@@ -42,7 +40,7 @@ export const RouteForm: FC<{
               multiple={false}
               required
             />
-          </div>
+          </Spanner>
         )}
       />
 
@@ -71,14 +69,16 @@ export const RouteForm: FC<{
           />
         )}
       />
-      <Group className={classes.fullspan} justify="end" gap="sm">
-        <Button variant="outline" onClick={onCancel}>
-          Avbryt
-        </Button>
-        <Button loading={loading} type="submit">
-          Spara
-        </Button>
-      </Group>
+      <Spanner cols={2}>
+        <Group justify="end" gap="sm">
+          <Button variant="outline" onClick={onCancel}>
+            Avbryt
+          </Button>
+          <Button loading={loading} type="submit">
+            Spara
+          </Button>
+        </Group>
+      </Spanner>
     </form>
   );
 };
