@@ -12,10 +12,14 @@ import { translatePriority } from "@/utils/taskUtils";
 import {
   ActionIcon,
   Anchor,
+  Box,
   Button,
   Card,
   Group,
   Menu,
+  Pill,
+  Space,
+  Stack,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -30,9 +34,8 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import clsx from "clsx";
 import { isEmpty } from "lodash-es";
-import { FC, ReactElement, useState } from "react";
+import { FC, Fragment, ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 import Restricted from "../../Restricted";
 import { usePointLabeler } from "../routeEditor/hooks";
@@ -49,7 +52,7 @@ const CompleteButton: FC<{
   const [closedAt, setClosedAt] = useState(new Date());
 
   return (
-    <div data-tailwind="flex flex-col gap-2">
+    <Stack gap="sm">
       {phase === 2 && (
         <>
           <TextInput
@@ -57,6 +60,7 @@ const CompleteButton: FC<{
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             required
+            size="sm"
           />
           <DatePickerInput
             label="Datum"
@@ -93,7 +97,28 @@ const CompleteButton: FC<{
           Markera åtgärdad
         </Button>
       </Group>
-    </div>
+    </Stack>
+  );
+};
+
+const PriorityPill: FC<{ priority: number }> = ({ priority }) => {
+  const props = (() => {
+    switch (priority) {
+      case 1:
+        return { bg: "red", c: "white" };
+      case 3:
+        return {};
+    }
+  })();
+
+  if (priority === 2) {
+    return <Fragment />;
+  }
+
+  return (
+    <Pill {...props} size="xs">
+      {translatePriority(priority)}
+    </Pill>
   );
 };
 
@@ -162,20 +187,9 @@ const TaskView: FC<{
     <Card withBorder>
       <Group justify="space-between">
         <span>
-          <span data-tailwind="inline-flex items-center gap-1">
+          <Group align="center" justify="start" gap="sm">
             {translatePriority(task.priority) && (
-              <span
-                data-tailwind={clsx(
-                  "text-xs font-medium text-white rounded-md py-0.5 px-1.5",
-                  task.priority === 1
-                    ? "bg-red-500"
-                    : task.priority === 3
-                    ? "bg-gray-500"
-                    : undefined
-                )}
-              >
-                {translatePriority(task.priority)}
-              </span>
+              <PriorityPill priority={task.priority} />
             )}
             <Anchor
               size="sm"
@@ -186,11 +200,11 @@ const TaskView: FC<{
             >
               {parent?.name}
             </Anchor>
-          </span>
+          </Group>
           {pointNo && (
-            <span data-tailwind="ml-1 text-gray-500 text-xs">
+            <Text size="xs" c="dimmed">
               {pointName} {pointNo}
-            </span>
+            </Text>
           )}
           <Text c="dimmed" size="xs">
             Rapporterat <Time time={task.createdAt} /> av{" "}
@@ -232,51 +246,42 @@ const TaskView: FC<{
         </Restricted>
       </Group>
 
+      <Space h="sm" />
+
       {action === "edit" ? (
         <TaskEdit task={task} onDone={() => setAction(undefined)} />
       ) : (
         <>
-          <p data-tailwind="text-sm">{task.description}</p>
+          <Text>{task.description}</Text>
 
           {isComplete ? (
             <>
-              <hr data-tailwind="-mx-5 pb-2" />
+              <Space h="sm" />
 
-              <div data-tailwind="flex flex-col">
-                <div data-tailwind="flex items-center">
+              <Box>
+                <Group align="center">
                   <IconCheck
-                    data-tailwind={clsx(
-                      task.status === "closed"
-                        ? "text-green-600"
-                        : "text-red-500"
-                    )}
+                    color={task.status === "closed" ? "green" : "red"}
                   />
-                  <p
-                    data-tailwind={clsx(
-                      task.status === "closed"
-                        ? "text-green-600"
-                        : "text-red-500"
-                    )}
+                  <Text
+                    size="sm"
+                    c={task.status === "closed" ? "green.9" : "red"}
                   >
-                    <span data-tailwind="text-sm ml-1 font-semibold">
-                      {task.status === "closed" ? "Åtgärdat" : "Stängd"}
-                    </span>{" "}
+                    {task.status === "closed" ? "Åtgärdat" : "Stängd"}{" "}
                     {task.closedAt && <Time time={task.closedAt} />}
-                  </p>
-                </div>
+                  </Text>
+                </Group>
                 {task.comment && (
-                  <p data-tailwind="text-sm text-gray-700">
-                    <IconMessage name="comment" data-tailwind="mr-1" />
-                    {task.comment}
-                  </p>
+                  <Group align="center">
+                    <IconMessage />
+                    <Text>{task.comment}</Text>
+                  </Group>
                 )}
-              </div>
+              </Box>
             </>
           ) : (
             <Restricted>
               <>
-                <hr data-tailwind="-mx-5 pb-2" />
-
                 <CompleteButton
                   loading={updateTask.isLoading}
                   onComplete={complete}

@@ -7,7 +7,10 @@ import classes from "./RootPage.module.css";
 const RootPage = () => {
   return (
     <Stack align="center" gap="sm">
-      <Text variant="gradient" gradient={{ from: "brand", to: "red", deg: 90 }}>
+      <Text
+        variant="gradient"
+        gradient={{ from: "brand.4", to: "brand.6", deg: 90 }}
+      >
         <Title order={1}>bultdatabasen</Title>
       </Text>
       <Text ta="center">
