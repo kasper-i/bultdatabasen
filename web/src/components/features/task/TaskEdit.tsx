@@ -3,7 +3,25 @@ import { Task } from "@/models/task";
 import { useUpdateTask } from "@/queries/taskQueries";
 import { Button, TextInput } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
-import { priorityOptions } from "./CreateTask";
+import { Option } from "@/components/atoms/types";
+
+export const priorityOptions: Option<number>[] = [
+  {
+    key: "3",
+    label: "Låg",
+    value: 3,
+  },
+  {
+    key: "2",
+    label: "Normal",
+    value: 2,
+  },
+  {
+    key: "1",
+    label: "Hög",
+    value: 1,
+  },
+];
 
 const TaskEdit: FC<{ task: Task; onDone: () => void }> = ({ task, onDone }) => {
   const [editedTask, setEditedTask] = useState(task);

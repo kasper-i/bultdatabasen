@@ -1,8 +1,6 @@
-import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
-import { Option } from "@/components/atoms/types";
 import { usePoints } from "@/queries/pointQueries";
 import { useCreateTask } from "@/queries/taskQueries";
-import { Button, Select, TextInput } from "@mantine/core";
+import { Button, Group, Radio, Select, Stack, TextInput } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { ReactElement, useReducer, useState } from "react";
 import { usePointLabeler } from "../routeEditor/hooks";
@@ -10,24 +8,6 @@ import { usePointLabeler } from "../routeEditor/hooks";
 interface Props {
   routeId: string;
 }
-
-export const priorityOptions: Option<number>[] = [
-  {
-    key: "3",
-    label: "Låg",
-    value: 3,
-  },
-  {
-    key: "2",
-    label: "Normal",
-    value: 2,
-  },
-  {
-    key: "1",
-    label: "Hög",
-    value: 1,
-  },
-];
 
 const CreateTask = ({ routeId }: Props): ReactElement => {
   const { data: points } = usePoints(routeId);
@@ -48,16 +28,14 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
 
   if (!showForm) {
     return (
-      <div data-tailwind="sm:w-96">
-        <Button leftSection={<IconPlus size={14} />} onClick={() => openForm()}>
-          Nytt uppdrag
-        </Button>
-      </div>
+      <Button leftSection={<IconPlus size={14} />} onClick={() => openForm()}>
+        Nytt uppdrag
+      </Button>
     );
   }
 
   return (
-    <div data-tailwind="sm:w-96 flex flex-col gap-4">
+    <Stack gap="sm">
       <TextInput
         label="Beskrivning"
         placeholder="Byt nedsliten firningskarbin"
@@ -85,22 +63,28 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
         multiple={false}
       />
 
-      <RadioCardsGroup<number>
-        value={priority}
-        onChange={(value) => value !== undefined && setPriority(value)}
-        options={priorityOptions}
+      <Radio.Group
         label="Prioritet"
-        mandatory
-      />
-
-      <Button
-        onClick={handleCreateTask}
-        loading={createTask.isLoading}
-        disabled={description.length === 0}
+        defaultValue={priority.toString()}
+        onChange={(value) => value !== undefined && setPriority(Number(value))}
       >
-        Skapa
-      </Button>
-    </div>
+        <Group>
+          <Radio value="3" label="Låg" />
+          <Radio value="2" label="Normal" />
+          <Radio value="1" label="Hög" />
+        </Group>
+      </Radio.Group>
+
+      <Group justify="end">
+        <Button
+          onClick={handleCreateTask}
+          loading={createTask.isLoading}
+          disabled={description.length === 0}
+        >
+          Skapa
+        </Button>
+      </Group>
+    </Stack>
   );
 };
 
