@@ -51,7 +51,7 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
         <Center>
           <Pagination
             value={page}
-            total={Math.ceil(tasks?.meta.totalItems ?? 0 / ITEMS_PER_PAGE)}
+            total={Math.ceil((tasks?.meta.totalItems ?? 0) / ITEMS_PER_PAGE)}
             onChange={setPage}
             withEdges
           />
