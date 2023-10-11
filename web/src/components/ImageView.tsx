@@ -1,8 +1,8 @@
 import configData from "@/config.json";
 import { Image, ImageVersion } from "@/models/image";
 import { Loader } from "@mantine/core";
-import clsx from "clsx";
 import { CSSProperties, ReactNode, useReducer, useRef } from "react";
+import classes from "./ImageView.module.css";
 
 interface Props {
   image: Image;
@@ -88,22 +88,21 @@ export const ImageView = ({
 
   return (
     <div
-      data-tailwind="relative"
+      className={classes.container}
       style={{
         height: targetHeight,
         width: width,
       }}
     >
-      <div data-tailwind="absolute inset-0 flex justify-center items-center">
+      <div className={classes.loaderContainer}>
         {loading && <Loader type="bars" />}
       </div>
-      <div data-tailwind="absolute" style={innerStyle}>
+      <div className={classes.innerContainer} style={innerStyle}>
         <img
           ref={imgRef}
           onLoad={onLoad}
           onClick={onClick}
           className={className}
-          data-tailwind="h-full w-full object-contain"
           style={{ imageOrientation: "none", ...rotatorClasses }}
           src={`${configData.API_URL}/images/${image.id}/${version}`}
           alt=""

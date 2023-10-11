@@ -1,0 +1,10 @@
+.thumb {
+    border-radius: var(--mantine-radius-sm);
+    cursor: pointer;
+    outline: solid 0.125rem var(--mantine-color-gray-2);
+    outline-offset: 0.125rem;
+}
+
+.thumb:hover {
+    outline-color: var(--mantine-color-gray-4);
+}
