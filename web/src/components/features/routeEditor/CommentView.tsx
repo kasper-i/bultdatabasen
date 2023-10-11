@@ -29,7 +29,7 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
   }, [updateComment.isSuccess]);
 
   return (
-    <Group>
+    <Group justify="space-between">
       {action === "edit" ? (
         <Stack gap="sm">
           <TextInput

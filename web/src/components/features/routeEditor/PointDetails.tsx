@@ -1,5 +1,4 @@
 import { Concatenator } from "@/components/Concatenator";
-import Feed, { FeedItem } from "@/components/Feed";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import ImageThumbnail from "@/components/ImageThumbnail";
 import ImageUploadButton from "@/components/ImageUploadButton";
@@ -11,22 +10,42 @@ import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useComments } from "@/queries/commentQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
-import { ActionIcon, Button, Menu } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Menu,
+  Space,
+  Text,
+  Timeline,
+  TimelineItemProps,
+  TimelineProps,
+} from "@mantine/core";
 import {
   IconMenu2,
   IconMessage,
+  IconMessage2,
   IconPhoto,
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react";
 import { compareDesc } from "date-fns";
-import { ReactElement, useEffect, useMemo, useState } from "react";
+import {
+  Key,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import AdvancedBoltEditor from "./AdvancedBoltEditor";
 import BoltDetails from "./BoltDetails";
 import { CommentView } from "./CommentView";
 import { PointLabel } from "./hooks";
 import { PostComment } from "./PostComment";
+import UserName from "@/components/UserName";
+import { Time } from "@/components/atoms/Time";
+import { Author } from "@/models/user";
 
 interface Props {
   point: Point;
@@ -57,6 +76,16 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
     createBolt.isSuccess && setAction(undefined);
   }, [createBolt.isSuccess]);
 
+  interface FeedItem {
+    key: Key;
+    timestamp: Date;
+    icon: ReactNode;
+    title: string;
+    action: string;
+    author: Author;
+    value: ReactNode;
+  }
+
   const feedItems = useMemo(() => {
     const feedItems: FeedItem[] = [];
 
@@ -65,7 +94,8 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         key: image.id,
         icon: <IconPhoto size={14} />,
         timestamp: image.timestamp,
-        description: "Laddade upp foto",
+        title: "Nytt foto",
+        action: "laddade upp foto",
         author: image.author,
         value: (
           <ImageThumbnail
@@ -82,7 +112,8 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         key: comment.id,
         icon: <IconMessage size={14} />,
         timestamp: comment.createdAt,
-        description: "Lämnade kommentar",
+        title: "Ny kommentar",
+        action: "lämnade kommentar",
         author: comment.author,
         value: <CommentView comment={comment} />,
       });
@@ -209,7 +240,18 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         </Restricted>
       </div>
 
-      <Feed items={feedItems} />
+      <Timeline>
+        {feedItems.map(({ key, title, action, author, timestamp, value }) => (
+          <Timeline.Item key={key} title={title}>
+            <Text c="dimmed" size="sm">
+              <UserName user={author} /> {action} <Time time={timestamp} />
+            </Text>
+            <Space h="xs" />
+            {value}
+          </Timeline.Item>
+        ))}
+      </Timeline>
+
       {currImg !== undefined && (
         <ImageCarousel
           pointId={point.id}
