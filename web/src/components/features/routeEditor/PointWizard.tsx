@@ -1,7 +1,7 @@
 import { CreatePointRequest, InsertPosition } from "@/Api";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
-import { Button, Loader, Switch } from "@mantine/core";
+import { Button, Group, Loader, Switch, Text } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { ReactElement, Suspense, useState } from "react";
@@ -96,12 +96,9 @@ function PointWizard({
   return (
     <div>
       {!mergeMode && (
-        <button
-          data-tailwind="text-primary-500 underline mb-4"
-          onClick={() => setMergeMode((mode) => !mode)}
-        >
+        <Button variant="outline" onClick={() => setMergeMode((mode) => !mode)}>
           Anslut till närliggande led
-        </button>
+        </Button>
       )}
 
       {mergeMode ? (
@@ -122,9 +119,9 @@ function PointWizard({
             label="Ankare"
           />
 
-          <p data-tailwind="mt-4 mb-1 font-medium">Bultar</p>
+          <Text fw={600}>Bultar</Text>
 
-          <div data-tailwind="flex flex-wrap gap-4">
+          <Group gap="sm">
             {bolts.map(([index, bolt]) => (
               <BasicBoltEditor
                 key={index}
@@ -139,23 +136,19 @@ function PointWizard({
               />
             ))}
             {bolts.length < 2 && (
-              <div
-                key="new"
-                data-tailwind="h-24 w-28 border-2 border-gray-300 border-dashed rounded-md flex justify-center items-center"
+              <Button
+                size="xl"
+                leftSection={<IconPlus />}
+                onClick={addRightBolt}
               >
-                <div data-tailwind="text-center" onClick={addRightBolt}>
-                  <IconPlus />
-                  <p data-tailwind="cursor-pointer text-gray-700 text-sm">
-                    Lägg till en högerbult
-                  </p>
-                </div>
-              </div>
+                Lägg till en högerbult
+              </Button>
             )}
-          </div>
+          </Group>
         </>
       )}
 
-      <div data-tailwind="flex gap-2 w-full mt-4">
+      <Group gap="sm">
         <Button onClick={onCancel} variant="subtle">
           Avbryt
         </Button>
@@ -166,7 +159,7 @@ function PointWizard({
         >
           {mergeMode ? "Sammanfoga" : "Lägg till ny"}
         </Button>
-      </div>
+      </Group>
     </div>
   );
 }
