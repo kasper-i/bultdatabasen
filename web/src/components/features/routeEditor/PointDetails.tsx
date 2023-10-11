@@ -240,16 +240,18 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         </Restricted>
       </div>
 
-      <Timeline>
-        {feedItems.map(({ key, title, action, author, timestamp, value }) => (
-          <Timeline.Item key={key} title={title}>
-            <Text c="dimmed" size="sm">
-              <UserName user={author} /> {action} <Time time={timestamp} />
-            </Text>
-            <Space h="xs" />
-            {value}
-          </Timeline.Item>
-        ))}
+      <Timeline bulletSize={24}>
+        {feedItems.map(
+          ({ key, title, action, author, timestamp, value, icon }) => (
+            <Timeline.Item key={key} title={title} bullet={icon}>
+              <Text c="dimmed" size="sm">
+                <UserName user={author} /> {action} <Time time={timestamp} />
+              </Text>
+              <Space h="xs" />
+              {value}
+            </Timeline.Item>
+          )
+        )}
       </Timeline>
 
       {currImg !== undefined && (
