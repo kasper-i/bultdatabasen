@@ -2,28 +2,33 @@ import { Concatenator } from "@/components/Concatenator";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import ImageThumbnail from "@/components/ImageThumbnail";
 import ImageUploadButton from "@/components/ImageUploadButton";
-import DeleteDialog from "@/components/molecules/DeleteDialog";
 import Restricted from "@/components/Restricted";
+import UserName from "@/components/UserName";
+import { Time } from "@/components/atoms/Time";
+import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
+import { Author } from "@/models/user";
 import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useComments } from "@/queries/commentQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
 import {
   ActionIcon,
+  Anchor,
   Button,
+  Card,
+  Group,
   Menu,
   Space,
+  Stack,
   Text,
   Timeline,
-  TimelineItemProps,
-  TimelineProps,
+  Title,
 } from "@mantine/core";
 import {
   IconMenu2,
   IconMessage,
-  IconMessage2,
   IconPhoto,
   IconPlus,
   IconTrash,
@@ -41,11 +46,8 @@ import { Link } from "react-router-dom";
 import AdvancedBoltEditor from "./AdvancedBoltEditor";
 import BoltDetails from "./BoltDetails";
 import { CommentView } from "./CommentView";
-import { PointLabel } from "./hooks";
 import { PostComment } from "./PostComment";
-import UserName from "@/components/UserName";
-import { Time } from "@/components/atoms/Time";
-import { Author } from "@/models/user";
+import { PointLabel } from "./hooks";
 
 interface Props {
   point: Point;
@@ -126,35 +128,34 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
 
   return (
     <div>
-      <div data-tailwind="flex justify-between">
+      <Group justify="space-between">
         <div>
-          <div data-tailwind="h-6 cursor-pointer" onClick={onClose}>
+          <Title order={3} onClick={onClose}>
             {label.name}
-            <span data-tailwind="font-medium text-primary-500 ml-1">
-              {label.no}
-            </span>
-          </div>
+          </Title>
+          <Text size="xs" c="dimmed">
+            {label.no}
+          </Text>
 
-          <div data-tailwind="space-x-1 text-xs">
+          <div>
             {sharedParents.length === 0
               ? "Delas ej med annan led."
               : sharedParents.length > 0 && (
                   <>
-                    <span data-tailwind="whitespace-nowrap">Delas med</span>
+                    <span>Delas med</span>
                     <span>
                       <Concatenator>
                         {sharedParents.map((parent) => (
-                          <Link
+                          <Anchor
                             key={point.id}
+                            component={Link}
                             to={{
                               pathname: `/route/${parent.id}`,
                               search: `?p=${point.id}`,
                             }}
                           >
-                            <span data-tailwind="underline text-primary-500">
-                              {parent.name}
-                            </span>
-                          </Link>
+                            {parent.name}
+                          </Anchor>
                         ))}
                       </Concatenator>
                       .
@@ -164,7 +165,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           </div>
         </div>
 
-        <div data-tailwind="flex gap-2">
+        <Stack gap="sm">
           <Restricted>
             <Menu position="bottom-end" withArrow>
               <Menu.Target>
@@ -197,29 +198,31 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
               />
             )}
           </Restricted>
-        </div>
-      </div>
+        </Stack>
+      </Group>
 
-      <div data-tailwind="flex flex-wrap gap-2.5 py-4">
+      <Stack gap="sm">
         {action === "add_bolt" && (
-          <div data-tailwind="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
-            <AdvancedBoltEditor
-              bolt={newBolt}
-              onChange={setNewBolt}
-              hideDismantled
-            />
-            <div data-tailwind="flex gap-x-2.5 py-2 mt-2">
-              <Button onClick={() => setAction(undefined)} variant="subtle">
-                Avbryt
-              </Button>
-              <Button
-                loading={createBolt.isLoading}
-                onClick={() => createBolt.mutate(newBolt)}
-              >
-                Skapa
-              </Button>
-            </div>
-          </div>
+          <Card withBorder>
+            <Stack gap="sm">
+              <AdvancedBoltEditor
+                bolt={newBolt}
+                onChange={setNewBolt}
+                hideDismantled
+              />
+              <Group gap="sm" justify="end">
+                <Button onClick={() => setAction(undefined)} variant="subtle">
+                  Avbryt
+                </Button>
+                <Button
+                  loading={createBolt.isLoading}
+                  onClick={() => createBolt.mutate(newBolt)}
+                >
+                  Skapa
+                </Button>
+              </Group>
+            </Stack>
+          </Card>
         )}
         {bolts.data
           ?.slice()
@@ -233,12 +236,12 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           ))}
 
         <Restricted>
-          <div data-tailwind="flex flex-row gap-2 w-full mt-1">
+          <Group justify="space-between">
             <PostComment parentResourceId={point.id} />
             <ImageUploadButton pointId={point.id} />
-          </div>
+          </Group>
         </Restricted>
-      </div>
+      </Stack>
 
       <Timeline bulletSize={24}>
         {feedItems.map(
