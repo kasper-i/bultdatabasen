@@ -1,15 +1,12 @@
-import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
 import { Option } from "@/components/atoms/types";
 import { Bolt, BoltType, DiameterUnit } from "@/models/bolt";
 import { useManufacturers } from "@/queries/manufacturerQueries";
 import { useMaterials } from "@/queries/materialQueries";
 import { useModels } from "@/queries/modelQueries";
 import { translateBoltType } from "@/utils/boltUtils";
-import { ActionIcon, Select } from "@mantine/core";
+import { Chip, Grid, Group, Select } from "@mantine/core";
 import { DatePickerInput, YearPickerInput } from "@mantine/dates";
-import { IconX } from "@tabler/icons-react";
-import clsx from "clsx";
-import { FC, useMemo } from "react";
+import { useMemo } from "react";
 
 const typeOptions = (["expansion", "glue", "piton"] as const).map<
   Option<BoltType>
@@ -18,16 +15,6 @@ const typeOptions = (["expansion", "glue", "piton"] as const).map<
   value: type,
   label: translateBoltType(type),
 }));
-
-const ClearButton: FC<{ onClick: () => void }> = ({ onClick }) => {
-  return (
-    <div data-tailwind="mt-6 h-[2.125rem] flex justify-center items-center">
-      <ActionIcon onClick={onClick} variant="subtle" color="black">
-        <IconX size={14} />
-      </ActionIcon>
-    </div>
-  );
-};
 
 interface DiameterAndUnit {
   diameter: number;
@@ -117,114 +104,122 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
   );
 
   return (
-    <div
-      data-tailwind={clsx("w-full grid gap-x-2 gap-y-2 content-center")}
-      style={{
-        gridTemplateColumns: "1fr 1rem",
-      }}
-    >
-      <Select
-        value={bolt.manufacturerId}
-        data={manufacturerOptions}
-        onSelect={(event) =>
-          updateBolt({
-            manufacturerId: event.currentTarget.value,
-            modelId: undefined,
-          })
-        }
-        label="Tillverkare"
-        nothingFoundMessage="Inga tillverkare hittades"
-        multiple={false}
-      />
-
-      <ClearButton onClick={() => updateBolt({ manufacturerId: undefined })} />
-
-      <Select
-        value={bolt.modelId}
-        data={modelOptions}
-        onSelect={(event) => {
-          const modelId = event.currentTarget.value;
-          const model = models?.find((model) => model.id === modelId);
-          if (model) {
-            const { materialId, type, diameter, diameterUnit } = model;
-            updateBolt({ modelId, materialId, type, diameter, diameterUnit });
+    <Grid>
+      <Grid.Col>
+        <Select
+          value={bolt.manufacturerId}
+          data={manufacturerOptions}
+          onSelect={(event) =>
+            updateBolt({
+              manufacturerId: event.currentTarget.value,
+              modelId: undefined,
+            })
           }
-        }}
-        label="Modell"
-        nothingFoundMessage="Inga modeller hittades"
-        multiple={false}
-      />
+          label="Tillverkare"
+          nothingFoundMessage="Inga tillverkare hittades"
+          multiple={false}
+        />
+      </Grid.Col>
 
-      <ClearButton onClick={() => updateBolt({ modelId: undefined })} />
+      <Grid.Col>
+        <Select
+          value={bolt.modelId}
+          data={modelOptions}
+          onSelect={(event) => {
+            const modelId = event.currentTarget.value;
+            const model = models?.find((model) => model.id === modelId);
+            if (model) {
+              const { materialId, type, diameter, diameterUnit } = model;
+              updateBolt({ modelId, materialId, type, diameter, diameterUnit });
+            }
+          }}
+          label="Modell"
+          nothingFoundMessage="Inga modeller hittades"
+          multiple={false}
+        />
+      </Grid.Col>
 
-      <RadioCardsGroup<BoltType>
-        value={bolt.type}
-        options={typeOptions}
-        onChange={(type) => updateBolt({ type })}
-        label="Typ"
-      />
+      <Grid.Col>
+        <Chip.Group
+          defaultValue={bolt.type}
+          onChange={(type) => updateBolt({ type: type as Bolt["type"] })}
+        >
+          <Group>
+            {typeOptions.map(({ key, value, label }) => (
+              <Chip key={key} value={value} variant="outline">
+                {label}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+      </Grid.Col>
 
-      <div />
-
-      <Select
-        value={bolt.materialId}
-        data={materialOptions}
-        onSelect={(event) =>
-          updateBolt({ materialId: event.currentTarget.value })
-        }
-        label="Material"
-        nothingFoundMessage="Inga material hittades"
-        multiple={false}
-      />
-
-      <ClearButton onClick={() => updateBolt({ materialId: undefined })} />
-
-      <RadioCardsGroup<DiameterAndUnit>
-        value={
-          bolt.diameter && bolt.diameterUnit
-            ? { diameter: bolt.diameter, unit: bolt.diameterUnit }
-            : undefined
-        }
-        onChange={(value) => {
-          if (value) {
-            const { diameter, unit: diameterUnit } = value;
-            updateBolt({ diameter, diameterUnit });
-          } else {
-            updateBolt({ diameter: undefined, diameterUnit: undefined });
+      <Grid.Col>
+        <Select
+          value={bolt.materialId}
+          data={materialOptions}
+          onSelect={(event) =>
+            updateBolt({ materialId: event.currentTarget.value })
           }
-        }}
-        options={diameterOptions}
-        label="Diameter"
-      />
+          label="Material"
+          nothingFoundMessage="Inga material hittades"
+          multiple={false}
+        />
+      </Grid.Col>
 
-      <div />
+      <Grid.Col>
+        <Chip.Group
+          defaultValue={
+            diameterOptions.find(
+              ({ value: { diameter, unit } }) =>
+                diameter === bolt.diameter && unit === bolt.diameterUnit
+            )?.key
+          }
+          onChange={(value) => {
+            if (value) {
+              const { diameter, unit: diameterUnit } = diameterOptions.find(
+                ({ key }) => key === value
+              )?.value ?? { diameter: undefined, unit: undefined };
+              updateBolt({ diameter, diameterUnit });
+            }
+          }}
+        >
+          <Group>
+            {diameterOptions.map(({ key, label }) => (
+              <Chip key={key} value={key} variant="outline">
+                {label}
+              </Chip>
+            ))}
+          </Group>
+        </Chip.Group>
+      </Grid.Col>
 
-      <YearPickerInput
-        value={bolt.installed}
-        label="År"
-        onSelect={(value) =>
-          updateBolt({
-            installed: new Date(Date.UTC(Number(value), 0, 1)),
-          })
-        }
-        clearable
-      />
-
-      <div />
+      <Grid.Col>
+        <YearPickerInput
+          value={bolt.installed}
+          label="År"
+          placeholder="År"
+          onSelect={(value) =>
+            updateBolt({
+              installed: new Date(Date.UTC(Number(value), 0, 1)),
+            })
+          }
+          clearable
+        />
+      </Grid.Col>
 
       {!hideDismantled && (
-        <>
+        <Grid.Col>
           <DatePickerInput
             label="Demonterad"
+            placeholder="Demonterad"
             value={bolt.dismantled}
             onChange={(value) => updateBolt({ dismantled: value ?? undefined })}
             clearable
           />
-
-          <div />
-        </>
+        </Grid.Col>
       )}
-    </div>
+    </Grid>
   );
 };
 

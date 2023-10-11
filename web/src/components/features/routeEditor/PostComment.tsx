@@ -1,5 +1,5 @@
 import { useCreateComment } from "@/queries/commentQueries";
-import { Button, Textarea } from "@mantine/core";
+import { Button, Group, Textarea } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 
 export const PostComment: FC<{ parentResourceId: string }> = ({
@@ -16,7 +16,7 @@ export const PostComment: FC<{ parentResourceId: string }> = ({
   }, [postComment.isSuccess]);
 
   return (
-    <div data-tailwind="flex flex-row gap-x-2">
+    <Group>
       <Textarea
         placeholder="Kommentar"
         value={comment}
@@ -29,6 +29,6 @@ export const PostComment: FC<{ parentResourceId: string }> = ({
       >
         Posta
       </Button>
-    </div>
+    </Group>
   );
 };

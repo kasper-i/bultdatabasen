@@ -2,7 +2,7 @@ export interface Option<T> {
   value: T;
   label: string;
   sublabel?: string;
-  key: React.Key;
+  key: string;
   disabled?: boolean;
 }
 

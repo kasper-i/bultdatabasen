@@ -3,12 +3,11 @@ import Restricted from "@/components/Restricted";
 import { usePermissions } from "@/hooks/authHooks";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
-import { ActionIcon, Loader } from "@mantine/core";
+import { ActionIcon, Card, Loader } from "@mantine/core";
 import { IconChevronRight, IconPlus } from "@tabler/icons-react";
 import clsx from "clsx";
 import { FC, ReactElement, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Card } from "./Card";
 import { usePointLabeler } from "./hooks";
 import PointDetails from "./PointDetails";
 import PointWizard from "./PointWizard";
@@ -172,11 +171,7 @@ const PointEditor = ({
           }
 
           cards.push(
-            <Card
-              key={point.id}
-              lowerCutout={editable && !showWizard}
-              upperCutout={editable && !wizardAbove}
-            >
+            <Card key={point.id} withBorder>
               {selected && selectedPoint !== undefined ? (
                 <Suspense fallback={<Loader type="bars" />}>
                   <PointDetails
@@ -220,7 +215,7 @@ const PointEditor = ({
               insertPosition.order === "after" ? 0 : cards.length - 1,
               1,
               <div key="new" data-tailwind="my-1">
-                <Card dashed>
+                <Card>
                   <PointWizard
                     mutation={createPoint}
                     position={insertPosition}

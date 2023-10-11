@@ -1,3 +1,4 @@
+import { Text } from "@mantine/core";
 import { FC } from "react";
 
 export const Counter: FC<{ label: string; count: number }> = ({
@@ -5,9 +6,11 @@ export const Counter: FC<{ label: string; count: number }> = ({
   count,
 }) => {
   return (
-    <div data-tailwind="h-12 rounded-lg bg-transparent flex flex-col items-center divide-y-2 divide-analogous-500">
-      <span data-tailwind="font-bold">{count}</span>
-      <span data-tailwind="text-xs">{label}</span>
+    <div>
+      <Text fw={900} ta="center">
+        {count}
+      </Text>
+      <Text size="xs">{label}</Text>
     </div>
   );
 };

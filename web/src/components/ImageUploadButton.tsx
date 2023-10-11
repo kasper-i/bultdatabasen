@@ -39,9 +39,7 @@ const ImageUploadButton = ({ pointId }: Props): ReactElement => {
   });
 
   return progress && progress < 100 ? (
-    <div data-tailwind="h-[2.125rem] w-[2.125rem]">
-      <Progress value={progress} animated />
-    </div>
+    <Progress value={progress} animated />
   ) : (
     <div {...getRootProps()}>
       <input {...getInputProps()} />

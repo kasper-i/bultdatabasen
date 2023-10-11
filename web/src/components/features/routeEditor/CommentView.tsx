@@ -2,7 +2,15 @@ import DeleteDialog from "@/components/molecules/DeleteDialog";
 import Restricted from "@/components/Restricted";
 import { Comment } from "@/models/comment";
 import { useDeleteComment, useUpdateComment } from "@/queries/commentQueries";
-import { ActionIcon, Button, Menu, TextInput } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Group,
+  Menu,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { IconEdit, IconMenu2, IconTrash } from "@tabler/icons-react";
 import { FC, useEffect, useState } from "react";
 
@@ -21,16 +29,16 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
   }, [updateComment.isSuccess]);
 
   return (
-    <div data-tailwind="flex flex-row justify-between gap-x-2">
+    <Group>
       {action === "edit" ? (
-        <div data-tailwind="flex-grow flex flex-col gap-2">
+        <Stack gap="sm">
           <TextInput
             label="Kommentar"
             value={text}
             onChange={(e) => setText(e.target.value)}
             required
           />
-          <div data-tailwind="flex flex-row gap-2 justify-start">
+          <Group justify="end">
             <Button variant="subtle" onClick={() => setAction(undefined)}>
               Avbryt
             </Button>
@@ -40,10 +48,10 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
             >
               Spara
             </Button>
-          </div>
-        </div>
+          </Group>
+        </Stack>
       ) : (
-        <div data-tailwind="flex-grow w-0 text-sm italic">{comment.text}</div>
+        <Text fs="italic">{comment.text}</Text>
       )}
       {action === undefined && (
         <Restricted>
@@ -82,6 +90,6 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
           onClose={() => setAction(undefined)}
         />
       )}
-    </div>
+    </Group>
   );
 };
