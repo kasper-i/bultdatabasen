@@ -3,14 +3,21 @@ import Restricted from "@/components/Restricted";
 import { usePermissions } from "@/hooks/authHooks";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
-import { ActionIcon, Card, Loader } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Group,
+  Loader,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { IconChevronRight, IconPlus } from "@tabler/icons-react";
-import clsx from "clsx";
 import { FC, ReactElement, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { usePointLabeler } from "./hooks";
 import PointDetails from "./PointDetails";
 import PointWizard from "./PointWizard";
+import { usePointLabeler } from "./hooks";
 
 interface Props {
   routeId: string;
@@ -75,7 +82,7 @@ const PointEditor = ({
 
   if (points.length === 0 || openInitialWizard) {
     return (
-      <div data-tailwind="p-4 border-2 border-gray-300 border-dashed rounded-md">
+      <Card>
         {openInitialWizard ? (
           <PointWizard
             mutation={createPoint}
@@ -87,33 +94,26 @@ const PointEditor = ({
             illegalPoints={points.map((point) => point.id)}
           />
         ) : (
-          <div data-tailwind="flex flex-col items-center justify-center">
+          <Stack align="center">
             <Restricted>
-              <ActionIcon
-                onClick={() => createFirst()}
-                data-tailwind="mb-2.5"
-                size="lg"
-              >
+              <ActionIcon onClick={() => createFirst()} size="lg">
                 <IconPlus size={20} />
               </ActionIcon>
             </Restricted>
-            <div data-tailwind="text-sm text-gray-600 text-center">
+            <Text>
               <p>På den här leden finns ännu inga dokumenterade bultar.</p>
               <Restricted>
-                <p data-tailwind="font-medium mt-2">
-                  <span
-                    onClick={() => createFirst()}
-                    data-tailwind="text-primary-500 hover:text-primary-400 pr-1 cursor-pointer"
-                  >
+                <p>
+                  <Button variant="subtle" onClick={() => createFirst()}>
                     Lägg till
-                  </span>
+                  </Button>
                   en första ledbult eller ankare.
                 </p>
               </Restricted>
-            </div>
-          </div>
+            </Text>
+          </Stack>
         )}
-      </div>
+      </Card>
     );
   }
 
@@ -124,27 +124,21 @@ const PointEditor = ({
     insertPosition,
   }) => {
     return (
-      <div data-tailwind="relative h-0 w-full my-0.5">
-        <div data-tailwind="absolute z-10 w-full h-5 -top-2.5 flex justify-center items-center">
-          <ActionIcon
-            onClick={() => {
-              deselectPoint();
-              setInsertPosition(insertPosition);
-            }}
-            radius="xl"
-            size="xs"
-          >
-            <IconPlus size={14} color="white" />
-          </ActionIcon>
-        </div>
-      </div>
+      <ActionIcon
+        onClick={() => {
+          deselectPoint();
+          setInsertPosition(insertPosition);
+        }}
+        radius="xl"
+        size="xs"
+      >
+        <IconPlus size={14} color="white" />
+      </ActionIcon>
     );
   };
 
   return (
-    <div
-      data-tailwind={clsx("flex flex-col w-full sm:w-96", !editable && "gap-1")}
-    >
+    <Stack gap="sm">
       {points
         .slice()
         .reverse()
@@ -182,21 +176,16 @@ const PointEditor = ({
                   />
                 </Suspense>
               ) : (
-                <div
-                  data-tailwind={clsx(
-                    "h-6 w-full cursor-pointer flex items-center justify-between",
-                    navigable && "cursor-pointer"
-                  )}
+                <Group
+                  justify="space-between"
                   onClick={navigable ? () => changePoint(point.id) : undefined}
                 >
                   <span>
                     {name}
-                    <span data-tailwind="font-medium text-primary-500 ml-1">
-                      {no}
-                    </span>
+                    <span>{no}</span>
                   </span>
                   <IconChevronRight size={14} />
-                </div>
+                </Group>
               )}
             </Card>
           );
@@ -214,7 +203,7 @@ const PointEditor = ({
             cards.splice(
               insertPosition.order === "after" ? 0 : cards.length - 1,
               1,
-              <div key="new" data-tailwind="my-1">
+              <div key="new">
                 <Card>
                   <PointWizard
                     mutation={createPoint}
@@ -231,7 +220,7 @@ const PointEditor = ({
 
           return cards;
         })}
-    </div>
+    </Stack>
   );
 };
 
