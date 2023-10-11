@@ -124,16 +124,17 @@ const PointEditor = ({
     insertPosition,
   }) => {
     return (
-      <ActionIcon
+      <Button
         onClick={() => {
           deselectPoint();
           setInsertPosition(insertPosition);
         }}
-        radius="xl"
         size="xs"
+        leftSection={<IconPlus size={14} />}
+        variant="light"
       >
-        <IconPlus size={14} color="white" />
-      </ActionIcon>
+        Ny punkt
+      </Button>
     );
   };
 
@@ -142,14 +143,9 @@ const PointEditor = ({
       {points
         .slice()
         .reverse()
-        .flatMap((point, index, array) => {
+        .flatMap((point, index) => {
           const selected = point.id === selectedPointId;
           const showWizard = insertPosition?.pointId === point.id;
-          const wizardAbove =
-            insertPosition?.order === "after" ||
-            (index > 0 &&
-              insertPosition?.order === "before" &&
-              insertPosition.pointId === array[index - 1].id);
 
           const { name, no } = pointLabeler(point.id);
 
