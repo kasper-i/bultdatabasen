@@ -5,9 +5,8 @@ import TaskList from "@/components/features/task/TaskList";
 import { useUnsafeParams } from "@/hooks/common";
 import { ResourceType } from "@/models/resource";
 import { useResource } from "@/queries/resourceQueries";
-import { Text, Title } from "@mantine/core";
+import { Box, Stack, Text, Title } from "@mantine/core";
 import { Fragment, ReactElement } from "react";
-import classes from "./TasksPage.module.css";
 
 const locationDescription = (
   resourceName: string,
@@ -38,21 +37,24 @@ const TasksPage = (): ReactElement => {
   const onlyRoot = ancestors?.length === 1;
 
   return (
-    <>
-      {!onlyRoot && (
-        <Breadcrumbs className={classes.breadcrumbs} resources={ancestors} />
-      )}
-      <Title order={1}>Uppdrag</Title>
-      {resource.name !== undefined && (
-        <Text size="sm">
-          {locationDescription(resource.name, resource.type)}
-        </Text>
-      )}
+    <Stack gap="sm">
+      {!onlyRoot && <Breadcrumbs resources={ancestors} />}
+
+      <Box>
+        <Title order={1}>Uppdrag</Title>
+        {resource.name !== undefined && (
+          <Text size="sm">
+            {locationDescription(resource.name, resource.type)}
+          </Text>
+        )}
+      </Box>
+
       <Restricted>
         {resource.type === "route" && <CreateTask routeId={resourceId} />}
       </Restricted>
+
       <TaskList resourceId={resourceId} />
-    </>
+    </Stack>
   );
 };
 
