@@ -1,7 +1,7 @@
 import { Api } from "@/Api";
-import UserName from "@/components/UserName";
 import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
+import UserName from "@/components/UserName";
 import { Point } from "@/models/point";
 import { Resource } from "@/models/resource";
 import { Task, TaskStatus } from "@/models/task";
@@ -25,11 +25,9 @@ import {
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import {
-  IconCheck,
   IconClipboardCheck,
   IconEdit,
   IconMenu2,
-  IconMessage,
   IconRefresh,
   IconTrash,
 } from "@tabler/icons-react";
@@ -40,6 +38,7 @@ import { Link } from "react-router-dom";
 import Restricted from "../../Restricted";
 import { usePointLabeler } from "../routeEditor/hooks";
 import TaskEdit from "./TaskEdit";
+import classes from "./TaskView.module.css";
 
 const finalStatuses: TaskStatus[] = ["closed", "rejected"];
 
@@ -92,7 +91,8 @@ const CompleteButton: FC<{
           leftSection={<IconClipboardCheck size={14} />}
           loading={loading}
           disabled={phase === 2 && isEmpty(comment.trim())}
-          variant="filled"
+          variant="light"
+          fullWidth
         >
           Markera åtgärdad
         </Button>
@@ -116,7 +116,7 @@ const PriorityPill: FC<{ priority: number }> = ({ priority }) => {
   }
 
   return (
-    <Pill {...props} size="xs">
+    <Pill {...props} size="xs" className={classes.pill}>
       {translatePriority(priority)}
     </Pill>
   );
@@ -187,8 +187,8 @@ const TaskView: FC<{
     <Card withBorder>
       <Group justify="space-between">
         <span>
-          <Group align="center" justify="start" gap="sm">
-            {translatePriority(task.priority) && (
+          <Group align="center" justify="start" gap={0}>
+            {!isComplete && translatePriority(task.priority) && (
               <PriorityPill priority={task.priority} />
             )}
             <Anchor
@@ -239,7 +239,7 @@ const TaskView: FC<{
                 leftSection={<IconTrash size={14} />}
                 onClick={() => setAction("delete")}
               >
-                Redigera
+                Radera
               </Menu.Item>
             </Menu.Dropdown>
           </Menu>
@@ -251,34 +251,43 @@ const TaskView: FC<{
       {action === "edit" ? (
         <TaskEdit task={task} onDone={() => setAction(undefined)} />
       ) : (
-        <>
-          <Text>{task.description}</Text>
+        <Text className={classes.description} size="sm" fw={500}>
+          Problem:{" "}
+          <Text component="span" size="sm">
+            {task.description}
+          </Text>
+        </Text>
+      )}
 
+      {action !== "edit" && (
+        <Card.Section
+          className={classes.section}
+          withBorder
+          data-status={task.status}
+        >
           {isComplete ? (
-            <>
-              <Space h="sm" />
+            <Box>
+              <>
+                <Text fw={600} size="sm">
+                  {task.status === "closed" ? "Åtgärdat" : "Avvisad"}
+                </Text>
+                <Text size="xs">
+                  {task.closedAt && <Time time={task.closedAt} />}
+                </Text>
+              </>
+              {task.comment && (
+                <>
+                  <Space h="sm" />
 
-              <Box>
-                <Group align="center">
-                  <IconCheck
-                    color={task.status === "closed" ? "green" : "red"}
-                  />
-                  <Text
-                    size="sm"
-                    c={task.status === "closed" ? "green.9" : "red"}
-                  >
-                    {task.status === "closed" ? "Åtgärdat" : "Stängd"}{" "}
-                    {task.closedAt && <Time time={task.closedAt} />}
+                  <Text size="sm" fw={500}>
+                    Kommentar:{" "}
+                    <Text component="span" size="sm">
+                      {task.comment}
+                    </Text>
                   </Text>
-                </Group>
-                {task.comment && (
-                  <Group align="center">
-                    <IconMessage />
-                    <Text>{task.comment}</Text>
-                  </Group>
-                )}
-              </Box>
-            </>
+                </>
+              )}
+            </Box>
           ) : (
             <Restricted>
               <>
@@ -289,7 +298,7 @@ const TaskView: FC<{
               </>
             </Restricted>
           )}
-        </>
+        </Card.Section>
       )}
       {action === "delete" && (
         <DeleteDialog

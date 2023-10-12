@@ -1,0 +1,21 @@
+.pill {
+    margin-right: 0.25rem;
+}
+
+.section {
+    padding: var(--mantine-spacing-md);
+}
+
+.section[data-status="closed"] {
+    background-color: var(--mantine-color-green-light);
+    color: var(--mantine-color-green-light-color);
+}
+
+.section[data-status="rejected"] {
+    background-color: var(--mantine-color-red-light);
+    color: var(--mantine-color-red-light-color);
+}
+
+.description {
+    margin-bottom: var(--mantine-spacing-md);
+}

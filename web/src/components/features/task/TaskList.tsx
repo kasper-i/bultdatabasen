@@ -2,6 +2,7 @@ import { useTasks } from "@/queries/taskQueries";
 import {
   Center,
   Divider,
+  Flex,
   Loader,
   Pagination,
   Space,
@@ -37,8 +38,6 @@ const TaskList = ({ resourceId }: Props): ReactElement => {
           setPage(1);
         }}
       />
-
-      <Space h="lg" />
 
       <Stack gap="sm">
         {tasks?.data?.map((task) => (
