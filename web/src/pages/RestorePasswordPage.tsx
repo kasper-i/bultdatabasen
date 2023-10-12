@@ -8,17 +8,23 @@ import {
 } from "@/utils/cognito";
 import {
   Alert,
+  Anchor,
+  Box,
   Button,
+  Center,
+  Group,
+  InputLabel,
   PasswordInput,
   PinInput,
   Stack,
+  Text,
   TextInput,
 } from "@mantine/core";
-import { IconAlertHexagon } from "@tabler/icons-react";
+import { IconAlertHexagon, IconArrowLeft } from "@tabler/icons-react";
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { handleLogin } from "./SigninPage";
 
 interface State {
@@ -111,23 +117,36 @@ const RestorePasswordPage = () => {
             </Alert>
           )}
 
-          <Button
-            loading={inProgress}
-            fullWidth
-            onClick={restore}
-            disabled={!email}
-          >
-            Återställ
-          </Button>
+          <Group justify="space-between">
+            <Anchor c="dimmed" size="sm" component={Link} to="/auth/signin">
+              <Center inline>
+                <IconArrowLeft size={14} />
+                <Box ml={4}>Tillbaka till inloggingssidan</Box>
+              </Center>
+            </Anchor>
+            <Button loading={inProgress} onClick={restore} disabled={!email}>
+              Återställ
+            </Button>
+          </Group>
         </>
       ) : (
         <>
-          <PinInput
-            length={6}
-            value={verificationCode}
-            onChange={(value) => updateState({ verificationCode: value })}
-            tabIndex={1}
-          />
+          <Box>
+            <InputLabel>
+              Återställningskod{" "}
+              <Text component="span" c="red" aria-hidden="true">
+                {" "}
+                *
+              </Text>
+            </InputLabel>
+            <PinInput
+              length={6}
+              value={verificationCode}
+              onChange={(value) => updateState({ verificationCode: value })}
+              tabIndex={1}
+            />
+          </Box>
+
           <PasswordInput
             label="Lösenord"
             value={newPassword}
@@ -148,7 +167,6 @@ const RestorePasswordPage = () => {
           )}
           <Button
             loading={inProgress}
-            fullWidth
             onClick={confirm}
             disabled={!verificationCode || !newPassword}
           >
