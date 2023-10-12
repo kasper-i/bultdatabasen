@@ -1,5 +1,5 @@
 .maintainer svg {
-    margin-right: calc(0.5 * var(--mantine-spacing-xs));
+    margin-right: 0.25rem;
 }
 
 .title {

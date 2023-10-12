@@ -185,14 +185,13 @@ const TaskView: FC<{
 
   return (
     <Card withBorder>
-      <Group justify="space-between">
+      <Group justify="space-between" wrap="nowrap" align="start">
         <span>
-          <Group align="center" justify="start" gap={0}>
+          <Text size="sm">
             {!isComplete && translatePriority(task.priority) && (
               <PriorityPill priority={task.priority} />
             )}
             <Anchor
-              size="sm"
               component={Link}
               to={`${getResourceRoute(parent.type, parent.id)}${
                 pointId ? `?p=${pointId}` : ""
@@ -200,7 +199,7 @@ const TaskView: FC<{
             >
               {parent?.name}
             </Anchor>
-          </Group>
+          </Text>
           {pointNo && (
             <Text size="xs" c="dimmed">
               {pointName} {pointNo}
