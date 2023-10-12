@@ -92,7 +92,7 @@ const CompleteButton: FC<{
           loading={loading}
           disabled={phase === 2 && isEmpty(comment.trim())}
           variant="light"
-          fullWidth
+          fullWidth={phase === 1}
         >
           Markera åtgärdad
         </Button>
