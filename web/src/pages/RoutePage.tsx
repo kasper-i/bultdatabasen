@@ -49,7 +49,7 @@ const RoutePage = () => {
         menu={
           <Menu position="bottom-end" withArrow>
             <Menu.Target>
-              <ActionIcon variant="light">
+              <ActionIcon variant="outline" color="white">
                 <IconMenu2 size={14} />
               </ActionIcon>
             </Menu.Target>
@@ -71,7 +71,16 @@ const RoutePage = () => {
             </Menu.Dropdown>
           </Menu>
         }
-      />
+      >
+        <Text size="sm">
+          {renderRouteType(routeType)}
+          {year && <> från {year}</>}
+          {" som "}
+          {length && <> är {length}m lång och </>}
+          har {numInstalledBolts} dokumenterade bult
+          {numInstalledBolts !== 1 && "ar"}.
+        </Text>
+      </PageHeader>
 
       {action === "delete" && (
         <DeleteDialog
@@ -80,15 +89,6 @@ const RoutePage = () => {
           onClose={() => setAction(undefined)}
         />
       )}
-
-      <Text size="sm">
-        {renderRouteType(routeType)}
-        {year && <> från {year}</>}
-        {" som "}
-        {length && <> är {length}m lång och </>}
-        har {numInstalledBolts} dokumenterade bult
-        {numInstalledBolts !== 1 && "ar"}.
-      </Text>
 
       <Space h="lg" />
 

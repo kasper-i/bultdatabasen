@@ -1,27 +1,21 @@
 import { Concatenator } from "@/components/Concatenator";
-import { Resource } from "@/models/resource";
 import { useMaintainers, useResource } from "@/queries/resourceQueries";
+import { Card, Group, Space, Stack, Text, Title } from "@mantine/core";
 import { IconTool } from "@tabler/icons-react";
-import { ReactElement, ReactNode } from "react";
+import { FC, ReactNode } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import { Counter } from "./Counter";
-import Restricted from "./Restricted";
-import { Group, Space, Stack, Text, Title } from "@mantine/core";
 import classes from "./PageHeader.module.css";
+import Restricted from "./Restricted";
+import { Resource } from "@/models/resource";
 
-interface Props {
+const PageHeader: FC<{
   resourceId: string;
   ancestors?: Resource[];
   showCounts?: boolean;
   menu?: ReactNode;
-}
-
-const PageHeader = ({
-  resourceId,
-  ancestors,
-  showCounts = false,
-  menu,
-}: Props): ReactElement => {
+  children?: ReactNode;
+}> = ({ resourceId, ancestors, showCounts = false, menu, children }) => {
   const { data: resource } = useResource(resourceId);
   const { data: maintainers } = useMaintainers(resourceId);
 
@@ -33,40 +27,48 @@ const PageHeader = ({
   const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (
-    <Stack>
+    <>
       {crumbs && !onlyRoot && (
         <Breadcrumbs className={classes.breadcrumbs} resources={crumbs} />
       )}
-      <Group justify="space-between">
-        <Title order={1}>{resource.name}</Title>
-        <Restricted>{menu}</Restricted>
-      </Group>
+      <Card bg="brand.4" c="white">
+        <Stack gap={0}>
+          <Group justify="space-between" wrap="nowrap">
+            <Title order={3} className={classes.title}>
+              {resource.name}
+            </Title>
+            <Restricted>{menu}</Restricted>
+          </Group>
 
-      <Text className={classes.maintainer}>
-        <IconTool size={14} />
-        {maintainers?.length ? (
-          <Concatenator>
-            {maintainers?.map((maintainer) => (
-              <span key={maintainer.id}>{maintainer.name}</span>
-            ))}
-          </Concatenator>
-        ) : (
-          <span>Underhållsansvarig saknas</span>
-        )}
-      </Text>
+          <Text className={classes.maintainer}>
+            <IconTool size={14} />
+            {maintainers?.length ? (
+              <Concatenator>
+                {maintainers?.map((maintainer) => (
+                  <span key={maintainer.id}>{maintainer.name}</span>
+                ))}
+              </Concatenator>
+            ) : (
+              <span>Underhållsansvarig saknas</span>
+            )}
+          </Text>
 
-      <Space h="sm" />
+          <Space h="sm" />
 
-      {showCounts && (
-        <Group>
-          <Counter
-            label="Bultar"
-            count={resource.counters?.installedBolts ?? 0}
-          />
-          <Counter label="Leder" count={resource.counters?.routes ?? 0} />
-        </Group>
-      )}
-    </Stack>
+          {showCounts && (
+            <Group>
+              <Counter
+                label="Bultar"
+                count={resource.counters?.installedBolts ?? 0}
+              />
+              <Counter label="Leder" count={resource.counters?.routes ?? 0} />
+            </Group>
+          )}
+
+          {children}
+        </Stack>
+      </Card>
+    </>
   );
 };
 

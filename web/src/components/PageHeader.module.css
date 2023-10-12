@@ -5,3 +5,9 @@
 .breadcrumbs {
     margin-bottom: var(--mantine-spacing-sm);
 }
+
+.title {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

@@ -16,7 +16,7 @@ const AreaPage = (): ReactElement => {
   }
 
   return (
-    <Stack>
+    <Stack gap="sm">
       <PageHeader
         resourceId={resourceId}
         ancestors={area.ancestors}

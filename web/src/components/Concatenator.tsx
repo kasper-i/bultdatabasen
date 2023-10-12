@@ -1,4 +1,4 @@
-import React, { Children, FC, Fragment, ReactNode } from "react";
+import { Children, FC, Fragment, ReactNode } from "react";
 
 export const Concatenator: FC<{
   children?: ReactNode[];

@@ -16,7 +16,7 @@ const CragPage = (): ReactElement => {
   }
 
   return (
-    <Stack>
+    <Stack gap="sm">
       <PageHeader
         resourceId={resourceId}
         ancestors={crag.ancestors}

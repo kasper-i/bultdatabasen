@@ -20,7 +20,7 @@ const SectorPage = (): ReactElement => {
   }
 
   return (
-    <Stack className={classes.container}>
+    <Stack gap="sm" className={classes.container}>
       <PageHeader
         resourceId={resourceId}
         ancestors={sector.ancestors}
