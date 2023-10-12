@@ -1,11 +1,14 @@
-import { ReactElement } from "react";
+import { FC, ReactElement } from "react";
 import { useLocation } from "react-router-dom";
 import LoginToolbar from "./LoginToolbar";
 import Search from "./Search";
 import classes from "./NavigationBar.module.css";
 import { Flex } from "@mantine/core";
+import clsx from "clsx";
 
-const NavigationBar = (): ReactElement => {
+const NavigationBar: FC<{ className?: string }> = ({
+  className,
+}): ReactElement => {
   const location = useLocation();
 
   return (
@@ -13,7 +16,7 @@ const NavigationBar = (): ReactElement => {
       justify="space-between"
       align="center"
       direction="row-reverse"
-      className={classes.bar}
+      className={clsx(classes.bar, className)}
     >
       <LoginToolbar />
       {location.pathname !== "/" && <Search />}

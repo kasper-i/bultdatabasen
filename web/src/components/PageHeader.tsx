@@ -38,7 +38,7 @@ const PageHeader: FC<{
             <Restricted>{menu}</Restricted>
           </Group>
 
-          <Text className={classes.maintainer}>
+          <Text size="sm" className={classes.maintainer}>
             <IconTool size={14} />
             {maintainers?.length ? (
               <Concatenator>

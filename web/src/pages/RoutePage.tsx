@@ -42,7 +42,7 @@ const RoutePage = () => {
   }
 
   return (
-    <Stack>
+    <Stack gap="sm">
       <PageHeader
         resourceId={resourceId}
         ancestors={route.ancestors}
@@ -90,11 +90,7 @@ const RoutePage = () => {
         />
       )}
 
-      <Space h="lg" />
-
       <TaskAlert openTasks={route.counters?.openTasks ?? 0} />
-
-      <Space h="lg" />
 
       <PointEditor
         routeId={resourceId}
