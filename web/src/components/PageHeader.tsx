@@ -28,9 +28,7 @@ const PageHeader: FC<{
 
   return (
     <>
-      {crumbs && !onlyRoot && (
-        <Breadcrumbs className={classes.breadcrumbs} resources={crumbs} />
-      )}
+      {crumbs && !onlyRoot && <Breadcrumbs resources={crumbs} />}
       <Card bg="brand.4" c="white">
         <Stack gap={0}>
           <Group justify="space-between" wrap="nowrap">

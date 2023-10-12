@@ -7,17 +7,18 @@ import classes from "./RootPage.module.css";
 const RootPage = () => {
   return (
     <Stack align="center" gap="sm">
-      <Text
-        variant="gradient"
-        gradient={{ from: "brand.4", to: "brand.6", deg: 90 }}
-      >
+      <div className={classes.hero}>
         <Title order={1}>bultdatabasen</Title>
-      </Text>
-      <Text ta="center">
-        En databas över borrbultar och ankare på klätterleder i Västsverige.
-      </Text>
-      <Search className={classes.search} />
-      <ChildrenTable resourceId={rootNodeId} filters={{ types: ["area"] }} />
+        <Text size="sm">
+          En databas över borrbultar och ankare på klätterleder i Västsverige.
+        </Text>
+        <Search className={classes.search} />
+      </div>
+      <ChildrenTable
+        className={classes.container}
+        resourceId={rootNodeId}
+        filters={{ types: ["area"] }}
+      />
     </Stack>
   );
 };

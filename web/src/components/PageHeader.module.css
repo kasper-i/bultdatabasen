@@ -2,10 +2,6 @@
     margin-right: calc(0.5 * var(--mantine-spacing-xs));
 }
 
-.breadcrumbs {
-    margin-bottom: var(--mantine-spacing-sm);
-}
-
 .title {
     text-overflow: ellipsis;
     white-space: nowrap;
