@@ -23,7 +23,7 @@
   font-size: var(--mantine-font-size-sm);
   text-decoration: none;
   display: contents;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .ellipsis {
