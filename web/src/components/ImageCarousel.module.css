@@ -1,13 +1,14 @@
 .filler {
-    flex-grow: 1;
+    margin-right: auto;
 }
 
 .toolbar {
     position: fixed;
     bottom: 0;
-    height: 4rem;
+    height: 3.5rem;
     background-color: var(--mantine-color-gray-1);
     width: 100%;
+    padding: var(--mantine-spacing-sm)
 }
 
 .modal {
@@ -25,7 +26,7 @@
 }
 
 .imgContainer {
-    margin-top: -4rem;
+    margin-top: -3.5rem;
 }
 
 .imgContainer img {

@@ -77,7 +77,7 @@ export const FullSizeImage: FC<{
   };
 
   let dimensionClasses: CSSProperties = {
-    maxHeight: "round(up, calc(100vh - 4rem), 1px)",
+    maxHeight: "round(up, calc(100vh - 3.5rem), 1px)",
     maxWidth: "round(up, calc(100vw), 1px)",
   };
 
@@ -112,10 +112,13 @@ export const FullSizeImage: FC<{
         />
       </div>
       <Group gap="sm" justify="space-between" className={classes.toolbar}>
-        <ActionIcon onClick={onClose} variant="subtle">
+        <ActionIcon
+          onClick={onClose}
+          variant="subtle"
+          className={classes.filler}
+        >
           <IconX size={14} />
         </ActionIcon>
-        <div className={classes.filler} />
         <Restricted>
           <Button
             loading={updateImage.isLoading}
