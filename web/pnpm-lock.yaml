@@ -84,8 +84,8 @@ dependencies:
     specifier: ^4.1.2
     version: 4.1.2
   zod:
-    specifier: ^3.20.6
-    version: 3.20.6
+    specifier: ^3.22.3
+    version: 3.22.3
 
 devDependencies:
   '@tailwindcss/forms':
@@ -3313,6 +3313,6 @@ packages:
       yargs-parser: 21.1.1
     dev: true
 
-  /zod@3.20.6:
-    resolution: {integrity: sha512-oyu0m54SGCtzh6EClBVqDDlAYRz4jrVtKwQ7ZnsEmMI9HnzuZFj8QFwAY1M5uniIYACdGvv0PBWPF2kO0aNofA==}
+  /zod@3.22.3:
+    resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
     dev: false
