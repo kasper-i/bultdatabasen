@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "gomod"
+    directory: "/backend"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "pip"
+    directory: "/backend/functions/packages/images/resize"
+    schedule:
+      interval: "daily"
