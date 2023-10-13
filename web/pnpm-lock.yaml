@@ -131,8 +131,8 @@ devDependencies:
     specifier: ^8.4.21
     version: 8.4.21
   rollup-plugin-visualizer:
-    specifier: ^5.8.3
-    version: 5.8.3
+    specifier: ^5.9.2
+    version: 5.9.2
   tailwindcss:
     specifier: ^3.0.23
     version: 3.0.23(autoprefixer@10.4.4)(postcss@8.4.21)
@@ -2864,8 +2864,8 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rollup-plugin-visualizer@5.8.3:
-    resolution: {integrity: sha512-QGJk4Bqe4AOat5AjipOh8esZH1nck5X2KFpf4VytUdSUuuuSwvIQZjMGgjcxe/zXexltqaXp5Vx1V3LmnQH15Q==}
+  /rollup-plugin-visualizer@5.9.2:
+    resolution: {integrity: sha512-waHktD5mlWrYFrhOLbti4YgQCn1uR24nYsNuXxg7LkPH8KdTXVWR9DNY1WU0QqokyMixVXJS4J04HNrVTMP01A==}
     engines: {node: '>=14'}
     hasBin: true
     peerDependencies:
@@ -2875,6 +2875,7 @@ packages:
         optional: true
     dependencies:
       open: 8.4.2
+      picomatch: 2.3.1
       source-map: 0.7.4
       yargs: 17.7.2
     dev: true
