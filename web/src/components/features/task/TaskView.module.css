@@ -4,6 +4,9 @@
 
 .section {
     padding: var(--mantine-spacing-md);
+    margin-bottom: calc(var(--card-padding) * -1);
+    border-bottom: unset;
+    margin-top: var(--card-padding);
 }
 
 .section[data-status="closed"] {
@@ -14,8 +17,4 @@
 .section[data-status="rejected"] {
     background-color: var(--mantine-color-red-light);
     color: var(--mantine-color-red-light-color);
-}
-
-.description {
-    margin-bottom: var(--mantine-spacing-md);
 }

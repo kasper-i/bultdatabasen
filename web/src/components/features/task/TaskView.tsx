@@ -1,7 +1,7 @@
 import { Api } from "@/Api";
+import UserName from "@/components/UserName";
 import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import UserName from "@/components/UserName";
 import { Point } from "@/models/point";
 import { Resource } from "@/models/resource";
 import { Task, TaskStatus } from "@/models/task";
@@ -12,9 +12,9 @@ import { translatePriority } from "@/utils/taskUtils";
 import {
   ActionIcon,
   Anchor,
-  Box,
   Button,
   Card,
+  CardSectionProps,
   Group,
   Menu,
   Pill,
@@ -183,6 +183,11 @@ const TaskView: FC<{
 
   const { name: pointName, no: pointNo } = pointLabeler(pointId ?? "");
 
+  const sectionProps: CardSectionProps = {
+    className: classes.section,
+    withBorder: true,
+  };
+
   return (
     <Card withBorder>
       <Group justify="space-between" wrap="nowrap" align="start">
@@ -250,7 +255,7 @@ const TaskView: FC<{
       {action === "edit" ? (
         <TaskEdit task={task} onDone={() => setAction(undefined)} />
       ) : (
-        <Text className={classes.description} size="sm" fw={500}>
+        <Text size="sm" fw={500}>
           Problem:{" "}
           <Text component="span" size="sm">
             {task.description}
@@ -258,47 +263,38 @@ const TaskView: FC<{
         </Text>
       )}
 
-      {action !== "edit" && (
-        <Card.Section
-          className={classes.section}
-          withBorder
-          data-status={task.status}
-        >
-          {isComplete ? (
-            <Box>
+      {action !== "edit" &&
+        (isComplete ? (
+          <Card.Section {...sectionProps} data-status={task.status}>
+            <Text fw={600} size="sm">
+              {task.status === "closed" ? "Åtgärdat" : "Avvisad"}
+            </Text>
+            <Text size="xs">
+              {task.closedAt && <Time time={task.closedAt} />}
+            </Text>
+            {task.comment && (
               <>
-                <Text fw={600} size="sm">
-                  {task.status === "closed" ? "Åtgärdat" : "Avvisad"}
-                </Text>
-                <Text size="xs">
-                  {task.closedAt && <Time time={task.closedAt} />}
-                </Text>
-              </>
-              {task.comment && (
-                <>
-                  <Space h="sm" />
+                <Space h="sm" />
 
-                  <Text size="sm" fw={500}>
-                    Kommentar:{" "}
-                    <Text component="span" size="sm">
-                      {task.comment}
-                    </Text>
+                <Text size="sm" fw={500}>
+                  Kommentar:{" "}
+                  <Text component="span" size="sm">
+                    {task.comment}
                   </Text>
-                </>
-              )}
-            </Box>
-          ) : (
-            <Restricted>
-              <>
-                <CompleteButton
-                  loading={updateTask.isLoading}
-                  onComplete={complete}
-                />
+                </Text>
               </>
-            </Restricted>
-          )}
-        </Card.Section>
-      )}
+            )}
+          </Card.Section>
+        ) : (
+          <Restricted>
+            <Card.Section {...sectionProps}>
+              <CompleteButton
+                loading={updateTask.isLoading}
+                onComplete={complete}
+              />
+            </Card.Section>
+          </Restricted>
+        ))}
       {action === "delete" && (
         <DeleteDialog
           mutation={deleteTask}
