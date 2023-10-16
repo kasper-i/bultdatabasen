@@ -1,5 +1,7 @@
 .pill {
     margin-right: 0.25rem;
+    vertical-align: middle;
+    display: inline-block;
 }
 
 .section {
