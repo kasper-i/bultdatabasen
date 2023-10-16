@@ -1,8 +1,9 @@
 import { usePoints } from "@/queries/pointQueries";
 import { useCreateTask } from "@/queries/taskQueries";
 import { Button, Group, Radio, Select, Stack, TextInput } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { IconPlus } from "@tabler/icons-react";
-import { ReactElement, useReducer, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { usePointLabeler } from "../routeEditor/hooks";
 
 interface Props {
@@ -17,13 +18,26 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
   const [description, setDescription] = useState("");
   const [selectedPointId, setSelectedPointId] = useState<string>();
   const [priority, setPriority] = useState(2);
-  const [showForm, openForm] = useReducer(() => true, false);
+  const [showForm, { open: openForm, close: closeForm }] = useDisclosure(false);
 
   const createTask = useCreateTask(routeId, selectedPointId ?? routeId);
+
+  useEffect(() => {
+    if (createTask.isSuccess) {
+      reset();
+    }
+  }, [createTask.isSuccess]);
 
   const handleCreateTask = () => {
     createTask.mutate({ description, priority });
     setDescription("");
+  };
+
+  const reset = () => {
+    setDescription("");
+    setSelectedPointId(undefined);
+    setPriority(2);
+    closeForm();
   };
 
   if (!showForm) {
@@ -76,6 +90,9 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
       </Radio.Group>
 
       <Group justify="end">
+        <Button onClick={reset} variant="subtle">
+          Avbryt
+        </Button>
         <Button
           onClick={handleCreateTask}
           loading={createTask.isLoading}
