@@ -2,7 +2,7 @@ import { Concatenator } from "@/components/Concatenator";
 import { useMaintainers, useResource } from "@/queries/resourceQueries";
 import { Card, Group, Space, Stack, Text, Title } from "@mantine/core";
 import { IconTool } from "@tabler/icons-react";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useMemo } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import { Counter } from "./Counter";
 import classes from "./PageHeader.module.css";
@@ -23,7 +23,15 @@ const PageHeader: FC<{
     return <></>;
   }
 
-  const crumbs = ancestors?.slice();
+  const crumbs = useMemo(() => {
+    const crumbs = ancestors?.slice();
+    if (resource) {
+      crumbs?.push(resource);
+    }
+
+    return crumbs;
+  }, [ancestors, resource]);
+
   const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (
