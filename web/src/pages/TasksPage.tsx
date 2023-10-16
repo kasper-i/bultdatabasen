@@ -5,8 +5,8 @@ import TaskList from "@/components/features/task/TaskList";
 import { useUnsafeParams } from "@/hooks/common";
 import { ResourceType } from "@/models/resource";
 import { useResource } from "@/queries/resourceQueries";
-import { Box, Stack, Text, Title } from "@mantine/core";
-import { Fragment, ReactElement } from "react";
+import { Box, Divider, Stack, Switch, Text, Title } from "@mantine/core";
+import { Fragment, ReactElement, useState } from "react";
 
 const locationDescription = (
   resourceName: string,
@@ -27,6 +27,7 @@ const locationDescription = (
 const TasksPage = (): ReactElement => {
   const { resourceId } = useUnsafeParams<"resourceId">();
   const { data: resource } = useResource(resourceId);
+  const [showClosed, setShowClosed] = useState(false);
 
   if (!resource) {
     return <Fragment />;
@@ -52,6 +53,13 @@ const TasksPage = (): ReactElement => {
       <Restricted>
         {resource.type === "route" && <CreateTask routeId={resourceId} />}
       </Restricted>
+
+      <Divider my="sm" />
+      <Switch
+        label="Visa åtgärdade"
+        checked={showClosed}
+        onChange={() => setShowClosed((state) => !state)}
+      />
 
       <TaskList resourceId={resourceId} />
     </Stack>

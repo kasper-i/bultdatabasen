@@ -1,5 +1,5 @@
 import PointEditor from "@/components/features/routeEditor/PointEditor";
-import { TaskAlert } from "@/components/features/task/TaskAlert";
+import TaskList from "@/components/features/task/TaskList";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
 import PageHeader from "@/components/PageHeader";
 import { useUnsafeParams } from "@/hooks/common";
@@ -7,10 +7,11 @@ import { usePoints } from "@/queries/pointQueries";
 import { useDeleteRoute, useRoute } from "@/queries/routeQueries";
 import { getParent } from "@/utils/resourceUtils";
 import { renderRouteType } from "@/utils/routeUtils";
-import { ActionIcon, Menu, Space, Stack, Text } from "@mantine/core";
+import { ActionIcon, Menu, Text } from "@mantine/core";
 import { IconEdit, IconMenu2, IconTrash } from "@tabler/icons-react";
 import { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import classes from "./RoutePage.module.css";
 
 const RoutePage = () => {
   const { resourceId } = useUnsafeParams<"resourceId">();
@@ -42,8 +43,9 @@ const RoutePage = () => {
   }
 
   return (
-    <Stack gap="sm">
+    <div className={classes.container}>
       <PageHeader
+        className={classes.header}
         resourceId={resourceId}
         ancestors={route.ancestors}
         menu={
@@ -90,14 +92,14 @@ const RoutePage = () => {
         />
       )}
 
-      <TaskAlert openTasks={route.counters?.openTasks ?? 0} />
-
       <PointEditor
         routeId={resourceId}
         routeParentId={parentId}
         points={points}
       />
-    </Stack>
+
+      <TaskList resourceId={resourceId} />
+    </div>
   );
 };
 

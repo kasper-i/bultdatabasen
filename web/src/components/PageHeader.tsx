@@ -15,7 +15,15 @@ const PageHeader: FC<{
   showCounts?: boolean;
   menu?: ReactNode;
   children?: ReactNode;
-}> = ({ resourceId, ancestors, showCounts = false, menu, children }) => {
+  className?: string;
+}> = ({
+  resourceId,
+  ancestors,
+  showCounts = false,
+  menu,
+  children,
+  className,
+}) => {
   const { data: resource } = useResource(resourceId);
   const { data: maintainers } = useMaintainers(resourceId);
 
@@ -35,7 +43,7 @@ const PageHeader: FC<{
   const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (
-    <>
+    <Stack gap="sm" className={className}>
       {crumbs && !onlyRoot && <Breadcrumbs resources={crumbs} />}
       <Card bg="brand.4" c="white">
         <Stack gap={0}>
@@ -74,7 +82,7 @@ const PageHeader: FC<{
           {children}
         </Stack>
       </Card>
-    </>
+    </Stack>
   );
 };
 

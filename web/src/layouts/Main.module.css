@@ -17,7 +17,7 @@
 .content {
     grid-area: main;
     width: 100%;
-    max-width: 768px;
+    max-width: var(--mantine-breakpoint-md);
     margin: 0 auto;
     padding: var(--mantine-spacing-lg);
     flex-grow: 1;
