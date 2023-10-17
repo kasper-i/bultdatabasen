@@ -66,7 +66,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
   const textStyle = bolt.dismantled ? "line-through opacity-50" : undefined;
 
   return (
-    <Card withBorder>
+    <Card bg="brand.4" c="white">
       <Group justify="space-between">
         <Text fw={500}>
           <span>
@@ -79,7 +79,7 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
         <Restricted>
           <Menu position="bottom-end" withArrow>
             <Menu.Target>
-              <ActionIcon variant="light">
+              <ActionIcon variant="outline" color="white">
                 <IconMenu2 size={14} />
               </ActionIcon>
             </Menu.Target>

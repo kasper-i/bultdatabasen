@@ -1,7 +1,15 @@
 import { CreatePointRequest, InsertPosition } from "@/Api";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
-import { Button, Group, Loader, Switch, Text } from "@mantine/core";
+import {
+  Anchor,
+  Button,
+  Group,
+  Loader,
+  Stack,
+  Switch,
+  Text,
+} from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { ReactElement, Suspense, useState } from "react";
@@ -94,11 +102,15 @@ function PointWizard({
   };
 
   return (
-    <div>
+    <Stack gap="sm" align="start">
       {!mergeMode && (
-        <Button variant="outline" onClick={() => setMergeMode((mode) => !mode)}>
+        <Anchor
+          component="button"
+          variant="outline"
+          onClick={() => setMergeMode((mode) => !mode)}
+        >
           Anslut till närliggande led
-        </Button>
+        </Anchor>
       )}
 
       {mergeMode ? (
@@ -160,7 +172,7 @@ function PointWizard({
           {mergeMode ? "Sammanfoga" : "Lägg till ny"}
         </Button>
       </Group>
-    </div>
+    </Stack>
   );
 }
 

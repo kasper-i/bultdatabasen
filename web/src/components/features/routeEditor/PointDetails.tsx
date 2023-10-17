@@ -1,11 +1,11 @@
+import { Time } from "@/components/atoms/Time";
 import { Concatenator } from "@/components/Concatenator";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import ImageThumbnail from "@/components/ImageThumbnail";
 import ImageUploadButton from "@/components/ImageUploadButton";
+import DeleteDialog from "@/components/molecules/DeleteDialog";
 import Restricted from "@/components/Restricted";
 import UserName from "@/components/UserName";
-import { Time } from "@/components/atoms/Time";
-import DeleteDialog from "@/components/molecules/DeleteDialog";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
 import { Author } from "@/models/user";
@@ -24,9 +24,9 @@ import {
   Stack,
   Text,
   Timeline,
-  Title,
 } from "@mantine/core";
 import {
+  IconChevronUp,
   IconMenu2,
   IconMessage,
   IconPhoto,
@@ -46,8 +46,9 @@ import { Link } from "react-router-dom";
 import AdvancedBoltEditor from "./AdvancedBoltEditor";
 import BoltDetails from "./BoltDetails";
 import { CommentView } from "./CommentView";
-import { PostComment } from "./PostComment";
 import { PointLabel } from "./hooks";
+import { PostComment } from "./PostComment";
+import classes from "./PointDetails.module.css";
 
 interface Props {
   point: Point;
@@ -127,17 +128,17 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   }, [comments, images]);
 
   return (
-    <div>
-      <Group justify="space-between">
-        <div>
-          <Title order={3} onClick={onClose}>
-            {label.name}
-          </Title>
-          <Text size="xs" c="dimmed">
-            {label.no}
+    <Stack gap="sm" align="stretch">
+      <Group justify="space-between" align="start" gap="xs">
+        <ActionIcon variant="subtle" onClick={onClose}>
+          <IconChevronUp size={14} />
+        </ActionIcon>
+        <div className={classes.title}>
+          <Text fw={500} size="md">
+            {label.name} {label.no}
           </Text>
 
-          <div>
+          <Text c="dimmed" size="sm">
             {sharedParents.length === 0
               ? "Delas ej med annan led."
               : sharedParents.length > 0 && (
@@ -162,7 +163,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
                     </span>
                   </>
                 )}
-          </div>
+          </Text>
         </div>
 
         <Stack gap="sm">
@@ -201,7 +202,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
         </Stack>
       </Group>
 
-      <Stack gap="sm">
+      <Stack gap="sm" align="stretch">
         {action === "add_bolt" && (
           <Card withBorder>
             <Stack gap="sm">
@@ -265,7 +266,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           onClose={() => setCurrImg(undefined)}
         />
       )}
-    </div>
+    </Stack>
   );
 }
 

@@ -1,7 +1,7 @@
 import { Option } from "@/components/atoms/types";
 import { Bolt, BoltType } from "@/models/bolt";
 import { positionToLabel, translateBoltType } from "@/utils/boltUtils";
-import { ActionIcon, Card, Group, Radio, Text } from "@mantine/core";
+import { ActionIcon, Card, Group, Radio, Stack, Text } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 
 const typeOptions = (["expansion", "glue", "piton"] as const).map<
@@ -53,11 +53,11 @@ const BasicBoltEditor = ({
           })
         }
       >
-        <Group mt="xs">
+        <Stack mt="xs">
           {typeOptions.map(({ key, value, label }) => (
             <Radio key={key} value={value} label={label} />
           ))}
-        </Group>
+        </Stack>
       </Radio.Group>
     </Card>
   );

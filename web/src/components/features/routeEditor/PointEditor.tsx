@@ -1,5 +1,4 @@
 import { InsertPosition } from "@/Api";
-import Restricted from "@/components/Restricted";
 import { usePermissions } from "@/hooks/authHooks";
 import { Point } from "@/models/point";
 import { useAttachPoint } from "@/queries/pointQueries";
@@ -15,9 +14,11 @@ import {
 import { IconChevronRight, IconPlus } from "@tabler/icons-react";
 import { FC, ReactElement, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import PointDetails from "./PointDetails";
-import PointWizard from "./PointWizard";
+import { CreateFirstPointWizard } from "./CreateFirstPointWizard";
 import { usePointLabeler } from "./hooks";
+import PointDetails from "./PointDetails";
+import classes from "./PointEditor.module.css";
+import PointWizard from "./PointWizard";
 
 interface Props {
   routeId: string;
@@ -32,7 +33,6 @@ const PointEditor = ({
 }: Props): ReactElement => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [insertPosition, setInsertPosition] = useState<InsertPosition>();
-  const [openInitialWizard, setOpenInitialWizard] = useState(false);
   const createPoint = useAttachPoint(routeId);
 
   const editable = usePermissions(routeId)?.some(
@@ -46,7 +46,6 @@ const PointEditor = ({
 
     if (isSuccess) {
       setInsertPosition(undefined);
-      setOpenInitialWizard(false);
       changePoint(data.id);
     }
   }, [createPoint.isSuccess]);
@@ -76,44 +75,15 @@ const PointEditor = ({
     setSearchParams({});
   };
 
-  const createFirst = () => {
-    setOpenInitialWizard(true);
-  };
-
-  if (points.length === 0 || openInitialWizard) {
+  if (points.length === 0) {
     return (
-      <Card>
-        {openInitialWizard ? (
-          <PointWizard
-            mutation={createPoint}
-            hint="anchor"
-            position={insertPosition}
-            onCancel={() => setOpenInitialWizard(false)}
-            routeId={routeId}
-            routeParentId={routeParentId}
-            illegalPoints={points.map((point) => point.id)}
-          />
-        ) : (
-          <Stack align="center">
-            <Restricted>
-              <ActionIcon onClick={() => createFirst()} size="lg">
-                <IconPlus size={20} />
-              </ActionIcon>
-            </Restricted>
-            <Text>
-              <p>På den här leden finns ännu inga dokumenterade bultar.</p>
-              <Restricted>
-                <p>
-                  <Button variant="subtle" onClick={() => createFirst()}>
-                    Lägg till
-                  </Button>
-                  en första ledbult eller ankare.
-                </p>
-              </Restricted>
-            </Text>
-          </Stack>
-        )}
-      </Card>
+      <CreateFirstPointWizard
+        points={points}
+        routeId={routeId}
+        routeParentId={routeParentId}
+        createPoint={createPoint}
+        insertPosition={insertPosition}
+      />
     );
   }
 
@@ -139,7 +109,7 @@ const PointEditor = ({
   };
 
   return (
-    <Stack gap="sm">
+    <Stack gap="sm" align="end">
       {points
         .slice()
         .reverse()
@@ -161,7 +131,7 @@ const PointEditor = ({
           }
 
           cards.push(
-            <Card key={point.id} withBorder>
+            <Card key={point.id} withBorder className={classes.point}>
               {selected && selectedPoint !== undefined ? (
                 <Suspense fallback={<Loader type="bars" />}>
                   <PointDetails
@@ -173,14 +143,16 @@ const PointEditor = ({
                 </Suspense>
               ) : (
                 <Group
-                  justify="space-between"
+                  justify="start"
+                  gap="xs"
                   onClick={navigable ? () => changePoint(point.id) : undefined}
                 >
-                  <span>
-                    {name}
-                    <span>{no}</span>
-                  </span>
-                  <IconChevronRight size={14} />
+                  <ActionIcon variant="subtle">
+                    <IconChevronRight size={14} />
+                  </ActionIcon>
+                  <Text fw={500} size="md">
+                    {name} {no}
+                  </Text>
                 </Group>
               )}
             </Card>
