@@ -1,3 +1,17 @@
 .point {
-    align-self: stretch;
+    justify-self: stretch;
+}
+
+
+.edge {
+    margin-left: 4rem;
+}
+
+.grid {
+    width: 20rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--mantine-spacing-sm);
+    align-items: center;
+    justify-items: start;
 }

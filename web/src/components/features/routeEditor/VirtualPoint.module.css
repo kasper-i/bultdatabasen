@@ -1,0 +1,10 @@
+.card {
+    flex-grow: 1;
+    display: flex;
+    gap: var(--mantine-spacing-sm);
+    align-items: center;
+    background-color: transparent;
+    border-width: 0.0625rem;
+    border-color: var(--mantine-color-gray-3);
+    margin-left: var(--mantine-spacing-sm);
+}

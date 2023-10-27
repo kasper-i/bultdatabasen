@@ -1,3 +1,4 @@
+import LegacyPointEditor from "@/components/features/routeEditor/LegacyPointEditor";
 import PointEditor from "@/components/features/routeEditor/PointEditor";
 import TaskList from "@/components/features/task/TaskList";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
