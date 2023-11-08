@@ -106,40 +106,6 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
   return (
     <Grid>
       <Grid.Col>
-        <Select
-          value={bolt.manufacturerId}
-          data={manufacturerOptions}
-          onSelect={(event) =>
-            updateBolt({
-              manufacturerId: event.currentTarget.value,
-              modelId: undefined,
-            })
-          }
-          label="Tillverkare"
-          nothingFoundMessage="Inga tillverkare hittades"
-          multiple={false}
-        />
-      </Grid.Col>
-
-      <Grid.Col>
-        <Select
-          value={bolt.modelId}
-          data={modelOptions}
-          onSelect={(event) => {
-            const modelId = event.currentTarget.value;
-            const model = models?.find((model) => model.id === modelId);
-            if (model) {
-              const { materialId, type, diameter, diameterUnit } = model;
-              updateBolt({ modelId, materialId, type, diameter, diameterUnit });
-            }
-          }}
-          label="Modell"
-          nothingFoundMessage="Inga modeller hittades"
-          multiple={false}
-        />
-      </Grid.Col>
-
-      <Grid.Col>
         <Chip.Group
           defaultValue={bolt.type}
           onChange={(type) => updateBolt({ type: type as Bolt["type"] })}
@@ -205,6 +171,40 @@ const AdvancedBoltEditor = <T extends Omit<Bolt, "id" | "parentId">>({
             })
           }
           clearable
+        />
+      </Grid.Col>
+
+      <Grid.Col>
+        <Select
+          value={bolt.manufacturerId}
+          data={manufacturerOptions}
+          onSelect={(event) =>
+            updateBolt({
+              manufacturerId: event.currentTarget.value,
+              modelId: undefined,
+            })
+          }
+          label="Tillverkare"
+          nothingFoundMessage="Inga tillverkare hittades"
+          multiple={false}
+        />
+      </Grid.Col>
+
+      <Grid.Col>
+        <Select
+          value={bolt.modelId}
+          data={modelOptions}
+          onSelect={(event) => {
+            const modelId = event.currentTarget.value;
+            const model = models?.find((model) => model.id === modelId);
+            if (model) {
+              const { materialId, type, diameter, diameterUnit } = model;
+              updateBolt({ modelId, materialId, type, diameter, diameterUnit });
+            }
+          }}
+          label="Modell"
+          nothingFoundMessage="Inga modeller hittades"
+          multiple={false}
         />
       </Grid.Col>
 
