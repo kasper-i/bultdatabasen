@@ -12,6 +12,7 @@ export default defineConfig({
     react(),
     visualizer({
       template: "sunburst",
+      emitFile: false,
     }),
   ],
   resolve: {

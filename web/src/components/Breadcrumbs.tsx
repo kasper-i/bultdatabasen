@@ -1,8 +1,7 @@
 import { Resource } from "@/models/resource";
 import { getResourceRoute } from "@/utils/resourceUtils";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import clsx from "clsx";
-import React, {
+import { IconChevronRight, IconHome } from "@tabler/icons-react";
+import {
   FC,
   Fragment,
   ReactElement,
@@ -12,7 +11,8 @@ import React, {
   useState,
 } from "react";
 import { Link } from "react-router-dom";
-import Icon from "./atoms/Icon";
+import classes from "./Breadcrumbs.module.css";
+import clsx from "clsx";
 
 interface Crumb {
   key: string;
@@ -21,7 +21,8 @@ interface Crumb {
 
 const Breadcrumbs: FC<{
   resources?: Resource[];
-}> = ({ resources }): ReactElement => {
+  className?: string;
+}> = ({ resources, className }): ReactElement => {
   const rulerRef = useRef<HTMLDivElement>(null);
   const breadcrumbsRef = useRef<HTMLDivElement>(null);
 
@@ -89,15 +90,8 @@ const Breadcrumbs: FC<{
     return {
       key: resource.id,
       content: (
-        <Link
-          to={to}
-          className="flex items-center text-primary-500 whitespace-nowrap text-xs"
-        >
-          {resource.type === "root" ? (
-            <Icon className="h-3 text-primary-500" name="home" />
-          ) : (
-            resource.name
-          )}
+        <Link to={to} className={classes.crumb}>
+          {resource.type === "root" ? <IconHome size={14} /> : resource.name}
         </Link>
       ),
     };
@@ -107,7 +101,7 @@ const Breadcrumbs: FC<{
     crumbs.splice(1, crumbs.length - 2, {
       key: "ellipsis",
       content: (
-        <div className="cursor-pointer" onClick={() => setExpanded(true)}>
+        <div className={classes.ellipsis} onClick={() => setExpanded(true)}>
           ...
         </div>
       ),
@@ -115,21 +109,19 @@ const Breadcrumbs: FC<{
   }
 
   return (
-    <div className="relative h-5">
-      <div ref={rulerRef} className="w-full" />
+    <div className={clsx(classes.container, className)}>
+      <div ref={rulerRef} className={classes.ruler} />
       <div
         ref={breadcrumbsRef}
-        className={clsx(
-          "absolute flex h-5 items-center",
-          expandedWidth === undefined && "invisible"
-        )}
+        className={classes.crumbs}
+        style={{
+          display: expandedWidth === undefined ? "invisible" : undefined,
+        }}
       >
         {crumbs.map(({ key, content }, index) => (
           <Fragment key={key}>
             {content}
-            {index !== crumbs.length - 1 && (
-              <ChevronRightIcon className="mx-0.5 h-4 text-gray-400" />
-            )}
+            {index !== crumbs.length - 1 && <IconChevronRight size={14} />}
           </Fragment>
         ))}
       </div>

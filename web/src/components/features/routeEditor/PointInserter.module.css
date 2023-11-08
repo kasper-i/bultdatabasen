@@ -1,0 +1,14 @@
+.container {
+    position: relative;
+    height: calc(100% + var(--mantine-spacing-sm));
+}
+
+.inner {
+    position: absolute;
+    height: 100%;
+    top: -50%;
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}

@@ -1,0 +1,10 @@
+.container {
+  position: fixed;
+  inset: 0;
+}
+
+.smiley {
+  font-size: 3rem;
+  text-align: center;
+  font-weight: 900;
+}

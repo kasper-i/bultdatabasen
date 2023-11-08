@@ -1,0 +1,42 @@
+.filler {
+    margin-right: auto;
+}
+
+.toolbar {
+    position: fixed;
+    bottom: 0;
+    height: 3.5rem;
+    background-color: var(--mantine-color-gray-1);
+    width: 100%;
+    padding: var(--mantine-spacing-sm)
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: var(--mantine-color-white);
+}
+
+.imgContainer {
+    margin-top: -3.5rem;
+}
+
+.imgContainer img {
+    image-orientation: none;
+}
+
+.loaderContainer {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -4rem;
+}

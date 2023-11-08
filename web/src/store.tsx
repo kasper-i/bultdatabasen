@@ -2,7 +2,6 @@ import authReducer from "@/slices/authSlice";
 import clipboardReducer from "@/slices/clipboardSlice";
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import "./index.css";
 
 export const store = configureStore({
   reducer: {

@@ -2,10 +2,8 @@ import SigninPage from "@/pages/SigninPage";
 import { useQueryClient } from "@tanstack/react-query";
 import { CognitoUserSession } from "amazon-cognito-identity-js";
 import { Suspense, useEffect, useState } from "react";
-import "react-activity/dist/Digital.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Api } from "./Api";
-import Loader from "./components/atoms/Loader";
 import { ErrorBoundary } from "./ErrorBoundary";
 import Auth from "./layouts/Auth";
 import Main from "./layouts/Main";
@@ -17,7 +15,6 @@ import RestorePasswordPage from "./pages/RestorePasswordPage";
 import RootPage from "./pages/RootPage";
 import RoutePage from "./pages/RoutePage";
 import SectorPage from "./pages/SectorPage";
-import { ShowcasePage } from "./pages/ShowcasePage";
 import SignoutPage from "./pages/SignoutPage";
 import TasksPage from "./pages/TasksPage";
 import { login } from "./slices/authSlice";
@@ -26,6 +23,9 @@ import { getCurrentUser, refreshSession } from "./utils/cognito";
 import configData from "@/config.json";
 import { NewRoutePage } from "./pages/NewRoutePage";
 import { EditRoutePage } from "./pages/EditRoutePage";
+import { Alert, Center, Loader } from "@mantine/core";
+import { IconAlertHexagon } from "@tabler/icons-react";
+import classes from "./App.module.css";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -89,16 +89,18 @@ const App = () => {
     configData.API_URL === "https://api.bultdatabasen.se"
   ) {
     return (
-      <pre className="text-red-500 h-screen w-screen flex justify-center items-center">
-        Production environment is blocked in DEV mode!
-      </pre>
+      <Alert color="red" icon={<IconAlertHexagon />} title="Loading aborted">
+        Production environment is blocked in development mode.
+      </Alert>
     );
   }
 
   if (!initialized) {
     return (
-      <div className="w-screen h-screen bg-gray-900 text-gray-400">
-        <Loader />
+      <div className={classes.loaderContainer}>
+        <Center h="100%">
+          <Loader type="bars" size="lg" />
+        </Center>
       </div>
     );
   }
@@ -108,7 +110,6 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route element={<Main />}>
-            <Route path="/showcase" element={<ShowcasePage />} />
             <Route element={<Auth />}>
               <Route path="/auth/signin" element={<SigninPage />} />
               <Route

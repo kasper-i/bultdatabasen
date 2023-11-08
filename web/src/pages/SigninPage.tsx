@@ -1,21 +1,28 @@
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
 import {
   AuthenticationDetails,
   CognitoUserSession,
 } from "amazon-cognito-identity-js";
 
 import { Api } from "@/Api";
-import { Alert } from "@/components/atoms/Alert";
 import { login } from "@/slices/authSlice";
 import { useAppDispatch } from "@/store";
 import {
+  signIn as cognitoSignin,
   confirmRegistration,
   isCognitoError,
   resendConfirmationCode,
-  signIn as cognitoSignin,
   translateCognitoError,
 } from "@/utils/cognito";
+import {
+  Alert,
+  Anchor,
+  Button,
+  Group,
+  PasswordInput,
+  Stack,
+  TextInput,
+} from "@mantine/core";
+import { IconAlertHexagon } from "@tabler/icons-react";
 import { useState } from "react";
 import { Link, NavigateFunction, useNavigate } from "react-router-dom";
 
@@ -111,49 +118,66 @@ const SigninPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
-      <Input
+    <Stack gap="sm">
+      <TextInput
         label="E-postadress"
         value={email}
         onChange={(e) => updateState({ email: e.target.value })}
         tabIndex={1}
         disabled={requireConfirmationCode}
+        required
       />
-      <Input
+      <PasswordInput
         label="Lösenord"
-        password
         value={password}
         onChange={(e) => updateState({ password: e.target.value })}
         tabIndex={2}
         disabled={requireConfirmationCode}
+        required
       />
       {requireConfirmationCode ? (
-        <Input
+        <TextInput
           label="Verifikationskod"
           value={confirmationCode}
           onChange={(e) => updateState({ confirmationCode: e.target.value })}
           tabIndex={3}
         />
       ) : (
-        <Link
+        <Anchor
+          size="sm"
+          component={Link}
           to={`/auth/forgot-password?email=${email}`}
           replace
-          className="text-sm text-purple-600 self-start"
         >
           Glömt lösenord?
-        </Link>
+        </Anchor>
       )}
 
-      <hr />
-
-      <Alert>{errorMessage}</Alert>
-      <Button onClick={signin} disabled={!canSubmit} loading={inProgress} full>
-        Logga in
-      </Button>
-      <Link to="/auth/register" replace>
-        <span className="text-sm text-purple-600">Skapa nytt konto</span>
-      </Link>
-    </div>
+      {errorMessage && (
+        <Alert
+          color="red"
+          icon={<IconAlertHexagon />}
+          title="Inloggning misslyckades"
+        >
+          {errorMessage}
+        </Alert>
+      )}
+      <Group justify="space-between">
+        <Anchor
+          size="sm"
+          c="dimmed"
+          variant="subtle"
+          component={Link}
+          to="/auth/register"
+          replace
+        >
+          Saknar du konto? Registrera
+        </Anchor>
+        <Button onClick={signin} disabled={!canSubmit} loading={inProgress}>
+          Logga in
+        </Button>
+      </Group>
+    </Stack>
   );
 };
 

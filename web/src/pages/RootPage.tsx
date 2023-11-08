@@ -1,24 +1,25 @@
 import ChildrenTable from "@/components/ChildrenTable";
 import Search from "@/components/Search";
 import { rootNodeId } from "@/constants";
+import { Stack, Text, Title } from "@mantine/core";
+import classes from "./RootPage.module.css";
 
 const RootPage = () => {
   return (
-    <div className="flex flex-grow flex-col items-center">
-      <h1 className="text-center text-4xl leading-tight">
-        <span className="text-transparent font-bold bg-clip-text bg-gradient-to-r from-primary-500 to-primary-300">
-          bult
-        </span>
-        databasen
-      </h1>
-      <p className="text-md text-center text-gray-700">
-        En databas över borrbultar och ankare på klätterleder i Västsverige.
-      </p>
-      <div className="mt-5 w-full mb-5">
-        <Search />
+    <Stack align="center" gap="sm">
+      <div className={classes.hero}>
+        <Title order={1}>bultdatabasen</Title>
+        <Text size="sm">
+          En databas över borrbultar och ankare på klätterleder i Västsverige.
+        </Text>
+        <Search className={classes.search} />
       </div>
-      <ChildrenTable resourceId={rootNodeId} filters={{ types: ["area"] }} />
-    </div>
+      <ChildrenTable
+        className={classes.container}
+        resourceId={rootNodeId}
+        filters={{ types: ["area"] }}
+      />
+    </Stack>
   );
 };
 

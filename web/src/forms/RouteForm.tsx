@@ -1,11 +1,19 @@
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
-import { Option } from "@/components/atoms/RadioGroup";
-import { Select } from "@/components/atoms/Select";
+import { Option } from "@/components/atoms/types";
 import { Route, RouteType, routeTypes } from "@/models/route";
 import { renderRouteType } from "@/utils/routeUtils";
+import {
+  Button,
+  Group,
+  NumberInput,
+  Select,
+  Space,
+  TextInput,
+} from "@mantine/core";
+import { YearPickerInput } from "@mantine/dates";
 import { FC } from "react";
 import { Controller, SubmitHandler, useFormContext } from "react-hook-form";
+import classes from "./RouteForm.module.css";
+import { Spanner } from "@/components/Spanner";
 
 const routeTypeOptions: Option<RouteType>[] = routeTypes.map((type) => ({
   key: type,
@@ -18,33 +26,28 @@ export const RouteForm: FC<{
   onSubmit: SubmitHandler<Route>;
   onCancel: () => void;
 }> = ({ loading, onSubmit, onCancel }) => {
-  const { control, handleSubmit } = useFormContext<Route>();
+  const { control, handleSubmit, register } = useFormContext<Route>();
 
   return (
-    <form className="grid gap-3 grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
-      <Controller
-        control={control}
-        name="name"
-        render={({ field: { onChange, value } }) => (
-          <div className="col-span-2">
-            <Input label="Lednamn" value={value} onChange={onChange} />
-          </div>
-        )}
-      />
+    <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
+      <Spanner cols={2}>
+        <TextInput {...register("name")} label="Lednamn" required />
+      </Spanner>
 
       <Controller
         control={control}
         name="routeType"
         render={({ field: { onChange, value } }) => (
-          <div className="col-span-2">
-            <Select<RouteType>
+          <Spanner cols={2}>
+            <Select
               label="Typ"
-              options={routeTypeOptions}
+              data={routeTypeOptions}
               value={value}
               onSelect={onChange}
               multiple={false}
+              required
             />
-          </div>
+          </Spanner>
         )}
       />
 
@@ -52,10 +55,10 @@ export const RouteForm: FC<{
         control={control}
         name="length"
         render={({ field: { onChange, value } }) => (
-          <Input
+          <NumberInput
             label="Längd"
             value={value ? `${value}` : ""}
-            onChange={(event) => onChange(Number(event.currentTarget.value))}
+            onChange={(value) => onChange(Number(value))}
           />
         )}
       />
@@ -63,21 +66,29 @@ export const RouteForm: FC<{
         control={control}
         name="year"
         render={({ field: { onChange, value } }) => (
-          <Input
+          <YearPickerInput
             label="År"
-            value={value ? `${value}` : ""}
-            onChange={(event) => onChange(Number(event.currentTarget.value))}
+            value={value ? new Date(value) : undefined}
+            onChange={(value) => onChange(value?.getFullYear())}
+            placeholder="År"
+            maxDate={new Date()}
+            clearable
           />
         )}
       />
-      <div className="col-span-2 flex justify-end gap-2">
-        <Button outlined onClick={onCancel}>
-          Avbryt
-        </Button>
-        <Button loading={loading} type="submit">
-          Spara
-        </Button>
-      </div>
+
+      <Space />
+
+      <Spanner cols={2}>
+        <Group justify="end" gap="sm">
+          <Button variant="subtle" onClick={onCancel}>
+            Avbryt
+          </Button>
+          <Button loading={loading} type="submit">
+            Spara
+          </Button>
+        </Group>
+      </Spanner>
     </form>
   );
 };

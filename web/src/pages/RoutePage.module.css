@@ -1,0 +1,19 @@
+.header {
+    grid-area: header;
+}
+
+.container {
+    display: grid;
+    gap: var(--mantine-spacing-sm);
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: "header";
+    align-items: start;
+}
+
+.container {
+    @media (min-width: $mantine-breakpoint-md) {
+        grid-template-columns: 2fr 1fr;
+        grid-template-areas: "header header";
+    }
+}

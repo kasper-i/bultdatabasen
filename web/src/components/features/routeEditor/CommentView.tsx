@@ -1,10 +1,17 @@
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
 import { Comment } from "@/models/comment";
 import { useDeleteComment, useUpdateComment } from "@/queries/commentQueries";
+import {
+  ActionIcon,
+  Button,
+  Group,
+  Menu,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { IconEdit, IconMenu2, IconTrash } from "@tabler/icons-react";
 import { FC, useEffect, useState } from "react";
 
 export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
@@ -22,17 +29,17 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
   }, [updateComment.isSuccess]);
 
   return (
-    <div className="flex flex-row justify-between gap-x-2">
+    <Group justify="space-between">
       {action === "edit" ? (
-        <div className="flex-grow flex flex-col gap-2">
-          <Input
+        <Stack gap="sm">
+          <TextInput
             label="Kommentar"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            labelStyle="none"
+            required
           />
-          <div className="flex flex-row gap-2 justify-start">
-            <Button outlined onClick={() => setAction(undefined)}>
+          <Group justify="end">
+            <Button variant="subtle" onClick={() => setAction(undefined)}>
               Avbryt
             </Button>
             <Button
@@ -41,31 +48,39 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
             >
               Spara
             </Button>
-          </div>
-        </div>
+          </Group>
+        </Stack>
       ) : (
-        <div className="flex-grow w-0 text-sm italic">{comment.text}</div>
+        <Text fs="italic">{comment.text}</Text>
       )}
       {action === undefined && (
         <Restricted>
-          <Menu
-            items={[
-              {
-                label: "Redigera",
-                onClick: () => {
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon variant="light">
+                <IconMenu2 size={14} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                onClick={() => {
                   setAction("edit");
                   setText(comment.text);
-                },
-                icon: "edit",
-              },
-              {
-                label: "Radera",
-                onClick: () => setAction("delete"),
-                icon: "trash",
-                className: "text-red-500",
-              },
-            ]}
-          />
+                }}
+              >
+                Redigera
+              </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<IconTrash size={14} />}
+                onClick={() => setAction("delete")}
+              >
+                Radera
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Restricted>
       )}
       {action === "delete" && (
@@ -75,6 +90,6 @@ export const CommentView: FC<{ comment: Comment }> = ({ comment }) => {
           onClose={() => setAction(undefined)}
         />
       )}
-    </div>
+    </Group>
   );
 };

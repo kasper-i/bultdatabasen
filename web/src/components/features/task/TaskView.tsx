@@ -1,12 +1,7 @@
 import { Api } from "@/Api";
-import Button from "@/components/atoms/Button";
-import { Datepicker } from "@/components/atoms/DatePicker";
-import Icon from "@/components/atoms/Icon";
-import Input from "@/components/atoms/Input";
+import UserName from "@/components/UserName";
 import { Time } from "@/components/atoms/Time";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import { Menu } from "@/components/molecules/Menu";
-import UserName from "@/components/UserName";
 import { Point } from "@/models/point";
 import { Resource } from "@/models/resource";
 import { Task, TaskStatus } from "@/models/task";
@@ -14,14 +9,36 @@ import { useDeleteTask, useTask, useUpdateTask } from "@/queries/taskQueries";
 import { emptyArray } from "@/utils/constants";
 import { getResourceRoute } from "@/utils/resourceUtils";
 import { translatePriority } from "@/utils/taskUtils";
+import {
+  ActionIcon,
+  Anchor,
+  Button,
+  Card,
+  CardSectionProps,
+  Group,
+  Menu,
+  Pill,
+  Space,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
+import {
+  IconClipboardCheck,
+  IconEdit,
+  IconMenu2,
+  IconRefresh,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import clsx from "clsx";
 import { isEmpty } from "lodash-es";
-import { FC, ReactElement, useState } from "react";
+import { FC, Fragment, ReactElement, useState } from "react";
 import { Link } from "react-router-dom";
 import Restricted from "../../Restricted";
 import { usePointLabeler } from "../routeEditor/hooks";
 import TaskEdit from "./TaskEdit";
+import classes from "./TaskView.module.css";
 
 const finalStatuses: TaskStatus[] = ["closed", "rejected"];
 
@@ -34,24 +51,31 @@ const CompleteButton: FC<{
   const [closedAt, setClosedAt] = useState(new Date());
 
   return (
-    <div className="flex flex-col gap-2">
+    <Stack gap="sm">
       {phase === 2 && (
         <>
-          <Input
+          <TextInput
             label="Kommentar"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            required
+            size="sm"
           />
-          <Datepicker
+          <DatePickerInput
             label="Datum"
             value={closedAt}
-            onChange={(date) => setClosedAt(date)}
+            onChange={(date) => setClosedAt(date ?? new Date())}
+            required
           />
         </>
       )}
-      <div className="flex justify-end gap-2 mt-2">
+      <Group justify="end">
         {phase === 2 && (
-          <Button onClick={() => setPhase(1)} outlined disabled={loading}>
+          <Button
+            onClick={() => setPhase(1)}
+            variant="subtle"
+            disabled={loading}
+          >
             Avbryt
           </Button>
         )}
@@ -64,15 +88,37 @@ const CompleteButton: FC<{
                   closedAt: closedAt,
                 })
           }
-          icon="check badge"
+          leftSection={<IconClipboardCheck size={14} />}
           loading={loading}
           disabled={phase === 2 && isEmpty(comment.trim())}
-          full
+          variant="light"
+          fullWidth={phase === 1}
         >
           Markera åtgärdad
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
+  );
+};
+
+const PriorityPill: FC<{ priority: number }> = ({ priority }) => {
+  const props = (() => {
+    switch (priority) {
+      case 1:
+        return { bg: "red", c: "white" };
+      case 3:
+        return {};
+    }
+  })();
+
+  if (priority === 2) {
+    return <Fragment />;
+  }
+
+  return (
+    <Pill {...props} size="xs" className={classes.pill}>
+      {translatePriority(priority)}
+    </Pill>
   );
 };
 
@@ -137,128 +183,118 @@ const TaskView: FC<{
 
   const { name: pointName, no: pointNo } = pointLabeler(pointId ?? "");
 
+  const sectionProps: CardSectionProps = {
+    className: classes.section,
+    withBorder: true,
+  };
+
   return (
-    <div className="w-full sm:w-96 flex flex-col space-y-2.5 bg-white shadow-sm p-5 rounded border border-gray-300">
-      <div className="relative flex justify-between items-start">
-        <Link
-          to={`${getResourceRoute(parent.type, parent.id)}${
-            pointId ? `?p=${pointId}` : ""
-          }`}
-          className="w-full pr-5"
-        >
-          <div className="text-sm">
-            <span className="inline-flex items-center gap-1">
-              {translatePriority(task.priority) && (
-                <span
-                  className={clsx(
-                    "text-xs font-medium text-white rounded-md py-0.5 px-1.5",
-                    task.priority === 1
-                      ? "bg-red-500"
-                      : task.priority === 3
-                      ? "bg-gray-500"
-                      : undefined
-                  )}
-                >
-                  {translatePriority(task.priority)}
-                </span>
-              )}
-              {parent?.name}
-            </span>
-            {pointNo && (
-              <span className="ml-1 text-gray-500 text-xs">
-                {pointName} {pointNo}
-              </span>
+    <Card withBorder>
+      <Group justify="space-between" wrap="nowrap" align="start">
+        <span>
+          <Text size="sm">
+            {!isComplete && translatePriority(task.priority) && (
+              <PriorityPill priority={task.priority} />
             )}
-          </div>
-          <div className="text-xs mt-0.5">
-            Rapporterat{" "}
-            <span className="font-medium">
-              <Time time={task.createdAt} />
-            </span>{" "}
-            av <UserName user={task.author} />
-          </div>
-        </Link>
+            <Anchor
+              component={Link}
+              to={`${getResourceRoute(parent.type, parent.id)}${
+                pointId ? `?p=${pointId}` : ""
+              }`}
+            >
+              {parent?.name}
+            </Anchor>
+          </Text>
+          {pointNo && (
+            <Text size="xs" c="dimmed">
+              {pointName} {pointNo}
+            </Text>
+          )}
+          <Text c="dimmed" size="xs">
+            Rapporterat <Time time={task.createdAt} /> av{" "}
+            <UserName user={task.author} />
+          </Text>
+        </span>
         <Restricted>
-          <Menu
-            items={[
-              {
-                label: "Redigera",
-                icon: "edit",
-                disabled: isComplete,
-                onClick: () => setAction("edit"),
-              },
-              {
-                label: "Återöppna",
-                icon: "refresh",
-                disabled: !isComplete,
-                onClick: () => changeStatus("open"),
-              },
-              {
-                label: "Radera",
-                icon: "trash",
-                className: "text-red-500",
-                onClick: () => setAction("delete"),
-              },
-            ]}
-          />
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon variant="light">
+                <IconMenu2 size={14} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                onClick={() => setAction("edit")}
+                disabled={isComplete}
+              >
+                Redigera
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<IconRefresh size={14} />}
+                onClick={() => changeStatus("open")}
+                disabled={!isComplete}
+              >
+                Återöppna
+              </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<IconTrash size={14} />}
+                onClick={() => setAction("delete")}
+              >
+                Radera
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Restricted>
-      </div>
+      </Group>
+
+      <Space h="sm" />
 
       {action === "edit" ? (
         <TaskEdit task={task} onDone={() => setAction(undefined)} />
       ) : (
-        <>
-          <p className="text-sm">{task.description}</p>
-
-          {isComplete ? (
-            <>
-              <hr className="-mx-5 pb-2" />
-
-              <div className="flex flex-col">
-                <div className="flex items-center">
-                  <Icon
-                    className={clsx(
-                      task.status === "closed"
-                        ? "text-green-600"
-                        : "text-red-500"
-                    )}
-                    name="check"
-                  />
-                  <p
-                    className={clsx(
-                      task.status === "closed"
-                        ? "text-green-600"
-                        : "text-red-500"
-                    )}
-                  >
-                    <span className="text-sm ml-1 font-semibold">
-                      {task.status === "closed" ? "Åtgärdat" : "Stängd"}
-                    </span>{" "}
-                    {task.closedAt && <Time time={task.closedAt} />}
-                  </p>
-                </div>
-                {task.comment && (
-                  <p className="text-sm text-gray-700">
-                    <Icon name="comment" className="mr-1" />
-                    {task.comment}
-                  </p>
-                )}
-              </div>
-            </>
-          ) : (
-            <Restricted>
-              <>
-                <hr className="-mx-5 pb-2" />
-
-                <CompleteButton
-                  loading={updateTask.isLoading}
-                  onComplete={complete}
-                />
-              </>
-            </Restricted>
-          )}
-        </>
+        <Text size="sm" fw={500}>
+          Problem:{" "}
+          <Text component="span" size="sm">
+            {task.description}
+          </Text>
+        </Text>
       )}
+
+      {action !== "edit" &&
+        (isComplete ? (
+          <Card.Section {...sectionProps} data-status={task.status}>
+            <Text fw={600} size="sm">
+              {task.status === "closed" ? "Åtgärdat" : "Avvisad"}
+            </Text>
+            <Text size="xs">
+              {task.closedAt && <Time time={task.closedAt} />}
+            </Text>
+            {task.comment && (
+              <>
+                <Space h="sm" />
+
+                <Text size="sm" fw={500}>
+                  Kommentar:{" "}
+                  <Text component="span" size="sm">
+                    {task.comment}
+                  </Text>
+                </Text>
+              </>
+            )}
+          </Card.Section>
+        ) : (
+          <Restricted>
+            <Card.Section {...sectionProps}>
+              <CompleteButton
+                loading={updateTask.isLoading}
+                onComplete={complete}
+              />
+            </Card.Section>
+          </Restricted>
+        ))}
       {action === "delete" && (
         <DeleteDialog
           mutation={deleteTask}
@@ -266,7 +302,7 @@ const TaskView: FC<{
           onClose={() => setAction(undefined)}
         />
       )}
-    </div>
+    </Card>
   );
 };
 

@@ -1,3 +1,7 @@
+import { createTheme, MantineProvider } from "@mantine/core";
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "@mantine/spotlight/styles.css";
 import { init } from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -8,7 +12,6 @@ import { Provider } from "react-redux";
 import { ZodError } from "zod";
 import { Api } from "./Api";
 import App from "./App";
-import "./index.css";
 import { store } from "./store";
 import { refreshSession } from "./utils/cognito";
 
@@ -57,11 +60,31 @@ const container = document.getElementById("root");
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const root = createRoot(container!);
 
+const theme = createTheme({
+  colors: {
+    brand: [
+      "#f7ebff",
+      "#e6d3fe",
+      "#c8a4f7",
+      "#aa74f1",
+      "#9049eb",
+      "#802ee8",
+      "#7820e8",
+      "#6614cf",
+      "#5a10ba",
+      "#4d08a4",
+    ],
+  },
+  primaryColor: "brand",
+});
+
 root.render(
-  <QueryClientProvider client={queryClient}>
-    <Provider store={store}>
-      <App />
-      <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
-    </Provider>
-  </QueryClientProvider>
+  <MantineProvider theme={theme}>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <App />
+        <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
+      </Provider>
+    </QueryClientProvider>
+  </MantineProvider>
 );

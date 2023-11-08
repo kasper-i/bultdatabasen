@@ -1,12 +1,18 @@
 import { CreatePointRequest, InsertPosition } from "@/Api";
-import Button from "@/components/atoms/Button";
-import Dots from "@/components/atoms/Dots";
-import Icon from "@/components/atoms/Icon";
-import { Switch } from "@/components/atoms/Switch";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
-import React, { ReactElement, Suspense, useState } from "react";
+import {
+  Anchor,
+  Button,
+  Group,
+  Loader,
+  Stack,
+  Switch,
+  Text,
+} from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { UseMutationResult } from "@tanstack/react-query";
+import { ReactElement, Suspense, useState } from "react";
 import BasicBoltEditor from "./BasicBoltEditor";
 import PointPicker from "./PointPicker";
 
@@ -96,18 +102,19 @@ function PointWizard({
   };
 
   return (
-    <div>
+    <Stack gap="sm" align="start">
       {!mergeMode && (
-        <button
-          className="text-primary-500 underline mb-4"
+        <Anchor
+          component="button"
+          variant="outline"
           onClick={() => setMergeMode((mode) => !mode)}
         >
           Anslut till närliggande led
-        </button>
+        </Anchor>
       )}
 
       {mergeMode ? (
-        <Suspense fallback={<Dots />}>
+        <Suspense fallback={<Loader type="bars" />}>
           <PointPicker
             targetRouteId={routeId}
             targetRouteParentId={routeParentId}
@@ -118,11 +125,15 @@ function PointWizard({
         </Suspense>
       ) : (
         <>
-          <Switch enabled={isAnchor} onChange={toggleAnchor} label="Ankare" />
+          <Switch
+            checked={isAnchor}
+            onChange={(event) => toggleAnchor(event.currentTarget.checked)}
+            label="Ankare"
+          />
 
-          <p className="mt-4 mb-1 font-medium">Bultar</p>
+          <Text fw={600}>Bultar</Text>
 
-          <div className="flex flex-wrap gap-4">
+          <Group gap="sm">
             {bolts.map(([index, bolt]) => (
               <BasicBoltEditor
                 key={index}
@@ -137,28 +148,20 @@ function PointWizard({
               />
             ))}
             {bolts.length < 2 && (
-              <div
-                key="new"
-                className="h-24 w-28 border-2 border-gray-300 border-dashed rounded-md flex justify-center items-center"
+              <Button
+                size="xl"
+                leftSection={<IconPlus />}
+                onClick={addRightBolt}
               >
-                <div className="text-center" onClick={addRightBolt}>
-                  <Icon
-                    big
-                    name="plus"
-                    className="cursor-pointer text-primary-500"
-                  />
-                  <p className="cursor-pointer text-gray-700 text-sm">
-                    Lägg till en högerbult
-                  </p>
-                </div>
-              </div>
+                Lägg till en högerbult
+              </Button>
             )}
-          </div>
+          </Group>
         </>
       )}
 
-      <div className="flex gap-2 w-full mt-4">
-        <Button onClick={onCancel} outlined>
+      <Group gap="sm">
+        <Button onClick={onCancel} variant="subtle">
           Avbryt
         </Button>
         <Button
@@ -168,8 +171,8 @@ function PointWizard({
         >
           {mergeMode ? "Sammanfoga" : "Lägg till ny"}
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }
 

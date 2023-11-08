@@ -1,0 +1,5 @@
+.bar {
+    padding: 0 var(--mantine-spacing-lg);
+    background: linear-gradient(0.25turn, var(--mantine-color-brand-4), var(--mantine-color-brand-3));
+    gap: var(--mantine-spacing-lg)
+}

@@ -1,6 +1,3 @@
-import { Alert } from "@/components/atoms/Alert";
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
 import { useAppDispatch } from "@/store";
 import {
   confirmPassword,
@@ -9,10 +6,25 @@ import {
   signIn,
   translateCognitoError,
 } from "@/utils/cognito";
+import {
+  Alert,
+  Anchor,
+  Box,
+  Button,
+  Center,
+  Group,
+  InputLabel,
+  PasswordInput,
+  PinInput,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { IconAlertHexagon, IconArrowLeft } from "@tabler/icons-react";
 import { AuthenticationDetails } from "amazon-cognito-identity-js";
 
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { handleLogin } from "./SigninPage";
 
 interface State {
@@ -84,46 +96,77 @@ const RestorePasswordPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <Stack gap="sm">
       {phase === 1 ? (
         <>
-          <Input
+          <TextInput
             label="E-post"
             value={email}
             onChange={(e) => updateState({ email: e.target.value })}
             tabIndex={1}
+            required
           />
 
-          <hr />
+          {errorMessage && (
+            <Alert
+              color="red"
+              icon={<IconAlertHexagon />}
+              title="Operationen misslyckades"
+            >
+              {errorMessage}
+            </Alert>
+          )}
 
-          <Alert>{errorMessage}</Alert>
-          <Button loading={inProgress} full onClick={restore} disabled={!email}>
-            Återställ
-          </Button>
+          <Group justify="space-between">
+            <Anchor c="dimmed" size="sm" component={Link} to="/auth/signin">
+              <Center inline>
+                <IconArrowLeft size={14} />
+                <Box ml={4}>Tillbaka till inloggingssidan</Box>
+              </Center>
+            </Anchor>
+            <Button loading={inProgress} onClick={restore} disabled={!email}>
+              Återställ
+            </Button>
+          </Group>
         </>
       ) : (
         <>
-          <Input
-            label="Verifikationskod"
-            value={verificationCode}
-            onChange={(e) => updateState({ verificationCode: e.target.value })}
-            tabIndex={1}
-          />
-          <Input
+          <Box>
+            <InputLabel>
+              Återställningskod{" "}
+              <Text component="span" c="red" aria-hidden="true">
+                {" "}
+                *
+              </Text>
+            </InputLabel>
+            <PinInput
+              length={6}
+              value={verificationCode}
+              onChange={(value) => updateState({ verificationCode: value })}
+              tabIndex={1}
+            />
+          </Box>
+
+          <PasswordInput
             label="Lösenord"
             value={newPassword}
-            password
             onChange={(e) => updateState({ newPassword: e.target.value })}
             tabIndex={2}
             autoComplete="new-password"
+            required
           />
 
-          <hr />
-
-          <Alert>{errorMessage}</Alert>
+          {errorMessage && (
+            <Alert
+              color="red"
+              icon={<IconAlertHexagon />}
+              title="Återställning misslyckades"
+            >
+              {errorMessage}
+            </Alert>
+          )}
           <Button
             loading={inProgress}
-            full
             onClick={confirm}
             disabled={!verificationCode || !newPassword}
           >
@@ -131,7 +174,7 @@ const RestorePasswordPage = () => {
           </Button>
         </>
       )}
-    </div>
+    </Stack>
   );
 };
 

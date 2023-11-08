@@ -1,12 +1,12 @@
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Restricted from "@/components/Restricted";
 import CreateTask from "@/components/features/task/CreateTask";
 import TaskList from "@/components/features/task/TaskList";
-import Pill from "@/components/Pill";
-import Restricted from "@/components/Restricted";
 import { useUnsafeParams } from "@/hooks/common";
 import { ResourceType } from "@/models/resource";
 import { useResource } from "@/queries/resourceQueries";
-import React, { Fragment, ReactElement } from "react";
+import { Box, Divider, Stack, Switch, Text, Title } from "@mantine/core";
+import { Fragment, ReactElement, useState } from "react";
 
 const locationDescription = (
   resourceName: string,
@@ -27,6 +27,7 @@ const locationDescription = (
 const TasksPage = (): ReactElement => {
   const { resourceId } = useUnsafeParams<"resourceId">();
   const { data: resource } = useResource(resourceId);
+  const [showClosed, setShowClosed] = useState(false);
 
   if (!resource) {
     return <Fragment />;
@@ -37,26 +38,31 @@ const TasksPage = (): ReactElement => {
   const onlyRoot = ancestors?.length === 1;
 
   return (
-    <div className="w-full h-full absolute inset-0 overflow-y-auto bg-gray-50 p-5 space-y-4">
+    <Stack gap="sm">
       {!onlyRoot && <Breadcrumbs resources={ancestors} />}
-      <div>
-        <h1 className="text-2xl font-bold pb-1 flex items-start leading-none">
-          Uppdrag
-          {(resource.counters?.openTasks ?? 0) > 0 && (
-            <Pill className="ml-2">{resource.counters?.openTasks}</Pill>
-          )}
-        </h1>
+
+      <Box>
+        <Title order={1}>Uppdrag</Title>
         {resource.name !== undefined && (
-          <span className="text-sm">
+          <Text size="sm">
             {locationDescription(resource.name, resource.type)}
-          </span>
+          </Text>
         )}
-      </div>
+      </Box>
+
       <Restricted>
         {resource.type === "route" && <CreateTask routeId={resourceId} />}
       </Restricted>
+
+      <Divider my="sm" />
+      <Switch
+        label="Visa åtgärdade"
+        checked={showClosed}
+        onChange={() => setShowClosed((state) => !state)}
+      />
+
       <TaskList resourceId={resourceId} />
-    </div>
+    </Stack>
   );
 };
 

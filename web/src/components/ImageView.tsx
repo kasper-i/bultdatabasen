@@ -1,8 +1,8 @@
 import configData from "@/config.json";
 import { Image, ImageVersion } from "@/models/image";
-import clsx from "clsx";
-import React, { CSSProperties, ReactNode, useReducer, useRef } from "react";
-import Spinner from "./atoms/Spinner";
+import { Loader } from "@mantine/core";
+import { CSSProperties, ReactNode, useReducer, useRef } from "react";
+import classes from "./ImageView.module.css";
 
 interface Props {
   image: Image;
@@ -88,21 +88,21 @@ export const ImageView = ({
 
   return (
     <div
-      className="relative"
+      className={classes.container}
       style={{
         height: targetHeight,
         width: width,
       }}
     >
-      <div className="absolute inset-0 flex justify-center items-center">
-        <Spinner active={loading} />
+      <div className={classes.loaderContainer}>
+        {loading && <Loader type="bars" />}
       </div>
-      <div className="absolute" style={innerStyle}>
+      <div className={classes.innerContainer} style={innerStyle}>
         <img
           ref={imgRef}
           onLoad={onLoad}
           onClick={onClick}
-          className={clsx(className, "h-full w-full object-contain")}
+          className={className}
           style={{ imageOrientation: "none", ...rotatorClasses }}
           src={`${configData.API_URL}/images/${image.id}/${version}`}
           alt=""

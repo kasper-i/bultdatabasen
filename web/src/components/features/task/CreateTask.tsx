@@ -1,35 +1,14 @@
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
-import RadioCardsGroup from "@/components/atoms/RadioCardsGroup";
-import { Option } from "@/components/atoms/RadioGroup";
-import { Select } from "@/components/atoms/Select";
-import { Point } from "@/models/point";
 import { usePoints } from "@/queries/pointQueries";
 import { useCreateTask } from "@/queries/taskQueries";
-import { ReactElement, useReducer, useState } from "react";
+import { Button, Group, Radio, Select, Stack, TextInput } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { IconPlus } from "@tabler/icons-react";
+import { ReactElement, useEffect, useState } from "react";
 import { usePointLabeler } from "../routeEditor/hooks";
 
 interface Props {
   routeId: string;
 }
-
-export const priorityOptions: Option<number>[] = [
-  {
-    key: "3",
-    label: "Låg",
-    value: 3,
-  },
-  {
-    key: "2",
-    label: "Normal",
-    value: 2,
-  },
-  {
-    key: "1",
-    label: "Hög",
-    value: 1,
-  },
-];
 
 const CreateTask = ({ routeId }: Props): ReactElement => {
   const { data: points } = usePoints(routeId);
@@ -39,74 +18,90 @@ const CreateTask = ({ routeId }: Props): ReactElement => {
   const [description, setDescription] = useState("");
   const [selectedPointId, setSelectedPointId] = useState<string>();
   const [priority, setPriority] = useState(2);
-  const [showForm, openForm] = useReducer(() => true, false);
+  const [showForm, { open: openForm, close: closeForm }] = useDisclosure(false);
 
   const createTask = useCreateTask(routeId, selectedPointId ?? routeId);
+
+  useEffect(() => {
+    if (createTask.isSuccess) {
+      reset();
+    }
+  }, [createTask.isSuccess]);
 
   const handleCreateTask = () => {
     createTask.mutate({ description, priority });
     setDescription("");
   };
 
+  const reset = () => {
+    setDescription("");
+    setSelectedPointId(undefined);
+    setPriority(2);
+    closeForm();
+  };
+
   if (!showForm) {
     return (
-      <div className="sm:w-96">
-        <Button icon="plus" onClick={() => openForm()}>
-          Nytt uppdrag
-        </Button>
-      </div>
+      <Button leftSection={<IconPlus size={14} />} onClick={() => openForm()}>
+        Nytt uppdrag
+      </Button>
     );
   }
 
   return (
-    <div className="sm:w-96 flex flex-col gap-4">
-      <Input
+    <Stack gap="sm">
+      <TextInput
         label="Beskrivning"
         placeholder="Byt nedsliten firningskarbin"
         onChange={(event) => setDescription(event.target.value)}
         value={description}
+        required
       />
 
-      <Select<Point>
+      <Select
         label="Ledbult eller ankare"
-        value={points?.find((point) => point.id === selectedPointId)}
-        options={
+        value={selectedPointId}
+        data={
           points
             ?.slice()
             ?.reverse()
             ?.map((point) => ({
               label: pointLabeler(point.id).name,
               sublabel: pointLabeler(point.id).no,
-              value: point,
-              key: point.id,
+              value: point.id,
             })) ?? []
         }
-        onSelect={(point) => setSelectedPointId(point.id)}
-        displayValue={(point) => {
-          const { name, no } = pointLabeler(point.id);
-          return `${name} ${no}`;
-        }}
-        noOptionsText="Leden saknar dokumenterade bultar."
+        onSelect={(event) => setSelectedPointId(event.currentTarget.value)}
+        nothingFoundMessage="Leden saknar dokumenterade bultar."
         disabled={points === undefined}
         multiple={false}
       />
 
-      <RadioCardsGroup<number>
-        value={priority}
-        onChange={(value) => value !== undefined && setPriority(value)}
-        options={priorityOptions}
+      <Radio.Group
         label="Prioritet"
-        mandatory
-      />
-
-      <Button
-        onClick={handleCreateTask}
-        loading={createTask.isLoading}
-        disabled={description.length === 0}
+        defaultValue={priority.toString()}
+        onChange={(value) => value !== undefined && setPriority(Number(value))}
       >
-        Skapa
-      </Button>
-    </div>
+        <Group>
+          <Radio value="3" label="Låg" />
+          <Radio value="2" label="Normal" />
+          <Radio value="1" label="Hög" />
+        </Group>
+      </Radio.Group>
+
+      <Group justify="end">
+        <Button onClick={reset} variant="subtle">
+          Avbryt
+        </Button>
+        <Button
+          onClick={handleCreateTask}
+          loading={createTask.isLoading}
+          disabled={description.length === 0}
+        >
+          Skapa
+        </Button>
+      </Group>
+    </Stack>
   );
 };
 

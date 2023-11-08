@@ -1,27 +1,29 @@
 import { Concatenator } from "@/components/Concatenator";
-import { Resource } from "@/models/resource";
 import { useMaintainers, useResource } from "@/queries/resourceQueries";
-import { ReactElement } from "react";
-import Icon from "./atoms/Icon";
+import { Card, Group, Space, Stack, Text, Title } from "@mantine/core";
+import { IconTool } from "@tabler/icons-react";
+import { FC, ReactNode, useMemo } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import { Counter } from "./Counter";
-import { Menu, MenuItem } from "./molecules/Menu";
+import classes from "./PageHeader.module.css";
 import Restricted from "./Restricted";
-import { Underlined } from "./Underlined";
+import { Resource } from "@/models/resource";
 
-interface Props {
+const PageHeader: FC<{
   resourceId: string;
   ancestors?: Resource[];
   showCounts?: boolean;
-  menuItems?: MenuItem[];
-}
-
-const PageHeader = ({
+  menu?: ReactNode;
+  children?: ReactNode;
+  className?: string;
+}> = ({
   resourceId,
   ancestors,
   showCounts = false,
-  menuItems,
-}: Props): ReactElement => {
+  menu,
+  children,
+  className,
+}) => {
   const { data: resource } = useResource(resourceId);
   const { data: maintainers } = useMaintainers(resourceId);
 
@@ -29,46 +31,58 @@ const PageHeader = ({
     return <></>;
   }
 
-  const crumbs = ancestors?.slice();
+  const crumbs = useMemo(() => {
+    const crumbs = ancestors?.slice();
+    if (resource) {
+      crumbs?.push(resource);
+    }
+
+    return crumbs;
+  }, [ancestors, resource]);
+
   const onlyRoot = crumbs?.length === 1 && crumbs[0].type === "root";
 
   return (
-    <div className="flex flex-col">
-      {crumbs && !onlyRoot && (
-        <div className="mr-14 mb-2.5">
-          <Breadcrumbs resources={crumbs} />
-        </div>
-      )}
-      <div className="flex justify-between">
-        <h1 className="text-2xl font-bold">{resource.name}</h1>
-        <Restricted>{menuItems && <Menu items={menuItems} />}</Restricted>
-      </div>
+    <Stack gap="sm" className={className}>
+      {crumbs && !onlyRoot && <Breadcrumbs resources={crumbs} />}
+      <Card bg="brand.4" c="white">
+        <Stack gap={0}>
+          <Group justify="space-between" wrap="nowrap">
+            <Title order={3} className={classes.title}>
+              {resource.name}
+            </Title>
+            <Restricted>{menu}</Restricted>
+          </Group>
 
-      <p className="text-sm leading-snug">
-        <Icon name="wrench" className="mr-0.5" />
-        {maintainers?.length ? (
-          <Concatenator>
-            {maintainers?.map((maintainer) => (
-              <Underlined key={maintainer.id}>{maintainer.name}</Underlined>
-            ))}
-          </Concatenator>
-        ) : (
-          <Underlined>Underhållsansvarig saknas</Underlined>
-        )}
-      </p>
+          <Text size="sm" className={classes.maintainer}>
+            <IconTool size={14} />
+            {maintainers?.length ? (
+              <Concatenator>
+                {maintainers?.map((maintainer) => (
+                  <span key={maintainer.id}>{maintainer.name}</span>
+                ))}
+              </Concatenator>
+            ) : (
+              <span>Underhållsansvarig saknas</span>
+            )}
+          </Text>
 
-      <div className="h-2.5" />
+          <Space h="sm" />
 
-      {showCounts && (
-        <div className="text-md flex gap-4">
-          <Counter
-            label="Bultar"
-            count={resource.counters?.installedBolts ?? 0}
-          />
-          <Counter label="Leder" count={resource.counters?.routes ?? 0} />
-        </div>
-      )}
-    </div>
+          {showCounts && (
+            <Group>
+              <Counter
+                label="Bultar"
+                count={resource.counters?.installedBolts ?? 0}
+              />
+              <Counter label="Leder" count={resource.counters?.routes ?? 0} />
+            </Group>
+          )}
+
+          {children}
+        </Stack>
+      </Card>
+    </Stack>
   );
 };
 

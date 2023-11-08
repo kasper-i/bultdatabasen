@@ -1,0 +1,22 @@
+.pill {
+    margin-right: 0.25rem;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.section {
+    padding: var(--mantine-spacing-md);
+    margin-bottom: calc(var(--card-padding) * -1);
+    border-bottom: unset;
+    margin-top: var(--card-padding);
+}
+
+.section[data-status="closed"] {
+    background-color: var(--mantine-color-green-light);
+    color: var(--mantine-color-green-light-color);
+}
+
+.section[data-status="rejected"] {
+    background-color: var(--mantine-color-red-light);
+    color: var(--mantine-color-red-light-color);
+}

@@ -1,17 +1,16 @@
 import NavigationBar from "@/components/NavigationBar";
-import React from "react";
+import { Box } from "@mantine/core";
 import { Outlet } from "react-router-dom";
+import classes from "./Main.module.css";
 
 const Main = () => {
   return (
-    <div className="w-screen min-h-screen flex flex-col">
-      <NavigationBar />
-      <div className="relative flex flex-grow">
-        <div className="flex-grow mx-auto p-5" style={{ maxWidth: 768 }}>
-          <Outlet />
-        </div>
-      </div>
-    </div>
+    <Box className={classes.main}>
+      <NavigationBar className={classes.navbar} />
+      <Box className={classes.content}>
+        <Outlet />
+      </Box>
+    </Box>
   );
 };
 

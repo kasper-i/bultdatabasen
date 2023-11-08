@@ -1,26 +1,54 @@
-import Button from "@/components/atoms/Button";
+import { Time } from "@/components/atoms/Time";
 import { Concatenator } from "@/components/Concatenator";
-import Feed, { FeedItem } from "@/components/Feed";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import ImageThumbnail from "@/components/ImageThumbnail";
 import ImageUploadButton from "@/components/ImageUploadButton";
 import DeleteDialog from "@/components/molecules/DeleteDialog";
-import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
+import UserName from "@/components/UserName";
 import { Bolt } from "@/models/bolt";
 import { Point } from "@/models/point";
+import { Author } from "@/models/user";
 import { useBolts, useCreateBolt } from "@/queries/boltQueries";
 import { useComments } from "@/queries/commentQueries";
 import { useImages } from "@/queries/imageQueries";
 import { useDetachPoint } from "@/queries/pointQueries";
+import {
+  ActionIcon,
+  Anchor,
+  Button,
+  Card,
+  Group,
+  Menu,
+  Space,
+  Stack,
+  Text,
+  Timeline,
+} from "@mantine/core";
+import {
+  IconChevronUp,
+  IconMenu2,
+  IconMessage,
+  IconPhoto,
+  IconPlus,
+  IconTrash,
+} from "@tabler/icons-react";
 import { compareDesc } from "date-fns";
-import { ReactElement, useEffect, useMemo, useState } from "react";
+import {
+  Key,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import AdvancedBoltEditor from "./AdvancedBoltEditor";
 import BoltDetails from "./BoltDetails";
 import { CommentView } from "./CommentView";
 import { PointLabel } from "./hooks";
 import { PostComment } from "./PostComment";
+import classes from "./PointDetails.module.css";
 
 interface Props {
   point: Point;
@@ -51,15 +79,26 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
     createBolt.isSuccess && setAction(undefined);
   }, [createBolt.isSuccess]);
 
+  interface FeedItem {
+    key: Key;
+    timestamp: Date;
+    icon: ReactNode;
+    title: string;
+    action: string;
+    author: Author;
+    value: ReactNode;
+  }
+
   const feedItems = useMemo(() => {
     const feedItems: FeedItem[] = [];
 
     images?.forEach((image) => {
       feedItems.push({
         key: image.id,
-        icon: "image",
+        icon: <IconPhoto size={14} />,
         timestamp: image.timestamp,
-        description: "Laddade upp foto",
+        title: "Nytt foto",
+        action: "laddade upp foto",
         author: image.author,
         value: (
           <ImageThumbnail
@@ -74,9 +113,10 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
     comments?.forEach((comment) => {
       feedItems.push({
         key: comment.id,
-        icon: "comment",
+        icon: <IconMessage size={14} />,
         timestamp: comment.createdAt,
-        description: "Lämnade kommentar",
+        title: "Ny kommentar",
+        action: "lämnade kommentar",
         author: comment.author,
         value: <CommentView comment={comment} />,
       });
@@ -88,62 +128,69 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
   }, [comments, images]);
 
   return (
-    <div>
-      <div className="flex justify-between">
-        <div>
-          <div className="h-6 cursor-pointer" onClick={onClose}>
-            {label.name}
-            <span className="font-medium text-primary-500 ml-1">
-              {label.no}
-            </span>
-          </div>
+    <Stack gap="sm" align="stretch">
+      <Group justify="space-between" align="start" gap="xs">
+        <ActionIcon variant="subtle" onClick={onClose}>
+          <IconChevronUp size={14} />
+        </ActionIcon>
+        <div className={classes.title}>
+          <Text fw={500} size="md">
+            {label.name} {label.no}
+          </Text>
 
-          <div className="space-x-1 text-xs">
+          <Text c="dimmed" size="sm">
             {sharedParents.length === 0
               ? "Delas ej med annan led."
               : sharedParents.length > 0 && (
                   <>
-                    <span className="whitespace-nowrap">Delas med</span>
+                    <span>Delas med</span>
                     <span>
                       <Concatenator>
                         {sharedParents.map((parent) => (
-                          <Link
+                          <Anchor
                             key={point.id}
+                            component={Link}
                             to={{
                               pathname: `/route/${parent.id}`,
                               search: `?p=${point.id}`,
                             }}
                           >
-                            <span className="underline text-primary-500">
-                              {parent.name}
-                            </span>
-                          </Link>
+                            {parent.name}
+                          </Anchor>
                         ))}
                       </Concatenator>
                       .
                     </span>
                   </>
                 )}
-          </div>
+          </Text>
         </div>
 
-        <div className="flex gap-2">
+        <Stack gap="sm">
           <Restricted>
-            <Menu
-              items={[
-                {
-                  label: "Radera",
-                  icon: "trash",
-                  className: "text-red-500",
-                  onClick: () => setAction("delete"),
-                },
-                {
-                  label: "Ny bult",
-                  icon: "plus",
-                  onClick: () => setAction("add_bolt"),
-                },
-              ]}
-            />
+            <Menu position="bottom-end" withArrow>
+              <Menu.Target>
+                <ActionIcon variant="light">
+                  <IconMenu2 size={14} />
+                </ActionIcon>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Item
+                  leftSection={<IconPlus size={14} />}
+                  onClick={() => setAction("add_bolt")}
+                >
+                  Ny bult
+                </Menu.Item>
+                <Menu.Item
+                  color="red"
+                  leftSection={<IconTrash size={14} />}
+                  onClick={() => setAction("delete")}
+                >
+                  Radera
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
             {action === "delete" && (
               <DeleteDialog
                 mutation={deletePoint}
@@ -152,29 +199,31 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
               />
             )}
           </Restricted>
-        </div>
-      </div>
+        </Stack>
+      </Group>
 
-      <div className="flex flex-wrap gap-2.5 py-4">
+      <Stack gap="sm" align="stretch">
         {action === "add_bolt" && (
-          <div className="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
-            <AdvancedBoltEditor
-              bolt={newBolt}
-              onChange={setNewBolt}
-              hideDismantled
-            />
-            <div className="flex gap-x-2.5 py-2 mt-2">
-              <Button onClick={() => setAction(undefined)} outlined>
-                Avbryt
-              </Button>
-              <Button
-                loading={createBolt.isLoading}
-                onClick={() => createBolt.mutate(newBolt)}
-              >
-                Skapa
-              </Button>
-            </div>
-          </div>
+          <Card withBorder>
+            <Stack gap="sm">
+              <AdvancedBoltEditor
+                bolt={newBolt}
+                onChange={setNewBolt}
+                hideDismantled
+              />
+              <Group gap="sm" justify="end">
+                <Button onClick={() => setAction(undefined)} variant="subtle">
+                  Avbryt
+                </Button>
+                <Button
+                  loading={createBolt.isLoading}
+                  onClick={() => createBolt.mutate(newBolt)}
+                >
+                  Skapa
+                </Button>
+              </Group>
+            </Stack>
+          </Card>
         )}
         {bolts.data
           ?.slice()
@@ -188,14 +237,27 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           ))}
 
         <Restricted>
-          <div className="flex flex-row gap-2 w-full mt-1">
+          <Group justify="space-between">
             <PostComment parentResourceId={point.id} />
             <ImageUploadButton pointId={point.id} />
-          </div>
+          </Group>
         </Restricted>
-      </div>
+      </Stack>
 
-      <Feed items={feedItems} />
+      <Timeline bulletSize={24}>
+        {feedItems.map(
+          ({ key, title, action, author, timestamp, value, icon }) => (
+            <Timeline.Item key={key} title={title} bullet={icon}>
+              <Text c="dimmed" size="sm">
+                <UserName user={author} /> {action} <Time time={timestamp} />
+              </Text>
+              <Space h="xs" />
+              {value}
+            </Timeline.Item>
+          )
+        )}
+      </Timeline>
+
       {currImg !== undefined && (
         <ImageCarousel
           pointId={point.id}
@@ -204,7 +266,7 @@ function PointDetails({ point, routeId, label, onClose }: Props): ReactElement {
           onClose={() => setCurrImg(undefined)}
         />
       )}
-    </div>
+    </Stack>
   );
 }
 

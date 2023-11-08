@@ -1,56 +1,48 @@
-import Pagination from "@/components/atoms/Pagination";
-import { Switch } from "@/components/atoms/Switch";
 import { useTasks } from "@/queries/taskQueries";
-import React, { ReactElement, Suspense, useState } from "react";
-import { Dots } from "react-activity";
+import { Center, Loader, Pagination, Stack } from "@mantine/core";
+import { FC, ReactElement, Suspense, useEffect, useState } from "react";
 import TaskView from "./TaskView";
-
-interface Props {
-  resourceId: string;
-}
 
 const ITEMS_PER_PAGE = 12;
 
-const TaskList = ({ resourceId }: Props): ReactElement => {
+const TaskList: FC<{
+  resourceId: string;
+  showClosed?: boolean;
+}> = ({ resourceId, showClosed }): ReactElement => {
   const [page, setPage] = useState(1);
-  const [showClosed, setShowClosed] = useState(false);
+
+  useEffect(() => {
+    setPage(1);
+  }, [showClosed]);
 
   const { data: tasks } = useTasks(resourceId, {
     status: showClosed ? ["closed", "rejected"] : ["open", "assigned"],
     pagination: { page, itemsPerPage: ITEMS_PER_PAGE },
   });
 
-  return (
-    <Suspense fallback={<Dots />}>
-      <div className="w-full border-b"></div>
-      <Switch
-        label="Visa åtgärdade"
-        enabled={showClosed}
-        onChange={() => {
-          setShowClosed((state) => !state);
-          setPage(1);
-        }}
-      />
+  const pages = Math.ceil((tasks?.meta.totalItems ?? 0) / ITEMS_PER_PAGE);
 
-      <div className="flex flex-col w-full">
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-5 items-start">
-          {tasks?.data?.map((task) => (
-            <TaskView
-              key={task.id}
-              taskId={task.id}
-              parentResourceId={resourceId}
-            />
-          ))}
-        </div>
-        <div className="w-full my-5">
-          <Pagination
-            page={page}
-            itemsPerPage={ITEMS_PER_PAGE}
-            totalItems={tasks?.meta.totalItems ?? 0}
-            onPageSelect={setPage}
+  return (
+    <Suspense fallback={<Loader type="bars" />}>
+      <Stack gap="sm">
+        {tasks?.data?.map((task) => (
+          <TaskView
+            key={task.id}
+            taskId={task.id}
+            parentResourceId={resourceId}
           />
-        </div>
-      </div>
+        ))}
+        {pages > 1 && (
+          <Center>
+            <Pagination
+              value={page}
+              total={pages}
+              onChange={setPage}
+              withEdges
+            />
+          </Center>
+        )}
+      </Stack>
     </Suspense>
   );
 };

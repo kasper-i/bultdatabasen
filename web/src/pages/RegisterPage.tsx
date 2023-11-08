@@ -1,6 +1,3 @@
-import { Alert } from "@/components/atoms/Alert";
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
 import { useAppDispatch } from "@/store";
 import {
   confirmRegistration,
@@ -10,12 +7,27 @@ import {
   translateCognitoError,
 } from "@/utils/cognito";
 import {
+  Alert,
+  Anchor,
+  Box,
+  Button,
+  Center,
+  Group,
+  PasswordInput,
+  PinInput,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { IconAlertHexagon, IconArrowLeft } from "@tabler/icons-react";
+import {
   AuthenticationDetails,
   CognitoUserAttribute,
 } from "amazon-cognito-identity-js";
+import classes from "./RegisterPage.module.css";
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useId, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { handleLogin } from "./SigninPage";
 
 interface State {
@@ -32,6 +44,7 @@ interface State {
 const RegisterPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const id = useId();
 
   const [
     {
@@ -116,67 +129,103 @@ const RegisterPage = () => {
   const canRegister = !!email && !!password && !!givenName && !!lastName;
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <>
       {phase === 1 ? (
-        <>
-          <Input
+        <Stack gap="sm">
+          <TextInput
             label="E-post"
             value={email}
             onChange={(e) => updateState({ email: e.target.value })}
             tabIndex={1}
+            required
           />
-          <Input
+          <PasswordInput
             label="Lösenord"
             value={password}
-            password
             onChange={(e) => updateState({ password: e.target.value })}
             tabIndex={2}
             autoComplete="new-password"
+            required
           />
-          <div className="flex gap-2.5">
-            <Input
+          <Group gap="sm" justify="stretch" grow>
+            <TextInput
               label="Förnamn"
               value={givenName}
               onChange={(e) => updateState({ givenName: e.target.value })}
               tabIndex={3}
+              required
             />
-            <Input
+            <TextInput
               label="Efternamn"
               value={lastName}
               onChange={(e) => updateState({ lastName: e.target.value })}
               tabIndex={4}
+              required
             />
-          </div>
+          </Group>
 
-          <hr />
-
-          <Alert>{errorMessage}</Alert>
-          <Button
-            loading={inProgress}
-            full
-            onClick={register}
-            disabled={!canRegister}
-          >
-            Registrera
-          </Button>
-        </>
+          {errorMessage && (
+            <Alert
+              color="red"
+              icon={<IconAlertHexagon />}
+              title="Registrering misslyckades"
+            >
+              {errorMessage}
+            </Alert>
+          )}
+          <Group justify="space-between" mt="lg">
+            <Anchor c="dimmed" size="sm" component={Link} to="/auth/signin">
+              <Center inline>
+                <IconArrowLeft size={14} />
+                <Box ml={4}>Tillbaka till inloggingssidan</Box>
+              </Center>
+            </Anchor>
+            <Button
+              loading={inProgress}
+              onClick={register}
+              disabled={!canRegister}
+            >
+              Registrera
+            </Button>
+          </Group>
+        </Stack>
       ) : (
-        <>
-          <Input
-            label="Verifikationskod"
+        <Stack align="center" gap="sm">
+          <Text ta="center" component="label" size="lg" fw={500}>
+            Verifiera din e-post
+            <Text c="dimmed" size="sm">
+              Skriv in den 6-siffriga koden som skickades till din e-post
+            </Text>
+          </Text>
+          <PinInput
+            length={6}
             value={confirmationCode}
-            onChange={(e) => updateState({ confirmationCode: e.target.value })}
+            onChange={(value) => updateState({ confirmationCode: value })}
+            id={id}
+            size="md"
           />
 
-          <hr />
+          {errorMessage && (
+            <Alert
+              color="red"
+              icon={<IconAlertHexagon />}
+              title="Verifiering misslyckades"
+              className={classes.alert}
+            >
+              {errorMessage}
+            </Alert>
+          )}
 
-          <Alert>{errorMessage}</Alert>
-          <Button loading={inProgress} full onClick={confirm}>
-            Bekräfta
+          <Button
+            loading={inProgress}
+            disabled={confirmationCode.length !== 6}
+            onClick={confirm}
+          >
+            Verifiera
           </Button>
-        </>
+        </Stack>
       )}
-    </div>
+    </>
   );
 };
 

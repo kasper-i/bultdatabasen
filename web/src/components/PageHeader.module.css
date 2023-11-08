@@ -1,0 +1,9 @@
+.maintainer svg {
+    margin-right: 0.25rem;
+}
+
+.title {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

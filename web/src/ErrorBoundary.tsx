@@ -1,6 +1,7 @@
+import { Button, Center, Stack, Text } from "@mantine/core";
 import { captureException, withScope } from "@sentry/core";
 import React, { ErrorInfo, ReactNode } from "react";
-import Button from "./components/atoms/Button";
+import classes from "./ErrorBoundary.module.css";
 
 interface Props {
   children: ReactNode;
@@ -32,18 +33,19 @@ export class ErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col gap-2.5 justify-center items-center h-screen w-screen">
-          <h1 className="font-bold text-3xl">:(</h1>
-          <p className="text-center">
-            <span className="font-medium">Attans bananer, något gick fel.</span>
-            <br />
-
-            {this.state.eventId && (
-              <span className="text-gray-500">{this.state.eventId}</span>
-            )}
-          </p>
-          <Button onClick={() => location.reload()}>Ladda om sidan</Button>
-        </div>
+        <Center className={classes.container}>
+          <Stack>
+            <Text className={classes.smiley}>:(</Text>
+            <Text ta="center">
+              Attans bananer, något gick fel.
+              <br />
+              {this.state.eventId && <Text fw={500}>{this.state.eventId}</Text>}
+            </Text>
+            <Button variant="filled" onClick={() => location.reload()}>
+              Ladda om sidan
+            </Button>
+          </Stack>
+        </Center>
       );
     }
 

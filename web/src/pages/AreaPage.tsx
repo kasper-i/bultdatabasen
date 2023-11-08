@@ -3,6 +3,7 @@ import { TaskAlert } from "@/components/features/task/TaskAlert";
 import PageHeader from "@/components/PageHeader";
 import { useUnsafeParams } from "@/hooks/common";
 import { useArea } from "@/queries/areaQueries";
+import { Stack } from "@mantine/core";
 import { Fragment, ReactElement } from "react";
 
 const AreaPage = (): ReactElement => {
@@ -15,7 +16,7 @@ const AreaPage = (): ReactElement => {
   }
 
   return (
-    <div className="flex flex-col space-y-5">
+    <Stack gap="sm">
       <PageHeader
         resourceId={resourceId}
         ancestors={area.ancestors}
@@ -28,7 +29,7 @@ const AreaPage = (): ReactElement => {
         resourceId={resourceId}
         filters={{ types: ["area", "crag", "route"] }}
       />
-    </div>
+    </Stack>
   );
 };
 

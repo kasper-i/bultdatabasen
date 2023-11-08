@@ -1,7 +1,5 @@
-import Button from "@/components/atoms/Button";
-import { Time } from "@/components/atoms/Time";
-import { Menu } from "@/components/molecules/Menu";
 import Restricted from "@/components/Restricted";
+import { Time } from "@/components/atoms/Time";
 import { Bolt } from "@/models/bolt";
 import { useUpdateBolt } from "@/queries/boltQueries";
 import {
@@ -9,8 +7,18 @@ import {
   positionToLabel,
   translateBoltType,
 } from "@/utils/boltUtils";
-import clsx from "clsx";
-import React, { FC, Fragment, ReactNode, useEffect, useState } from "react";
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Grid,
+  Group,
+  Menu,
+  Stack,
+  Text,
+} from "@mantine/core";
+import { IconArchive, IconEdit, IconMenu2 } from "@tabler/icons-react";
+import { FC, Fragment, ReactNode, useEffect, useState } from "react";
 import AdvancedBoltEditor from "./AdvancedBoltEditor";
 
 const LabelAndValue: FC<{
@@ -23,10 +31,10 @@ const LabelAndValue: FC<{
   }
 
   return (
-    <div className={clsx("flex items-center justify-between", className)}>
-      <div className="text-xs text-gray-600">{label}</div>
-      <div className={clsx("text-sm", className)}>{value}</div>
-    </div>
+    <Text size="sm" className={className}>
+      <Text fw={600}>{label}</Text>
+      <Text>{value}</Text>
+    </Text>
   );
 };
 
@@ -58,44 +66,53 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
   const textStyle = bolt.dismantled ? "line-through opacity-50" : undefined;
 
   return (
-    <div className="w-full xs:w-64 flex flex-col justify-between border p-2 rounded-md">
-      <div className="flex justify-between">
-        <p className="text-left font-medium">
+    <Card bg="brand.4" c="white">
+      <Group justify="space-between">
+        <Text fw={500}>
           <span>
             {positionToLabel(
               totalNumberOfBolts === 1 ? undefined : bolt.position
             )}
           </span>
-        </p>
+        </Text>
 
         <Restricted>
-          <Menu
-            items={[
-              {
-                label: "Redigera",
-                icon: "edit",
-                onClick: () => setAction("edit"),
-              },
-              {
-                label: "Demontera",
-                icon: "archive",
-                onClick: () =>
+          <Menu position="bottom-end" withArrow>
+            <Menu.Target>
+              <ActionIcon variant="outline" color="white">
+                <IconMenu2 size={14} />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<IconEdit size={14} />}
+                onClick={() => setAction("edit")}
+              >
+                Redigera
+              </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<IconArchive size={14} />}
+                onClick={() =>
                   updateBolt.mutate({
                     ...bolt,
                     dismantled: new Date(),
-                  }),
-                disabled: !!bolt.dismantled,
-              },
-            ]}
-          />
+                  })
+                }
+              >
+                Demontera
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Restricted>
-      </div>
+      </Group>
 
       {action === "edit" ? (
-        <div className="flex flex-col items-start pt-2">
+        <Stack gap="sm">
           <AdvancedBoltEditor bolt={editedBolt} onChange={setEditedBolt} />
-          <div className="flex gap-x-2.5 py-2 mt-2">
-            <Button onClick={() => setAction(undefined)} outlined>
+          <Group justify="end">
+            <Button onClick={() => setAction(undefined)} variant="subtle">
               Avbryt
             </Button>
 
@@ -105,65 +122,79 @@ const BoltDetails = ({ bolt, totalNumberOfBolts }: Props) => {
             >
               Spara
             </Button>
-          </div>
-        </div>
+          </Group>
+        </Stack>
       ) : (
-        <div
-          className={clsx(
-            "relative grid items-center text-left grid-cols-2 gap-x-2.5"
-          )}
-        >
-          <LabelAndValue
-            label="Tillverkare"
-            value={bolt.manufacturer}
-            className={textStyle}
-          />
-          <LabelAndValue
-            label="Modell"
-            value={bolt.model}
-            className={textStyle}
-          />
-          <LabelAndValue
-            label="Typ"
-            value={translateBoltType(bolt.type)}
-            className={textStyle}
-          />
+        <Grid>
+          <Grid.Col>
+            <LabelAndValue
+              label="Tillverkare"
+              value={bolt.manufacturer}
+              className={textStyle}
+            />
+          </Grid.Col>
 
-          <LabelAndValue
-            label="Material"
-            value={bolt.material}
-            className={textStyle}
-          />
-          <LabelAndValue
-            label="Diameter"
-            value={
-              bolt.diameter
-                ? `${diameterToFraction(bolt.diameter)}${
-                    bolt.diameterUnit === "inch" ? '"' : "mm"
-                  }`
-                : undefined
-            }
-            className={textStyle}
-          />
-          <LabelAndValue
-            label="Installerad"
-            value={
-              bolt.installed ? (
-                <Time time={bolt.installed} datetimeFormat="yyyy" />
-              ) : undefined
-            }
-            className={textStyle}
-          />
-          <LabelAndValue
-            label="Demonterad"
-            value={
-              bolt.dismantled ? <Time time={bolt.dismantled} /> : undefined
-            }
-            className="col-span-2"
-          />
-        </div>
+          <Grid.Col>
+            <LabelAndValue
+              label="Modell"
+              value={bolt.model}
+              className={textStyle}
+            />
+          </Grid.Col>
+
+          <Grid.Col>
+            <LabelAndValue
+              label="Typ"
+              value={translateBoltType(bolt.type)}
+              className={textStyle}
+            />
+          </Grid.Col>
+
+          <Grid.Col>
+            <LabelAndValue
+              label="Material"
+              value={bolt.material}
+              className={textStyle}
+            />
+          </Grid.Col>
+
+          <Grid.Col>
+            <LabelAndValue
+              label="Diameter"
+              value={
+                bolt.diameter
+                  ? `${diameterToFraction(bolt.diameter)}${
+                      bolt.diameterUnit === "inch" ? '"' : "mm"
+                    }`
+                  : undefined
+              }
+              className={textStyle}
+            />
+          </Grid.Col>
+
+          <Grid.Col>
+            <LabelAndValue
+              label="Installerad"
+              value={
+                bolt.installed ? (
+                  <Time time={bolt.installed} datetimeFormat="yyyy" />
+                ) : undefined
+              }
+              className={textStyle}
+            />
+          </Grid.Col>
+
+          <Grid.Col span={2}>
+            <LabelAndValue
+              label="Demonterad"
+              value={
+                bolt.dismantled ? <Time time={bolt.dismantled} /> : undefined
+              }
+            />
+          </Grid.Col>
+        </Grid>
       )}
-    </div>
+    </Card>
   );
 };
 

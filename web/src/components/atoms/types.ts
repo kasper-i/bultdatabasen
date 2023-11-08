@@ -1,3 +1,11 @@
+export interface Option<T> {
+  value: T;
+  label: string;
+  sublabel?: string;
+  key: string;
+  disabled?: boolean;
+}
+
 export type IconType =
   | "beaker"
   | "cancel"

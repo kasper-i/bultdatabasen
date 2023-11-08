@@ -1,15 +1,14 @@
-import { Card } from "@/components/features/routeEditor/Card";
+import { Card, Center } from "@mantine/core";
 import { Outlet } from "react-router-dom";
+import classes from "./Auth.module.css";
 
 const Auth = () => {
   return (
-    <div className="w-full mt-20 flex justify-center items-center">
-      <div className="w-full max-w-md">
-        <Card>
-          <Outlet />
-        </Card>
-      </div>
-    </div>
+    <Center className={classes.container}>
+      <Card withBorder className={classes.card}>
+        <Outlet />
+      </Card>
+    </Center>
   );
 };
 
