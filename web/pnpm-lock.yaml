@@ -45,8 +45,8 @@ dependencies:
     specifier: ^1.1.1
     version: 1.1.1
   date-fns:
-    specifier: ^2.28.0
-    version: 2.28.0
+    specifier: ^3.0.0
+    version: 3.0.0
   dayzed:
     specifier: ^3.2.3
     version: 3.2.3(prop-types@15.8.1)(react@18.0.0)
@@ -1254,6 +1254,10 @@ packages:
   /date-fns@2.28.0:
     resolution: {integrity: sha512-8d35hViGYx/QH0icHYCeLmsLmMUheMmTyV9Fcm6gvNwdw31yXXH+O85sOBJ+OLnLQMKZowvpKb6FgMIQjcpvQw==}
     engines: {node: '>=0.11'}
+    dev: false
+
+  /date-fns@3.0.0:
+    resolution: {integrity: sha512-xjDz3rNN9jp+Lh3P/4MeY4E5HkaRnEnrJCcrdRZnKdn42gJlIe6hwrrwVXePRwVR2kh1UcMnz00erYBnHF8PFA==}
     dev: false
 
   /dayzed@3.2.3(prop-types@15.8.1)(react@18.0.0):
